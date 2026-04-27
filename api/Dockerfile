@@ -30,8 +30,6 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY --from=build /app/api/dist/index.js ./index.js
-COPY --from=build /app/api/drizzle ./drizzle
-COPY --from=build /app/packages/db/src ./packages/db/src
 
 EXPOSE 3001
 
