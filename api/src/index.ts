@@ -12,6 +12,11 @@ import { staffModule } from './modules/staff/index.js'
 import { availabilityModule } from './modules/availability/index.js'
 import { businessModule } from './modules/business/index.js'
 import { notificationModule } from './modules/notification/index.js'
+import { billingModule } from './modules/billing/index.js'
+import { usageModule } from './modules/usage/index.js'
+import { onboardingModule } from './modules/onboarding/index.js'
+import { knowledgeBaseModule } from './modules/knowledge-base/index.js'
+import { customerModule } from './modules/conversation/customer-endpoint.js'
 import { API_PORT } from './config/env.js'
 import { logger } from './infra/logger.js'
 
@@ -43,6 +48,12 @@ const app = new Elysia()
   .use(availabilityModule)
   .use(businessModule)
   .use(notificationModule)
+  // Phase 2 modules
+  .use(billingModule)
+  .use(usageModule)
+  .use(onboardingModule)
+  .use(knowledgeBaseModule)
+  .use(customerModule)
   .onError(({ error, set }) => {
     logger.error('Unhandled error', { error: error.message, stack: error.stack })
     set.status = 500
