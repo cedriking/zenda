@@ -13,8 +13,10 @@ export const businessProfiles = pgTable('business_profiles', {
   name: varchar('name', { length: 100 }).notNull(),
   category: businessCategoryEnum('category').default('other'),
   description: text('description'),
+  descriptionEs: text('description_es'),
   location: varchar('location', { length: 300 }),
   cancellationPolicy: text('cancellation_policy'),
+  cancellationPolicyEs: text('cancellation_policy_es'),
   refundPolicy: text('refund_policy'),
   priceDisplayPreference: priceDisplayEnum('price_display_preference').notNull().default('show'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -31,6 +33,7 @@ export const receptionistProfiles = pgTable('receptionist_profiles', {
   name: varchar('name', { length: 50 }).notNull().default('Noa'),
   tone: receptionistToneEnum('tone').notNull().default('professional'),
   greetingTemplate: text('greeting_template'),
+  greetingTemplateEs: text('greeting_template_es'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })

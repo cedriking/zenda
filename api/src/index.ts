@@ -21,6 +21,8 @@ import { analyticsModule } from './modules/analytics/index.js'
 import { queueModule } from './modules/queue/index.js'
 import { adminModule } from './modules/admin/index.js'
 import { monitoringModule } from './modules/monitoring/index.js'
+import { translationModule } from './modules/ai/translation.js'
+import { supportModule } from './modules/support/index.js'
 import { API_PORT } from './config/env.js'
 import { logger } from './infra/logger.js'
 
@@ -63,6 +65,8 @@ const app = new Elysia()
   .use(queueModule)
   .use(adminModule)
   .use(monitoringModule)
+  .use(translationModule)
+  .use(supportModule)
   .onError(({ error, set }) => {
     logger.error('Unhandled error', { error: error.message, stack: error.stack })
     set.status = 500
