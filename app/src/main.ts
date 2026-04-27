@@ -9,6 +9,9 @@ import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS, inDevelopment } from "./constants";
 import { getBasePath } from "./utils/path";
+import { createTray, updateTrayStatus } from "./main/tray";
+import { setAutoStart } from "./main/auto-start";
+import { startHealthMonitor, updateWhatsAppHealth } from "./main/health-monitor";
 
 function createWindow() {
   const basePath = getBasePath();
@@ -31,6 +34,14 @@ function createWindow() {
       process.platform === "darwin" ? { x: 5, y: 5 } : undefined,
   });
   ipcContext.setMainWindow(mainWindow);
+
+  // Minimize to tray instead of closing
+  mainWindow.on("close", (event) => {
+    if (!app.isQuitting) {
+      event.preventDefault();
+      mainWindow.hide();
+    }
+  });
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
@@ -81,6 +92,16 @@ app.whenReady().then(async () => {
     const { registerWhatsAppIPC } = await import("./ipc/modules/whatsapp");
     if (ipcContext.mainWindow) {
       registerWhatsAppIPC(ipcContext.mainWindow);
+
+      // System tray
+      createTray(ipcContext.mainWindow);
+
+      // Auto-start on boot
+      setAutoStart(true);
+
+      // Health monitor
+      const apiBase = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
+      startHealthMonitor(ipcContext.mainWindow, apiBase);
     }
   } catch (error) {
     console.error("Error during app initialization:", error);
