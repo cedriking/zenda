@@ -9,7 +9,8 @@ export const metadata: Metadata = {
 const PLANS = [
   {
     name: 'Starter',
-    price: 29,
+    price: 19,
+    originalPrice: 29,
     desc: 'For solo businesses just getting started',
     features: [
       '500 conversations/month',
@@ -24,7 +25,8 @@ const PLANS = [
   },
   {
     name: 'Pro',
-    price: 69,
+    price: 49,
+    originalPrice: 69,
     desc: 'For growing businesses with a team',
     features: [
       '2,000 conversations/month',
@@ -40,7 +42,8 @@ const PLANS = [
   },
   {
     name: 'Business',
-    price: 149,
+    price: 99,
+    originalPrice: 149,
     desc: 'For established businesses with high volume',
     features: [
       'Unlimited conversations',
@@ -71,6 +74,9 @@ export default function PricingPage() {
       <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
+            <div className="inline-block bg-amber-100 text-amber-800 px-4 py-2 rounded-lg text-sm font-semibold mb-4">
+              Founding Member Pricing — Limited Time
+            </div>
             <h1 className="text-4xl font-bold mb-4">Simple, transparent pricing</h1>
             <p className="text-[var(--text-muted)] text-lg">No per-message fees. No surprises. Cancel anytime.</p>
           </div>
@@ -95,6 +101,9 @@ export default function PricingPage() {
                 <div className="mb-6">
                   <span className="text-4xl font-bold">${plan.price}</span>
                   <span className="text-[var(--text-muted)]">/month</span>
+                  {plan.originalPrice && (
+                    <span className="ml-2 text-lg text-gray-400 line-through">${plan.originalPrice}</span>
+                  )}
                 </div>
                 <ul className="space-y-3 mb-8">
                   {plan.features.map(f => (
