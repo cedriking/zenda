@@ -5,7 +5,12 @@ WORKDIR /app
 FROM base AS deps
 COPY package.json package-lock.json ./
 COPY packages/shared/package.json ./packages/shared/
+COPY packages/db/package.json ./packages/db/
 COPY web/package.json ./web/
+# Create placeholder package.json for workspaces not needed in this build
+RUN mkdir -p app api && \
+    echo '{"name":"app-placeholder","version":"0.0.0","private":true}' > app/package.json && \
+    echo '{"name":"api-placeholder","version":"0.0.0","private":true}' > api/package.json
 RUN npm ci --workspace @zenda/web
 
 # Build shared package

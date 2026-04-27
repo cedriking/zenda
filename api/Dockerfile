@@ -7,6 +7,10 @@ COPY package.json package-lock.json ./
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/db/package.json ./packages/db/
 COPY api/package.json ./api/
+# Create placeholder package.json for workspaces not needed in this build
+RUN mkdir -p app web && \
+    echo '{"name":"app-placeholder","version":"0.0.0","private":true}' > app/package.json && \
+    echo '{"name":"web-placeholder","version":"0.0.0","private":true}' > web/package.json
 RUN bun install
 
 # Build shared packages and API
