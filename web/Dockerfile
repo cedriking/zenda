@@ -4,15 +4,24 @@ WORKDIR /app
 # Install dependencies
 FROM base AS deps
 COPY package.json package-lock.json ./
-RUN npm ci
+COPY packages/shared/package.json ./packages/shared/
+COPY web/package.json ./web/
+RUN npm ci --workspace @zenda/web
 
-# Build
+# Build shared package
+FROM base AS build-shared
+COPY --from=deps /app/node_modules ./node_modules
+COPY packages/shared/ ./packages/shared/
+RUN npm run --workspace @zenda/shared build
+
+# Build web
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY --from=build-shared /app/packages/shared ./packages/shared/
+COPY web/ ./web/
 
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+RUN npm run --workspace @zenda/web build
 
 # Production
 FROM base AS runner
@@ -24,9 +33,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=build /app/public ./public
-COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=build /app/web/public ./public
+COPY --from=build --chown=nextjs:nodejs /app/web/.next/standalone ./
+COPY --from=build --chown=nextjs:nodejs /app/web/.next/static ./.next/static
 
 USER nextjs
 

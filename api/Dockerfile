@@ -3,13 +3,13 @@ WORKDIR /app
 
 # Install dependencies
 FROM base AS deps
-COPY package.json bun.lockb ./
+COPY package.json package-lock.json ./
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/db/package.json ./packages/db/
 COPY api/package.json ./api/
-RUN bun install --frozen-lockfile
+RUN bun install
 
-# Build shared packages
+# Build shared packages and API
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
 COPY packages/shared/ ./packages/shared/
