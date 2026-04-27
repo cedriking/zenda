@@ -1,0 +1,28 @@
+{
+  "name": "zenda",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI Receptionist for appointment-based businesses",
+  "workspaces": [
+    "packages/*",
+    "api",
+    "app",
+    "web"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "check": "turbo run check",
+    "db:generate": "cd packages/db && bunx drizzle-kit generate",
+    "db:migrate": "cd packages/db && bunx drizzle-kit migrate",
+    "db:studio": "cd packages/db && bunx drizzle-kit studio",
+    "db:seed": "cd packages/db && bun run src/seed/index.ts"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "npm@11.4.2"
+}

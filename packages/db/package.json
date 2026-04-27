@@ -1,0 +1,25 @@
+{
+  "name": "@zenda/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/client.ts",
+  "types": "./src/client.ts",
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc --noEmit",
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate",
+    "studio": "drizzle-kit studio",
+    "seed": "bun run src/seed/index.ts"
+  },
+  "dependencies": {
+    "@zenda/shared": "*",
+    "drizzle-orm": "^0.44.2",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.4",
+    "typescript": "^5.9.3"
+  }
+}

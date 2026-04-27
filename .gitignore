@@ -1,0 +1,10 @@
+node_modules
+dist
+.vite
+.next
+.turbo
+.env
+*.local
+coverage
+playwright-report
+test-results
