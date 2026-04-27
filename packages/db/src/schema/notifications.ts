@@ -16,6 +16,7 @@ export const notifications = pgTable('notifications', {
   type: notificationTypeEnum('type').notNull(),
   title: varchar('title', { length: 200 }).notNull(),
   body: varchar('body', { length: 500 }).notNull(),
-  readAt: timestamp('read_at', { withTimezone: true }),
+  relatedId: uuid('related_id'),
+  read: timestamp('read_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })

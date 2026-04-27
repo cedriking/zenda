@@ -5,6 +5,11 @@
   "type": "module",
   "main": "./src/client.ts",
   "types": "./src/client.ts",
+  "exports": {
+    ".": "./src/client.ts",
+    "./client": "./src/client.ts",
+    "./schema": "./src/schema/index.ts"
+  },
   "scripts": {
     "build": "tsc",
     "check": "tsc --noEmit",
