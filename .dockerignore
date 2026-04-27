@@ -6,4 +6,8 @@ dist
 .claude-flow
 .env
 *.md
-app/
+app/src
+app/dist
+app/.next
+app/node_modules
+app/resources
