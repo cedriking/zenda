@@ -2,12 +2,10 @@ import { Elysia, t } from 'elysia'
 import { db } from '@zenda/db/client'
 import { availabilityRules } from '@zenda/db/schema'
 import { eq, and } from 'drizzle-orm'
-import { authPlugin } from '../../middleware/auth.js'
-import { workspaceContext } from '../../middleware/workspace-context.js'
+import { appPlugin } from '../../middleware/app-plugin.js'
 
 export const availabilityModule = new Elysia({ prefix: '/availability' })
-  .use(authPlugin)
-  .use(workspaceContext)
+  .use(appPlugin)
   .requireAuth(true)
   .requireWorkspace(true)
 

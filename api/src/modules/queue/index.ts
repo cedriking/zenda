@@ -1,12 +1,10 @@
 import { Elysia } from 'elysia'
-import { authPlugin } from '../../middleware/auth.js'
-import { workspaceContext } from '../../middleware/workspace-context.js'
+import { appPlugin } from '../../middleware/app-plugin.js'
 import { getQueuedItems, clearQueue } from './offline-queue.js'
 import { getQueueStats } from './retry-queue.js'
 
 export const queueModule = new Elysia({ prefix: '/queue' })
-  .use(authPlugin)
-  .use(workspaceContext)
+  .use(appPlugin)
   .requireAuth(true)
   .requireWorkspace(true)
 

@@ -1,13 +1,11 @@
 import { Elysia, t } from 'elysia'
-import { authPlugin } from '../../middleware/auth.js'
-import { workspaceContext } from '../../middleware/workspace-context.js'
+import { appPlugin } from '../../middleware/app-plugin.js'
 import { createCheckoutSession, createPortalSession, getSubscription } from './checkout.js'
 import { handleWebhook } from './webhooks.js'
 import { logger } from '../../infra/logger.js'
 
 export const billingModule = new Elysia({ prefix: '/billing' })
-  .use(authPlugin)
-  .use(workspaceContext)
+  .use(appPlugin)
 
   // Stripe webhook endpoint (no auth — Stripe calls this)
   .post('/webhook', async ({ request, body }) => {

@@ -1,12 +1,10 @@
 import { Elysia, t } from 'elysia'
-import { authPlugin } from '../../middleware/auth.js'
-import { workspaceContext } from '../../middleware/workspace-context.js'
+import { appPlugin } from '../../middleware/app-plugin.js'
 import { getOnboardingStatus, advanceOnboarding } from './flow.js'
 import { getNextOnboardingQuestion, processOnboardingResponse } from './conversation-handler.js'
 
 export const onboardingModule = new Elysia({ prefix: '/onboarding' })
-  .use(authPlugin)
-  .use(workspaceContext)
+  .use(appPlugin)
   .requireAuth(true)
   .requireWorkspace(true)
 

@@ -1,7 +1,6 @@
 import { Elysia } from 'elysia'
 import { cors } from '@elysiajs/cors'
-import { authPlugin } from './middleware/auth.js'
-import { workspaceContext } from './middleware/workspace-context.js'
+import { appPlugin } from './middleware/app-plugin.js'
 import { authModule } from './modules/auth/index.js'
 import { workspaceModule } from './modules/workspace/index.js'
 import { wsModule } from './modules/whatsapp/ws-handler.js'
@@ -34,8 +33,7 @@ const app = new Elysia()
     ],
     credentials: true,
   }))
-  .use(authPlugin)
-  .use(workspaceContext)
+  .use(appPlugin)
   .get('/health', () => ({
     status: 'ok',
     timestamp: new Date().toISOString(),

@@ -2,12 +2,10 @@ import { Elysia, t } from 'elysia'
 import { db } from '@zenda/db/client'
 import { staffMembers } from '@zenda/db/schema'
 import { eq, and } from 'drizzle-orm'
-import { authPlugin } from '../../middleware/auth.js'
-import { workspaceContext } from '../../middleware/workspace-context.js'
+import { appPlugin } from '../../middleware/app-plugin.js'
 
 export const staffModule = new Elysia({ prefix: '/staff' })
-  .use(authPlugin)
-  .use(workspaceContext)
+  .use(appPlugin)
   .requireAuth(true)
   .requireWorkspace(true)
 

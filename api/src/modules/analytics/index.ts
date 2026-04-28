@@ -1,11 +1,9 @@
 import { Elysia } from 'elysia'
-import { authPlugin } from '../../middleware/auth.js'
-import { workspaceContext } from '../../middleware/workspace-context.js'
+import { appPlugin } from '../../middleware/app-plugin.js'
 import { getAnalytics } from './service.js'
 
 export const analyticsModule = new Elysia({ prefix: '/analytics' })
-  .use(authPlugin)
-  .use(workspaceContext)
+  .use(appPlugin)
   .requireAuth(true)
   .requireWorkspace(true)
 

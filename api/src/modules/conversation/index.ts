@@ -2,13 +2,11 @@ import { Elysia, t } from 'elysia'
 import { db } from '@zenda/db/client'
 import { conversations, messages, conversationSummaries } from '@zenda/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
-import { authPlugin } from '../../middleware/auth.js'
-import { workspaceContext } from '../../middleware/workspace-context.js'
+import { appPlugin } from '../../middleware/app-plugin.js'
 import { logger } from '../../infra/logger.js'
 
 export const conversationModule = new Elysia({ prefix: '/conversations' })
-  .use(authPlugin)
-  .use(workspaceContext)
+  .use(appPlugin)
   .requireAuth(true)
   .requireWorkspace(true)
 

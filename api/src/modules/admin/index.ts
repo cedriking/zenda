@@ -2,7 +2,7 @@ import { Elysia } from 'elysia'
 import { db } from '@zenda/db/client'
 import { workspaces, subscriptions, users, whatsappConnections } from '@zenda/db/schema'
 import { eq, desc, sql } from 'drizzle-orm'
-import { authPlugin } from '../../middleware/auth.js'
+import { appPlugin } from '../../middleware/app-plugin.js'
 import { logger } from '../../infra/logger.js'
 
 // Admin middleware: only allow if user has admin flag
@@ -10,7 +10,7 @@ import { logger } from '../../infra/logger.js'
 const ADMIN_SECRET = process.env.ADMIN_SECRET ?? 'admin-dev'
 
 export const adminModule = new Elysia({ prefix: '/admin' })
-  .use(authPlugin)
+  .use(appPlugin)
   .requireAuth(true)
 
   // Workspace overview

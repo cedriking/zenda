@@ -1,11 +1,9 @@
 import { Elysia } from 'elysia'
 import { getNotifications, markNotificationRead } from './service.js'
-import { authPlugin } from '../../middleware/auth.js'
-import { workspaceContext } from '../../middleware/workspace-context.js'
+import { appPlugin } from '../../middleware/app-plugin.js'
 
 export const notificationModule = new Elysia({ prefix: '/notifications' })
-  .use(authPlugin)
-  .use(workspaceContext)
+  .use(appPlugin)
   .requireAuth(true)
   .requireWorkspace(true)
 

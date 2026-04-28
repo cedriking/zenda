@@ -3,7 +3,8 @@ import { db } from '@zenda/db/client'
 import { workspaces, workspaceMembers } from '@zenda/db/schema'
 import { eq, and } from 'drizzle-orm'
 
-export const workspaceContext = new Elysia({ name: 'workspace' })
+// Workspace derivation only (no macros)
+export const workspaceBase = new Elysia({ name: 'workspace-base' })
   .derive(async ({ userId, workspaceId }) => {
     if (!userId || !workspaceId) {
       return { workspace: null }
@@ -31,16 +32,6 @@ export const workspaceContext = new Elysia({ name: 'workspace' })
 
     return { workspace: workspace[0] ?? null }
   })
-  .macro(({ onBeforeHandle }) => ({
-    requireWorkspace(enabled: boolean) {
-      if (!enabled) return
-      onBeforeHandle(({ workspace }) => {
-        if (!workspace) {
-          return new Response(JSON.stringify({ error: 'Workspace not found or access denied' }), {
-            status: 403,
-            headers: { 'Content-Type': 'application/json' },
-          })
-        }
-      })
-    },
-  }))
+
+// Keep workspaceContext as alias
+export const workspaceContext = workspaceBase

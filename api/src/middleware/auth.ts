@@ -2,7 +2,8 @@ import { Elysia } from 'elysia'
 import { jwt } from '@elysiajs/jwt'
 import { JWT_SECRET, JWT_REFRESH_SECRET } from '../config/env.js'
 
-export const authPlugin = new Elysia({ name: 'auth' })
+// JWT + auth derivation only (no macros)
+const authBase = new Elysia({ name: 'auth-base' })
   .use(
     jwt({
       name: 'jwt',
@@ -32,16 +33,7 @@ export const authPlugin = new Elysia({ name: 'auth' })
       workspaceId: (payload as Record<string, unknown>).workspaceId as string ?? null,
     }
   })
-  .macro(({ onBeforeHandle }) => ({
-    requireAuth(enabled: boolean) {
-      if (!enabled) return
-      onBeforeHandle(({ userId }) => {
-        if (!userId) {
-          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' },
-          })
-        }
-      })
-    },
-  }))
+
+export { authBase }
+// Keep authPlugin as alias for backward compat (but modules should use appPlugin instead)
+export const authPlugin = authBase
