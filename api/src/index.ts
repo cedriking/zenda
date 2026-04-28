@@ -23,6 +23,8 @@ import { monitoringModule } from './modules/monitoring/index.js'
 import { translationModule } from './modules/ai/translation.js'
 import { supportModule } from './modules/support/index.js'
 import { API_PORT } from './config/env.js'
+import { db } from '@zenda/db/client'
+import { sql } from 'drizzle-orm'
 import { logger } from './infra/logger.js'
 
 const app = new Elysia()
@@ -34,11 +36,21 @@ const app = new Elysia()
     credentials: true,
   }))
   .use(appPlugin)
-  .get('/health', () => ({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    version: '0.1.0',
-  }))
+  .get('/health', async () => {
+    let dbOk = false
+    try {
+      await db.execute(sql`SELECT 1`)
+      dbOk = true
+    } catch {
+      dbOk = false
+    }
+    return {
+      status: dbOk ? 'ok' : 'degraded',
+      db: dbOk,
+      timestamp: new Date().toISOString(),
+      version: '0.1.0',
+    }
+  })
   // Auth
   .use(authModule)
   .use(workspaceModule)

@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useAuthStore } from '@/stores/auth'
 import { apiFetch } from '@/services/api-client'
@@ -188,9 +188,9 @@ function LoginPage() {
         </p>
         <p className="text-center text-sm text-muted-foreground">
           Don't have an account?{' '}
-          <a href="/auth/signup" className="text-primary underline">
+          <Link to="/auth/signup" className="text-primary underline">
             Create one
-          </a>
+          </Link>
         </p>
       </div>
     </div>
