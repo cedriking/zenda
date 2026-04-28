@@ -1,6 +1,6 @@
 import { app, Tray, Menu, nativeImage, BrowserWindow } from 'electron'
 import path from 'node:path'
-import { getBasePath } from './utils/path'
+import { getBasePath } from '../utils/path'
 
 let tray: Tray | null = null
 

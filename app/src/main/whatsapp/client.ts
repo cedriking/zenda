@@ -1,10 +1,9 @@
 import { EventEmitter } from 'events'
 import { BrowserWindow } from 'electron'
-
-// whatsapp-web.js runs inside Electron's Chromium — no Puppeteer needed
-// We use dynamic import since it's only available in main process
-let whatsappClient: any = null
-const emitter = new EventEmitter()
+import { Client, LocalAuth } from 'whatsapp-web.js'
+import QRCode from 'qrcode'
+import { getSessionPath, clearSession } from './session.js'
+import { forwardWhatsAppMessage, forwardWhatsAppStatus } from './bridge.js'
 
 export interface WhatsAppStatus {
   status: 'disconnected' | 'connecting' | 'qr_required' | 'connected' | 'error'
@@ -13,39 +12,110 @@ export interface WhatsAppStatus {
   error?: string
 }
 
-export async function initWhatsAppClient(mainWindow: BrowserWindow): Promise<void> {
+let client: Client | null = null
+const emitter = new EventEmitter()
+
+function emitStatus(status: WhatsAppStatus) {
+  emitter.emit('status', status)
+}
+
+export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<void> {
+  if (client) {
+    await client.destroy()
+    client = null
+  }
+
+  client = new Client({
+    authStrategy: new LocalAuth({ dataPath: getSessionPath() }),
+    puppeteer: {
+      executablePath: process.execPath,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--single-process',
+      ],
+      headless: true,
+    },
+  })
+
+  client.on('loading_screen', () => {
+    emitStatus({ status: 'connecting' })
+  })
+
+  client.on('qr', async (qr: string) => {
+    try {
+      const qrData = await QRCode.toDataURL(qr, {
+        width: 400,
+        margin: 2,
+        color: { dark: '#000000', light: '#ffffff' },
+      })
+      emitStatus({ status: 'qr_required', qrData })
+    } catch {
+      emitStatus({ status: 'qr_required' })
+    }
+  })
+
+  client.on('ready', () => {
+    const phoneNumber = client?.info?.wid?.user
+    emitStatus({ status: 'connected', phoneNumber })
+    forwardWhatsAppStatus('connected', phoneNumber)
+  })
+
+  client.on('authenticated', () => {
+    // Session restored — will be followed by 'ready'
+    emitStatus({ status: 'connecting' })
+  })
+
+  client.on('auth_failure', (msg: string) => {
+    emitStatus({ status: 'error', error: `Authentication failed: ${msg}` })
+    clearSession()
+    forwardWhatsAppStatus('auth_failure')
+  })
+
+  client.on('disconnected', (reason: string) => {
+    emitStatus({ status: 'disconnected', error: reason })
+    forwardWhatsAppStatus('disconnected')
+    client = null
+  })
+
+  client.on('message', async (message) => {
+    // Only forward incoming messages (not sent by us)
+    if (message.from !== 'status@broadcast' && !message.fromMe) {
+      const contact = await message.getContact()
+      forwardWhatsAppMessage({
+        phoneNumber: contact.number || message.from.replace('@c.us', ''),
+        body: message.body,
+        contentType: message.type === 'chat' ? 'text' : message.type,
+        mediaUrl: message.hasMedia ? undefined : undefined,
+        timestamp: new Date(message.timestamp * 1000).toISOString(),
+        externalMessageId: message.id._serialized,
+      })
+    }
+  })
+
   try {
-    const { default: makeWASocket } = await import('@whiskeysockets/baileys')
-    // Note: In production, whatsapp-web.js is used. For dev without a phone,
-    // this is a stub that sends status to the renderer.
-    // Full implementation requires whatsapp-web.js with Electron's Chromium.
-
-    const status: WhatsAppStatus = { status: 'connecting' }
-    mainWindow.webContents.send('whatsapp:status', status)
-
-    // TODO: Replace with actual whatsapp-web.js init when in production
-    // For now, emit QR_required so the UI can show the QR flow
-    emitter.emit('status', { status: 'qr_required' } as WhatsAppStatus)
-    mainWindow.webContents.send('whatsapp:status', { status: 'qr_required' })
+    emitStatus({ status: 'connecting' })
+    await client.initialize()
   } catch (error) {
-    const status: WhatsAppStatus = {
+    emitStatus({
       status: 'error',
       error: error instanceof Error ? error.message : 'Failed to initialize WhatsApp',
-    }
-    mainWindow.webContents.send('whatsapp:status', status)
+    })
   }
 }
 
-export function getWhatsAppClient() {
-  return whatsappClient
+export function getClient(): Client | null {
+  return client
 }
 
 export function disconnectWhatsApp() {
-  if (whatsappClient) {
-    whatsappClient.destroy()
-    whatsappClient = null
+  if (client) {
+    client.destroy()
+    client = null
   }
-  emitter.emit('status', { status: 'disconnected' } as WhatsAppStatus)
+  emitStatus({ status: 'disconnected' })
 }
 
 export function onStatus(callback: (status: WhatsAppStatus) => void) {

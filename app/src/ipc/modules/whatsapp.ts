@@ -11,6 +11,8 @@ import {
   forwardWhatsAppMessage,
   forwardWhatsAppStatus,
 } from '../../main/whatsapp/bridge.js'
+import { updateWhatsAppHealth } from '../../main/health-monitor.js'
+import { updateTrayStatus } from '../../main/tray.js'
 
 export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
   // Init WhatsApp client
@@ -58,5 +60,9 @@ export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
   // Listen for WhatsApp client status changes and forward to renderer
   onStatus((status: WhatsAppStatus) => {
     mainWindow.webContents.send('whatsapp:status', status)
+
+    const connected = status.status === 'connected'
+    updateWhatsAppHealth(connected)
+    updateTrayStatus(connected)
   })
 }

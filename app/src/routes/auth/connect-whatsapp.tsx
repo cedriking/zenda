@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useWhatsApp } from '../../hooks/use-whatsapp'
 import { useAuthStore } from '../../stores/auth'
 import { useEffect } from 'react'
-import { QrCode, Loader2, CheckCircle, XCircle } from 'lucide-react'
+import { Loader2, CheckCircle, XCircle } from 'lucide-react'
 
 export const Route = createFileRoute('/auth/connect-whatsapp')({
   component: ConnectWhatsAppPage,
@@ -45,7 +45,11 @@ function ConnectWhatsAppPage() {
 
         {needsQR && (
           <div className="flex flex-col items-center gap-4">
-            <QrCode size={200} className="text-gray-300" />
+            {status.qrData ? (
+              <img src={status.qrData} alt="WhatsApp QR Code" className="w-[280px] h-[280px]" />
+            ) : (
+              <Loader2 size={200} className="text-gray-300 animate-spin" />
+            )}
             <p className="text-gray-600">Scan the QR code with your WhatsApp</p>
             <p className="text-sm text-gray-400">Open WhatsApp {'>'} Settings {'>'} Linked Devices {'>'} Link a Device</p>
           </div>
