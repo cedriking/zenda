@@ -2,3 +2,6 @@ export const DATABASE_URL = process.env.DATABASE_URL ?? 'postgres://zenda:zenda_
 export const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-jwt-secret-change-in-production'
 export const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET ?? 'dev-refresh-secret-change-in-production'
 export const API_PORT = process.env.API_PORT ?? '3001'
+export const ZAI_API_KEY = process.env.ZAI_API_KEY ?? ''
+export const ZAI_BASE_URL = process.env.ZAI_BASE_URL ?? 'https://api.z.ai/api/coding/paas/v4'
+export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY ?? ''

@@ -27,7 +27,7 @@ interface ToolDefinition {
   }
 }
 
-const ZAI_BASE = process.env.ZAI_BASE_URL ?? 'https://api.zai.chat/v1'
+const ZAI_BASE = process.env.ZAI_BASE_URL ?? 'https://api.z.ai/api/coding/paas/v4'
 
 export const zaiProvider = {
   name: 'zai' as const,

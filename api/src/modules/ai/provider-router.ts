@@ -13,40 +13,32 @@ interface RoutingContext {
   risk?: 'low' | 'medium' | 'high'
 }
 
-// Model assignments per task type
+// ZAI (ZhipuAI) GLM models
+// glm-5.1: most capable, glm-5-turbo: fast, glm-4.7: balanced, glm-4.5-air: lightweight
 const TASK_ROUTING: Record<AITaskType, ProviderConfig[]> = {
   intent_detection: [
-    { provider: 'ollama', model: 'llama3.2:3b', maxTokens: 200 },
-    { provider: 'zai', model: 'zai-fast', maxTokens: 200 },
-    { provider: 'openai', model: 'gpt-4o-mini', maxTokens: 200 },
+    { provider: 'zai', model: 'glm-4.5-air', maxTokens: 200 },
   ],
   language_detection: [
-    { provider: 'ollama', model: 'llama3.2:3b', maxTokens: 50 },
-    { provider: 'zai', model: 'zai-fast', maxTokens: 50 },
-    { provider: 'openai', model: 'gpt-4o-mini', maxTokens: 50 },
+    { provider: 'zai', model: 'glm-4.5-air', maxTokens: 50 },
   ],
   classification: [
-    { provider: 'zai', model: 'zai-fast', maxTokens: 300 },
-    { provider: 'openai', model: 'gpt-4o-mini', maxTokens: 300 },
+    { provider: 'zai', model: 'glm-5-turbo', maxTokens: 300 },
   ],
   tool_planning: [
-    { provider: 'openai', model: 'gpt-4o-mini', maxTokens: 500 },
-    { provider: 'zai', model: 'zai-chat', maxTokens: 500 },
+    { provider: 'zai', model: 'glm-5.1', maxTokens: 500 },
   ],
   response_generation: [
-    { provider: 'zai', model: 'zai-chat', maxTokens: 800 },
-    { provider: 'openai', model: 'gpt-4o-mini', maxTokens: 800 },
+    { provider: 'zai', model: 'glm-5.1', maxTokens: 800 },
   ],
   summarization: [
-    { provider: 'zai', model: 'zai-fast', maxTokens: 400 },
-    { provider: 'openai', model: 'gpt-4o-mini', maxTokens: 400 },
+    { provider: 'zai', model: 'glm-5-turbo', maxTokens: 400 },
   ],
   memory_extraction: [
-    { provider: 'zai', model: 'zai-fast', maxTokens: 300 },
-    { provider: 'openai', model: 'gpt-4o-mini', maxTokens: 300 },
+    { provider: 'zai', model: 'glm-5-turbo', maxTokens: 300 },
   ],
   transcription: [
-    { provider: 'openai', model: 'whisper-1', maxTokens: 0 },
+    { provider: 'zai', model: 'glm-4.7', maxTokens: 0 },
   ],
 }
 
