@@ -28,6 +28,8 @@ COPY web/ ./web/
 
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run --workspace @zenda/web build
+# Ensure public directory exists for COPY in runner
+RUN mkdir -p /app/web/public
 
 # Production
 FROM base AS runner
