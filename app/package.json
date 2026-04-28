@@ -1,11 +1,12 @@
 {
-  "name": "zenda",
+  "name": "@zenda/app",
   "productName": "Zenda",
   "version": "0.1.0",
   "description": "Zenda — AI Receptionist for appointment-based businesses",
   "main": ".vite/build/main.js",
   "private": true,
   "scripts": {
+    "dev": "electron-forge start",
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
