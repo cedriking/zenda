@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { apiFetch } from '../../services/api-client'
+import { apiFetch } from '../services/api-client'
 import { WifiOff, Send, Eye, Trash2, RefreshCw } from 'lucide-react'
 
 interface QueueStats {

@@ -21,13 +21,16 @@ function DashboardPage() {
     needsAttention: 0,
     todayMessages: 0,
   })
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
       try {
-        const [convs, appts] = await Promise.all([
+        setError(null)
+        const [convs, appts, msgStats] = await Promise.all([
           apiFetch<any[]>('/conversations'),
           apiFetch<any[]>('/appointments'),
+          apiFetch<{ todayCount: number }>('/analytics/messages-today').catch(() => null),
         ])
         setStats({
           todayAppointments: appts.filter(a => {
@@ -36,10 +39,10 @@ function DashboardPage() {
           }).length,
           activeConversations: convs.filter(c => c.mode === 'auto').length,
           needsAttention: convs.filter(c => c.mode === 'needs_attention' || c.mode === 'human_takeover').length,
-          todayMessages: 0, // Would need a dedicated endpoint
+          todayMessages: msgStats?.todayCount ?? 0,
         })
-      } catch {
-        // silent
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load dashboard data')
       }
     }
     load()
@@ -48,6 +51,13 @@ function DashboardPage() {
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h2>
+
+      {error && (
+        <div className="mb-6 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+          Failed to load dashboard data: {error}
+          <button onClick={() => window.location.reload()} className="ml-2 underline">Retry</button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard

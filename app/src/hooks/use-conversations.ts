@@ -4,10 +4,12 @@ import { apiFetch } from '../services/api-client'
 interface Conversation {
   id: string
   customerId: string
+  customerName: string | null
   mode: string
   language: string
   channel: string
   lastMessageAt: string
+  lastMessagePreview: string | null
   needsAttentionReason: string | null
   createdAt: string
 }
@@ -28,14 +30,16 @@ export function useConversations() {
   const [messages, setMessages] = useState<Record<string, Message[]>>({})
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const loadConversations = useCallback(async () => {
     setIsLoading(true)
+    setError(null)
     try {
-      const data = await apiFetch<Conversation[]>('/conversations')
-      setConversations(data)
-    } catch {
-      // silent
+      const data = await apiFetch<Conversation[]>('/conversations?include=customer')
+      setConversations(data as Conversation[])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load conversations')
     } finally {
       setIsLoading(false)
     }
@@ -45,8 +49,8 @@ export function useConversations() {
     try {
       const data = await apiFetch<Message[]>(`/conversations/${conversationId}/messages`)
       setMessages(prev => ({ ...prev, [conversationId]: data.reverse() }))
-    } catch {
-      // silent
+    } catch (err) {
+      console.error('Failed to load messages:', err)
     }
   }, [])
 
@@ -88,6 +92,7 @@ export function useConversations() {
     messages,
     unreadCounts,
     isLoading,
+    error,
     setActiveConversationId,
     loadConversations,
     loadMessages,

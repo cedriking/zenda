@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { apiFetch } from '../../../services/api-client'
-import { BarChart3, MessageSquare, Calendar, AlertTriangle, Zap, Clock } from 'lucide-react'
+import { BarChart3, MessageSquare, Calendar, AlertTriangle, Zap, Clock, AlertCircle } from 'lucide-react'
 
 export const Route = createFileRoute('/dashboard/analytics/')({
   component: AnalyticsPage,
@@ -19,6 +19,7 @@ function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [period, setPeriod] = useState('30')
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadAnalytics()
@@ -26,20 +27,61 @@ function AnalyticsPage() {
 
   async function loadAnalytics() {
     setLoading(true)
+    setError(null)
     try {
       const result = await apiFetch<AnalyticsData>(`/analytics?period=${period}`)
       setData(result as any)
-    } catch { /* silent */ }
-    setLoading(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load analytics')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (loading && !data) {
-    return <div className="p-6 text-gray-500">Loading analytics...</div>
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <BarChart3 size={24} />
+            Analytics
+          </h2>
+        </div>
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-lg border border-gray-200 p-5 animate-pulse">
+              <div className="flex items-center justify-between mb-3">
+                <div className="h-3 w-24 bg-gray-200 rounded" />
+                <div className="h-4 w-4 bg-gray-200 rounded" />
+              </div>
+              <div className="h-6 w-16 bg-gray-200 rounded" />
+            </div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
-  if (!data) {
-    return <div className="p-6 text-gray-500">No data available</div>
+  if (error && !data) {
+    return (
+      <div className="p-6">
+        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 mb-6">
+          <BarChart3 size={24} />
+          Analytics
+        </h2>
+        <div className="rounded-lg bg-red-50 border border-red-200 p-6 text-center">
+          <AlertCircle size={32} className="mx-auto mb-3 text-red-400" />
+          <p className="text-red-700 mb-2">Failed to load analytics</p>
+          <p className="text-sm text-red-500 mb-4">{error}</p>
+          <button onClick={loadAnalytics} className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm">
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
   }
+
+  if (!data) return null
 
   const cards = [
     { label: 'Conversations', value: data.conversations.total, icon: <MessageSquare size={20} />, color: 'blue' },
