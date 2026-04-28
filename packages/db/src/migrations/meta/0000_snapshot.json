@@ -1,5 +1,5 @@
 {
-  "id": "0d86c028-ecc2-4ec9-9917-c24577476638",
+  "id": "393e16a2-9fd9-4d9b-9b7f-19bb4bcb7833",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -182,7 +182,7 @@
         },
         "reminder_status": {
           "name": "reminder_status",
-          "type": "reminder_status",
+          "type": "appointment_reminder_status",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
@@ -2322,14 +2322,14 @@
         "customer"
       ]
     },
-    "public.reminder_status": {
-      "name": "reminder_status",
+    "public.appointment_reminder_status": {
+      "name": "appointment_reminder_status",
       "schema": "public",
       "values": [
-        "pending",
+        "none",
+        "scheduled",
         "sent",
-        "delivered",
-        "failed"
+        "confirmed"
       ]
     },
     "public.appointment_status": {
@@ -2437,6 +2437,15 @@
         "es"
       ]
     },
+    "public.memory_source": {
+      "name": "memory_source",
+      "schema": "public",
+      "values": [
+        "ai_extraction",
+        "owner_note",
+        "system"
+      ]
+    },
     "public.message_content_type": {
       "name": "message_content_type",
       "schema": "public",
@@ -2517,6 +2526,16 @@
         "friendly",
         "elegant",
         "casual"
+      ]
+    },
+    "public.reminder_status": {
+      "name": "reminder_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "sent",
+        "delivered",
+        "failed"
       ]
     },
     "public.sender_type": {

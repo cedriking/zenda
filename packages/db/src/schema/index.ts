@@ -49,6 +49,7 @@ export {
 export {
   agentMemory,
   knowledgeBaseItems,
+  memorySourceEnum,
 } from './memory.js'
 export { reminders, reminderStatusEnum } from './reminders.js'
 export {

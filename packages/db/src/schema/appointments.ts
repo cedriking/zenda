@@ -12,7 +12,7 @@ export const appointmentStatusEnum = pgEnum('appointment_status', [
 ])
 
 export const confirmationStatusEnum = pgEnum('confirmation_status', ['pending', 'confirmed', 'expired'])
-export const reminderStatusEnum = pgEnum('reminder_status', ['none', 'scheduled', 'sent', 'confirmed'])
+export const reminderStatusEnum = pgEnum('appointment_reminder_status', ['none', 'scheduled', 'sent', 'confirmed'])
 export const createdByEnum = pgEnum('created_by', ['ai', 'owner', 'system'])
 
 export const appointments = pgTable('appointments', {

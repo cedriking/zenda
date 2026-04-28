@@ -1,5 +1,5 @@
 CREATE TYPE "public"."actor_type" AS ENUM('ai', 'owner', 'system', 'customer');--> statement-breakpoint
-CREATE TYPE "public"."reminder_status" AS ENUM('pending', 'sent', 'delivered', 'failed');--> statement-breakpoint
+CREATE TYPE "public"."appointment_reminder_status" AS ENUM('none', 'scheduled', 'sent', 'confirmed');--> statement-breakpoint
 CREATE TYPE "public"."appointment_status" AS ENUM('requested', 'pending_confirmation', 'confirmed', 'reminder_sent', 'client_confirmed', 'reschedule_requested', 'rescheduled', 'cancel_requested', 'cancelled', 'completed', 'no_show', 'needs_attention');--> statement-breakpoint
 CREATE TYPE "public"."billing_period" AS ENUM('monthly', 'annual');--> statement-breakpoint
 CREATE TYPE "public"."business_category" AS ENUM('beauty', 'wellness', 'health', 'coaching', 'fitness', 'other');--> statement-breakpoint
@@ -9,6 +9,7 @@ CREATE TYPE "public"."created_by" AS ENUM('ai', 'owner', 'system');--> statement
 CREATE TYPE "public"."escalation_reason" AS ENUM('customer_requested_human', 'unknown_question', 'discount_request', 'price_dispute', 'refund_request', 'angry_customer', 'medical_legal_financial', 'sensitive_info', 'custom_exception', 'unlisted_service', 'outside_rules', 'unclear_audio', 'emergency', 'low_confidence', 'technology_question');--> statement-breakpoint
 CREATE TYPE "public"."escalation_status" AS ENUM('open', 'resolved');--> statement-breakpoint
 CREATE TYPE "public"."language" AS ENUM('en', 'es');--> statement-breakpoint
+CREATE TYPE "public"."memory_source" AS ENUM('ai_extraction', 'owner_note', 'system');--> statement-breakpoint
 CREATE TYPE "public"."message_content_type" AS ENUM('text', 'audio', 'image', 'file', 'system');--> statement-breakpoint
 CREATE TYPE "public"."message_status" AS ENUM('received', 'queued', 'sent', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."notification_type" AS ENUM('appointment_booked', 'appointment_cancelled', 'appointment_rescheduled', 'needs_attention', 'discount_requested', 'ai_unsure', 'whatsapp_disconnected', 'whatsapp_reconnected', 'usage_warning', 'usage_limit', 'payment_failed', 'subscription_updated');--> statement-breakpoint
@@ -16,6 +17,7 @@ CREATE TYPE "public"."onboarding_step" AS ENUM('not_started', 'whatsapp_connecte
 CREATE TYPE "public"."plan_tier" AS ENUM('starter', 'pro', 'business');--> statement-breakpoint
 CREATE TYPE "public"."price_display" AS ENUM('show', 'hide', 'on_request');--> statement-breakpoint
 CREATE TYPE "public"."receptionist_tone" AS ENUM('professional', 'warm', 'friendly', 'elegant', 'casual');--> statement-breakpoint
+CREATE TYPE "public"."reminder_status" AS ENUM('pending', 'sent', 'delivered', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."sender_type" AS ENUM('customer', 'ai', 'owner', 'system');--> statement-breakpoint
 CREATE TYPE "public"."subscription_status" AS ENUM('trialing', 'active', 'past_due', 'unpaid', 'canceled', 'incomplete', 'paused');--> statement-breakpoint
 CREATE TYPE "public"."whatsapp_connection_status" AS ENUM('connected', 'connecting', 'qr_required', 'disconnected', 'session_expired', 'error', 'rate_limited', 'maintenance');--> statement-breakpoint
@@ -43,7 +45,7 @@ CREATE TABLE "appointments" (
 	"source_conversation_id" uuid,
 	"created_by" "created_by" DEFAULT 'owner' NOT NULL,
 	"confirmation_status" "confirmation_status" DEFAULT 'pending' NOT NULL,
-	"reminder_status" "reminder_status" DEFAULT 'none' NOT NULL,
+	"reminder_status" "appointment_reminder_status" DEFAULT 'none' NOT NULL,
 	"notes" varchar(500),
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
