@@ -1,7 +1,7 @@
 FROM node:22-alpine AS base
 WORKDIR /app
 
-# Install dependencies — copy all workspace package.json files
+# Install dependencies
 FROM base AS deps
 COPY package.json package-lock.json ./
 COPY packages/shared/package.json ./packages/shared/
@@ -14,13 +14,16 @@ RUN npm ci
 # Build shared package
 FROM base AS build-shared
 COPY --from=deps /app/node_modules ./node_modules
+COPY package.json ./package.json
+COPY packages/shared/package.json ./packages/shared/package.json
 COPY packages/shared/ ./packages/shared/
 RUN npm run --workspace @zenda/shared build
 
 # Build web
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=build-shared /app/packages/shared ./packages/shared/
+COPY package.json ./package.json
+COPY packages/shared/ ./packages/shared/
 COPY web/ ./web/
 
 ENV NEXT_TELEMETRY_DISABLED=1
