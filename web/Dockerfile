@@ -28,7 +28,7 @@ COPY web/ ./web/
 
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run --workspace @zenda/web build
-# Ensure public directory exists for COPY in runner
+# Ensure public directory exists
 RUN mkdir -p /app/web/public
 
 # Production
@@ -41,9 +41,13 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=build /app/web/public ./public
+# Copy standalone output
 COPY --from=build --chown=nextjs:nodejs /app/web/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/web/.next/static ./.next/static
+COPY --from=build /app/web/public ./public
+
+# Copy node_modules for monorepo dependencies that standalone doesn't trace
+COPY --from=build /app/node_modules ./node_modules
 
 USER nextjs
 

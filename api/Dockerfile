@@ -9,21 +9,23 @@ COPY app/package.json ./app/
 COPY web/package.json ./web/
 RUN npm ci
 
-# Build stage uses Bun for fast compilation
-FROM oven/bun:1 AS build
+# Build shared packages (they compile TS to JS)
+FROM oven/bun:1 AS build-shared
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY packages/shared/ ./packages/shared/
 COPY packages/db/ ./packages/db/
-COPY api/ ./api/
 RUN bun run --filter @zenda/shared build
 RUN bun run --filter @zenda/db build
-RUN bun run --filter @zenda/api build
 
-# Production stage uses Bun runtime
+# Production stage — run API source directly with Bun (no bundling, preserves Elysia macros)
 FROM oven/bun:1 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=build /app/api/dist/index.js ./index.js
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=build-shared /app/packages/shared ./packages/shared
+COPY --from=build-shared /app/packages/db ./packages/db
+COPY package.json ./package.json
+COPY api/ ./api/
 EXPOSE 3000
-CMD ["bun", "run", "index.js"]
+CMD ["bun", "run", "api/src/index.ts"]
