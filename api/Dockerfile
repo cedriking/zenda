@@ -25,5 +25,5 @@ FROM oven/bun:1 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=build /app/api/dist/index.js ./index.js
-EXPOSE 3001
+EXPOSE 3000
 CMD ["bun", "run", "index.js"]
