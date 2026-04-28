@@ -4,8 +4,6 @@ import { getAnalytics } from './service.js'
 
 export const analyticsModule = new Elysia({ prefix: '/analytics' })
   .use(appPlugin)
-  .requireAuth(true)
-  .requireWorkspace(true)
 
   .get('/', async ({ workspaceId, query }) => {
     const { period } = (query as Record<string, string>) ?? {}

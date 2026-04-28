@@ -6,8 +6,6 @@ import { appPlugin } from '../../middleware/app-plugin.js'
 
 export const availabilityModule = new Elysia({ prefix: '/availability' })
   .use(appPlugin)
-  .requireAuth(true)
-  .requireWorkspace(true)
 
   .get('/', async ({ workspaceId, query }) => {
     const { staffMemberId } = query as Record<string, string>

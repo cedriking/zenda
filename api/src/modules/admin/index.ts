@@ -11,7 +11,6 @@ const ADMIN_SECRET = process.env.ADMIN_SECRET ?? 'admin-dev'
 
 export const adminModule = new Elysia({ prefix: '/admin' })
   .use(appPlugin)
-  .requireAuth(true)
 
   // Workspace overview
   .get('/workspaces', async () => {

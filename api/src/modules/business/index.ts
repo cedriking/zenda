@@ -6,8 +6,6 @@ import { appPlugin } from '../../middleware/app-plugin.js'
 
 export const businessModule = new Elysia({ prefix: '/business' })
   .use(appPlugin)
-  .requireAuth(true)
-  .requireWorkspace(true)
 
   // Get business profile
   .get('/profile', async ({ workspaceId }) => {

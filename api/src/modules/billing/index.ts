@@ -24,8 +24,6 @@ export const billingModule = new Elysia({ prefix: '/billing' })
   })
 
   // Authenticated endpoints
-  .requireAuth(true)
-  .requireWorkspace(true)
 
   // Create checkout session
   .post('/checkout', async ({ workspaceId, body }) => {

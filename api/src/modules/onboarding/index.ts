@@ -5,8 +5,6 @@ import { getNextOnboardingQuestion, processOnboardingResponse } from './conversa
 
 export const onboardingModule = new Elysia({ prefix: '/onboarding' })
   .use(appPlugin)
-  .requireAuth(true)
-  .requireWorkspace(true)
 
   .get('/status', async ({ workspaceId }) => {
     return getOnboardingStatus(workspaceId!)

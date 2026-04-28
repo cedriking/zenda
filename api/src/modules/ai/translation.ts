@@ -4,8 +4,6 @@ import { logger } from '../../infra/logger.js'
 
 export const translationModule = new Elysia({ prefix: '/translation' })
   .use(appPlugin)
-  .requireAuth(true)
-  .requireWorkspace(true)
 
   .post('/generate', async ({ body }) => {
     const { text, sourceLang, targetLang } = body as { text: string; sourceLang: string; targetLang: string }

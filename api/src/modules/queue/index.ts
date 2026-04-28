@@ -5,8 +5,6 @@ import { getQueueStats } from './retry-queue.js'
 
 export const queueModule = new Elysia({ prefix: '/queue' })
   .use(appPlugin)
-  .requireAuth(true)
-  .requireWorkspace(true)
 
   .get('/', async () => {
     const stats = getQueueStats()

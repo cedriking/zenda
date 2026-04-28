@@ -4,8 +4,6 @@ import { appPlugin } from '../../middleware/app-plugin.js'
 
 export const notificationModule = new Elysia({ prefix: '/notifications' })
   .use(appPlugin)
-  .requireAuth(true)
-  .requireWorkspace(true)
 
   .get('/', async ({ workspaceId, query }) => {
     const { limit } = (query as Record<string, string>) ?? {}

@@ -4,8 +4,6 @@ import { getUsageForPeriod } from './tracker.js'
 
 export const usageModule = new Elysia({ prefix: '/usage' })
   .use(appPlugin)
-  .requireAuth(true)
-  .requireWorkspace(true)
 
   .get('/', async ({ workspaceId }) => {
     return getUsageForPeriod(workspaceId!)

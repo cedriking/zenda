@@ -7,8 +7,6 @@ import { getCustomerProfile } from './customer-profile.js'
 
 export const customerModule = new Elysia({ prefix: '/customers' })
   .use(appPlugin)
-  .requireAuth(true)
-  .requireWorkspace(true)
 
   .get('/', async ({ workspaceId }) => {
     return db.select().from(customers).where(eq(customers.workspaceId, workspaceId!))

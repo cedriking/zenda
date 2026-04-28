@@ -9,8 +9,6 @@ import { logger } from '../../infra/logger.js'
 
 export const appointmentModule = new Elysia({ prefix: '/appointments' })
   .use(appPlugin)
-  .requireAuth(true)
-  .requireWorkspace(true)
 
   // List appointments
   .get('/', async ({ workspaceId, query }) => {

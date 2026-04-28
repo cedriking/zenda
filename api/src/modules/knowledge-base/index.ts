@@ -9,8 +9,6 @@ import {
 
 export const knowledgeBaseModule = new Elysia({ prefix: '/knowledge-base' })
   .use(appPlugin)
-  .requireAuth(true)
-  .requireWorkspace(true)
 
   .get('/', async ({ workspaceId }) => {
     return getKnowledgeBase(workspaceId!)

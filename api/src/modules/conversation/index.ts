@@ -7,8 +7,6 @@ import { logger } from '../../infra/logger.js'
 
 export const conversationModule = new Elysia({ prefix: '/conversations' })
   .use(appPlugin)
-  .requireAuth(true)
-  .requireWorkspace(true)
 
   // List conversations
   .get('/', async ({ workspaceId, query }) => {

@@ -6,8 +6,6 @@ import { appPlugin } from '../../middleware/app-plugin.js'
 
 export const serviceModule = new Elysia({ prefix: '/services' })
   .use(appPlugin)
-  .requireAuth(true)
-  .requireWorkspace(true)
 
   .get('/', async ({ workspaceId }) => {
     return db.select().from(services).where(eq(services.workspaceId, workspaceId!))
