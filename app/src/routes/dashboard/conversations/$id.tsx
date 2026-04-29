@@ -90,7 +90,7 @@ function ConversationDetailPage() {
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-auto p-4 space-y-3" role="log" aria-label="Conversation messages">
+      <div className="flex-1 overflow-auto p-4 space-y-3" role="log" aria-label="Conversation messages" aria-live="polite">
         {convMessages.length === 0 && !error && (
           <div className="text-center py-8 text-gray-400 text-sm">No messages yet</div>
         )}

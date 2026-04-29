@@ -27,20 +27,8 @@ function DashboardPage() {
     async function load() {
       try {
         setError(null)
-        const [convs, appts, msgStats] = await Promise.all([
-          apiFetch<any[]>('/conversations'),
-          apiFetch<any[]>('/appointments'),
-          apiFetch<{ todayCount: number }>('/analytics/messages-today').catch(() => null),
-        ])
-        setStats({
-          todayAppointments: appts.filter(a => {
-            const today = new Date().toISOString().split('T')[0]
-            return a.startAt?.startsWith(today) && !['cancelled', 'completed', 'no_show'].includes(a.status)
-          }).length,
-          activeConversations: convs.filter(c => c.mode === 'auto').length,
-          needsAttention: convs.filter(c => c.mode === 'needs_attention' || c.mode === 'human_takeover').length,
-          todayMessages: msgStats?.todayCount ?? 0,
-        })
+        const result = await apiFetch<DashboardStats>('/analytics/dashboard-stats')
+        setStats(result)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load dashboard data')
       }

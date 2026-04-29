@@ -31,13 +31,21 @@ export function useConversations() {
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [hasMore, setHasMore] = useState(true)
+  const PAGE_SIZE = 20
 
-  const loadConversations = useCallback(async () => {
-    setIsLoading(true)
+  const loadConversations = useCallback(async (page = 0) => {
+    if (page === 0) setIsLoading(true)
     setError(null)
     try {
-      const data = await apiFetch<Conversation[]>('/conversations?include=customer')
-      setConversations(data as Conversation[])
+      const data = await apiFetch<Conversation[]>(`/conversations?include=customer&limit=${PAGE_SIZE}&offset=${page * PAGE_SIZE}`)
+      const result = data as Conversation[]
+      if (page === 0) {
+        setConversations(result)
+      } else {
+        setConversations(prev => [...prev, ...result])
+      }
+      setHasMore(result.length === PAGE_SIZE)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load conversations')
     } finally {
@@ -93,6 +101,7 @@ export function useConversations() {
     unreadCounts,
     isLoading,
     error,
+    hasMore,
     setActiveConversationId,
     loadConversations,
     loadMessages,

@@ -20,7 +20,9 @@ function DashboardLayout() {
       try {
         const notifs = await apiFetch<Array<{ read: unknown }>>('/notifications?limit=50')
         setUnreadCount(notifs.filter(n => !n.read).length)
-      } catch { /* silent */ }
+      } catch {
+        // Will retry on next interval
+      }
     }, 30_000)
 
     // Initial load
@@ -34,7 +36,9 @@ function DashboardLayout() {
       const notifs = await apiFetch<Array<{ id: string; title: string; body: string; read: boolean; createdAt: string }>>('/notifications?limit=10')
       setNotifications(notifs)
       setUnreadCount(notifs.filter(n => !n.read).length)
-    } catch { /* silent */ }
+    } catch {
+      // Notifications will retry on next poll cycle
+    }
   }
 
   const handleLogout = () => {
@@ -49,6 +53,9 @@ function DashboardLayout() {
 
   return (
     <div className="flex h-screen bg-gray-50">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[100] focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:text-sm focus:font-medium">
+        Skip to content
+      </a>
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
@@ -84,7 +91,7 @@ function DashboardLayout() {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden" id="main-content">
         <ConnectivityBanner />
         {/* Top bar */}
         <header className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4">
@@ -95,6 +102,7 @@ function DashboardLayout() {
                 onClick={toggleNotifications}
                 className="relative p-1 text-gray-500 hover:text-gray-700 transition-colors"
                 aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
+              aria-live="polite"
                 aria-expanded={showNotifications}
               >
                 <Bell size={18} />

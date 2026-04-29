@@ -72,15 +72,15 @@ export default function DownloadPage() {
         )}
 
         <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
-          <div className="border border-[var(--border)] rounded-xl p-6 text-center opacity-75">
+          <div className="border border-[var(--border)] rounded-xl p-6 text-center">
             <div className="text-3xl mb-2">&#63743;</div>
             <div className="font-semibold">macOS</div>
-            <div className="text-xs text-[var(--text-muted)] mt-1">Coming soon</div>
+            <div className="text-xs text-[var(--accent-green)] mt-1 font-medium">Beta available</div>
           </div>
-          <div className="border border-[var(--border)] rounded-xl p-6 text-center opacity-75">
+          <div className="border border-[var(--border)] rounded-xl p-6 text-center">
             <div className="text-3xl mb-2">&#8862;</div>
             <div className="font-semibold">Windows</div>
-            <div className="text-xs text-[var(--text-muted)] mt-1">Coming soon</div>
+            <div className="text-xs text-[var(--accent-green)] mt-1 font-medium">Beta available</div>
           </div>
         </div>
 

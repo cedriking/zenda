@@ -10,6 +10,15 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const passwordStrength = (() => {
+    let score = 0
+    if (password.length >= 8) score++
+    if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++
+    if (/\d/.test(password)) score++
+    if (/[^A-Za-z0-9]/.test(password)) score++
+    return score
+  })()
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
@@ -87,6 +96,33 @@ export default function SignupPage() {
               className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
               placeholder="At least 8 characters"
             />
+            {password.length > 0 && (
+              <div className="mt-2">
+                <div className="flex gap-1 mb-1">
+                  {[1, 2, 3, 4].map(i => (
+                    <div
+                      key={i}
+                      className={`h-1 flex-1 rounded-full ${
+                        passwordStrength >= i
+                          ? passwordStrength <= 1 ? 'bg-red-400'
+                          : passwordStrength <= 2 ? 'bg-yellow-400'
+                          : passwordStrength <= 3 ? 'bg-blue-400'
+                          : 'bg-green-500'
+                        : 'bg-gray-200'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className={`text-xs ${
+                  passwordStrength <= 1 ? 'text-red-500'
+                  : passwordStrength <= 2 ? 'text-yellow-600'
+                  : passwordStrength <= 3 ? 'text-blue-500'
+                  : 'text-green-600'
+                }`}>
+                  {passwordStrength <= 1 ? 'Weak' : passwordStrength <= 2 ? 'Fair' : passwordStrength <= 3 ? 'Good' : 'Strong'}
+                </p>
+              </div>
+            )}
           </div>
 
           <button

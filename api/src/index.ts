@@ -129,7 +129,15 @@ const app = new Elysia()
   .use(translationModule)
   .use(supportModule)
 
-  .onError(({ error, set }) => {
+  .onError(({ error, set, code }) => {
+    if (code === 'NOT_FOUND') {
+      set.status = 404
+      return { error: 'Not found' }
+    }
+    if (code === 'VALIDATION') {
+      set.status = 400
+      return { error: 'Validation error' }
+    }
     const message = error instanceof Error ? error.message : 'Internal server error'
     logger.error('Unhandled error', { error: message, ...(NODE_ENV !== 'production' && { stack: error instanceof Error ? error.stack : undefined }) })
     set.status = 500

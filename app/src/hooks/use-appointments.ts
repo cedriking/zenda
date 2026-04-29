@@ -21,14 +21,23 @@ export function useAppointments() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [hasMore, setHasMore] = useState(true)
+  const PAGE_SIZE = 30
 
-  const loadAppointments = useCallback(async (status?: string) => {
-    setIsLoading(true)
+  const loadAppointments = useCallback(async (status?: string, page = 0) => {
+    if (page === 0) setIsLoading(true)
     setError(null)
     try {
-      const query = status ? `?status=${status}&include=customer,service` : '?include=customer,service'
-      const data = await apiFetch<Appointment[]>(`/appointments${query}`)
-      setAppointments(data as Appointment[])
+      const params = new URLSearchParams({ include: 'customer,service', limit: String(PAGE_SIZE), offset: String(page * PAGE_SIZE) })
+      if (status) params.set('status', status)
+      const data = await apiFetch<Appointment[]>(`/appointments?${params}`)
+      const result = data as Appointment[]
+      if (page === 0) {
+        setAppointments(result)
+      } else {
+        setAppointments(prev => [...prev, ...result])
+      }
+      setHasMore(result.length === PAGE_SIZE)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load appointments')
     } finally {
@@ -59,6 +68,7 @@ export function useAppointments() {
     selectedDate,
     isLoading,
     error,
+    hasMore,
     setSelectedDate,
     loadAppointments,
     updateStatus,

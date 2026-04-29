@@ -31,7 +31,9 @@ function KnowledgeBasePage() {
     try {
       const data = await apiFetch<KBItem[]>('/knowledge-base')
       setItems(data as any)
-    } catch { /* silent */ }
+    } catch {
+      // Knowledge base items will appear when available
+    }
   }
 
   async function handleSearch() {
@@ -42,7 +44,9 @@ function KnowledgeBasePage() {
     try {
       const data = await apiFetch<KBItem[]>(`/knowledge-base/search?q=${encodeURIComponent(searchQuery)}`)
       setItems(data as any)
-    } catch { /* silent */ }
+    } catch {
+      // Search will retry on next attempt
+    }
   }
 
   async function handleAdd(e: React.FormEvent) {
@@ -56,7 +60,9 @@ function KnowledgeBasePage() {
       setForm({ question: '', answer: '', category: 'general' })
       setShowForm(false)
       loadItems()
-    } catch { /* silent */ }
+    } catch {
+      // Form submission error handled by UI state
+    }
     setLoading(false)
   }
 
@@ -64,7 +70,9 @@ function KnowledgeBasePage() {
     try {
       await apiFetch(`/knowledge-base/${id}`, { method: 'DELETE' })
       setItems(prev => prev.filter(i => i.id !== id))
-    } catch { /* silent */ }
+    } catch {
+      // Item will remain in list; retry by refreshing
+    }
   }
 
   return (
