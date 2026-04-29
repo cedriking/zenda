@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events'
 import { BrowserWindow } from 'electron'
 import { Client, LocalAuth } from 'whatsapp-web.js'
+import puppeteer from 'puppeteer'
 import QRCode from 'qrcode'
 import { getSessionPath, clearSession } from './session.js'
 import { forwardWhatsAppMessage, forwardWhatsAppStatus } from './bridge.js'
@@ -28,7 +29,7 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
   client = new Client({
     authStrategy: new LocalAuth({ dataPath: getSessionPath() }),
     puppeteer: {
-      executablePath: process.execPath,
+      executablePath: puppeteer.executablePath(),
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
