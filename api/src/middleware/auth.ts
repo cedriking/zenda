@@ -2,8 +2,11 @@ import { Elysia } from 'elysia'
 import { jwt } from '@elysiajs/jwt'
 import { JWT_SECRET, JWT_REFRESH_SECRET } from '../config/env.js'
 
-// JWT + auth derivation only (no macros)
-const authBase = new Elysia({ name: 'auth-base' })
+/**
+ * Standalone JWT instance — NOT an Elysia plugin.
+ * Import and use in each module that needs JWT signing/verification.
+ */
+export const authBase = new Elysia()
   .use(
     jwt({
       name: 'jwt',
@@ -34,6 +37,4 @@ const authBase = new Elysia({ name: 'auth-base' })
     }
   })
 
-export { authBase }
-// Keep authPlugin as alias for backward compat (but modules should use appPlugin instead)
-export const authPlugin = authBase
+export { authBase as authPlugin }

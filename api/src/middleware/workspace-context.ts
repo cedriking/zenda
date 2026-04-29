@@ -4,7 +4,7 @@ import { workspaces, workspaceMembers } from '@zenda/db/schema'
 import { eq, and } from 'drizzle-orm'
 
 // Workspace derivation only (no macros)
-export const workspaceBase = new Elysia({ name: 'workspace-base' })
+export const workspaceBase = new Elysia()
   .derive(async ({ userId, workspaceId }) => {
     if (!userId || !workspaceId) {
       return { workspace: null }

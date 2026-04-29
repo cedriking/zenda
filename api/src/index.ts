@@ -36,8 +36,6 @@ const app = new Elysia()
     credentials: true,
   }))
   .use(rateLimit())
-  // Register JWT context on root (no guards — just makes jwt available)
-  .use(authBase)
   .get('/health', async () => {
     let dbOk = false
     try {
@@ -53,10 +51,10 @@ const app = new Elysia()
       timestamp: new Date().toISOString(),
     }
   })
-  // Public routes (no auth required)
+  // Public routes
   .use(authModule)
   .use(billingModule)
-  // Authenticated routes (appPlugin adds auth + workspace guards)
+  // Authenticated routes — each module uses appPlugin internally
   .use(workspaceModule)
   .use(wsModule)
   .use(conversationModule)

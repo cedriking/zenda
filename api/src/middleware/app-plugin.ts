@@ -1,6 +1,12 @@
 import { Elysia } from 'elysia'
-import { authBase } from './auth.js'
-import { workspaceBase } from './workspace-context.js'
+import { jwtVerify } from 'jose'
+import { JWT_SECRET } from '../config/env.js'
+import { db } from '@zenda/db/client'
+import { workspaces, workspaceMembers } from '@zenda/db/schema'
+import { eq, and } from 'drizzle-orm'
+import { logger } from '../infra/logger.js'
+
+const jwtSecret = new TextEncoder().encode(JWT_SECRET)
 
 const unauthorizedRes = new Response(JSON.stringify({ error: 'Unauthorized' }), {
   status: 401,
@@ -13,12 +19,54 @@ const forbiddenRes = new Response(JSON.stringify({ error: 'Workspace not found o
 })
 
 /**
- * Combined plugin that provides auth, workspace context, and guards.
- * Using .use(appPlugin) on a module enables all auth/workspace checks.
+ * Combined auth + workspace guard plugin.
+ * Uses jose directly for JWT verification — no Elysia JWT plugin dependency.
+ * Each module that needs auth should .use(appPlugin) directly.
  */
-export const appPlugin = new Elysia({ name: 'app' })
-  .use(authBase)
-  .use(workspaceBase)
+export const appPlugin = new Elysia()
+  .derive(async ({ headers }) => {
+    const authHeader = headers.authorization
+    if (!authHeader?.startsWith('Bearer ')) {
+      return { userId: null as string | null, workspaceId: null as string | null }
+    }
+    try {
+      const token = authHeader.slice(7)
+      const { payload } = await jwtVerify(token, jwtSecret)
+      const userId = (payload.sub as string) ?? null
+      const workspaceId = (payload as Record<string, unknown>).workspaceId as string ?? null
+      logger.debug('[appPlugin] Token verified', { userId, workspaceId })
+      return { userId, workspaceId }
+    } catch (err) {
+      logger.debug('[appPlugin] Token verification failed', { error: (err as Error).message })
+      return { userId: null as string | null, workspaceId: null as string | null }
+    }
+  })
+  .derive(async ({ userId, workspaceId }) => {
+    if (!userId || !workspaceId) {
+      return { workspace: null }
+    }
+
+    const membership = await db
+      .select()
+      .from(workspaceMembers)
+      .where(and(
+        eq(workspaceMembers.userId, userId),
+        eq(workspaceMembers.workspaceId, workspaceId),
+      ))
+      .limit(1)
+
+    if (membership.length === 0) {
+      return { workspace: null }
+    }
+
+    const workspace = await db
+      .select()
+      .from(workspaces)
+      .where(eq(workspaces.id, workspaceId))
+      .limit(1)
+
+    return { workspace: workspace[0] ?? null }
+  })
   .onBeforeHandle(({ userId }) => {
     if (!userId) return unauthorizedRes
   })
