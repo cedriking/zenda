@@ -51,6 +51,29 @@ const app = new Elysia()
       timestamp: new Date().toISOString(),
     }
   })
+  // Debug endpoint — remove after fixing auth
+  .get('/debug/auth', async ({ headers }) => {
+    const authHeader = headers.authorization
+    if (!authHeader?.startsWith('Bearer ')) {
+      return { error: 'No Bearer token', hasAuth: !!authHeader }
+    }
+    try {
+      const { jwtVerify } = await import('jose')
+      const { JWT_SECRET } = await import('./config/env.js')
+      const secret = new TextEncoder().encode(JWT_SECRET)
+      const token = authHeader.slice(7)
+      const { payload } = await jwtVerify(token, secret)
+      return {
+        payload,
+        sub: payload.sub,
+        workspaceId: payload.workspaceId,
+        workspaceIdType: typeof payload.workspaceId,
+        allKeys: Object.keys(payload),
+      }
+    } catch (err: any) {
+      return { error: err.message, name: err.name }
+    }
+  })
   // Public routes
   .use(authModule)
   .use(billingModule)
