@@ -18,12 +18,12 @@ export function useWhatsApp() {
 
   useEffect(() => {
     // Listen for WhatsApp status updates from main process
-    const unsubStatus = window.electron?.on?.('whatsapp:status', (status: WhatsAppStatus) => {
-      setWaStatus(status)
+    const unsubStatus = window.electron?.on?.('whatsapp:status', (status: unknown) => {
+      setWaStatus(status as WhatsAppStatus)
     })
 
-    const unsubBridge = window.electron?.on?.('bridge:status', (status: BridgeStatus) => {
-      setBridgeStatus(status)
+    const unsubBridge = window.electron?.on?.('bridge:status', (status: unknown) => {
+      setBridgeStatus(status as BridgeStatus)
     })
 
     return () => {
@@ -33,7 +33,13 @@ export function useWhatsApp() {
   }, [])
 
   const initWhatsApp = useCallback(async () => {
-    await window.electron?.invoke?.('whatsapp:init')
+    console.log('[renderer] initWhatsApp called, window.electron:', !!window.electron)
+    try {
+      const result = await window.electron?.invoke?.('whatsapp:init')
+      console.log('[renderer] whatsapp:init result:', result)
+    } catch (err) {
+      console.error('[renderer] whatsapp:init error:', err)
+    }
   }, [])
 
   const disconnectWhatsApp = useCallback(async () => {

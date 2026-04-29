@@ -17,8 +17,15 @@ import { updateTrayStatus } from '../../main/tray.js'
 export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
   // Init WhatsApp client
   ipcMain.handle('whatsapp:init', async () => {
-    await initWhatsAppClient(mainWindow)
-    return { success: true }
+    console.log('[IPC] whatsapp:init received')
+    try {
+      await initWhatsAppClient(mainWindow)
+      console.log('[IPC] whatsapp:init completed')
+      return { success: true }
+    } catch (err) {
+      console.error('[IPC] whatsapp:init error:', err)
+      throw err
+    }
   })
 
   // Disconnect WhatsApp

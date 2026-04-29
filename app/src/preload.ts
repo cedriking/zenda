@@ -1,6 +1,8 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { IPC_CHANNELS } from "./constants";
 
+console.log("[preload] Loaded, exposing window.electron");
+
 // Expose IPC to renderer via window.electron
 contextBridge.exposeInMainWorld("electron", {
   invoke: (channel: string, ...args: unknown[]) => {
