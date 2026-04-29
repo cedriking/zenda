@@ -1,10 +1,8 @@
 import { Elysia, t } from 'elysia'
-import { createAppPlugin } from '../../middleware/app-plugin.js'
 import { getOnboardingStatus, advanceOnboarding } from './flow.js'
 import { getNextOnboardingQuestion, processOnboardingResponse } from './conversation-handler.js'
 
 export const onboardingModule = new Elysia({ prefix: '/onboarding' })
-  .use(createAppPlugin())
 
   .get('/status', async ({ workspaceId }) => {
     return getOnboardingStatus(workspaceId!)

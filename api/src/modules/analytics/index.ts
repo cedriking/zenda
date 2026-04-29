@@ -2,11 +2,9 @@ import { Elysia } from 'elysia'
 import { db } from '@zenda/db/client'
 import { messages } from '@zenda/db/schema'
 import { eq, and, gte, sql } from 'drizzle-orm'
-import { createAppPlugin } from '../../middleware/app-plugin.js'
 import { getAnalytics } from './service.js'
 
 export const analyticsModule = new Elysia({ prefix: '/analytics' })
-  .use(createAppPlugin())
 
   .get('/', async ({ workspaceId, query }) => {
     const { period } = (query as Record<string, string>) ?? {}

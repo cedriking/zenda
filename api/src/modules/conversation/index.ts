@@ -2,11 +2,9 @@ import { Elysia, t } from 'elysia'
 import { db } from '@zenda/db/client'
 import { conversations, messages, conversationSummaries } from '@zenda/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
-import { createAppPlugin } from '../../middleware/app-plugin.js'
 import { logger } from '../../infra/logger.js'
 
 export const conversationModule = new Elysia({ prefix: '/conversations' })
-  .use(createAppPlugin())
 
   // List conversations
   .get('/', async ({ workspaceId, query }) => {

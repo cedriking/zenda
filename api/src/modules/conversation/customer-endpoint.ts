@@ -2,11 +2,9 @@ import { Elysia, t } from 'elysia'
 import { db } from '@zenda/db/client'
 import { customers } from '@zenda/db/schema'
 import { eq, and } from 'drizzle-orm'
-import { createAppPlugin } from '../../middleware/app-plugin.js'
 import { getCustomerProfile } from './customer-profile.js'
 
 export const customerModule = new Elysia({ prefix: '/customers' })
-  .use(createAppPlugin())
 
   .get('/', async ({ workspaceId }) => {
     return db.select().from(customers).where(eq(customers.workspaceId, workspaceId!))

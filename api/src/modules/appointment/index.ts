@@ -2,13 +2,11 @@ import { Elysia, t } from 'elysia'
 import { db } from '@zenda/db/client'
 import { appointments } from '@zenda/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
-import { createAppPlugin } from '../../middleware/app-plugin.js'
 import { validateTransition } from './state-machine.js'
 import { getAvailableSlots } from './availability-engine.js'
 import { logger } from '../../infra/logger.js'
 
 export const appointmentModule = new Elysia({ prefix: '/appointments' })
-  .use(createAppPlugin())
 
   // List appointments
   .get('/', async ({ workspaceId, query }) => {

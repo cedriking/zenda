@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia'
 import { cors } from '@elysiajs/cors'
-import { authBase } from './middleware/auth.js'
+import { jwtVerify } from 'jose'
 import { authModule } from './modules/auth/index.js'
 import { workspaceModule } from './modules/workspace/index.js'
 import { wsModule } from './modules/whatsapp/ws-handler.js'
@@ -25,10 +25,19 @@ import { supportModule } from './modules/support/index.js'
 import { API_PORT, CORS_ORIGINS, NODE_ENV, JWT_SECRET } from './config/env.js'
 import { rateLimit } from './middleware/rate-limit.js'
 import { db } from '@zenda/db/client'
-import { sql } from 'drizzle-orm'
+import { workspaces, workspaceMembers } from '@zenda/db/schema'
+import { eq, and, sql } from 'drizzle-orm'
 import { logger } from './infra/logger.js'
 
 const corsOrigins = CORS_ORIGINS.split(',').map(o => o.trim()).filter(Boolean)
+const jwtSecret = new TextEncoder().encode(JWT_SECRET)
+
+// Public paths that skip auth
+const PUBLIC_PATHS = ['/auth', '/health', '/billing/webhook']
+
+function isPublicPath(path: string): boolean {
+  return PUBLIC_PATHS.some(p => path === p || path.startsWith(p + '/'))
+}
 
 const app = new Elysia()
   .use(cors({
@@ -36,13 +45,76 @@ const app = new Elysia()
     credentials: true,
   }))
   .use(rateLimit())
+
+  // ── Global auth derive (runs for ALL requests) ──────────────────
+  .derive(async ({ headers, path }) => {
+    if (isPublicPath(path)) {
+      return { userId: null as string | null, workspaceId: null as string | null, workspace: null as any }
+    }
+
+    const authHeader = headers.authorization
+    if (!authHeader?.startsWith('Bearer ')) {
+      return { userId: null as string | null, workspaceId: null as string | null, workspace: null as any }
+    }
+
+    try {
+      const token = authHeader.slice(7)
+      const { payload } = await jwtVerify(token, jwtSecret)
+      const userId = (payload.sub as string) ?? null
+      const workspaceId = (payload as Record<string, unknown>).workspaceId as string ?? null
+
+      // Also resolve workspace membership
+      let workspace: any = null
+      if (userId && workspaceId) {
+        const [membership] = await db
+          .select()
+          .from(workspaceMembers)
+          .where(and(
+            eq(workspaceMembers.userId, userId),
+            eq(workspaceMembers.workspaceId, workspaceId),
+          ))
+          .limit(1)
+
+        if (membership) {
+          const [ws] = await db
+            .select()
+            .from(workspaces)
+            .where(eq(workspaces.id, workspaceId))
+            .limit(1)
+          workspace = ws ?? null
+        }
+      }
+
+      return { userId, workspaceId, workspace }
+    } catch {
+      return { userId: null as string | null, workspaceId: null as string | null, workspace: null as any }
+    }
+  })
+
+  // ── Global auth guard ───────────────────────────────────────────
+  .onBeforeHandle(({ userId, workspace, path }) => {
+    if (isPublicPath(path)) return
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+    if (!workspace) {
+      return new Response(JSON.stringify({ error: 'Workspace not found or access denied' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+  })
+
+  // ── Routes ──────────────────────────────────────────────────────
   .get('/health', async () => {
     let dbOk = false
     try {
       await db.execute(sql`SELECT 1`)
       dbOk = true
-    } catch (err) {
-      logger.error('Health check DB query failed', { error: (err as Error).message })
+    } catch {
       dbOk = false
     }
     return {
@@ -51,30 +123,12 @@ const app = new Elysia()
       timestamp: new Date().toISOString(),
     }
   })
-  // Debug endpoint — remove after fixing auth
-  .get('/debug/auth', async ({ headers }) => {
-    const authHeader = headers.authorization
-    if (!authHeader?.startsWith('Bearer ')) {
-      return { error: 'No Bearer token', hasAuth: !!authHeader }
-    }
-    try {
-      const token = authHeader.slice(7)
-      const parts = token.split('.')
-      const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString())
-      return {
-        sub: payload.sub,
-        workspaceId: payload.workspaceId,
-        allKeys: Object.keys(payload),
-        secretLength: JWT_SECRET.length,
-      }
-    } catch (err: any) {
-      return { error: err.message }
-    }
-  })
+
   // Public routes
   .use(authModule)
   .use(billingModule)
-  // Authenticated routes — each module uses appPlugin internally
+
+  // Authenticated routes — auth is handled at root level
   .use(workspaceModule)
   .use(wsModule)
   .use(conversationModule)
@@ -94,6 +148,7 @@ const app = new Elysia()
   .use(monitoringModule)
   .use(translationModule)
   .use(supportModule)
+
   .onError(({ error, set }) => {
     const message = error instanceof Error ? error.message : 'Internal server error'
     logger.error('Unhandled error', { error: message, ...(NODE_ENV !== 'production' && { stack: error instanceof Error ? error.stack : undefined }) })

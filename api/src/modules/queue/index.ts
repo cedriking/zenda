@@ -1,10 +1,8 @@
 import { Elysia } from 'elysia'
-import { createAppPlugin } from '../../middleware/app-plugin.js'
 import { getQueuedItems, clearQueue } from './offline-queue.js'
 import { getQueueStats } from './retry-queue.js'
 
 export const queueModule = new Elysia({ prefix: '/queue' })
-  .use(createAppPlugin())
 
   .get('/', async () => {
     const stats = getQueueStats()

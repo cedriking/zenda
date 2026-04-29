@@ -1,9 +1,7 @@
 import { Elysia, t } from 'elysia'
-import { createAppPlugin } from '../../middleware/app-plugin.js'
 import { logger } from '../../infra/logger.js'
 
 export const translationModule = new Elysia({ prefix: '/translation' })
-  .use(createAppPlugin())
 
   .post('/generate', async ({ body }) => {
     const { text, sourceLang, targetLang } = body as { text: string; sourceLang: string; targetLang: string }
