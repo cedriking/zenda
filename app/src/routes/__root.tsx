@@ -21,11 +21,12 @@ export const Route = createRootRoute({
   beforeLoad: ({ location }) => {
     const token = localStorage.getItem("accessToken");
     const isAuthRoute = location.pathname.startsWith("/auth");
+    const isConnectWhatsApp = location.pathname === "/auth/connect-whatsapp";
 
     if (!token && !isAuthRoute) {
       throw redirect({ to: "/auth/login" });
     }
-    if (token && isAuthRoute) {
+    if (token && isAuthRoute && !isConnectWhatsApp) {
       throw redirect({ to: getPostAuthRoute() });
     }
   },
