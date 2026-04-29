@@ -22,19 +22,20 @@ import { adminModule } from './modules/admin/index.js'
 import { monitoringModule } from './modules/monitoring/index.js'
 import { translationModule } from './modules/ai/translation.js'
 import { supportModule } from './modules/support/index.js'
-import { API_PORT } from './config/env.js'
+import { API_PORT, CORS_ORIGINS, NODE_ENV } from './config/env.js'
+import { rateLimit } from './middleware/rate-limit.js'
 import { db } from '@zenda/db/client'
 import { sql } from 'drizzle-orm'
 import { logger } from './infra/logger.js'
 
+const corsOrigins = CORS_ORIGINS.split(',').map(o => o.trim()).filter(Boolean)
+
 const app = new Elysia()
   .use(cors({
-    origin: [
-      'http://localhost:5173',   // Vite dev server (renderer)
-      'http://localhost:3000',   // Next.js website
-    ],
+    origin: corsOrigins,
     credentials: true,
   }))
+  .use(rateLimit())
   .use(appPlugin)
   .get('/health', async () => {
     let dbOk = false
@@ -48,10 +49,11 @@ const app = new Elysia()
       status: dbOk ? 'ok' : 'degraded',
       db: dbOk,
       timestamp: new Date().toISOString(),
-      version: '0.1.0',
     }
   })
-  // Auth
+  // Stripe webhook (no auth — mounted before appPlugin takes effect on routes)
+  .use(billingModule)
+  // Auth (stricter rate limit)
   .use(authModule)
   .use(workspaceModule)
   // WebSocket (WhatsApp relay)
@@ -65,7 +67,6 @@ const app = new Elysia()
   .use(businessModule)
   .use(notificationModule)
   // Phase 2 modules
-  .use(billingModule)
   .use(usageModule)
   .use(onboardingModule)
   .use(knowledgeBaseModule)
@@ -78,7 +79,8 @@ const app = new Elysia()
   .use(translationModule)
   .use(supportModule)
   .onError(({ error, set }) => {
-    logger.error('Unhandled error', { error: error.message, stack: error.stack })
+    const message = error instanceof Error ? error.message : 'Internal server error'
+    logger.error('Unhandled error', { error: message, ...(NODE_ENV !== 'production' && { stack: error instanceof Error ? error.stack : undefined }) })
     set.status = 500
     return { error: 'Internal server error' }
   })

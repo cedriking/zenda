@@ -25,7 +25,7 @@ function ConnectWhatsAppPage() {
 
   useEffect(() => {
     if (isConnected) {
-      const timer = setTimeout(() => navigate({ to: '/dashboard' }), 1500)
+      const timer = setTimeout(() => navigate({ to: '/onboarding' }), 1500)
       return () => clearTimeout(timer)
     }
   }, [isConnected, navigate])

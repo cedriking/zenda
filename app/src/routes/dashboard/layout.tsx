@@ -1,6 +1,6 @@
-import { createFileRoute, Outlet, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Outlet, Link, useNavigate, redirect } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
-import { useAuthStore } from '../../stores/auth'
+import { useAuthStore, getPostAuthRoute } from '../../stores/auth'
 import { useWhatsApp } from '../../hooks/use-whatsapp'
 import { apiFetch } from '../../services/api-client'
 import { MessageSquare, Calendar, Settings, LayoutDashboard, LogOut, Wifi, WifiOff, Bell, BarChart3, X } from 'lucide-react'
@@ -168,5 +168,18 @@ function NavLink({ to, icon, label, exact = false }: { to: string; icon: React.R
 }
 
 export const Route = createFileRoute('/dashboard/layout')({
+  beforeLoad: () => {
+    const raw = localStorage.getItem('workspace')
+    if (raw) {
+      try {
+        const workspace = JSON.parse(raw)
+        if (workspace.onboardingStep !== 'ready') {
+          throw redirect({ to: getPostAuthRoute() })
+        }
+      } catch (e) {
+        if (e && typeof e === 'object' && 'to' in e) throw e
+      }
+    }
+  },
   component: DashboardLayout,
 })

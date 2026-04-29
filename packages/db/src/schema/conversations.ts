@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, text, pgEnum, jsonb } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, timestamp, text, pgEnum, jsonb, index } from 'drizzle-orm/pg-core'
 import { workspaces } from './workspaces.js'
 import { customers } from './customers.js'
 import { languageEnum } from './workspaces.js'
@@ -20,7 +20,9 @@ export const conversations = pgTable('conversations', {
   summary: text('summary'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-})
+}, (table) => [
+  index('conversations_workspace_idx').on(table.workspaceId),
+])
 
 export const senderTypeEnum = pgEnum('sender_type', ['customer', 'ai', 'owner', 'system'])
 export const messageContentTypeEnum = pgEnum('message_content_type', ['text', 'audio', 'image', 'file', 'system'])
@@ -41,7 +43,10 @@ export const messages = pgTable('messages', {
   status: messageStatusEnum('status').notNull().default('received'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   sentAt: timestamp('sent_at', { withTimezone: true }),
-})
+}, (table) => [
+  index('messages_conversation_idx').on(table.conversationId),
+  index('messages_workspace_idx').on(table.workspaceId),
+])
 
 export const conversationSummaries = pgTable('conversation_summaries', {
   id: uuid('id').defaultRandom().primaryKey(),

@@ -20,18 +20,15 @@ const config: ForgeConfig = {
   ],
   publishers: [
     {
-      /*
-       * Publish release on GitHub as draft.
-       * Remember to manually publish it on GitHub website after verifying everything is correct.
-       */
-      name: "@electron-forge/publisher-github",
+      // Publish to S3 or compatible storage.
+      // Set S3_BUCKET, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY env vars.
+      // Artifacts will be available at https://zenda.bot/updates/{platform}/{arch}/
+      name: "@electron-forge/publisher-s3",
       config: {
-        repository: {
-          owner: "LuanRoger",
-          name: "electron-shadcn",
-        },
-        draft: true,
-        prerelease: false,
+        bucket: process.env.S3_BUCKET ?? "zenda-updates",
+        region: process.env.AWS_REGION ?? "us-east-1",
+        folder: "updates",
+        public: true,
       },
     },
   ],

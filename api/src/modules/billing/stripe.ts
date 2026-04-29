@@ -1,5 +1,10 @@
 import Stripe from 'stripe'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? 'sk_test_placeholder')
+const key = process.env.STRIPE_SECRET_KEY
+if (!key) {
+  console.warn('[stripe] STRIPE_SECRET_KEY not set — billing features disabled')
+}
 
-export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? 'whsec_placeholder'
+export const stripe = key ? new Stripe(key) : null
+
+export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? ''

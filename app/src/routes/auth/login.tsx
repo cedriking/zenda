@@ -1,6 +1,6 @@
 import { createFileRoute, redirect, Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore, getPostAuthRoute } from '@/stores/auth'
 import { apiFetch } from '@/services/api-client'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Mail } from 'lucide-react'
@@ -8,7 +8,7 @@ import { ArrowLeft, Mail } from 'lucide-react'
 export const Route = createFileRoute('/auth/login')({
   beforeLoad: ({ context }) => {
     if (context.auth?.isAuthenticated) {
-      throw redirect({ to: '/dashboard' })
+      throw redirect({ to: getPostAuthRoute() })
     }
   },
   component: LoginPage,
@@ -42,6 +42,7 @@ function LoginPage() {
       setAuth(data as Parameters<typeof setAuth>[0])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
+      setLoading(false)
     }
   }
 

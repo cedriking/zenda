@@ -24,7 +24,7 @@ function createWindow() {
     webPreferences: {
       devTools: inDevelopment,
       contextIsolation: true,
-      nodeIntegration: true,
+      nodeIntegration: false,
       nodeIntegrationInSubFrames: false,
 
       preload,
@@ -37,10 +37,14 @@ function createWindow() {
 
   // Minimize to tray instead of closing
   mainWindow.on("close", (event) => {
-    if (!app.isQuitting) {
+    if (!(app as any).isQuitting) {
       event.preventDefault();
       mainWindow.hide();
     }
+  });
+
+  app.on("before-quit", () => {
+    (app as any).isQuitting = true;
   });
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -62,10 +66,11 @@ async function installExtensions() {
 }
 
 function checkForUpdates() {
+  const baseUrl = import.meta.env.VITE_UPDATE_BASE_URL ?? 'https://zenda.bot/updates';
   updateElectronApp({
     updateSource: {
-      type: UpdateSourceType.ElectronPublicUpdateService,
-      repo: "zenda/zenda",
+      type: UpdateSourceType.StaticStorage,
+      baseUrl: `${baseUrl}/${process.platform}/${process.arch}`,
     },
   });
 }
@@ -100,7 +105,7 @@ app.whenReady().then(async () => {
       setAutoStart(true);
 
       // Health monitor
-      const apiBase = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
+      const apiBase = import.meta.env.VITE_API_URL ?? 'https://api.zenda.bot';
       startHealthMonitor(ipcContext.mainWindow, apiBase);
     }
   } catch (error) {

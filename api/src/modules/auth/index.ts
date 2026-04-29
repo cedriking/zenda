@@ -142,3 +142,9 @@ export const authModule = new Elysia({ prefix: '/auth' })
       refreshToken: t.String(),
     }),
   })
+  .post('/logout', async ({ jwt, set }) => {
+    // Client-side should discard tokens. Server-side token revocation
+    // can be added later with a token blacklist in Redis or DB.
+    logger.info('User logged out')
+    return { success: true }
+  })

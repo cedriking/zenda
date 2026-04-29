@@ -34,9 +34,27 @@ interface AuthState {
   logout: () => void
 }
 
+function loadFromStorage<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+export function getPostAuthRoute(): string {
+  const workspace = loadFromStorage<WorkspaceInfo>('workspace')
+  if (!workspace) return '/auth/login'
+  if (!workspace.onboardingStep || workspace.onboardingStep === 'not_started') return '/auth/connect-whatsapp'
+  if (workspace.onboardingStep === 'whatsapp_connected') return '/onboarding'
+  if (workspace.onboardingStep !== 'ready') return '/onboarding'
+  return '/dashboard'
+}
+
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  workspace: null,
+  user: loadFromStorage<User>('user'),
+  workspace: loadFromStorage<WorkspaceInfo>('workspace'),
   accessToken: localStorage.getItem('accessToken'),
   refreshToken: localStorage.getItem('refreshToken'),
   isAuthenticated: !!localStorage.getItem('accessToken'),
@@ -46,6 +64,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   setAuth: (data) => {
     localStorage.setItem('accessToken', data.accessToken)
     localStorage.setItem('refreshToken', data.refreshToken)
+    localStorage.setItem('workspace', JSON.stringify(data.workspace))
+    localStorage.setItem('user', JSON.stringify(data.user))
     set({
       user: data.user,
       workspace: data.workspace,
@@ -61,6 +81,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
+    localStorage.removeItem('workspace')
+    localStorage.removeItem('user')
     set({
       user: null,
       workspace: null,

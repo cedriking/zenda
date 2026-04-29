@@ -2,15 +2,30 @@ import { Elysia } from 'elysia'
 import { db } from '@zenda/db/client'
 import { workspaces, subscriptions, users, whatsappConnections } from '@zenda/db/schema'
 import { eq, desc, sql } from 'drizzle-orm'
-import { appPlugin } from '../../middleware/app-plugin.js'
+import { authBase } from '../../middleware/auth.js'
+import { ADMIN_SECRET } from '../../config/env.js'
 import { logger } from '../../infra/logger.js'
 
-// Admin middleware: only allow if user has admin flag
-// For now, check a simple env-based admin secret
-const ADMIN_SECRET = process.env.ADMIN_SECRET ?? 'admin-dev'
+const forbiddenRes = new Response(JSON.stringify({ error: 'Admin access denied' }), {
+  status: 403,
+  headers: { 'Content-Type': 'application/json' },
+})
 
 export const adminModule = new Elysia({ prefix: '/admin' })
-  .use(appPlugin)
+  .use(authBase)
+  .onBeforeHandle(({ headers, userId }) => {
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    const secret = headers['x-admin-secret']
+    if (!ADMIN_SECRET || secret !== ADMIN_SECRET) {
+      return forbiddenRes
+    }
+  })
 
   // Workspace overview
   .get('/workspaces', async () => {

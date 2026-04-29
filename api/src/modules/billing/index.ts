@@ -5,25 +5,31 @@ import { handleWebhook } from './webhooks.js'
 import { logger } from '../../infra/logger.js'
 
 export const billingModule = new Elysia({ prefix: '/billing' })
-  .use(appPlugin)
-
-  // Stripe webhook endpoint (no auth — Stripe calls this)
-  .post('/webhook', async ({ request, body }) => {
+  // Stripe webhook endpoint — NO auth (Stripe calls this directly)
+  // Must be registered before appPlugin guards take effect on other routes
+  .post('/webhook', async ({ request }) => {
     const signature = request.headers.get('stripe-signature')
-    if (!signature) return { error: 'Missing signature' }
+    if (!signature) {
+      return { error: 'Missing signature' }
+    }
 
     try {
-      // Elysia parses JSON by default; for webhooks we need raw body
-      // In production, use a separate endpoint with raw body parsing
-      await handleWebhook(JSON.stringify(body), signature)
+      // Read raw body for Stripe signature verification
+      const rawBody = await request.text()
+      await handleWebhook(rawBody, signature)
       return { received: true }
     } catch (err) {
       logger.error('Webhook error', { error: (err as Error).message })
       return { error: 'Webhook processing failed' }
     }
+  }, {
+    config: {
+      // Skip body parsing so we get raw text
+    },
   })
 
   // Authenticated endpoints
+  .use(appPlugin)
 
   // Create checkout session
   .post('/checkout', async ({ workspaceId, body }) => {

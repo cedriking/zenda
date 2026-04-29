@@ -1,13 +1,13 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect, Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore, getPostAuthRoute } from '@/stores/auth'
 import { apiFetch } from '@/services/api-client'
 import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/auth/signup')({
   beforeLoad: ({ context }) => {
     if (context.auth?.isAuthenticated) {
-      throw redirect({ to: '/dashboard' })
+      throw redirect({ to: getPostAuthRoute() })
     }
   },
   component: SignupPage,
@@ -36,6 +36,7 @@ function SignupPage() {
       setAuth(data as Parameters<typeof setAuth>[0])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed')
+      setLoading(false)
     }
   }
 
@@ -114,9 +115,9 @@ function SignupPage() {
 
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{' '}
-          <a href="/auth/login" className="text-primary underline">
+          <Link to="/auth/login" className="text-primary underline">
             Log in
-          </a>
+          </Link>
         </p>
       </div>
     </div>

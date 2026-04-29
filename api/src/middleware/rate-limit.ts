@@ -14,6 +14,16 @@ function getKey(identifier: string, path: string): string {
   return `${identifier}:${path}`
 }
 
+// Periodic cleanup of expired entries
+setInterval(() => {
+  const now = Date.now()
+  for (const [key, entry] of limits) {
+    if (now >= entry.resetAt) {
+      limits.delete(key)
+    }
+  }
+}, WINDOW_MS)
+
 export function rateLimit(max: number = DEFAULT_MAX) {
   return new Elysia({ name: 'rate-limit' })
     .derive(({ request }: { request: Request }) => {
@@ -35,5 +45,11 @@ export function rateLimit(max: number = DEFAULT_MAX) {
       const rateLimited = entry.count > max
 
       return { rateLimitRemaining: remaining, rateLimited }
+    })
+    .onBeforeHandle(({ rateLimited, set }) => {
+      if (rateLimited) {
+        set.status = 429
+        return { error: 'Too many requests' }
+      }
     })
 }

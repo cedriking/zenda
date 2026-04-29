@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, pgEnum } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, timestamp, pgEnum, uniqueIndex, index } from 'drizzle-orm/pg-core'
 import { users } from './users.js'
 
 export const onboardingStepEnum = pgEnum('onboarding_step', [
@@ -33,4 +33,6 @@ export const workspaceMembers = pgTable('workspace_members', {
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   role: varchar('role', { length: 20 }).notNull().default('owner'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-})
+}, (table) => [
+  uniqueIndex('workspace_members_workspace_user_idx').on(table.workspaceId, table.userId),
+])

@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, pgEnum } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, timestamp, pgEnum, index } from 'drizzle-orm/pg-core'
 import { workspaces } from './workspaces.js'
 import { customers } from './customers.js'
 import { services } from './services.js'
@@ -34,4 +34,6 @@ export const appointments = pgTable('appointments', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
   completedAt: timestamp('completed_at', { withTimezone: true }),
-})
+}, (table) => [
+  index('appointments_workspace_date_idx').on(table.workspaceId, table.startAt),
+])

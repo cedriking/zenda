@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, text } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, timestamp, text, index } from 'drizzle-orm/pg-core'
 import { workspaces } from './workspaces.js'
 import { languageEnum } from './workspaces.js'
 
@@ -11,4 +11,6 @@ export const customers = pgTable('customers', {
   notes: text('notes'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-})
+}, (table) => [
+  index('customers_phone_idx').on(table.workspaceId, table.phoneNumber),
+])

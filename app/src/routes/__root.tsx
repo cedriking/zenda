@@ -3,6 +3,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Activity } from "react";
 import { inDevelopment } from "@/constants";
 import BaseLayout from "@/layouts/base-layout";
+import { getPostAuthRoute } from "@/stores/auth";
 
 function Root() {
   return (
@@ -25,7 +26,7 @@ export const Route = createRootRoute({
       throw redirect({ to: "/auth/login" });
     }
     if (token && isAuthRoute) {
-      throw redirect({ to: "/dashboard" });
+      throw redirect({ to: getPostAuthRoute() });
     }
   },
 });
