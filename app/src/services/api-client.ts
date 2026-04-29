@@ -57,6 +57,10 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
 
   if (!response.ok) {
     const data = await response.json().catch(() => null)
+    if (data?.details) {
+      const msgs = data.details.map((d: { message: string }) => d.message).join('. ')
+      throw new Error(msgs || data?.error || `HTTP ${response.status}`)
+    }
     throw new Error(data?.error ?? data?.message ?? `HTTP ${response.status}`)
   }
 

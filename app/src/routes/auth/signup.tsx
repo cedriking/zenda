@@ -89,10 +89,13 @@ function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-              placeholder="Min 8 characters"
+              placeholder="Min 8 chars, uppercase, number, symbol"
               required
               minLength={8}
             />
+            <p className="text-xs text-muted-foreground">
+              At least 8 characters with uppercase, lowercase, number, and special character.
+            </p>
           </div>
 
           <div className="space-y-2">
