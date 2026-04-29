@@ -1,7 +1,12 @@
 import { EventEmitter } from 'events'
 import { BrowserWindow } from 'electron'
-import { Client, LocalAuth } from 'whatsapp-web.js'
-import puppeteer from 'puppeteer'
+import {
+  makeWASocket,
+  useMultiFileAuthState,
+  DisconnectReason,
+  fetchLatestBaileysVersion,
+  type WASocket,
+} from '@whiskeysockets/baileys'
 import QRCode from 'qrcode'
 import { getSessionPath, clearSession } from './session.js'
 import { forwardWhatsAppMessage, forwardWhatsAppStatus } from './bridge.js'
@@ -13,7 +18,7 @@ export interface WhatsAppStatus {
   error?: string
 }
 
-let client: Client | null = null
+let sock: WASocket | null = null
 const emitter = new EventEmitter()
 
 function emitStatus(status: WhatsAppStatus) {
@@ -21,99 +26,135 @@ function emitStatus(status: WhatsAppStatus) {
 }
 
 export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<void> {
-  if (client) {
-    await client.destroy()
-    client = null
+  if (sock) {
+    sock.end(undefined)
+    sock = null
   }
 
-  client = new Client({
-    authStrategy: new LocalAuth({ dataPath: getSessionPath() }),
-    puppeteer: {
-      executablePath: puppeteer.executablePath(),
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-      ],
-      headless: true,
-    },
+  const { state, saveCreds } = await useMultiFileAuthState(getSessionPath())
+  const { version } = await fetchLatestBaileysVersion()
+
+  emitStatus({ status: 'connecting' })
+
+  sock = makeWASocket({
+    version,
+    auth: state,
+    printQRInTerminal: false,
+    logger: {
+      level: 'silent',
+      info: () => {},
+      debug: () => {},
+      trace: () => {},
+      warn: () => {},
+      error: () => {},
+      fatal: () => {},
+      child: () => ({ level: 'silent', info: () => {}, debug: () => {}, trace: () => {}, warn: () => {}, error: () => {}, fatal: () => {}, child: () => ({} as any) } as any),
+    } as any,
   })
 
-  client.on('loading_screen', () => {
-    emitStatus({ status: 'connecting' })
-  })
+  // Save credentials whenever they update
+  sock.ev.on('creds.update', saveCreds)
 
-  client.on('qr', async (qr: string) => {
-    try {
-      const qrData = await QRCode.toDataURL(qr, {
-        width: 400,
-        margin: 2,
-        color: { dark: '#000000', light: '#ffffff' },
-      })
-      emitStatus({ status: 'qr_required', qrData })
-    } catch {
-      emitStatus({ status: 'qr_required' })
+  // Connection lifecycle
+  sock.ev.on('connection.update', async (update) => {
+    const { connection, lastDisconnect, qr } = update
+
+    if (qr) {
+      try {
+        const qrData = await QRCode.toDataURL(qr, {
+          width: 400,
+          margin: 2,
+          color: { dark: '#000000', light: '#ffffff' },
+        })
+        emitStatus({ status: 'qr_required', qrData })
+      } catch {
+        emitStatus({ status: 'qr_required' })
+      }
+    }
+
+    if (connection === 'close') {
+      const code = (lastDisconnect?.error as any)?.output?.statusCode ?? lastDisconnect?.error?.message
+      const loggedOut = (lastDisconnect?.error as any)?.output?.statusCode === DisconnectReason.loggedOut
+
+      if (loggedOut) {
+        clearSession()
+        sock = null
+        emitStatus({ status: 'disconnected', error: 'Logged out' })
+        forwardWhatsAppStatus('logged_out')
+      } else {
+        emitStatus({ status: 'connecting' })
+        // Reconnect
+        await initWhatsAppClient(_mainWindow)
+      }
+    } else if (connection === 'open') {
+      const phoneNumber = sock?.user?.id?.split(':')[0]
+      emitStatus({ status: 'connected', phoneNumber })
+      forwardWhatsAppStatus('connected', phoneNumber)
+    } else if (connection === 'connecting') {
+      emitStatus({ status: 'connecting' })
     }
   })
 
-  client.on('ready', () => {
-    const phoneNumber = client?.info?.wid?.user
-    emitStatus({ status: 'connected', phoneNumber })
-    forwardWhatsAppStatus('connected', phoneNumber)
-  })
+  // Incoming messages
+  sock.ev.on('messages.upsert', async ({ messages }) => {
+    for (const msg of messages) {
+      if (!msg.key.fromMe && msg.key.remoteJid !== 'status@broadcast') {
+        const jid = msg.key.remoteJid ?? ''
+        const phoneNumber = jid.replace('@s.whatsapp.net', '').replace('@c.us', '')
 
-  client.on('authenticated', () => {
-    // Session restored — will be followed by 'ready'
-    emitStatus({ status: 'connecting' })
-  })
+        let body = ''
+        let contentType: string = 'text'
 
-  client.on('auth_failure', (msg: string) => {
-    emitStatus({ status: 'error', error: `Authentication failed: ${msg}` })
-    clearSession()
-    forwardWhatsAppStatus('auth_failure')
-  })
+        if (msg.message?.conversation) {
+          body = msg.message.conversation
+        } else if (msg.message?.extendedTextMessage?.text) {
+          body = msg.message.extendedTextMessage.text
+        } else if (msg.message?.imageMessage) {
+          contentType = 'image'
+          body = msg.message.imageMessage.caption ?? ''
+        } else if (msg.message?.audioMessage) {
+          contentType = 'audio'
+        } else if (msg.message?.videoMessage) {
+          contentType = 'video'
+          body = msg.message.videoMessage.caption ?? ''
+        } else if (msg.message?.documentMessage) {
+          contentType = 'document'
+          body = msg.message.documentMessage.fileName ?? ''
+        } else if (msg.message?.contactMessage) {
+          contentType = 'contact'
+          body = msg.message.contactMessage.displayName ?? ''
+        } else if (msg.message?.locationMessage) {
+          contentType = 'location'
+          body = `${msg.message.locationMessage.degreesLatitude},${msg.message.locationMessage.degreesLongitude}`
+        }
 
-  client.on('disconnected', (reason: string) => {
-    emitStatus({ status: 'disconnected', error: reason })
-    forwardWhatsAppStatus('disconnected')
-    client = null
-  })
+        if (!body && contentType === 'text') continue
 
-  client.on('message', async (message) => {
-    // Only forward incoming messages (not sent by us)
-    if (message.from !== 'status@broadcast' && !message.fromMe) {
-      const contact = await message.getContact()
-      forwardWhatsAppMessage({
-        phoneNumber: contact.number || message.from.replace('@c.us', ''),
-        body: message.body,
-        contentType: message.type === 'chat' ? 'text' : message.type,
-        mediaUrl: message.hasMedia ? undefined : undefined,
-        timestamp: new Date(message.timestamp * 1000).toISOString(),
-        externalMessageId: message.id._serialized,
-      })
+        const ts = msg.messageTimestamp
+        const timestamp = typeof ts === 'number'
+          ? new Date(ts * 1000).toISOString()
+          : new Date().toISOString()
+
+        forwardWhatsAppMessage({
+          phoneNumber,
+          body,
+          contentType,
+          timestamp,
+          externalMessageId: msg.key.id ?? undefined,
+        })
+      }
     }
   })
-
-  try {
-    emitStatus({ status: 'connecting' })
-    await client.initialize()
-  } catch (error) {
-    emitStatus({
-      status: 'error',
-      error: error instanceof Error ? error.message : 'Failed to initialize WhatsApp',
-    })
-  }
 }
 
-export function getClient(): Client | null {
-  return client
+export function getClient(): WASocket | null {
+  return sock
 }
 
 export function disconnectWhatsApp() {
-  if (client) {
-    client.destroy()
-    client = null
+  if (sock) {
+    sock.end(undefined)
+    sock = null
   }
   emitStatus({ status: 'disconnected' })
 }

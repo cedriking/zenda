@@ -18,5 +18,5 @@ export function clearSession(): void {
 }
 
 export function hasSession(): boolean {
-  return fs.existsSync(path.join(SESSION_DIR, 'Default', 'Cookies'))
+  return fs.existsSync(path.join(SESSION_DIR, 'creds.json'))
 }
