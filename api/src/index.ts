@@ -32,7 +32,6 @@ import { logger } from './infra/logger.js'
 const corsOrigins = CORS_ORIGINS.split(',').map(o => o.trim()).filter(Boolean)
 const jwtSecret = new TextEncoder().encode(JWT_SECRET)
 
-// Public paths that skip auth
 const PUBLIC_PATHS = ['/auth', '/health', '/billing/webhook']
 
 function isPublicPath(path: string): boolean {
@@ -40,13 +39,10 @@ function isPublicPath(path: string): boolean {
 }
 
 const app = new Elysia()
-  .use(cors({
-    origin: corsOrigins,
-    credentials: true,
-  }))
+  .use(cors({ origin: corsOrigins, credentials: true }))
   .use(rateLimit())
 
-  // ── Global auth derive (runs for ALL requests) ──────────────────
+  // ── Global auth derive ──────────────────────────────────────────
   .derive(async ({ headers, path }) => {
     if (isPublicPath(path)) {
       return { userId: null as string | null, workspaceId: null as string | null, workspace: null as any }
@@ -63,24 +59,16 @@ const app = new Elysia()
       const userId = (payload.sub as string) ?? null
       const workspaceId = (payload as Record<string, unknown>).workspaceId as string ?? null
 
-      // Also resolve workspace membership
       let workspace: any = null
       if (userId && workspaceId) {
         const [membership] = await db
           .select()
           .from(workspaceMembers)
-          .where(and(
-            eq(workspaceMembers.userId, userId),
-            eq(workspaceMembers.workspaceId, workspaceId),
-          ))
+          .where(and(eq(workspaceMembers.userId, userId), eq(workspaceMembers.workspaceId, workspaceId)))
           .limit(1)
 
         if (membership) {
-          const [ws] = await db
-            .select()
-            .from(workspaces)
-            .where(eq(workspaces.id, workspaceId))
-            .limit(1)
+          const [ws] = await db.select().from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1)
           workspace = ws ?? null
         }
       }
@@ -96,39 +84,31 @@ const app = new Elysia()
     if (isPublicPath(path)) return
     if (!userId) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
+        status: 401, headers: { 'Content-Type': 'application/json' },
       })
     }
     if (!workspace) {
       return new Response(JSON.stringify({ error: 'Workspace not found or access denied' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' },
+        status: 403, headers: { 'Content-Type': 'application/json' },
       })
     }
   })
 
-  // ── Routes ──────────────────────────────────────────────────────
+  // ── Health (public) ─────────────────────────────────────────────
   .get('/health', async () => {
     let dbOk = false
     try {
       await db.execute(sql`SELECT 1`)
       dbOk = true
-    } catch {
-      dbOk = false
-    }
-    return {
-      status: dbOk ? 'ok' : 'degraded',
-      db: dbOk,
-      timestamp: new Date().toISOString(),
-    }
+    } catch { dbOk = false }
+    return { status: dbOk ? 'ok' : 'degraded', db: dbOk, timestamp: new Date().toISOString() }
   })
 
-  // Public routes
+  // ── Public routes ───────────────────────────────────────────────
   .use(authModule)
   .use(billingModule)
 
-  // Authenticated routes — auth is handled at root level
+  // ── Authenticated routes ────────────────────────────────────────
   .use(workspaceModule)
   .use(wsModule)
   .use(conversationModule)
