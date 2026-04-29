@@ -3,9 +3,11 @@ import { db } from '@zenda/db/client'
 import { users, workspaces, workspaceMembers, businessProfiles, receptionistProfiles } from '@zenda/db/schema'
 import { eq } from 'drizzle-orm'
 import { loginSchema, signupSchema } from '@zenda/shared'
+import { authBase } from '../../middleware/auth.js'
 import { logger } from '../../infra/logger.js'
 
 export const authModule = new Elysia({ prefix: '/auth' })
+  .use(authBase)
   .post('/signup', async ({ body, jwt, refreshJwt, set }) => {
     const parsed = signupSchema.safeParse(body)
     if (!parsed.success) {
