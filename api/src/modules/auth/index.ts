@@ -1,13 +1,15 @@
-import { Elysia, t } from 'elysia'
+import { Elysia } from 'elysia'
+import { jwt } from '@elysiajs/jwt'
 import { db } from '@zenda/db/client'
 import { users, workspaces, workspaceMembers, businessProfiles, receptionistProfiles } from '@zenda/db/schema'
 import { eq } from 'drizzle-orm'
 import { loginSchema, signupSchema } from '@zenda/shared'
-import { authBase } from '../../middleware/auth.js'
+import { JWT_SECRET, JWT_REFRESH_SECRET } from '../../config/env.js'
 import { logger } from '../../infra/logger.js'
 
 export const authModule = new Elysia({ prefix: '/auth' })
-  .use(authBase)
+  .use(jwt({ name: 'jwt', secret: JWT_SECRET, exp: '1h' }))
+  .use(jwt({ name: 'refreshJwt', secret: JWT_REFRESH_SECRET, exp: '7d' }))
   .post('/signup', async ({ body, jwt, refreshJwt, set }) => {
     const parsed = signupSchema.safeParse(body)
     if (!parsed.success) {
@@ -68,13 +70,6 @@ export const authModule = new Elysia({ prefix: '/auth' })
       user: { id: user.id, email: user.email, name: user.name },
       workspace: { id: workspace.id, name: workspace.name, slug: workspace.slug, planTier: 'starter' as const, onboardingStep: workspace.onboardingStep },
     }
-  }, {
-    body: t.Object({
-      name: t.String(),
-      email: t.String(),
-      password: t.String(),
-      businessName: t.String(),
-    }),
   })
   .post('/login', async ({ body, jwt, refreshJwt, set }) => {
     const parsed = loginSchema.safeParse(body)
@@ -116,11 +111,6 @@ export const authModule = new Elysia({ prefix: '/auth' })
         ? { id: workspace.id, name: workspace.name, slug: workspace.slug, planTier: 'starter' as const, onboardingStep: workspace.onboardingStep }
         : null,
     }
-  }, {
-    body: t.Object({
-      email: t.String(),
-      password: t.String(),
-    }),
   })
   .post('/refresh', async ({ body, jwt, refreshJwt, set }) => {
     const { refreshToken: token } = body as { refreshToken: string }
@@ -139,10 +129,6 @@ export const authModule = new Elysia({ prefix: '/auth' })
     const newRefreshToken = await refreshJwt.sign({ sub: payload.sub, workspaceId: (payload as Record<string, unknown>).workspaceId })
 
     return { accessToken, refreshToken: newRefreshToken }
-  }, {
-    body: t.Object({
-      refreshToken: t.String(),
-    }),
   })
   .post('/logout', async ({ jwt, set }) => {
     // Client-side should discard tokens. Server-side token revocation
