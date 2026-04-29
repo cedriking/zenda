@@ -1,14 +1,14 @@
 import { createFileRoute, Outlet, Link, useNavigate, redirect } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
-import { useAuthStore, getPostAuthRoute } from '../../stores/auth'
-import { useWhatsApp } from '../../hooks/use-whatsapp'
-import { apiFetch } from '../../services/api-client'
+import { useAuthStore, getPostAuthRoute } from '../stores/auth'
+import { useWhatsApp } from '../hooks/use-whatsapp'
+import { apiFetch } from '../services/api-client'
 import { MessageSquare, Calendar, Settings, LayoutDashboard, LogOut, Wifi, WifiOff, Bell, BarChart3, X } from 'lucide-react'
-import { ConnectivityBanner } from '../../components/connectivity-banner'
+import { ConnectivityBanner } from '../components/connectivity-banner'
 
 function DashboardLayout() {
   const { workspace, logout } = useAuthStore()
-  const { isConnected, status } = useWhatsApp()
+  const { isConnected } = useWhatsApp()
   const navigate = useNavigate()
   const [unreadCount, setUnreadCount] = useState(0)
   const [showNotifications, setShowNotifications] = useState(false)
@@ -72,13 +72,20 @@ function DashboardLayout() {
         </nav>
 
         <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-3" role="status" aria-label={isConnected ? 'WhatsApp connected' : 'WhatsApp disconnected'}>
-            {isConnected ? (
-              <><Wifi size={16} className="text-green-500" /> WhatsApp Connected</>
-            ) : (
-              <><WifiOff size={16} className="text-red-500" /> {status.status}</>
-            )}
-          </div>
+          {isConnected ? (
+            <div className="flex items-center gap-2 text-sm text-gray-500 mb-3" role="status" aria-label="WhatsApp connected">
+              <Wifi size={16} className="text-green-500" /> WhatsApp Connected
+            </div>
+          ) : (
+            <button
+              onClick={() => navigate({ to: '/auth/connect-whatsapp' })}
+              className="flex items-center gap-2 text-sm text-red-500 hover:text-red-700 mb-3 cursor-pointer"
+              role="status"
+              aria-label="WhatsApp disconnected — click to connect"
+            >
+              <WifiOff size={16} /> Connect WhatsApp
+            </button>
+          )}
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700"
@@ -175,7 +182,7 @@ function NavLink({ to, icon, label, exact = false }: { to: string; icon: React.R
   )
 }
 
-export const Route = createFileRoute('/dashboard/layout')({
+export const Route = createFileRoute('/dashboard')({
   beforeLoad: () => {
     const raw = localStorage.getItem('workspace')
     if (raw) {
