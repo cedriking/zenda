@@ -15,17 +15,13 @@ import { updateWhatsAppHealth } from '../../main/health-monitor.js'
 import { updateTrayStatus } from '../../main/tray.js'
 
 export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
-  // Init WhatsApp client
-  ipcMain.handle('whatsapp:init', async () => {
+  // Init WhatsApp client (fire-and-forget so it can't block the renderer)
+  ipcMain.handle('whatsapp:init', () => {
     console.log('[IPC] whatsapp:init received')
-    try {
-      await initWhatsAppClient(mainWindow)
-      console.log('[IPC] whatsapp:init completed')
-      return { success: true }
-    } catch (err) {
+    initWhatsAppClient(mainWindow).catch((err) => {
       console.error('[IPC] whatsapp:init error:', err)
-      throw err
-    }
+    })
+    return { success: true }
   })
 
   // Disconnect WhatsApp

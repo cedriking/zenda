@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, Link } from '@tanstack/react-router'
+import { createFileRoute, redirect, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useAuthStore, getPostAuthRoute } from '@/stores/auth'
 import { apiFetch } from '@/services/api-client'
@@ -22,6 +22,7 @@ function SignupPage() {
   const setAuth = useAuthStore((s) => s.setAuth)
   const setLoading = useAuthStore((s) => s.setLoading)
   const isLoading = useAuthStore((s) => s.isLoading)
+  const navigate = useNavigate()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -34,6 +35,7 @@ function SignupPage() {
         body: { name, email, password, businessName },
       })
       setAuth(data as Parameters<typeof setAuth>[0])
+      navigate({ to: getPostAuthRoute() })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed')
       setLoading(false)
