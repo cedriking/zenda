@@ -42,7 +42,8 @@ const app = new Elysia()
     try {
       await db.execute(sql`SELECT 1`)
       dbOk = true
-    } catch {
+    } catch (err) {
+      logger.error('Health check DB query failed', { error: (err as Error).message })
       dbOk = false
     }
     return {
