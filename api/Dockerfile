@@ -21,6 +21,8 @@ RUN bun run --filter @zenda/db build
 # Production stage — run API source directly with Bun (no bundling, preserves Elysia macros)
 FROM oven/bun:1 AS runner
 WORKDIR /app
+# Force cache invalidation
+ARG CACHEBUST=1
 ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build-shared /app/packages/shared ./packages/shared
