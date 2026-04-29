@@ -6,7 +6,12 @@ import { createAppPlugin } from '../../middleware/app-plugin.js'
 
 export const workspaceModule = new Elysia({ prefix: '/workspace' })
   .use(createAppPlugin())
-  .get('/', async ({ workspaceId, set }) => {
+  .get('/', async ({ workspaceId, userId, set }) => {
+    console.log('[workspace] handler called', { userId, workspaceId, wsType: typeof workspaceId, wsLen: workspaceId?.length })
+    if (!workspaceId) {
+      set.status = 400
+      return { error: 'No workspaceId', userId }
+    }
     const [ws] = await db.select().from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1)
     if (!ws) {
       set.status = 404
