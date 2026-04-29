@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia'
 import { cors } from '@elysiajs/cors'
-import { appPlugin } from './middleware/app-plugin.js'
+import { authBase } from './middleware/auth.js'
 import { authModule } from './modules/auth/index.js'
 import { workspaceModule } from './modules/workspace/index.js'
 import { wsModule } from './modules/whatsapp/ws-handler.js'
@@ -36,7 +36,8 @@ const app = new Elysia()
     credentials: true,
   }))
   .use(rateLimit())
-  .use(appPlugin)
+  // Register JWT context on root (no guards — just makes jwt available)
+  .use(authBase)
   .get('/health', async () => {
     let dbOk = false
     try {
@@ -52,14 +53,12 @@ const app = new Elysia()
       timestamp: new Date().toISOString(),
     }
   })
-  // Auth routes (no auth guard needed)
+  // Public routes (no auth required)
   .use(authModule)
-  .use(workspaceModule)
-  // Stripe webhook (no auth — Stripe calls this)
   .use(billingModule)
-  // WebSocket (WhatsApp relay)
+  // Authenticated routes (appPlugin adds auth + workspace guards)
+  .use(workspaceModule)
   .use(wsModule)
-  // Core modules (all require auth + workspace)
   .use(conversationModule)
   .use(appointmentModule)
   .use(serviceModule)
@@ -67,12 +66,10 @@ const app = new Elysia()
   .use(availabilityModule)
   .use(businessModule)
   .use(notificationModule)
-  // Phase 2 modules
   .use(usageModule)
   .use(onboardingModule)
   .use(knowledgeBaseModule)
   .use(customerModule)
-  // Phase 3 modules
   .use(analyticsModule)
   .use(queueModule)
   .use(adminModule)
