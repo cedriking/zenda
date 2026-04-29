@@ -29,6 +29,7 @@ export function createAppPlugin() {
     .derive(async ({ headers }) => {
       const authHeader = headers.authorization
       if (!authHeader?.startsWith('Bearer ')) {
+        console.log('[appPlugin] No Bearer token')
         return { userId: null as string | null, workspaceId: null as string | null }
       }
       try {
@@ -36,9 +37,10 @@ export function createAppPlugin() {
         const { payload } = await jwtVerify(token, jwtSecret)
         const userId = (payload.sub as string) ?? null
         const workspaceId = (payload as Record<string, unknown>).workspaceId as string ?? null
+        console.log('[appPlugin] Token OK', { userId, workspaceId, payloadKeys: Object.keys(payload), rawWs: payload.workspaceId })
         return { userId, workspaceId }
       } catch (err) {
-        logger.debug('[appPlugin] Token verification failed', { error: (err as Error).message })
+        console.log('[appPlugin] Token FAILED', { error: (err as Error).message })
         return { userId: null as string | null, workspaceId: null as string | null }
       }
     })

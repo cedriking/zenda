@@ -22,7 +22,7 @@ import { adminModule } from './modules/admin/index.js'
 import { monitoringModule } from './modules/monitoring/index.js'
 import { translationModule } from './modules/ai/translation.js'
 import { supportModule } from './modules/support/index.js'
-import { API_PORT, CORS_ORIGINS, NODE_ENV } from './config/env.js'
+import { API_PORT, CORS_ORIGINS, NODE_ENV, JWT_SECRET } from './config/env.js'
 import { rateLimit } from './middleware/rate-limit.js'
 import { db } from '@zenda/db/client'
 import { sql } from 'drizzle-orm'
@@ -58,20 +58,17 @@ const app = new Elysia()
       return { error: 'No Bearer token', hasAuth: !!authHeader }
     }
     try {
-      const { jwtVerify } = await import('jose')
-      const { JWT_SECRET } = await import('./config/env.js')
-      const secret = new TextEncoder().encode(JWT_SECRET)
       const token = authHeader.slice(7)
-      const { payload } = await jwtVerify(token, secret)
+      const parts = token.split('.')
+      const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString())
       return {
-        payload,
         sub: payload.sub,
         workspaceId: payload.workspaceId,
-        workspaceIdType: typeof payload.workspaceId,
         allKeys: Object.keys(payload),
+        secretLength: JWT_SECRET.length,
       }
     } catch (err: any) {
-      return { error: err.message, name: err.name }
+      return { error: err.message }
     }
   })
   // Public routes
