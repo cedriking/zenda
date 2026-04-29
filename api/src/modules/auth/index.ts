@@ -1,15 +1,13 @@
 import { Elysia } from 'elysia'
-import { jwt } from '@elysiajs/jwt'
 import { db } from '@zenda/db/client'
 import { users, workspaces, workspaceMembers, businessProfiles, receptionistProfiles } from '@zenda/db/schema'
 import { eq } from 'drizzle-orm'
 import { loginSchema, signupSchema } from '@zenda/shared'
-import { JWT_SECRET, JWT_REFRESH_SECRET } from '../../config/env.js'
+import { authBase } from '../../middleware/auth.js'
 import { logger } from '../../infra/logger.js'
 
 export const authModule = new Elysia({ prefix: '/auth' })
-  .use(jwt({ name: 'jwt', secret: JWT_SECRET, exp: '1h' }))
-  .use(jwt({ name: 'refreshJwt', secret: JWT_REFRESH_SECRET, exp: '7d' }))
+  .use(authBase)
   .post('/signup', async ({ body, jwt, refreshJwt, set }) => {
     const parsed = signupSchema.safeParse(body)
     if (!parsed.success) {

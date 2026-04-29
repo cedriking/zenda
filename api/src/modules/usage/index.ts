@@ -1,9 +1,9 @@
 import { Elysia } from 'elysia'
-import { appPlugin } from '../../middleware/app-plugin.js'
+import { createAppPlugin } from '../../middleware/app-plugin.js'
 import { getUsageForPeriod } from './tracker.js'
 
 export const usageModule = new Elysia({ prefix: '/usage' })
-  .use(appPlugin)
+  .use(createAppPlugin())
 
   .get('/', async ({ workspaceId }) => {
     return getUsageForPeriod(workspaceId!)

@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { appPlugin } from '../../middleware/app-plugin.js'
+import { createAppPlugin } from '../../middleware/app-plugin.js'
 import { createCheckoutSession, createPortalSession, getSubscription } from './checkout.js'
 import { handleWebhook } from './webhooks.js'
 import { logger } from '../../infra/logger.js'
@@ -29,7 +29,7 @@ export const billingModule = new Elysia({ prefix: '/billing' })
   })
 
   // Authenticated endpoints
-  .use(appPlugin)
+  .use(createAppPlugin())
 
   // Create checkout session
   .post('/checkout', async ({ workspaceId, body }) => {

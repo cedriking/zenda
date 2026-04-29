@@ -2,10 +2,10 @@ import { Elysia, t } from 'elysia'
 import { db } from '@zenda/db/client'
 import { businessProfiles, receptionistProfiles } from '@zenda/db/schema'
 import { eq } from 'drizzle-orm'
-import { appPlugin } from '../../middleware/app-plugin.js'
+import { createAppPlugin } from '../../middleware/app-plugin.js'
 
 export const businessModule = new Elysia({ prefix: '/business' })
-  .use(appPlugin)
+  .use(createAppPlugin())
 
   // Get business profile
   .get('/profile', async ({ workspaceId }) => {

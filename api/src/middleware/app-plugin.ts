@@ -19,57 +19,62 @@ const forbiddenRes = new Response(JSON.stringify({ error: 'Workspace not found o
 })
 
 /**
- * Combined auth + workspace guard plugin.
+ * Factory function that creates a FRESH auth + workspace guard plugin per call.
+ * This prevents Elysia from deduplicating a shared singleton across modules.
+ *
  * Uses jose directly for JWT verification — no Elysia JWT plugin dependency.
- * Each module that needs auth should .use(appPlugin) directly.
  */
-export const appPlugin = new Elysia()
-  .derive(async ({ headers }) => {
-    const authHeader = headers.authorization
-    if (!authHeader?.startsWith('Bearer ')) {
-      return { userId: null as string | null, workspaceId: null as string | null }
-    }
-    try {
-      const token = authHeader.slice(7)
-      const { payload } = await jwtVerify(token, jwtSecret)
-      const userId = (payload.sub as string) ?? null
-      const workspaceId = (payload as Record<string, unknown>).workspaceId as string ?? null
-      logger.debug('[appPlugin] Token verified', { userId, workspaceId })
-      return { userId, workspaceId }
-    } catch (err) {
-      logger.debug('[appPlugin] Token verification failed', { error: (err as Error).message })
-      return { userId: null as string | null, workspaceId: null as string | null }
-    }
-  })
-  .derive(async ({ userId, workspaceId }) => {
-    if (!userId || !workspaceId) {
-      return { workspace: null }
-    }
+export function createAppPlugin() {
+  return new Elysia()
+    .derive(async ({ headers }) => {
+      const authHeader = headers.authorization
+      if (!authHeader?.startsWith('Bearer ')) {
+        return { userId: null as string | null, workspaceId: null as string | null }
+      }
+      try {
+        const token = authHeader.slice(7)
+        const { payload } = await jwtVerify(token, jwtSecret)
+        const userId = (payload.sub as string) ?? null
+        const workspaceId = (payload as Record<string, unknown>).workspaceId as string ?? null
+        return { userId, workspaceId }
+      } catch (err) {
+        logger.debug('[appPlugin] Token verification failed', { error: (err as Error).message })
+        return { userId: null as string | null, workspaceId: null as string | null }
+      }
+    })
+    .derive(async ({ userId, workspaceId }) => {
+      if (!userId || !workspaceId) {
+        return { workspace: null }
+      }
 
-    const membership = await db
-      .select()
-      .from(workspaceMembers)
-      .where(and(
-        eq(workspaceMembers.userId, userId),
-        eq(workspaceMembers.workspaceId, workspaceId),
-      ))
-      .limit(1)
+      const membership = await db
+        .select()
+        .from(workspaceMembers)
+        .where(and(
+          eq(workspaceMembers.userId, userId),
+          eq(workspaceMembers.workspaceId, workspaceId),
+        ))
+        .limit(1)
 
-    if (membership.length === 0) {
-      return { workspace: null }
-    }
+      if (membership.length === 0) {
+        return { workspace: null }
+      }
 
-    const workspace = await db
-      .select()
-      .from(workspaces)
-      .where(eq(workspaces.id, workspaceId))
-      .limit(1)
+      const workspace = await db
+        .select()
+        .from(workspaces)
+        .where(eq(workspaces.id, workspaceId))
+        .limit(1)
 
-    return { workspace: workspace[0] ?? null }
-  })
-  .onBeforeHandle(({ userId }) => {
-    if (!userId) return unauthorizedRes
-  })
-  .onBeforeHandle(({ workspace }) => {
-    if (!workspace) return forbiddenRes
-  })
+      return { workspace: workspace[0] ?? null }
+    })
+    .onBeforeHandle(({ userId }) => {
+      if (!userId) return unauthorizedRes
+    })
+    .onBeforeHandle(({ workspace }) => {
+      if (!workspace) return forbiddenRes
+    })
+}
+
+// Default instance for backward compat with existing imports
+export const appPlugin = createAppPlugin()

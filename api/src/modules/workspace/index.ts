@@ -2,10 +2,10 @@ import { Elysia } from 'elysia'
 import { db } from '@zenda/db/client'
 import { workspaces } from '@zenda/db/schema'
 import { eq } from 'drizzle-orm'
-import { appPlugin } from '../../middleware/app-plugin.js'
+import { createAppPlugin } from '../../middleware/app-plugin.js'
 
 export const workspaceModule = new Elysia({ prefix: '/workspace' })
-  .use(appPlugin)
+  .use(createAppPlugin())
   .get('/', async ({ workspaceId, set }) => {
     const [ws] = await db.select().from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1)
     if (!ws) {

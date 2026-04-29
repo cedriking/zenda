@@ -1,9 +1,9 @@
 import { Elysia } from 'elysia'
 import { getNotifications, markNotificationRead } from './service.js'
-import { appPlugin } from '../../middleware/app-plugin.js'
+import { createAppPlugin } from '../../middleware/app-plugin.js'
 
 export const notificationModule = new Elysia({ prefix: '/notifications' })
-  .use(appPlugin)
+  .use(createAppPlugin())
 
   .get('/', async ({ workspaceId, query }) => {
     const { limit } = (query as Record<string, string>) ?? {}

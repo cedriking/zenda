@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { appPlugin } from '../../middleware/app-plugin.js'
+import { createAppPlugin } from '../../middleware/app-plugin.js'
 import {
   getKnowledgeBase,
   searchKnowledgeBase,
@@ -8,7 +8,7 @@ import {
 } from './service.js'
 
 export const knowledgeBaseModule = new Elysia({ prefix: '/knowledge-base' })
-  .use(appPlugin)
+  .use(createAppPlugin())
 
   .get('/', async ({ workspaceId }) => {
     return getKnowledgeBase(workspaceId!)
