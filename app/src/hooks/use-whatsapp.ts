@@ -33,12 +33,10 @@ export function useWhatsApp() {
   }, [])
 
   const initWhatsApp = useCallback(async () => {
-    console.log('[renderer] initWhatsApp called, window.electron:', !!window.electron)
     try {
-      const result = await window.electron?.invoke?.('whatsapp:init')
-      console.log('[renderer] whatsapp:init result:', result)
-    } catch (err) {
-      console.error('[renderer] whatsapp:init error:', err)
+      await window.electron?.invoke?.('whatsapp:init')
+    } catch {
+      // Error handled by status update from main process
     }
   }, [])
 

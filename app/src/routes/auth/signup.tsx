@@ -17,6 +17,7 @@ function SignupPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [businessName, setBusinessName] = useState('')
   const [error, setError] = useState<string | null>(null)
   const setAuth = useAuthStore((s) => s.setAuth)
@@ -27,6 +28,12 @@ function SignupPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -92,6 +99,20 @@ function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-md border bg-background px-3 py-2 text-sm"
               placeholder="Min 8 characters"
+              required
+              minLength={8}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="confirmPassword" className="text-sm font-medium">Confirm password</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              placeholder="Re-enter your password"
               required
               minLength={8}
             />

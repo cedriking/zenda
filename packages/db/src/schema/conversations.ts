@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, text, pgEnum, jsonb, index } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, timestamp, text, pgEnum, jsonb, index, uniqueIndex } from 'drizzle-orm/pg-core'
 import { workspaces } from './workspaces.js'
 import { customers } from './customers.js'
 import { languageEnum } from './workspaces.js'
@@ -21,7 +21,7 @@ export const conversations = pgTable('conversations', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => [
-  index('conversations_workspace_idx').on(table.workspaceId),
+  uniqueIndex('conversations_workspace_customer_unique').on(table.workspaceId, table.customerId, table.channel),
 ])
 
 export const senderTypeEnum = pgEnum('sender_type', ['customer', 'ai', 'owner', 'system'])

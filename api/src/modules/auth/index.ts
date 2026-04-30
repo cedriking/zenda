@@ -26,47 +26,47 @@ export const authModule = new Elysia({ prefix: '/auth' })
     // Hash password with Bun
     const passwordHash = await Bun.password.hash(password)
 
-    // Create user
-    const [user] = await db.insert(users).values({ email, name, passwordHash }).returning()
+    // Create user, workspace, and defaults in a transaction
+    const result = await db.transaction(async (tx) => {
+      const [user] = await tx.insert(users).values({ email, name, passwordHash }).returning()
 
-    // Create workspace
-    const slug = businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 100)
-    const [workspace] = await db.insert(workspaces).values({
-      name: businessName,
-      slug,
-    }).returning()
+      const slug = businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 100)
+      const [workspace] = await tx.insert(workspaces).values({
+        name: businessName,
+        slug,
+      }).returning()
 
-    // Create workspace membership
-    await db.insert(workspaceMembers).values({
-      workspaceId: workspace.id,
-      userId: user.id,
-      role: 'owner',
-    })
+      await tx.insert(workspaceMembers).values({
+        workspaceId: workspace.id,
+        userId: user.id,
+        role: 'owner',
+      })
 
-    // Create default business profile
-    await db.insert(businessProfiles).values({
-      workspaceId: workspace.id,
-      name: businessName,
-    })
+      await tx.insert(businessProfiles).values({
+        workspaceId: workspace.id,
+        name: businessName,
+      })
 
-    // Create default receptionist profile
-    await db.insert(receptionistProfiles).values({
-      workspaceId: workspace.id,
-      name: 'Noa',
-      tone: 'professional',
+      await tx.insert(receptionistProfiles).values({
+        workspaceId: workspace.id,
+        name: 'Noa',
+        tone: 'professional',
+      })
+
+      return { user, workspace }
     })
 
     // Generate tokens
-    const accessToken = await jwt.sign({ sub: user.id, workspaceId: workspace.id })
-    const refreshToken = await refreshJwt.sign({ sub: user.id, workspaceId: workspace.id })
+    const accessToken = await jwt.sign({ sub: result.user.id, workspaceId: result.workspace.id })
+    const refreshToken = await refreshJwt.sign({ sub: result.user.id, workspaceId: result.workspace.id })
 
-    logger.info('User signed up', { userId: user.id, workspaceId: workspace.id })
+    logger.info('User signed up', { userId: result.user.id, workspaceId: result.workspace.id })
 
     return {
       accessToken,
       refreshToken,
-      user: { id: user.id, email: user.email, name: user.name },
-      workspace: { id: workspace.id, name: workspace.name, slug: workspace.slug, planTier: 'starter' as const, onboardingStep: workspace.onboardingStep },
+      user: { id: result.user.id, email: result.user.email, name: result.user.name },
+      workspace: { id: result.workspace.id, name: result.workspace.name, slug: result.workspace.slug, planTier: 'starter' as const, onboardingStep: result.workspace.onboardingStep },
     }
   })
   .post('/login', async ({ body, jwt, refreshJwt, set }) => {

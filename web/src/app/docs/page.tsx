@@ -18,7 +18,7 @@ export default function DocsPage() {
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-6 py-16">
+      <main className="max-w-4xl mx-auto px-6 py-16">
         <h1 className="text-4xl font-bold mb-4">Documentation</h1>
         <p className="text-lg text-[var(--text-muted)] mb-12">Everything you need to get your AI receptionist up and running.</p>
 
@@ -158,7 +158,7 @@ export default function DocsPage() {
             </div>
           </div>
         </section>
-      </div>
+      </main>
     </div>
   )
 }

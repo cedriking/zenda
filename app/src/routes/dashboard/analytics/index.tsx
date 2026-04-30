@@ -84,12 +84,12 @@ function AnalyticsPage() {
   if (!data) return null
 
   const cards = [
-    { label: 'Conversations', value: data.conversations.total, icon: <MessageSquare size={20} />, color: 'blue' },
-    { label: 'Appointments', value: data.appointments.total, icon: <Calendar size={20} />, color: 'green' },
-    { label: 'Messages', value: data.messages.total, icon: <Zap size={20} />, color: 'purple' },
-    { label: 'Escalations', value: data.escalations.total, icon: <AlertTriangle size={20} />, color: 'orange' },
-    { label: 'No-Show Rate', value: `${(data.appointments.noShowRate * 100).toFixed(1)}%`, icon: <Clock size={20} />, color: 'red' },
-    { label: 'AI Tokens', value: data.ai.totalTokens.toLocaleString(), icon: <BarChart3 size={20} />, color: 'indigo' },
+    { label: 'Conversations', value: data.conversations.total, icon: <MessageSquare size={20} />, iconClass: 'text-blue-500' },
+    { label: 'Appointments', value: data.appointments.total, icon: <Calendar size={20} />, iconClass: 'text-green-500' },
+    { label: 'Messages', value: data.messages.total, icon: <Zap size={20} />, iconClass: 'text-purple-500' },
+    { label: 'Escalations', value: data.escalations.total, icon: <AlertTriangle size={20} />, iconClass: 'text-orange-500' },
+    { label: 'No-Show Rate', value: `${(data.appointments.noShowRate * 100).toFixed(1)}%`, icon: <Clock size={20} />, iconClass: 'text-red-500' },
+    { label: 'AI Tokens', value: data.ai.totalTokens.toLocaleString(), icon: <BarChart3 size={20} />, iconClass: 'text-indigo-500' },
   ]
 
   return (
@@ -116,7 +116,7 @@ function AnalyticsPage() {
           <div key={card.label} className="bg-white rounded-lg border border-gray-200 p-5">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm text-gray-500">{card.label}</span>
-              <span className={`text-${card.color}-500`}>{card.icon}</span>
+              <span className={card.iconClass}>{card.icon}</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">{card.value}</div>
           </div>

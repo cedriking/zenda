@@ -49,6 +49,7 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
+      <main>
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-block bg-indigo-50 text-[var(--primary)] px-4 py-1.5 rounded-full text-sm font-medium mb-6">
@@ -133,6 +134,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="border-t border-[var(--border)] py-12 px-6">

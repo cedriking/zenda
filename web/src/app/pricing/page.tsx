@@ -71,6 +71,7 @@ export default function PricingPage() {
         </div>
       </nav>
 
+      <main>
       <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
@@ -128,6 +129,7 @@ export default function PricingPage() {
           </div>
         </div>
       </section>
+      </main>
     </div>
   )
 }

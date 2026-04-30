@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { updateAppLanguage } from "./actions/language";
 import { syncWithLocalTheme } from "./actions/theme";
 import { router } from "./utils/routes";
+import ErrorBoundary from "./components/error-boundary";
 import "./localization/i18n";
 
 export default function App() {
@@ -25,6 +26,8 @@ if (!container) {
 const root = createRoot(container);
 root.render(
   <React.StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </React.StrictMode>
 );
