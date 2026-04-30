@@ -1,6 +1,6 @@
 import { db } from '@zenda/db/client'
 import { conversations, messages, appointments, providerUsage } from '@zenda/db/schema'
-import { eq, and, gte, lte, sql, count } from 'drizzle-orm'
+import { eq, and, gte, lte, sql, count, inArray } from 'drizzle-orm'
 
 interface AnalyticsPeriod {
   start: Date
@@ -116,18 +116,59 @@ async function getMessageStats(workspaceId: string, period: AnalyticsPeriod) {
       lte(messages.createdAt, period.end),
     ))
 
+  // Calculate avg response time: time between first customer message and first AI response
+  // per conversation, then average across all conversations in the period.
+  const responseTimeResult = await db
+    .select({
+      avgMs: sql<number>`COALESCE(
+        AVG(
+          EXTRACT(EPOCH FROM (
+            first_reply.created_at - first_customer.created_at
+          )) * 1000
+        ),
+        0
+      )`,
+    })
+    .from(
+      // Subquery: first customer message per conversation
+      sql`(SELECT DISTINCT ON (m1.conversation_id)
+           m1.conversation_id, m1.created_at
+           FROM messages m1
+           WHERE m1.sender_type = 'customer'
+             AND m1.workspace_id = ${workspaceId}
+             AND m1.created_at >= ${period.start}
+             AND m1.created_at <= ${period.end}
+           ORDER BY m1.conversation_id, m1.created_at ASC
+          ) AS first_customer`
+    )
+    .innerJoin(
+      // Subquery: first AI response per conversation
+      sql`(SELECT DISTINCT ON (m2.conversation_id)
+           m2.conversation_id, m2.created_at
+           FROM messages m2
+           WHERE m2.sender_type = 'ai'
+             AND m2.workspace_id = ${workspaceId}
+             AND m2.created_at >= ${period.start}
+             AND m2.created_at <= ${period.end}
+           ORDER BY m2.conversation_id, m2.created_at ASC
+          ) AS first_reply`,
+      sql`first_customer.conversation_id = first_reply.conversation_id`
+    )
+
   return {
     total: totalResult[0]?.count ?? 0,
-    avgResponseTimeMs: 0, // Would need timestamp diff calculation
+    avgResponseTimeMs: Math.round(responseTimeResult[0]?.avgMs ?? 0),
   }
 }
 
 async function getEscalationStats(workspaceId: string, period: AnalyticsPeriod) {
-  const escalations = await db
+  // Count conversations that were escalated (mode is needs_attention or human_takeover)
+  const escalatedResult = await db
     .select({ count: count() })
     .from(conversations)
     .where(and(
       eq(conversations.workspaceId, workspaceId),
+      inArray(conversations.mode, ['needs_attention', 'human_takeover']),
       gte(conversations.createdAt, period.start),
       lte(conversations.createdAt, period.end),
     ))
@@ -142,7 +183,7 @@ async function getEscalationStats(workspaceId: string, period: AnalyticsPeriod) 
     ))
 
   const total = totalResult[0]?.count ?? 0
-  const escalated = escalations[0]?.count ?? 0
+  const escalated = escalatedResult[0]?.count ?? 0
 
   return { total: escalated, rate: total > 0 ? escalated / total : 0 }
 }

@@ -11,6 +11,7 @@ const STEP_ORDER: OnboardingStep[] = [
   'availability',
   'policies',
   'receptionist_config',
+  'plan_selection',
   'ready',
 ]
 

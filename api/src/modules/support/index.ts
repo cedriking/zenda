@@ -1,8 +1,8 @@
 import { Elysia, t } from 'elysia'
+import { db } from '@zenda/db/client'
+import { waitlistEntries } from '@zenda/db/schema'
+import { eq, count } from 'drizzle-orm'
 import { logger } from '../../infra/logger.js'
-
-// In-memory waitlist for early access (replace with DB table in production)
-const waitlist: Array<{ email: string; name: string; businessType: string; createdAt: string }> = []
 
 export const supportModule = new Elysia({ prefix: '/support' })
 
@@ -27,20 +27,28 @@ export const supportModule = new Elysia({ prefix: '/support' })
   .post('/waitlist', async ({ body }) => {
     const data = body as Record<string, string>
 
-    // Prevent duplicates
-    const exists = waitlist.some(e => e.email === data.email)
-    if (exists) return { status: 'already_registered' }
+    // Prevent duplicates by checking the DB
+    const existing = await db
+      .select({ id: waitlistEntries.id })
+      .from(waitlistEntries)
+      .where(eq(waitlistEntries.email, data.email))
+      .limit(1)
 
-    waitlist.push({
+    if (existing.length > 0) return { status: 'already_registered' }
+
+    await db.insert(waitlistEntries).values({
       email: data.email,
-      name: data.name ?? '',
-      businessType: data.businessType ?? '',
-      createdAt: new Date().toISOString(),
+      name: data.name ?? null,
+      businessType: data.businessType ?? null,
     })
 
-    logger.info('Waitlist signup', { email: data.email, position: waitlist.length })
+    const [countResult] = await db
+      .select({ count: count() })
+      .from(waitlistEntries)
 
-    return { status: 'registered', position: waitlist.length }
+    logger.info('Waitlist signup', { email: data.email, position: countResult?.count ?? 0 })
+
+    return { status: 'registered', position: countResult?.count ?? 0 }
   }, {
     body: t.Object({
       email: t.String(),
@@ -51,5 +59,9 @@ export const supportModule = new Elysia({ prefix: '/support' })
 
   // Get waitlist count (admin)
   .get('/waitlist/count', async () => {
-    return { count: waitlist.length }
+    const [result] = await db
+      .select({ count: count() })
+      .from(waitlistEntries)
+
+    return { count: result?.count ?? 0 }
   })

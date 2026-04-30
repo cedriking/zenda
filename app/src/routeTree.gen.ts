@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SecondRouteImport } from './routes/second'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
@@ -25,11 +24,6 @@ import { Route as DashboardSettingsKnowledgeBaseRouteImport } from './routes/das
 import { Route as DashboardCustomersIdRouteImport } from './routes/dashboard/customers/$id'
 import { Route as DashboardConversationsIdRouteImport } from './routes/dashboard/conversations/$id'
 
-const SecondRoute = SecondRouteImport.update({
-  id: '/second',
-  path: '/second',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -108,7 +102,6 @@ const DashboardConversationsIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
-  '/second': typeof SecondRoute
   '/auth/connect-whatsapp': typeof AuthConnectWhatsappRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -124,7 +117,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/second': typeof SecondRoute
   '/auth/connect-whatsapp': typeof AuthConnectWhatsappRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -142,7 +134,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
-  '/second': typeof SecondRoute
   '/auth/connect-whatsapp': typeof AuthConnectWhatsappRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -161,7 +152,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
-    | '/second'
     | '/auth/connect-whatsapp'
     | '/auth/login'
     | '/auth/signup'
@@ -177,7 +167,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/second'
     | '/auth/connect-whatsapp'
     | '/auth/login'
     | '/auth/signup'
@@ -194,7 +183,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dashboard'
-    | '/second'
     | '/auth/connect-whatsapp'
     | '/auth/login'
     | '/auth/signup'
@@ -212,7 +200,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRouteWithChildren
-  SecondRoute: typeof SecondRoute
   AuthConnectWhatsappRoute: typeof AuthConnectWhatsappRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
@@ -221,13 +208,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/second': {
-      id: '/second'
-      path: '/second'
-      fullPath: '/second'
-      preLoaderRoute: typeof SecondRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -358,7 +338,6 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
-  SecondRoute: SecondRoute,
   AuthConnectWhatsappRoute: AuthConnectWhatsappRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,

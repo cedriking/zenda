@@ -64,3 +64,5 @@ export {
 export { auditLogs, actorTypeEnum } from './audit-logs.js'
 export { providerUsage } from './provider-usage.js'
 export { audioAssets } from './audio-assets.js'
+export { revokedTokens } from './revoked-tokens.js'
+export { waitlistEntries } from './waitlist.js'

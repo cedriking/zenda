@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { Nav } from '@/components/nav'
+import { Footer } from '@/components/footer'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -36,7 +38,6 @@ export default function SignupPage() {
         throw new Error(data.error ?? 'Signup failed')
       }
 
-      // Redirect to download page after successful signup
       window.location.href = '/download'
     } catch (err) {
       setError((err as Error).message)
@@ -46,100 +47,110 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-[var(--primary)]">Zenda</Link>
-          <h1 className="text-2xl font-bold mt-6 mb-2">Create your account</h1>
-          <p className="text-[var(--text-muted)]">Start your 14-day free trial. No credit card required.</p>
-        </div>
+    <div className="min-h-screen flex flex-col">
+      <Nav variant="simple" />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Full Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              required
-              className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-              placeholder="Your name"
-            />
+      <main className="flex-1 flex items-center justify-center px-6">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold mt-6 mb-2">Create your account</h1>
+            <p className="text-[var(--text-muted)]">Start your 14-day free trial. No credit card required.</p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-              placeholder="you@business.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              minLength={8}
-              className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-              placeholder="At least 8 characters"
-            />
-            {password.length > 0 && (
-              <div className="mt-2">
-                <div className="flex gap-1 mb-1">
-                  {[1, 2, 3, 4].map(i => (
-                    <div
-                      key={i}
-                      className={`h-1 flex-1 rounded-full ${
-                        passwordStrength >= i
-                          ? passwordStrength <= 1 ? 'bg-red-400'
-                          : passwordStrength <= 2 ? 'bg-yellow-400'
-                          : passwordStrength <= 3 ? 'bg-blue-400'
-                          : 'bg-green-500'
-                        : 'bg-gray-200'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <p className={`text-xs ${
-                  passwordStrength <= 1 ? 'text-red-500'
-                  : passwordStrength <= 2 ? 'text-yellow-600'
-                  : passwordStrength <= 3 ? 'text-blue-500'
-                  : 'text-green-600'
-                }`}>
-                  {passwordStrength <= 1 ? 'Weak' : passwordStrength <= 2 ? 'Fair' : passwordStrength <= 3 ? 'Good' : 'Strong'}
-                </p>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {error}
               </div>
             )}
-          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[var(--primary)] text-white py-3 rounded-lg font-medium hover:bg-[var(--primary-dark)] transition disabled:opacity-50"
-          >
-            {loading ? 'Creating account...' : 'Create Account'}
-          </button>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Full Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required
+                className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                placeholder="Your name"
+              />
+            </div>
 
-          <p className="text-xs text-[var(--text-muted)] text-center">
-            By signing up, you agree to our{' '}
-            <Link href="/legal/terms" className="underline">Terms of Service</Link> and{' '}
-            <Link href="/legal/privacy" className="underline">Privacy Policy</Link>.
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                placeholder="you@business.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                minLength={8}
+                className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                placeholder="At least 8 characters"
+              />
+              {password.length > 0 && (
+                <div className="mt-2">
+                  <div className="flex gap-1 mb-1">
+                    {[1, 2, 3, 4].map(i => (
+                      <div
+                        key={i}
+                        className={`h-1 flex-1 rounded-full ${
+                          passwordStrength >= i
+                            ? passwordStrength <= 1 ? 'bg-red-400'
+                            : passwordStrength <= 2 ? 'bg-yellow-400'
+                            : passwordStrength <= 3 ? 'bg-blue-400'
+                            : 'bg-green-500'
+                          : 'bg-gray-200'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className={`text-xs ${
+                    passwordStrength <= 1 ? 'text-red-500'
+                    : passwordStrength <= 2 ? 'text-yellow-600'
+                    : passwordStrength <= 3 ? 'text-blue-500'
+                    : 'text-green-600'
+                  }`}>
+                    {passwordStrength <= 1 ? 'Weak' : passwordStrength <= 2 ? 'Fair' : passwordStrength <= 3 ? 'Good' : 'Strong'}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[var(--primary)] text-white py-3 rounded-lg font-medium hover:bg-[var(--primary-dark)] transition disabled:opacity-50"
+            >
+              {loading ? 'Creating account...' : 'Create Account'}
+            </button>
+
+            <p className="text-xs text-[var(--text-muted)] text-center">
+              By signing up, you agree to our{' '}
+              <Link href="/legal/terms" className="underline">Terms of Service</Link> and{' '}
+              <Link href="/legal/privacy" className="underline">Privacy Policy</Link>.
+            </p>
+          </form>
+
+          <p className="text-center text-sm text-[var(--text-muted)] mt-6">
+            Already have an account?{' '}
+            <Link href="/login" className="text-[var(--primary)] underline">Log in</Link>
           </p>
-        </form>
-      </div>
+        </div>
+      </main>
+
+      <Footer />
     </div>
   )
 }

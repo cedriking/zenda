@@ -4,6 +4,7 @@ import { eq, and, desc } from 'drizzle-orm'
 import { resolveOrCreateCustomer } from './customer-resolver.js'
 import { detectLanguage } from './language-detector.js'
 import { sendToWorkspace } from '../whatsapp/ws-handler.js'
+import { handleAudioMessage } from '../ai/transcription/audio-handler.js'
 import { logger } from '../../infra/logger.js'
 
 interface IncomingMessage {
@@ -17,7 +18,7 @@ interface IncomingMessage {
 
 export async function processIncomingMessage(workspaceId: string, msg: IncomingMessage) {
   try {
-    // 1. Detect language
+    // 1. Detect language (for audio, body may be empty — refined after transcription)
     const language = detectLanguage(msg.body)
 
     // 2. Find or create customer
@@ -29,17 +30,48 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       conversation = await createConversation(workspaceId, customer.id, language)
     }
 
-    // 4. Check conversation mode — only process in auto mode
-    if (conversation.mode !== 'auto') {
-      // Queue message but don't auto-reply
-      await storeMessage(conversation.id, workspaceId, {
-        senderType: 'customer',
-        contentType: msg.contentType,
-        body: msg.body,
-        language,
-        externalMessageId: msg.externalMessageId,
+    // 4. Store incoming message (placeholder body for audio, actual body for text)
+    const isAudio = msg.contentType === 'audio' && !!msg.mediaUrl
+    const storedMessage = await storeMessage(conversation.id, workspaceId, {
+      senderType: 'customer',
+      contentType: msg.contentType,
+      body: isAudio ? '' : msg.body,
+      language,
+      externalMessageId: msg.externalMessageId,
+    })
+
+    // 5. For audio messages: transcribe and update the stored message
+    let messageBody = msg.body
+    let agentLanguage: 'en' | 'es' = language
+
+    if (isAudio) {
+      const transcription = await handleAudioMessage({
+        messageId: storedMessage.id,
+        workspaceId,
+        mediaUrl: msg.mediaUrl!,
+        mimeType: 'audio/ogg',
       })
 
+      if (transcription) {
+        messageBody = transcription.transcript
+        agentLanguage = transcription.language as 'en' | 'es'
+
+        await db
+          .update(messages)
+          .set({ body: transcription.transcript, language: agentLanguage })
+          .where(eq(messages.id, storedMessage.id))
+      } else {
+        messageBody = '[Audio message — transcription unavailable]'
+
+        await db
+          .update(messages)
+          .set({ body: messageBody })
+          .where(eq(messages.id, storedMessage.id))
+      }
+    }
+
+    // 6. Check conversation mode — only process in auto mode
+    if (conversation.mode !== 'auto') {
       // Notify owner if needs_attention or human_takeover
       if (conversation.mode === 'needs_attention') {
         sendToWorkspace(workspaceId, {
@@ -48,7 +80,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
             id: crypto.randomUUID(),
             type: 'needs_attention',
             title: 'New message needs attention',
-            body: `${customer.name ?? customer.phoneNumber}: ${msg.body.slice(0, 100)}`,
+            body: `${customer.name ?? customer.phoneNumber}: ${messageBody.slice(0, 100)}`,
             createdAt: new Date().toISOString(),
           },
         })
@@ -56,31 +88,22 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       return
     }
 
-    // 5. Store incoming message
-    const storedMessage = await storeMessage(conversation.id, workspaceId, {
-      senderType: 'customer',
-      contentType: msg.contentType,
-      body: msg.body,
-      language,
-      externalMessageId: msg.externalMessageId,
-    })
-
-    // 6. Update conversation lastMessageAt
+    // 7. Update conversation lastMessageAt
     await db
       .update(conversations)
       .set({ lastMessageAt: new Date(), updatedAt: new Date() })
       .where(eq(conversations.id, conversation.id))
 
-    // 7. Route to AI agent
+    // 8. Route to AI agent (using transcribed text for audio, raw body for text)
     const { runAgent } = await import('../ai/agent.js')
-    const aiResponse = await runAgent(workspaceId, conversation.id, customer.id, msg.body, language)
+    const aiResponse = await runAgent(workspaceId, conversation.id, customer.id, messageBody, agentLanguage)
 
     if (!aiResponse) {
       logger.warn('AI agent returned no response', { workspaceId, conversationId: conversation.id })
       return
     }
 
-    // 8. Store AI response
+    // 9. Store AI response
     const responseMessage = await storeMessage(conversation.id, workspaceId, {
       senderType: 'ai',
       contentType: 'text',
@@ -91,7 +114,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       toolCalls: aiResponse.toolCalls,
     })
 
-    // 9. Send response back to desktop app -> WhatsApp
+    // 10. Send response back to desktop app -> WhatsApp
     sendToWorkspace(workspaceId, {
       type: 'response.send',
       data: {
@@ -108,7 +131,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       },
     })
 
-    // 10. Send conversation update event
+    // 11. Send conversation update event
     sendToWorkspace(workspaceId, {
       type: 'conversation.update',
       data: {
@@ -123,7 +146,8 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       workspaceId,
       conversationId: conversation.id,
       customerId: customer.id,
-      language,
+      language: agentLanguage,
+      contentType: msg.contentType,
     })
   } catch (error) {
     logger.error('Failed to process message', {

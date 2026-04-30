@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia'
 import { db } from '@zenda/db/client'
-import { users, workspaces, workspaceMembers, businessProfiles, receptionistProfiles } from '@zenda/db/schema'
+import { users, workspaces, workspaceMembers, businessProfiles, receptionistProfiles, revokedTokens } from '@zenda/db/schema'
 import { eq } from 'drizzle-orm'
 import { loginSchema, signupSchema } from '@zenda/shared'
 import { authBase } from '../../middleware/auth.js'
@@ -56,9 +56,11 @@ export const authModule = new Elysia({ prefix: '/auth' })
       return { user, workspace }
     })
 
-    // Generate tokens
-    const accessToken = await jwt.sign({ sub: result.user.id, workspaceId: result.workspace.id })
-    const refreshToken = await refreshJwt.sign({ sub: result.user.id, workspaceId: result.workspace.id })
+    // Generate tokens with jti for revocation support
+    const accessJti = crypto.randomUUID()
+    const refreshJti = crypto.randomUUID()
+    const accessToken = await jwt.sign({ sub: result.user.id, workspaceId: result.workspace.id, jti: accessJti })
+    const refreshToken = await refreshJwt.sign({ sub: result.user.id, workspaceId: result.workspace.id, jti: refreshJti })
 
     logger.info('User signed up', { userId: result.user.id, workspaceId: result.workspace.id })
 
@@ -95,9 +97,11 @@ export const authModule = new Elysia({ prefix: '/auth' })
     const [membership] = await db.select().from(workspaceMembers).where(eq(workspaceMembers.userId, user.id)).limit(1)
     const [workspace] = membership ? await db.select().from(workspaces).where(eq(workspaces.id, membership.workspaceId)).limit(1) : []
 
-    // Generate tokens
-    const accessToken = await jwt.sign({ sub: user.id, workspaceId: workspace?.id })
-    const refreshToken = await refreshJwt.sign({ sub: user.id, workspaceId: workspace?.id })
+    // Generate tokens with jti for revocation support
+    const accessJti = crypto.randomUUID()
+    const refreshJti = crypto.randomUUID()
+    const accessToken = await jwt.sign({ sub: user.id, workspaceId: workspace?.id, jti: accessJti })
+    const refreshToken = await refreshJwt.sign({ sub: user.id, workspaceId: workspace?.id, jti: refreshJti })
 
     logger.info('User logged in', { userId: user.id })
 
@@ -123,14 +127,66 @@ export const authModule = new Elysia({ prefix: '/auth' })
       return { error: 'Invalid refresh token' }
     }
 
-    const accessToken = await jwt.sign({ sub: payload.sub, workspaceId: (payload as Record<string, unknown>).workspaceId })
-    const newRefreshToken = await refreshJwt.sign({ sub: payload.sub, workspaceId: (payload as Record<string, unknown>).workspaceId })
+    // Check if the refresh token has been revoked
+    const refreshJti = (payload as Record<string, unknown>).jti as string | undefined
+    if (refreshJti) {
+      const [revoked] = await db
+        .select({ id: revokedTokens.id })
+        .from(revokedTokens)
+        .where(eq(revokedTokens.tokenJti, refreshJti))
+        .limit(1)
+      if (revoked) {
+        set.status = 401
+        return { error: 'Refresh token has been revoked' }
+      }
+    }
+
+    const accessToken = await jwt.sign({ sub: payload.sub, workspaceId: (payload as Record<string, unknown>).workspaceId as string, jti: crypto.randomUUID() })
+    const newRefreshToken = await refreshJwt.sign({ sub: payload.sub, workspaceId: (payload as Record<string, unknown>).workspaceId as string, jti: crypto.randomUUID() })
 
     return { accessToken, refreshToken: newRefreshToken }
   })
-  .post('/logout', async ({ jwt, set }) => {
-    // Client-side should discard tokens. Server-side token revocation
-    // can be added later with a token blacklist in Redis or DB.
-    logger.info('User logged out')
+  .post('/logout', async ({ jwt, refreshJwt, headers, body, set }) => {
+    const authHeader = headers.authorization
+    if (!authHeader?.startsWith('Bearer ')) {
+      set.status = 401
+      return { error: 'No access token provided' }
+    }
+
+    const accessToken = authHeader.slice(7)
+    const payload = await jwt.verify(accessToken)
+    if (!payload) {
+      set.status = 401
+      return { error: 'Invalid access token' }
+    }
+
+    const jti = (payload as Record<string, unknown>).jti as string | undefined
+    const userId = payload.sub as string
+
+    // Revoke the current access token
+    if (jti) {
+      await db.insert(revokedTokens).values({
+        tokenJti: jti,
+        userId,
+      }).onConflictDoNothing()
+    }
+
+    // Also revoke the refresh token if provided
+    const { refreshToken: refresh_token } = body as { refreshToken?: string } ?? {}
+    if (refresh_token) {
+      const refreshPayload = await refreshJwt.verify(refresh_token)
+      if (refreshPayload) {
+        const refreshJti = (refreshPayload as Record<string, unknown>).jti as string | undefined
+        const refreshUserId = refreshPayload.sub as string
+        if (refreshJti) {
+          await db.insert(revokedTokens).values({
+            tokenJti: refreshJti,
+            userId: refreshUserId,
+          }).onConflictDoNothing()
+        }
+      }
+    }
+
+    logger.info('User logged out', { userId })
     return { success: true }
   })

@@ -25,9 +25,10 @@ import { supportModule } from './modules/support/index.js'
 import { API_PORT, CORS_ORIGINS, NODE_ENV, JWT_SECRET } from './config/env.js'
 import { rateLimit } from './middleware/rate-limit.js'
 import { db } from '@zenda/db/client'
-import { workspaces, workspaceMembers } from '@zenda/db/schema'
-import { eq, and, sql } from 'drizzle-orm'
+import { workspaces, workspaceMembers, revokedTokens } from '@zenda/db/schema'
+import { eq, and, sql, lt } from 'drizzle-orm'
 import { logger } from './infra/logger.js'
+import { processDueReminders } from './modules/appointment/reminder-service.js'
 
 const corsOrigins = CORS_ORIGINS.split(',').map(o => o.trim()).filter(Boolean)
 const jwtSecret = new TextEncoder().encode(JWT_SECRET)
@@ -58,6 +59,19 @@ const app = new Elysia()
       const { payload } = await jwtVerify(token, jwtSecret)
       const userId = (payload.sub as string) ?? null
       const workspaceId = (payload as Record<string, unknown>).workspaceId as string ?? null
+
+      // Check if the token has been revoked
+      const jti = (payload as Record<string, unknown>).jti as string | undefined
+      if (jti) {
+        const [revoked] = await db
+          .select({ id: revokedTokens.id })
+          .from(revokedTokens)
+          .where(eq(revokedTokens.tokenJti, jti))
+          .limit(1)
+        if (revoked) {
+          return { userId: null as string | null, workspaceId: null as string | null, workspace: null as any }
+        }
+      }
 
       let workspace: any = null
       if (userId && workspaceId) {
@@ -146,3 +160,45 @@ const app = new Elysia()
   .listen(Number(API_PORT))
 
 logger.info(`Zenda API running on port ${API_PORT}`)
+
+// ── Periodic cleanup of expired revoked tokens ─────────────────────
+// Revoked tokens older than 7 days (max refresh token lifetime) are safe to remove
+const REVOKED_TOKEN_CLEANUP_INTERVAL = 60 * 60 * 1000 // 1 hour
+const REVOKED_TOKEN_MAX_AGE_DAYS = 7
+
+setInterval(async () => {
+  try {
+    const cutoff = new Date(Date.now() - REVOKED_TOKEN_MAX_AGE_DAYS * 24 * 60 * 60 * 1000)
+    const result = await db
+      .delete(revokedTokens)
+      .where(lt(revokedTokens.revokedAt, cutoff))
+      .returning({ id: revokedTokens.id })
+    if (result.length > 0) {
+      logger.info('Cleaned up expired revoked tokens', { count: result.length })
+    }
+  } catch (err) {
+    logger.error('Failed to clean up revoked tokens', { error: err instanceof Error ? err.message : String(err) })
+  }
+}, REVOKED_TOKEN_CLEANUP_INTERVAL)
+
+// ── Reminder scheduler: process due reminders every 60 seconds ──
+const REMINDER_INTERVAL_MS = 60_000
+
+async function runReminderCycle() {
+  try {
+    const sent = await processDueReminders()
+    if (sent > 0) {
+      logger.info('Reminder cycle completed', { sent })
+    }
+  } catch (err) {
+    logger.error('Reminder cycle failed', { error: (err as Error).message })
+  }
+}
+
+// Stagger the first run 10 seconds after startup to let connections settle
+setTimeout(() => {
+  runReminderCycle()
+  setInterval(runReminderCycle, REMINDER_INTERVAL_MS)
+}, 10_000)
+
+logger.info(`Reminder scheduler active (every ${REMINDER_INTERVAL_MS / 1000}s)`)

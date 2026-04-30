@@ -1,11 +1,6 @@
 import Link from 'next/link'
-
-const NAV_LINKS = [
-  { href: '#features', label: 'Features' },
-  { href: '/pricing', label: 'Pricing' },
-  { href: '#how-it-works', label: 'How It Works' },
-  { href: '#faq', label: 'FAQ' },
-]
+import { Nav } from '@/components/nav'
+import { Footer } from '@/components/footer'
 
 const FEATURES = [
   { icon: '🤖', title: 'AI Receptionist', desc: 'Handles customer conversations naturally in English and Spanish, 24/7.' },
@@ -33,20 +28,7 @@ const FAQS = [
 export default function Home() {
   return (
     <div className="min-h-screen">
-      {/* Nav */}
-      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-[var(--border)] z-50">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-[var(--primary)]">Zenda</Link>
-          <div className="hidden md:flex gap-8 text-sm text-[var(--text-muted)]">
-            {NAV_LINKS.map(l => (
-              <Link key={l.href} href={l.href} className="hover:text-[var(--text)] transition">{l.label}</Link>
-            ))}
-          </div>
-          <Link href="/signup" className="bg-[var(--primary)] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[var(--primary-dark)] transition">
-            Get Started
-          </Link>
-        </div>
-      </nav>
+      <Nav variant="home" />
 
       {/* Hero */}
       <main>
@@ -113,7 +95,7 @@ export default function Home() {
       <section className="py-20 px-6 bg-[var(--bg-muted)]">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Simple pricing, powerful features</h2>
-          <p className="text-[var(--text-muted)] mb-8">Starting at $29/month for solo businesses. No per-message fees.</p>
+          <p className="text-[var(--text-muted)] mb-8">Starting at $19/month for solo businesses. No per-message fees.</p>
           <Link href="/pricing" className="inline-block bg-[var(--primary)] text-white px-8 py-3.5 rounded-lg font-medium text-lg hover:bg-[var(--primary-dark)] transition">
             View Plans
           </Link>
@@ -136,18 +118,7 @@ export default function Home() {
       </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-[var(--border)] py-12 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="text-lg font-bold text-[var(--primary)]">Zenda</div>
-          <div className="flex gap-6 text-sm text-[var(--text-muted)]">
-            <Link href="/legal/privacy">Privacy</Link>
-            <Link href="/legal/terms">Terms</Link>
-            <Link href="/pricing">Pricing</Link>
-          </div>
-          <div className="text-sm text-[var(--text-muted)]">&copy; {new Date().getFullYear()} Zenda</div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

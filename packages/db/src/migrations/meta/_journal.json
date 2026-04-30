@@ -15,6 +15,20 @@
       "when": 1777418700636,
       "tag": "0001_lowly_kronos",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777588186863,
+      "tag": "0002_careful_wilson_fisk",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1746012000000,
+      "tag": "0003_add_plan_selection_step",
+      "breakpoints": true
     }
   ]
 }

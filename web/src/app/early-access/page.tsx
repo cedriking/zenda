@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { Nav } from '@/components/nav'
+import { Footer } from '@/components/footer'
 
 export default function EarlyAccessPage() {
   const [email, setEmail] = useState('')
@@ -26,17 +28,10 @@ export default function EarlyAccessPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <nav className="border-b border-[var(--border)]">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-[var(--primary)]">Zenda</Link>
-          <Link href="/signup" className="bg-[var(--primary)] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[var(--primary-dark)] transition">
-            Sign Up
-          </Link>
-        </div>
-      </nav>
+    <div className="min-h-screen flex flex-col">
+      <Nav variant="simple" />
 
-      <div className="max-w-lg mx-auto px-6 py-20 text-center">
+      <main className="flex-1 max-w-lg mx-auto px-6 py-20 text-center">
         {!submitted ? (
           <>
             <div className="inline-block bg-amber-100 text-amber-800 px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
@@ -106,7 +101,9 @@ export default function EarlyAccessPage() {
             </Link>
           </>
         )}
-      </div>
+      </main>
+
+      <Footer />
     </div>
   )
 }

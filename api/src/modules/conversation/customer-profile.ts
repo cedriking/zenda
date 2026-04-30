@@ -1,6 +1,6 @@
 import { db } from '@zenda/db/client'
-import { customers } from '@zenda/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { customers, appointments } from '@zenda/db/schema'
+import { eq, and, count, desc } from 'drizzle-orm'
 
 interface CustomerProfile {
   id: string
@@ -24,17 +24,31 @@ export async function getCustomerProfile(
 
   if (!customer) return null
 
-  // Get memory for this customer
-  const { getMemoryForCustomer } = await import('../ai/memory.js')
-  const memory = await getMemoryForCustomer(workspaceId, customerId)
+  // Get appointment stats and memory in parallel
+  const [appointmentCountResult, lastAppointmentResult, memory] = await Promise.all([
+    db
+      .select({ count: count() })
+      .from(appointments)
+      .where(and(eq(appointments.customerId, customerId), eq(appointments.workspaceId, workspaceId))),
+    db
+      .select({ startAt: appointments.startAt })
+      .from(appointments)
+      .where(and(eq(appointments.customerId, customerId), eq(appointments.workspaceId, workspaceId)))
+      .orderBy(desc(appointments.startAt))
+      .limit(1),
+    (async () => {
+      const { getMemoryForCustomer } = await import('../ai/memory.js')
+      return getMemoryForCustomer(workspaceId, customerId)
+    })(),
+  ])
 
   return {
     id: customer.id,
     phoneNumber: customer.phoneNumber,
     name: customer.name,
     language: customer.language,
-    totalAppointments: 0, // Would need a count query
-    lastVisit: null, // Would need latest appointment query
+    totalAppointments: appointmentCountResult[0]?.count ?? 0,
+    lastVisit: lastAppointmentResult[0]?.startAt?.toISOString() ?? null,
     memory,
   }
 }

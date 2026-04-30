@@ -1,5 +1,6 @@
-import Link from 'next/link'
 import type { Metadata } from 'next'
+import { Nav } from '@/components/nav'
+import { Footer } from '@/components/footer'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy — Zenda',
@@ -8,13 +9,9 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen">
-      <nav className="border-b border-[var(--border)]">
-        <div className="max-w-4xl mx-auto px-6 h-16 flex items-center">
-          <Link href="/" className="text-xl font-bold text-[var(--primary)]">Zenda</Link>
-        </div>
-      </nav>
-      <article className="max-w-3xl mx-auto px-6 py-12 prose prose-slate">
+    <div className="min-h-screen flex flex-col">
+      <Nav variant="simple" />
+      <article className="flex-1 max-w-3xl mx-auto px-6 py-12 prose prose-slate">
         <h1>Privacy Policy</h1>
         <p><em>Last updated: {new Date().toLocaleDateString()}</em></p>
 
@@ -39,6 +36,7 @@ export default function PrivacyPage() {
         <h2>7. Contact</h2>
         <p>For privacy questions, contact us at privacy@zenda.ai.</p>
       </article>
+      <Footer />
     </div>
   )
 }

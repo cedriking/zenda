@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { Nav } from '@/components/nav'
+import { Footer } from '@/components/footer'
 
 export const metadata: Metadata = {
   title: 'AI Receptionist for Clinics — Zenda',
@@ -17,17 +19,10 @@ const FEATURES = [
 
 export default function ClinicsPage() {
   return (
-    <div className="min-h-screen">
-      <nav className="border-b border-[var(--border)]">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-[var(--primary)]">Zenda</Link>
-          <Link href="/signup" className="bg-[var(--primary)] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[var(--primary-dark)] transition">
-            Start Free Trial
-          </Link>
-        </div>
-      </nav>
+    <div className="min-h-screen flex flex-col">
+      <Nav variant="simple" />
 
-      <main>
+      <main className="flex-1">
         <section className="py-20 px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl font-bold mb-4">AI Receptionist for Health Clinics</h1>
@@ -54,6 +49,8 @@ export default function ClinicsPage() {
           </div>
         </section>
       </main>
+
+      <Footer />
     </div>
   )
 }

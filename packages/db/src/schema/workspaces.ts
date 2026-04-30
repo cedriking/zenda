@@ -9,6 +9,7 @@ export const onboardingStepEnum = pgEnum('onboarding_step', [
   'availability',
   'policies',
   'receptionist_config',
+  'plan_selection',
   'ready',
 ])
 
