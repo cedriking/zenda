@@ -1,11 +1,13 @@
 import { db } from '@zenda/db/client'
-import { conversations, messages } from '@zenda/db/schema'
+import { conversations, messages, workspaces } from '@zenda/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { resolveOrCreateCustomer } from './customer-resolver.js'
 import { detectLanguage } from './language-detector.js'
 import { sendToWorkspace } from '../whatsapp/ws-handler.js'
 import { handleAudioMessage } from '../ai/transcription/audio-handler.js'
+import { getNextOnboardingQuestion, processOnboardingResponse } from '../onboarding/conversation-handler.js'
 import { logger } from '../../infra/logger.js'
+import type { OnboardingStep } from '@zenda/shared'
 
 interface IncomingMessage {
   phoneNumber: string
@@ -70,7 +72,21 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       }
     }
 
-    // 6. Check conversation mode — only process in auto mode
+    // 6. Check if onboarding is incomplete — route to onboarding flow instead of AI agent
+    const [ws] = await db
+      .select({ onboardingStep: workspaces.onboardingStep })
+      .from(workspaces)
+      .where(eq(workspaces.id, workspaceId))
+      .limit(1)
+
+    const onboardingStep = (ws?.onboardingStep ?? 'not_started') as OnboardingStep
+    if (onboardingStep !== 'ready') {
+      // Workspace hasn't completed onboarding — handle via onboarding flow
+      await handleOnboardingMessage(workspaceId, conversation.id, customer.id, messageBody, agentLanguage, msg)
+      return
+    }
+
+    // 7. Check conversation mode — only process in auto mode
     if (conversation.mode !== 'auto') {
       // Notify owner if needs_attention or human_takeover
       if (conversation.mode === 'needs_attention') {
@@ -88,13 +104,13 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       return
     }
 
-    // 7. Update conversation lastMessageAt
+    // 8. Update conversation lastMessageAt
     await db
       .update(conversations)
       .set({ lastMessageAt: new Date(), updatedAt: new Date() })
       .where(eq(conversations.id, conversation.id))
 
-    // 8. Route to AI agent (using transcribed text for audio, raw body for text)
+    // 9. Route to AI agent (using transcribed text for audio, raw body for text)
     const { runAgent } = await import('../ai/agent.js')
     const aiResponse = await runAgent(workspaceId, conversation.id, customer.id, messageBody, agentLanguage)
 
@@ -103,7 +119,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       return
     }
 
-    // 9. Store AI response
+    // 10. Store AI response
     const responseMessage = await storeMessage(conversation.id, workspaceId, {
       senderType: 'ai',
       contentType: 'text',
@@ -114,7 +130,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       toolCalls: aiResponse.toolCalls,
     })
 
-    // 10. Send response back to desktop app -> WhatsApp
+    // 11. Send response back to desktop app -> WhatsApp
     sendToWorkspace(workspaceId, {
       type: 'response.send',
       data: {
@@ -131,7 +147,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       },
     })
 
-    // 11. Send conversation update event
+    // 12. Send conversation update event
     sendToWorkspace(workspaceId, {
       type: 'conversation.update',
       data: {
@@ -215,4 +231,98 @@ async function storeMessage(
     })
     .returning()
   return msg
+}
+
+async function handleOnboardingMessage(
+  workspaceId: string,
+  conversationId: string,
+  customerId: string,
+  messageBody: string,
+  language: 'en' | 'es',
+  msg: IncomingMessage,
+) {
+  // Get current onboarding step
+  const questionData = await getNextOnboardingQuestion(workspaceId, language)
+
+  if (!questionData) {
+    // No question available (shouldn't happen if onboarding isn't complete)
+    logger.warn('Onboarding question not found', { workspaceId })
+    return
+  }
+
+  const currentStep = questionData.step
+
+  // If this is the first message and step is whatsapp_connected,
+  // send the greeting/question without processing the response
+  if (currentStep === 'not_started') {
+    // Just send the first question
+    const responseMessage = await storeMessage(conversationId, workspaceId, {
+      senderType: 'ai',
+      contentType: 'text',
+      body: questionData.question,
+      language,
+    })
+
+    sendToWorkspace(workspaceId, {
+      type: 'response.send',
+      data: {
+        conversationId,
+        message: {
+          id: responseMessage.id,
+          body: questionData.question,
+          senderType: 'ai',
+          contentType: 'text',
+          status: 'sent',
+          createdAt: responseMessage.createdAt,
+        },
+        phoneNumber: msg.phoneNumber,
+      },
+    })
+    return
+  }
+
+  // Process the user's response for the current step
+  const result = await processOnboardingResponse(workspaceId, currentStep, messageBody, language)
+
+  // Build reply: acknowledgment + next question
+  const nextQuestion = await getNextOnboardingQuestion(workspaceId, language)
+  let reply = result.acknowledged
+  if (nextQuestion && nextQuestion.step !== 'ready') {
+    reply += `\n\n${nextQuestion.question}`
+  } else if (nextQuestion?.step === 'ready') {
+    reply += '\n\n' + (language === 'es'
+      ? '¡Todo listo! Tu recepcionista IA está lista para atender a tus clientes.'
+      : 'All set! Your AI receptionist is ready to serve your customers.')
+  }
+
+  // Store and send the reply
+  const responseMessage = await storeMessage(conversationId, workspaceId, {
+    senderType: 'ai',
+    contentType: 'text',
+    body: reply,
+    language,
+  })
+
+  sendToWorkspace(workspaceId, {
+    type: 'response.send',
+    data: {
+      conversationId,
+      message: {
+        id: responseMessage.id,
+        body: reply,
+        senderType: 'ai',
+        contentType: 'text',
+        status: 'sent',
+        createdAt: responseMessage.createdAt,
+      },
+      phoneNumber: msg.phoneNumber,
+    },
+  })
+
+  logger.info('Onboarding step processed', {
+    workspaceId,
+    step: currentStep,
+    nextStep: result.nextStep,
+    language,
+  })
 }

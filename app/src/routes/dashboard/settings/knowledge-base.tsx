@@ -55,7 +55,7 @@ function KnowledgeBasePage() {
     try {
       await apiFetch('/knowledge-base', {
         method: 'POST',
-        body: JSON.stringify(form),
+        body: form,
       })
       setForm({ question: '', answer: '', category: 'general' })
       setShowForm(false)

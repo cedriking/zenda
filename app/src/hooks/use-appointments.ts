@@ -48,7 +48,7 @@ export function useAppointments() {
   const updateStatus = useCallback(async (id: string, status: string) => {
     const updated = await apiFetch<Appointment>(`/appointments/${id}/status`, {
       method: 'PATCH',
-      body: JSON.stringify({ status }),
+      body: { status },
     })
     setAppointments(prev => prev.map(a => a.id === id ? updated : a))
     return updated

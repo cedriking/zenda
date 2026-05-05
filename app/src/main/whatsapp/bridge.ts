@@ -4,7 +4,7 @@ import { WebSocket } from 'ws'
 let ws: WebSocket | null = null
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 
-const WS_URL = process.env.ZENDA_API_WS_URL ?? 'ws://localhost:3001/ws'
+const WS_URL = process.env.ZENDA_API_WS_URL ?? 'wss://api.zenda.bot/ws'
 
 export function connectBridge(
   mainWindow: BrowserWindow,

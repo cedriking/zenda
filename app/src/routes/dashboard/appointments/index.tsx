@@ -329,13 +329,13 @@ function CreateAppointmentModal({ onClose, onCreated }: { onClose: () => void; o
     try {
       const created = await apiFetch('/appointments', {
         method: 'POST',
-        body: JSON.stringify({
+        body: {
           customerName: form.customerName,
           customerPhone: form.customerPhone || undefined,
           serviceId: form.serviceId || undefined,
           startAt,
           notes: form.notes || undefined,
-        }),
+        },
       })
       onCreated()
     } catch (err) {

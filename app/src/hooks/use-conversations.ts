@@ -65,7 +65,7 @@ export function useConversations() {
   const updateMode = useCallback(async (conversationId: string, mode: string) => {
     await apiFetch(`/conversations/${conversationId}/mode`, {
       method: 'PATCH',
-      body: JSON.stringify({ mode }),
+      body: { mode },
     })
     setConversations(prev =>
       prev.map(c => c.id === conversationId ? { ...c, mode } : c),
@@ -75,7 +75,7 @@ export function useConversations() {
   const sendMessage = useCallback(async (conversationId: string, text: string) => {
     const msg = await apiFetch<Message>(`/conversations/${conversationId}/messages`, {
       method: 'POST',
-      body: JSON.stringify({ text }),
+      body: { text },
     })
     setMessages(prev => ({
       ...prev,

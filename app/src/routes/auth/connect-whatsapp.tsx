@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useWhatsApp } from '../../hooks/use-whatsapp'
 import { useAuthStore } from '../../stores/auth'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
+import { apiFetch } from '../../services/api-client'
 
 export const Route = createFileRoute('/auth/connect-whatsapp')({
   component: ConnectWhatsAppPage,
@@ -12,14 +13,26 @@ function ConnectWhatsAppPage() {
   const { status, initWhatsApp, connectBridge, isConnected, needsQR } = useWhatsApp()
   const { workspace, accessToken } = useAuthStore()
   const navigate = useNavigate()
+  const initCalled = useRef(false)
 
   useEffect(() => {
-    initWhatsApp()
+    // Prevent double-init in React StrictMode
+    if (!initCalled.current) {
+      initCalled.current = true
+      initWhatsApp()
+    }
   }, [initWhatsApp])
 
   useEffect(() => {
     if (isConnected && workspace?.id && accessToken) {
       connectBridge(workspace.id, accessToken)
+      // Advance onboarding step from 'not_started' to 'whatsapp_connected'
+      apiFetch('/onboarding/advance', {
+        method: 'POST',
+        body: { completedStep: 'not_started' },
+      }).catch(() => {
+        // Non-critical — onboarding page handles step transitions too
+      })
     }
   }, [isConnected, workspace?.id, accessToken, connectBridge])
 

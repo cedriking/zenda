@@ -42,7 +42,7 @@ function SettingsPage() {
     try {
       await apiFetch(endpoint, {
         method: 'PATCH',
-        body: JSON.stringify(data),
+        body: data,
       })
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
@@ -248,9 +248,9 @@ function ServicesManager() {
       }
 
       if (editingId) {
-        await apiFetch(`/services/${editingId}`, { method: 'PATCH', body: JSON.stringify(payload) })
+        await apiFetch(`/services/${editingId}`, { method: 'PATCH', body: payload })
       } else {
-        await apiFetch('/services', { method: 'POST', body: JSON.stringify(payload) })
+        await apiFetch('/services', { method: 'POST', body: payload })
       }
       setForm({ name: '', description: '', durationMinutes: 30, priceCents: '' })
       setShowForm(false)
@@ -435,12 +435,12 @@ function AvailabilityManager() {
     try {
       await apiFetch('/availability', {
         method: 'POST',
-        body: JSON.stringify({
+        body: {
           dayOfWeek: form.dayOfWeek,
           startTime: form.startTime,
           endTime: form.endTime,
           available: true,
-        }),
+        },
       })
       setForm({ dayOfWeek: 1, startTime: '09:00', endTime: '17:00' })
       setShowForm(false)
@@ -463,7 +463,7 @@ function AvailabilityManager() {
     try {
       await apiFetch(`/availability/${rule.id}`, {
         method: 'PATCH',
-        body: JSON.stringify({ available: !rule.available }),
+        body: { available: !rule.available },
       })
       setRules(prev => prev.map(r => r.id === rule.id ? { ...r, available: !r.available } : r))
     } catch (err) {

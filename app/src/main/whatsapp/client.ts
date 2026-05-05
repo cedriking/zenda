@@ -21,6 +21,9 @@ export interface WhatsAppStatus {
 }
 
 let sock: WASocket | null = null
+let isInitializing = false
+let reconnectAttempts = 0
+const MAX_RECONNECT_ATTEMPTS = 5
 const emitter = new EventEmitter()
 
 function emitStatus(status: WhatsAppStatus) {
@@ -28,10 +31,19 @@ function emitStatus(status: WhatsAppStatus) {
 }
 
 export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<void> {
-  if (sock) {
-    sock.end(undefined)
-    sock = null
+  // Prevent concurrent initialization
+  if (isInitializing) {
+    log('Already initializing, skipping duplicate init')
+    return
   }
+
+  // If already connected, don't re-init
+  if (sock) {
+    log('Client already exists, skipping re-init')
+    return
+  }
+
+  isInitializing = true
 
   try {
     log('Initializing Baileys WhatsApp client...')
@@ -102,18 +114,38 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
       if (connection === 'close') {
         const statusCode = (lastDisconnect?.error as any)?.output?.statusCode
         const loggedOut = statusCode === DisconnectReason.loggedOut
-        log('Connection closed, statusCode:', statusCode, 'loggedOut:', loggedOut)
+        const isConflict = statusCode === DisconnectReason.connectionReplaced || statusCode === 440
+        log('Connection closed, statusCode:', statusCode, 'loggedOut:', loggedOut, 'isConflict:', isConflict)
 
         if (loggedOut) {
           clearSession()
           sock = null
+          isInitializing = false
           emitStatus({ status: 'disconnected', error: 'Logged out' })
           forwardWhatsAppStatus('logged_out')
+        } else if (isConflict) {
+          // Another instance replaced us — stop reconnecting to avoid infinite loop
+          log('Connection replaced by another instance, stopping reconnect')
+          sock = null
+          isInitializing = false
+          emitStatus({ status: 'error', error: 'Connection replaced by another session' })
         } else {
+          reconnectAttempts++
+          if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
+            log('Max reconnect attempts reached, stopping')
+            sock = null
+            isInitializing = false
+            emitStatus({ status: 'error', error: 'Max reconnection attempts reached' })
+            return
+          }
+          log('Reconnecting, attempt', reconnectAttempts, 'of', MAX_RECONNECT_ATTEMPTS)
           emitStatus({ status: 'connecting' })
+          sock = null
+          isInitializing = false
           await initWhatsAppClient(_mainWindow)
         }
       } else if (connection === 'open') {
+        reconnectAttempts = 0
         const phoneNumber = sock?.user?.id?.split(':')[0]
         log('Connected! Phone:', phoneNumber)
         emitStatus({ status: 'connected', phoneNumber })
@@ -124,17 +156,16 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
     })
 
     log('Baileys socket created, waiting for connection...')
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Failed to initialize WhatsApp'
-    log('Init error:', msg)
-    emitStatus({ status: 'error', error: msg })
-  }
 
-  // Incoming messages
-  sock.ev.on('messages.upsert', async ({ messages }) => {
-    for (const msg of messages) {
-      if (!msg.key.fromMe && msg.key.remoteJid !== 'status@broadcast') {
+    // Incoming messages
+    sock.ev.on('messages.upsert', async ({ messages }) => {
+      for (const msg of messages) {
         const jid = msg.key.remoteJid ?? ''
+        // Skip: own messages, status broadcasts, and group messages (groups cause Bad MAC decryption errors)
+        if (msg.key.fromMe || jid === 'status@broadcast' || jid.endsWith('@g.us')) {
+          continue
+        }
+
         const phoneNumber = jid.replace('@s.whatsapp.net', '').replace('@c.us', '')
 
         let body = ''
@@ -178,8 +209,15 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
           externalMessageId: msg.key.id ?? undefined,
         })
       }
-    }
-  })
+    })
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Failed to initialize WhatsApp'
+    log('Init error:', msg)
+    sock = null
+    emitStatus({ status: 'error', error: msg })
+  } finally {
+    isInitializing = false
+  }
 }
 
 export function getClient(): WASocket | null {
@@ -191,6 +229,8 @@ export function disconnectWhatsApp() {
     sock.end(undefined)
     sock = null
   }
+  isInitializing = false
+  reconnectAttempts = 0
   emitStatus({ status: 'disconnected' })
 }
 
