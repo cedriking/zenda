@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { apiFetch } from '../../../services/api-client'
 import { BarChart3, MessageSquare, Calendar, AlertTriangle, Zap, Clock, AlertCircle } from 'lucide-react'
 
@@ -13,6 +13,49 @@ interface AnalyticsData {
   messages: { total: number; avgResponseTimeMs: number }
   escalations: { total: number; rate: number }
   ai: { providerBreakdown: Record<string, number>; totalTokens: number }
+}
+
+function SimpleBarChart({ data, color }: { data: Array<{ date: string; count: number }>; color: 'blue' | 'green' }) {
+  const max = useMemo(() => Math.max(...data.map(x => x.count), 1), [data])
+  const yTicks = useMemo(() => {
+    const m = Math.max(...data.map(x => x.count), 1)
+    return [0, Math.round(m / 2), m]
+  }, [data])
+
+  return (
+    <div className="flex h-48 gap-2">
+      {/* Y-axis labels */}
+      <div className="flex flex-col justify-between text-right pr-1 py-0.5 shrink-0 w-8">
+        {yTicks.map((tick, i) => (
+          <span key={i} className="text-[10px] text-gray-400 dark:text-gray-500 leading-none">
+            {tick}
+          </span>
+        ))}
+      </div>
+      {/* Bars */}
+      <div className="flex-1 flex items-end gap-1">
+        {data.map((d, idx) => {
+          const height = (d.count / max) * 100
+          return (
+            <div key={idx} className="flex-1 flex flex-col items-center gap-1">
+              <div
+                className={`w-full rounded-t transition-all duration-150 cursor-default ${
+                  color === 'blue'
+                    ? 'bg-blue-500 hover:bg-blue-400'
+                    : 'bg-green-500 hover:bg-green-400'
+                }`}
+                style={{ height: `${Math.max(height, 2)}%` }}
+                title={`${d.date}: ${d.count}`}
+              />
+              <span className="text-[9px] text-gray-400 dark:text-gray-500">
+                {d.date.slice(5)}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 function AnalyticsPage() {
@@ -42,19 +85,19 @@ function AnalyticsPage() {
     return (
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
             <BarChart3 size={24} />
             Analytics
           </h2>
         </div>
         <div className="grid grid-cols-3 gap-4 mb-8">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-lg border border-gray-200 p-5 animate-pulse">
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 animate-pulse">
               <div className="flex items-center justify-between mb-3">
-                <div className="h-3 w-24 bg-gray-200 rounded" />
-                <div className="h-4 w-4 bg-gray-200 rounded" />
+                <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded" />
               </div>
-              <div className="h-6 w-16 bg-gray-200 rounded" />
+              <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded" />
             </div>
           ))}
         </div>
@@ -65,15 +108,15 @@ function AnalyticsPage() {
   if (error && !data) {
     return (
       <div className="p-6">
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-6">
           <BarChart3 size={24} />
           Analytics
         </h2>
-        <div className="rounded-lg bg-red-50 border border-red-200 p-6 text-center">
+        <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-6 text-center">
           <AlertCircle size={32} className="mx-auto mb-3 text-red-400" />
-          <p className="text-red-700 mb-2">Failed to load analytics</p>
-          <p className="text-sm text-red-500 mb-4">{error}</p>
-          <button onClick={loadAnalytics} className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm">
+          <p className="text-red-700 dark:text-red-400 mb-2">Failed to load analytics</p>
+          <p className="text-sm text-red-500 dark:text-red-400 mb-4">{error}</p>
+          <button onClick={loadAnalytics} className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 text-sm">
             Try Again
           </button>
         </div>
@@ -95,14 +138,14 @@ function AnalyticsPage() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
           <BarChart3 size={24} />
           Analytics
         </h2>
         <select
           value={period}
           onChange={e => setPeriod(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+          className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         >
           <option value="7">Last 7 days</option>
           <option value="30">Last 30 days</option>
@@ -113,65 +156,45 @@ function AnalyticsPage() {
       {/* Metric cards */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         {cards.map(card => (
-          <div key={card.label} className="bg-white rounded-lg border border-gray-200 p-5">
+          <div key={card.label} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-gray-500">{card.label}</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">{card.label}</span>
               <span className={card.iconClass}>{card.icon}</span>
             </div>
-            <div className="text-2xl font-bold text-gray-900">{card.value}</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{card.value}</div>
           </div>
         ))}
       </div>
 
       {/* Conversations chart */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-        <h3 className="font-semibold text-gray-900 mb-4">Conversations per Day</h3>
-        <div className="h-48 flex items-end gap-1">
-          {data.conversations.byDay.slice(-14).map((d, idx) => {
-            const max = Math.max(...data.conversations.byDay.map(x => x.count), 1)
-            const height = (d.count / max) * 100
-            return (
-              <div key={idx} className="flex-1 flex flex-col items-center gap-1">
-                <div
-                  className="w-full bg-blue-500 rounded-t"
-                  style={{ height: `${Math.max(height, 2)}%` }}
-                  title={`${d.date}: ${d.count}`}
-                />
-                <span className="text-[9px] text-gray-400">
-                  {d.date.slice(5)}
-                </span>
-              </div>
-            )
-          })}
-        </div>
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Conversations per Day</h3>
+        {data.conversations.byDay.length === 0 ? (
+          <div className="h-48 flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm">
+            <BarChart3 size={32} className="mr-2 opacity-50" />
+            No conversation data for this period
+          </div>
+        ) : (
+          <SimpleBarChart data={data.conversations.byDay.slice(-14)} color="blue" />
+        )}
       </div>
 
       {/* Appointments chart */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="font-semibold text-gray-900 mb-4">Appointments per Day</h3>
-        <div className="h-48 flex items-end gap-1">
-          {data.appointments.byDay.slice(-14).map((d, idx) => {
-            const max = Math.max(...data.appointments.byDay.map(x => x.count), 1)
-            const height = (d.count / max) * 100
-            return (
-              <div key={idx} className="flex-1 flex flex-col items-center gap-1">
-                <div
-                  className="w-full bg-green-500 rounded-t"
-                  style={{ height: `${Math.max(height, 2)}%` }}
-                  title={`${d.date}: ${d.count}`}
-                />
-                <span className="text-[9px] text-gray-400">
-                  {d.date.slice(5)}
-                </span>
-              </div>
-            )
-          })}
-        </div>
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+        <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Appointments per Day</h3>
+        {data.appointments.byDay.length === 0 ? (
+          <div className="h-48 flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm">
+            <BarChart3 size={32} className="mr-2 opacity-50" />
+            No appointment data for this period
+          </div>
+        ) : (
+          <SimpleBarChart data={data.appointments.byDay.slice(-14)} color="green" />
+        )}
       </div>
 
       {/* AI Provider breakdown */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 mt-6">
-        <h3 className="font-semibold text-gray-900 mb-4">AI Provider Usage</h3>
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mt-6">
+        <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">AI Provider Usage</h3>
         <div className="space-y-3">
           {Object.entries(data.ai.providerBreakdown).map(([provider, count]) => {
             const total = Object.values(data.ai.providerBreakdown).reduce((a, b) => a + b, 0)
@@ -179,17 +202,17 @@ function AnalyticsPage() {
             return (
               <div key={provider}>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-700">{provider}</span>
-                  <span className="text-gray-500">{count} calls ({pct.toFixed(0)}%)</span>
+                  <span className="text-gray-700 dark:text-gray-300">{provider}</span>
+                  <span className="text-gray-500 dark:text-gray-400">{count} calls ({pct.toFixed(0)}%)</span>
                 </div>
-                <div className="w-full h-2 bg-gray-100 rounded-full">
+                <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full">
                   <div className="h-2 bg-indigo-500 rounded-full" style={{ width: `${pct}%` }} />
                 </div>
               </div>
             )
           })}
           {Object.keys(data.ai.providerBreakdown).length === 0 && (
-            <p className="text-sm text-gray-400">No AI usage data yet</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">No AI usage data yet</p>
           )}
         </div>
       </div>
