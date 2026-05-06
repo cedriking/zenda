@@ -4,8 +4,11 @@ import { Activity } from "react";
 import { inDevelopment } from "@/constants";
 import BaseLayout from "@/layouts/base-layout";
 import { getPostAuthRoute } from "@/stores/auth";
+import { useBridgeSync } from "@/hooks/use-bridge-sync";
 
 function Root() {
+  useBridgeSync();
+
   return (
     <BaseLayout>
       <Outlet />
