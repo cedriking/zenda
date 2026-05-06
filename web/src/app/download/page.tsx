@@ -8,12 +8,14 @@ import { Footer } from '@/components/footer'
 export default function DownloadPage() {
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleWaitlistSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!email) return
     setLoading(true)
+    setError('')
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/support/waitlist`, {
@@ -24,7 +26,7 @@ export default function DownloadPage() {
       if (!res.ok) throw new Error('Failed')
       setSent(true)
     } catch {
-      setSent(true)
+      setError('Something went wrong. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -48,6 +50,11 @@ export default function DownloadPage() {
                 We&apos;ll email you the download link. Available for macOS and Windows.
               </p>
               <form onSubmit={handleWaitlistSubmit}>
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
+                    {error}
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <input
                     type="email"

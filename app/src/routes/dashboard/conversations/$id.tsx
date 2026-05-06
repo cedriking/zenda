@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useConversations } from '../../../hooks/use-conversations'
 import { ArrowLeft, Bot, User, Send, AlertCircle } from 'lucide-react'
 
@@ -11,6 +11,7 @@ function ConversationDetailPage() {
   const { id } = Route.useParams()
   const { conversations, messages, error, loadMessages, updateMode, sendMessage } = useConversations()
   const [input, setInput] = useState('')
+  const [modeError, setModeError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const conv = conversations.find(c => c.id === id)
 
@@ -22,6 +23,8 @@ function ConversationDetailPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages[id]])
 
+  const clearModeError = useCallback(() => setModeError(null), [])
+
   const handleSend = async () => {
     if (!input.trim()) return
     await sendMessage(id, input.trim())
@@ -29,11 +32,31 @@ function ConversationDetailPage() {
   }
 
   const handleTakeOver = async () => {
-    await updateMode(id, 'human_takeover')
+    setModeError(null)
+    const previousMode = conv?.mode
+    try {
+      await updateMode(id, 'human_takeover')
+    } catch (err) {
+      setModeError(err instanceof Error ? err.message : 'Failed to take over conversation')
+      // Revert local state by reloading
+      if (previousMode) {
+        updateMode(id, previousMode).catch(() => {})
+      }
+    }
   }
 
   const handleReturnToAuto = async () => {
-    await updateMode(id, 'auto')
+    setModeError(null)
+    const previousMode = conv?.mode
+    try {
+      await updateMode(id, 'auto')
+    } catch (err) {
+      setModeError(err instanceof Error ? err.message : 'Failed to return to auto mode')
+      // Revert local state by reloading
+      if (previousMode) {
+        updateMode(id, previousMode).catch(() => {})
+      }
+    }
   }
 
   const convMessages = messages[id] ?? []
@@ -86,6 +109,20 @@ function ConversationDetailPage() {
         <div className="p-3 bg-red-50 border-b border-red-200 text-sm text-red-700 flex items-center gap-2" role="alert">
           <AlertCircle size={16} aria-hidden="true" />
           {error}
+        </div>
+      )}
+
+      {/* Mode switch error */}
+      {modeError && (
+        <div
+          className="p-3 bg-red-50 border-b border-red-200 text-sm text-red-700 flex items-center justify-between"
+          role="alert"
+        >
+          <span className="flex items-center gap-2">
+            <AlertCircle size={16} aria-hidden="true" />
+            {modeError}
+          </span>
+          <button onClick={clearModeError} className="text-red-500 hover:text-red-700 text-xs underline">Dismiss</button>
         </div>
       )}
 

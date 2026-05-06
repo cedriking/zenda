@@ -97,11 +97,17 @@ export const authModule = new Elysia({ prefix: '/auth' })
     const [membership] = await db.select().from(workspaceMembers).where(eq(workspaceMembers.userId, user.id)).limit(1)
     const [workspace] = membership ? await db.select().from(workspaces).where(eq(workspaces.id, membership.workspaceId)).limit(1) : []
 
+    if (!workspace) {
+      logger.error('No workspace found for user during login', { userId: user.id })
+      set.status = 401
+      return { error: 'No workspace found for this user. Please contact support.' }
+    }
+
     // Generate tokens with jti for revocation support
     const accessJti = crypto.randomUUID()
     const refreshJti = crypto.randomUUID()
-    const accessToken = await jwt.sign({ sub: user.id, workspaceId: workspace?.id, jti: accessJti })
-    const refreshToken = await refreshJwt.sign({ sub: user.id, workspaceId: workspace?.id, jti: refreshJti })
+    const accessToken = await jwt.sign({ sub: user.id, workspaceId: workspace.id, jti: accessJti })
+    const refreshToken = await refreshJwt.sign({ sub: user.id, workspaceId: workspace.id, jti: refreshJti })
 
     logger.info('User logged in', { userId: user.id })
 
@@ -109,9 +115,7 @@ export const authModule = new Elysia({ prefix: '/auth' })
       accessToken,
       refreshToken,
       user: { id: user.id, email: user.email, name: user.name },
-      workspace: workspace
-        ? { id: workspace.id, name: workspace.name, slug: workspace.slug, planTier: 'starter' as const, onboardingStep: workspace.onboardingStep }
-        : null,
+      workspace: { id: workspace.id, name: workspace.name, slug: workspace.slug, planTier: 'starter' as const, onboardingStep: workspace.onboardingStep },
     }
   })
   .post('/refresh', async ({ body, jwt, refreshJwt, set }) => {

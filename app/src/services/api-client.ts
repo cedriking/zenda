@@ -67,25 +67,66 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
   return response.json()
 }
 
-// WebSocket connection
-export function createWSConnection(): WebSocket | null {
+// WebSocket connection with reconnection logic
+export function createWSConnection(): { ws: WebSocket | null; cleanup: () => void } {
   const token = localStorage.getItem('accessToken')
-  if (!token) return null
+  if (!token) return { ws: null, cleanup: () => {} }
 
   const wsUrl = API_BASE_URL.replace('http', 'ws')
-  const ws = new WebSocket(`${wsUrl}/ws?token=${token}`)
+  let ws: WebSocket | null = null
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+  let reconnectAttempts = 0
+  let intentionallyClosed = false
 
-  ws.addEventListener('open', () => {
-    console.log('[WS] Connected to Zenda API')
-  })
+  const MAX_RECONNECT_ATTEMPTS = 5
+  const BASE_RECONNECT_DELAY = 3000
 
-  ws.addEventListener('close', () => {
-    console.log('[WS] Disconnected from Zenda API')
-  })
+  function attemptConnect() {
+    const currentToken = localStorage.getItem('accessToken')
+    if (!currentToken) {
+      console.log('[WS] No access token available, skipping reconnect')
+      return
+    }
 
-  ws.addEventListener('error', (event) => {
-    console.error('[WS] Error:', event)
-  })
+    ws = new WebSocket(`${wsUrl}/ws?token=${currentToken}`)
 
-  return ws
+    ws.addEventListener('open', () => {
+      reconnectAttempts = 0
+      console.log('[WS] Connected to Zenda API')
+    })
+
+    ws.addEventListener('close', () => {
+      if (intentionallyClosed) return
+
+      console.log('[WS] Disconnected from Zenda API')
+      reconnectAttempts++
+
+      if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
+        console.error(`[WS] Max reconnect attempts (${MAX_RECONNECT_ATTEMPTS}) reached, giving up`)
+        return
+      }
+
+      // Exponential backoff: 3s, 6s, 12s, 24s, 48s
+      const delay = Math.min(BASE_RECONNECT_DELAY * Math.pow(2, reconnectAttempts - 1), 48000)
+      console.log(`[WS] Reconnecting in ${delay}ms (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`)
+      reconnectTimer = setTimeout(attemptConnect, delay)
+    })
+
+    ws.addEventListener('error', (event) => {
+      console.error('[WS] Error:', event)
+    })
+  }
+
+  attemptConnect()
+
+  const cleanup = () => {
+    intentionallyClosed = true
+    if (reconnectTimer) clearTimeout(reconnectTimer)
+    if (ws) {
+      ws.close()
+      ws = null
+    }
+  }
+
+  return { ws, cleanup }
 }

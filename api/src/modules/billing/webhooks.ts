@@ -109,6 +109,8 @@ export async function handleWebhook(rawBody: string, signature: string): Promise
           .where(eq(subscriptions.id, sub.id))
 
         logger.warn('Payment failed', { workspaceId: sub.workspaceId })
+      } else {
+        logger.warn('Payment failed but no subscription found for customer', { stripeCustomerId: customerId })
       }
       break
     }

@@ -27,8 +27,11 @@ setInterval(() => {
 export function rateLimit(max: number = DEFAULT_MAX) {
   return new Elysia({ name: 'rate-limit' })
     .derive(({ request }: { request: Request }) => {
+      // IMPORTANT: This middleware must run behind a trusted reverse proxy that
+      // sets x-forwarded-for. These headers are client-spoofable if exposed directly.
       const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
         ?? request.headers.get('x-real-ip')
+        ?? (request as any).server?.requestIP?.address
         ?? 'unknown'
 
       const key = getKey(ip, new URL(request.url).pathname)

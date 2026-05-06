@@ -21,7 +21,7 @@ interface IncomingMessage {
 export async function processIncomingMessage(workspaceId: string, msg: IncomingMessage) {
   try {
     // 1. Detect language (for audio, body may be empty — refined after transcription)
-    const language = detectLanguage(msg.body)
+    const language: 'en' | 'es' = detectLanguage(msg.body) || 'es'
 
     // 2. Find or create customer
     const customer = await resolveOrCreateCustomer(workspaceId, msg.phoneNumber, language)
@@ -236,7 +236,7 @@ async function storeMessage(
 async function handleOnboardingMessage(
   workspaceId: string,
   conversationId: string,
-  customerId: string,
+  _customerId: string,
   messageBody: string,
   language: 'en' | 'es',
   msg: IncomingMessage,

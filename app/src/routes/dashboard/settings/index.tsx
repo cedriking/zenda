@@ -13,6 +13,8 @@ function SettingsPage() {
   const [tab, setTab] = useState<TabId>('business')
   const [businessProfile, setBusinessProfile] = useState<Record<string, any>>({})
   const [receptionistProfile, setReceptionistProfile] = useState<Record<string, any>>({})
+  const [lastSavedBusiness, setLastSavedBusiness] = useState<Record<string, any> | null>(null)
+  const [lastSavedReceptionist, setLastSavedReceptionist] = useState<Record<string, any> | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
@@ -28,6 +30,8 @@ function SettingsPage() {
         ])
         setBusinessProfile(biz as any)
         setReceptionistProfile(rec as any)
+        setLastSavedBusiness(biz as any)
+        setLastSavedReceptionist(rec as any)
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : 'Failed to load settings')
       }
@@ -36,18 +40,49 @@ function SettingsPage() {
   }, [])
 
   const handleSave = async (endpoint: string, data: Record<string, any>) => {
+    // Basic validation
+    if (endpoint === '/business/profile') {
+      if (!data.name?.trim()) {
+        setSaveError('Business name is required')
+        return
+      }
+    }
+    if (endpoint === '/business/receptionist') {
+      if (!data.name?.trim()) {
+        setSaveError('Receptionist name is required')
+        return
+      }
+    }
+
     setSaving(true)
     setSaveError(null)
     setSaveSuccess(false)
+
     try {
       await apiFetch(endpoint, {
         method: 'PATCH',
         body: data,
       })
+
+      // Store last successfully saved values for rollback
+      if (endpoint === '/business/profile') {
+        setLastSavedBusiness({ ...data })
+      } else if (endpoint === '/business/receptionist') {
+        setLastSavedReceptionist({ ...data })
+      }
+
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Failed to save')
+      const message = err instanceof Error ? err.message : 'Failed to save'
+      setSaveError(message)
+
+      // Rollback to last saved values
+      if (endpoint === '/business/profile' && lastSavedBusiness) {
+        setBusinessProfile({ ...lastSavedBusiness })
+      } else if (endpoint === '/business/receptionist' && lastSavedReceptionist) {
+        setReceptionistProfile({ ...lastSavedReceptionist })
+      }
     } finally {
       setSaving(false)
     }

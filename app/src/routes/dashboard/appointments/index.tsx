@@ -323,11 +323,9 @@ function CreateAppointmentModal({ onClose, onCreated }: { onClose: () => void; o
     setError(null)
 
     const startAt = new Date(`${form.date}T${form.startTime}:00`).toISOString()
-    const optimisticId = `temp-${Date.now()}`
 
-    // Optimistic: immediately add to parent list
     try {
-      const created = await apiFetch('/appointments', {
+      await apiFetch('/appointments', {
         method: 'POST',
         body: {
           customerName: form.customerName,

@@ -9,7 +9,9 @@ const SPANISH_INDICATORS = [
   /\bdía\b/i, /\bhora\b/i, /\bservicio\b/i, /\bprecio\b/i,
 ]
 
-export function detectLanguage(text: string): Language {
+export function detectLanguage(text: string): Language | undefined {
+  if (!text || text.trim().length === 0) return undefined
+
   const lowerText = text.toLowerCase()
 
   for (const indicator of SPANISH_INDICATORS) {

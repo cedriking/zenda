@@ -142,7 +142,7 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
           emitStatus({ status: 'connecting' })
           sock = null
           isInitializing = false
-          await initWhatsAppClient(_mainWindow)
+          setTimeout(() => initWhatsAppClient(_mainWindow), 2000)
         }
       } else if (connection === 'open') {
         reconnectAttempts = 0

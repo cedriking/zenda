@@ -47,13 +47,12 @@ export const translationModule = new Elysia({ prefix: '/translation' })
   })
 
 async function generateTranslation(text: string, _source: 'en' | 'es', target: 'en' | 'es'): Promise<string> {
-  // Simple translation stub — in production, use OpenAI or DeepL
-  // This provides a clear marker that the translation needs review
-  const prefix = target === 'es' ? '[ES-AUTO] ' : '[EN-AUTO] '
-
   try {
     const apiKey = process.env.OPENAI_API_KEY
-    if (!apiKey) return `${prefix}${text}`
+    if (!apiKey) {
+      logger.warn('Translation skipped — OPENAI_API_KEY not set')
+      return text
+    }
 
     const prompt = target === 'es'
       ? `Translate the following business text from English to natural, professional Spanish (Latin America). Only return the translation, nothing else:\n\n${text}`
@@ -73,12 +72,15 @@ async function generateTranslation(text: string, _source: 'en' | 'es', target: '
       }),
     })
 
-    if (!res.ok) return `${prefix}${text}`
+    if (!res.ok) {
+      logger.warn('Translation API returned non-OK status', { status: res.status })
+      return text
+    }
 
     const data = await res.json() as { choices: Array<{ message: { content: string } }> }
-    return data.choices[0]?.message?.content?.trim() ?? `${prefix}${text}`
+    return data.choices[0]?.message?.content?.trim() ?? text
   } catch (err) {
     logger.error('Translation failed', { error: (err as Error).message })
-    return `${prefix}${text}`
+    return text
   }
 }

@@ -36,4 +36,6 @@ export const appointments = pgTable('appointments', {
   completedAt: timestamp('completed_at', { withTimezone: true }),
 }, (table) => [
   index('appointments_workspace_date_idx').on(table.workspaceId, table.startAt),
+  index('appointments_workspace_status_idx').on(table.workspaceId, table.status),
+  index('appointments_confirmation_status_idx').on(table.workspaceId, table.confirmationStatus),
 ])

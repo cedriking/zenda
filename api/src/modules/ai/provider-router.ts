@@ -60,8 +60,7 @@ export function selectModel(ctx: RoutingContext): ProviderConfig {
     return config
   }
 
-  // Fallback to first available
-  return providers[0]
+  throw new Error('No AI provider available — check API keys for ZAI, OpenAI, or Ollama')
 }
 
 function isProviderAvailable(provider: AIProvider): boolean {

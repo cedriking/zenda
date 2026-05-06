@@ -9,6 +9,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [businessName, setBusinessName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -23,14 +24,20 @@ export default function SignupPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
     setError('')
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters')
+      return
+    }
+
+    setLoading(true)
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify({ email, password, name, businessName }),
       })
 
       if (!res.ok) {
@@ -73,6 +80,18 @@ export default function SignupPage() {
                 required
                 className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
                 placeholder="Your name"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Business Name</label>
+              <input
+                type="text"
+                value={businessName}
+                onChange={e => setBusinessName(e.target.value)}
+                required
+                className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                placeholder="Your business name"
               />
             </div>
 
