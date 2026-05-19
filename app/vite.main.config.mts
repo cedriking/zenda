@@ -9,7 +9,7 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      external: ["whatsapp-web.js", "puppeteer", "puppeteer-core", "qrcode", "ws", "bufferutil", "utf-8-validate"],
+      external: ["@whiskeysockets/baileys", "whatsapp-web.js", "puppeteer", "puppeteer-core", "qrcode", "ws", "bufferutil", "utf-8-validate"],
     },
   },
 });
