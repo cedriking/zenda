@@ -9,7 +9,11 @@ import {
 } from '@whiskeysockets/baileys'
 import QRCode from 'qrcode'
 import { getSessionPath, clearSession } from './session'
-import { forwardWhatsAppMessage, forwardWhatsAppStatus } from './bridge'
+let _bridge: typeof import('./bridge') | null = null
+async function getBridge() {
+  if (!_bridge) _bridge = await import('./bridge')
+  return _bridge
+}
 
 const log = (...args: unknown[]) => console.log('[baileys]', ...args)
 
@@ -122,7 +126,7 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
           sock = null
           isInitializing = false
           emitStatus({ status: 'disconnected', error: 'Logged out' })
-          forwardWhatsAppStatus('logged_out')
+          getBridge().then(b => b.forwardWhatsAppStatus('logged_out'))
         } else if (isConflict) {
           // Another instance replaced us — stop reconnecting to avoid infinite loop
           log('Connection replaced by another instance, stopping reconnect')
@@ -149,7 +153,7 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
         const phoneNumber = sock?.user?.id?.split(':')[0]
         log('Connected! Phone:', phoneNumber)
         emitStatus({ status: 'connected', phoneNumber })
-        forwardWhatsAppStatus('connected', phoneNumber)
+        getBridge().then(b => b.forwardWhatsAppStatus('connected', phoneNumber))
       } else if (connection === 'connecting') {
         emitStatus({ status: 'connecting' })
       }
@@ -201,13 +205,13 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
           ? new Date(ts * 1000).toISOString()
           : new Date().toISOString()
 
-        forwardWhatsAppMessage({
+        getBridge().then(b => b.forwardWhatsAppMessage({
           phoneNumber,
           body,
           contentType,
           timestamp,
           externalMessageId: msg.key.id ?? undefined,
-        })
+        }))
       }
     })
   } catch (error) {
