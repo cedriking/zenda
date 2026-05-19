@@ -1,6 +1,5 @@
 import path from "node:path";
 import { defineConfig } from "vite";
-import { builtinModules } from "node:module";
 
 export default defineConfig({
   resolve: {
@@ -10,18 +9,7 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      external: [
-        ...builtinModules.flatMap((m) => [m, `node:${m}`]),
-        "@whiskeysockets/baileys",
-        "whatsapp-web.js",
-        "puppeteer",
-        "puppeteer-core",
-        "qrcode",
-        "pino",
-        "ws",
-        "bufferutil",
-        "utf-8-validate",
-      ],
+      external: ["@whiskeysockets/baileys", "whatsapp-web.js", "puppeteer", "puppeteer-core", "qrcode", "ws", "bufferutil", "utf-8-validate"],
     },
   },
 });

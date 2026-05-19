@@ -8,12 +8,8 @@ import {
   type WASocket,
 } from '@whiskeysockets/baileys'
 import QRCode from 'qrcode'
-import { getSessionPath, clearSession } from './session'
-let _bridge: typeof import('./bridge') | null = null
-async function getBridge() {
-  if (!_bridge) _bridge = await import('./bridge')
-  return _bridge
-}
+import { getSessionPath, clearSession } from './session.js'
+import { forwardWhatsAppMessage, forwardWhatsAppStatus } from './bridge.js'
 
 const log = (...args: unknown[]) => console.log('[baileys]', ...args)
 
@@ -126,7 +122,7 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
           sock = null
           isInitializing = false
           emitStatus({ status: 'disconnected', error: 'Logged out' })
-          getBridge().then(b => b.forwardWhatsAppStatus('logged_out'))
+          forwardWhatsAppStatus('logged_out')
         } else if (isConflict) {
           // Another instance replaced us — stop reconnecting to avoid infinite loop
           log('Connection replaced by another instance, stopping reconnect')
@@ -153,7 +149,7 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
         const phoneNumber = sock?.user?.id?.split(':')[0]
         log('Connected! Phone:', phoneNumber)
         emitStatus({ status: 'connected', phoneNumber })
-        getBridge().then(b => b.forwardWhatsAppStatus('connected', phoneNumber))
+        forwardWhatsAppStatus('connected', phoneNumber)
       } else if (connection === 'connecting') {
         emitStatus({ status: 'connecting' })
       }
@@ -205,13 +201,13 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
           ? new Date(ts * 1000).toISOString()
           : new Date().toISOString()
 
-        getBridge().then(b => b.forwardWhatsAppMessage({
+        forwardWhatsAppMessage({
           phoneNumber,
           body,
           contentType,
           timestamp,
           externalMessageId: msg.key.id ?? undefined,
-        }))
+        })
       }
     })
   } catch (error) {

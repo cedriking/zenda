@@ -99,10 +99,10 @@ app.whenReady().then(async () => {
       registerWhatsAppIPC(ipcContext.mainWindow);
 
       // Auto-init WhatsApp if session exists (user already connected before)
-      const { hasSession } = await import("./main/whatsapp/session");
+      const { hasSession } = await import("./main/whatsapp/session.js");
       if (hasSession()) {
         console.log('[main] Existing WhatsApp session found, auto-initializing...');
-        const { initWhatsAppClient } = await import("./main/whatsapp/client");
+        const { initWhatsAppClient } = await import("./main/whatsapp/client.js");
         initWhatsAppClient(ipcContext.mainWindow).catch((err) => {
           console.error('[main] Auto-init WhatsApp error:', err);
         });
