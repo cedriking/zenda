@@ -8,8 +8,8 @@ import {
   type WASocket,
 } from '@whiskeysockets/baileys'
 import QRCode from 'qrcode'
-import { getSessionPath, clearSession } from './session.js'
-import { forwardWhatsAppMessage, forwardWhatsAppStatus } from './bridge.js'
+import { getSessionPath, clearSession } from './session'
+import { forwardWhatsAppMessage, forwardWhatsAppStatus } from './bridge'
 
 const log = (...args: unknown[]) => console.log('[baileys]', ...args)
 

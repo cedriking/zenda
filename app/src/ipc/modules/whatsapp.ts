@@ -4,15 +4,15 @@ import {
   disconnectWhatsApp,
   onStatus,
   type WhatsAppStatus,
-} from '../../main/whatsapp/client.js'
+} from '../../main/whatsapp/client'
 import {
   connectBridge,
   disconnectBridge,
   forwardWhatsAppMessage,
   forwardWhatsAppStatus,
-} from '../../main/whatsapp/bridge.js'
-import { updateWhatsAppHealth } from '../../main/health-monitor.js'
-import { updateTrayStatus } from '../../main/tray.js'
+} from '../../main/whatsapp/bridge'
+import { updateWhatsAppHealth } from '../../main/health-monitor'
+import { updateTrayStatus } from '../../main/tray'
 
 export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
   // Init WhatsApp client (fire-and-forget so it can't block the renderer)
