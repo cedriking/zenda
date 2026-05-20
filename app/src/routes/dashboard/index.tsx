@@ -119,13 +119,13 @@ function DashboardPage() {
     const interval = setInterval(loadAll, 30000)
 
     const handler = () => loadAll()
-    window.electron?.on('appointment:update', handler)
-    window.electron?.on('conversation:update', handler)
+    const unsubAppointment = window.electron?.on('appointment:update', handler)
+    const unsubConversation = window.electron?.on('conversation:update', handler)
 
     return () => {
       clearInterval(interval)
-      window.electron?.off('appointment:update', handler)
-      window.electron?.off('conversation:update', handler)
+      unsubAppointment?.()
+      unsubConversation?.()
     }
   }, [loadAll])
 

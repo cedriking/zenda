@@ -110,26 +110,3 @@ export function disconnectBridge(): void {
     ws = null
   }
 }
-
-// Forward WhatsApp messages from renderer (received via whatsapp-web.js) to backend
-export function forwardWhatsAppMessage(message: {
-  phoneNumber: string
-  body: string
-  contentType: string
-  mediaUrl?: string
-  timestamp: string
-  externalMessageId?: string
-}): boolean {
-  return sendToBackend({
-    type: 'whatsapp.message',
-    data: message,
-  })
-}
-
-// Forward WhatsApp status changes to backend
-export function forwardWhatsAppStatus(status: string, phoneNumber?: string): boolean {
-  return sendToBackend({
-    type: 'whatsapp.status',
-    data: { status, phoneNumber },
-  })
-}

@@ -1,6 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { getOnboardingStatus, advanceOnboarding } from './flow.js'
 import { getNextOnboardingQuestion, processOnboardingResponse } from './conversation-handler.js'
+import { logger } from '../../infra/logger.js'
 
 export const onboardingModule = new Elysia({ prefix: '/onboarding' })
 
@@ -24,7 +25,12 @@ export const onboardingModule = new Elysia({ prefix: '/onboarding' })
 
   .post('/respond', async ({ workspaceId, body }) => {
     const { step, response } = body as { step: string; response: string }
-    return processOnboardingResponse(workspaceId!, step, response)
+    try {
+      return await processOnboardingResponse(workspaceId!, step, response)
+    } catch (err: any) {
+      logger.error('Onboarding respond error', { step, response, error: err?.message, stack: err?.stack })
+      throw err
+    }
   }, {
     body: t.Object({
       step: t.String(),

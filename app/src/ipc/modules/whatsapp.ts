@@ -8,8 +8,7 @@ import {
 import {
   connectBridge,
   disconnectBridge,
-  forwardWhatsAppMessage,
-  forwardWhatsAppStatus,
+  sendToBackend,
 } from '../../main/whatsapp/bridge.js'
 import { updateWhatsAppHealth } from '../../main/health-monitor.js'
 import { updateTrayStatus } from '../../main/tray.js'
@@ -49,7 +48,7 @@ export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
     timestamp: string
     externalMessageId?: string
   }) => {
-    forwardWhatsAppMessage(message)
+    sendToBackend({ type: 'whatsapp.message', ...message })
   })
 
   // Forward WhatsApp status to backend
@@ -57,7 +56,7 @@ export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
     status: string
     phoneNumber?: string
   }) => {
-    forwardWhatsAppStatus(status, phoneNumber)
+    sendToBackend({ type: 'whatsapp.status', status, phoneNumber })
   })
 
   // Listen for WhatsApp client status changes and forward to renderer

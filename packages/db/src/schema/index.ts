@@ -66,3 +66,9 @@ export { providerUsage } from './provider-usage.js'
 export { audioAssets } from './audio-assets.js'
 export { revokedTokens } from './revoked-tokens.js'
 export { waitlistEntries } from './waitlist.js'
+export {
+  integrations,
+  integrationTypeEnum,
+  integrationProviderEnum,
+  integrationStatusEnum,
+} from './integrations.js'

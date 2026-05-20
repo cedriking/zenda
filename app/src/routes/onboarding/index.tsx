@@ -107,6 +107,10 @@ function OnboardingPage() {
   }, [])
 
   useEffect(() => {
+    loadStatus()
+  }, [])
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, typingText])
 

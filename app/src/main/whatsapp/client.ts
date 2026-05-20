@@ -9,7 +9,7 @@ import {
 } from '@whiskeysockets/baileys'
 import QRCode from 'qrcode'
 import { getSessionPath, clearSession } from './session.js'
-import { forwardWhatsAppMessage, forwardWhatsAppStatus } from './bridge.js'
+import { sendToBackend } from './bridge.js'
 
 const log = (...args: unknown[]) => console.log('[baileys]', ...args)
 
@@ -122,7 +122,7 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
           sock = null
           isInitializing = false
           emitStatus({ status: 'disconnected', error: 'Logged out' })
-          forwardWhatsAppStatus('logged_out')
+          sendToBackend({ type: 'whatsapp.status', status: 'logged_out' })
         } else if (isConflict) {
           // Another instance replaced us — stop reconnecting to avoid infinite loop
           log('Connection replaced by another instance, stopping reconnect')
@@ -149,7 +149,7 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
         const phoneNumber = sock?.user?.id?.split(':')[0]
         log('Connected! Phone:', phoneNumber)
         emitStatus({ status: 'connected', phoneNumber })
-        forwardWhatsAppStatus('connected', phoneNumber)
+        sendToBackend({ type: 'whatsapp.status', status: 'connected', phoneNumber })
       } else if (connection === 'connecting') {
         emitStatus({ status: 'connecting' })
       }
@@ -201,7 +201,8 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
           ? new Date(ts * 1000).toISOString()
           : new Date().toISOString()
 
-        forwardWhatsAppMessage({
+        sendToBackend({
+          type: 'whatsapp.message',
           phoneNumber,
           body,
           contentType,

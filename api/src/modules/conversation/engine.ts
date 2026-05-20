@@ -10,12 +10,14 @@ import { logger } from '../../infra/logger.js'
 import type { OnboardingStep } from '@zenda/shared'
 
 interface IncomingMessage {
-  phoneNumber: string
+  threadId?: string // Zernio thread ID format: zernio:{accountId}:{conversationId}
+  phoneNumber: string // Legacy support - will be deprecated
   body: string
   contentType: 'text' | 'audio' | 'image' | 'file' | 'system'
   mediaUrl?: string
   timestamp: string
   externalMessageId?: string
+  platform?: string // 'whatsapp', 'instagram', 'telegram', etc.
 }
 
 export async function processIncomingMessage(workspaceId: string, msg: IncomingMessage) {
@@ -23,13 +25,13 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
     // 1. Detect language (for audio, body may be empty — refined after transcription)
     const language: 'en' | 'es' = detectLanguage(msg.body) || 'es'
 
-    // 2. Find or create customer
+    // 2. Find or create customer (using phone number or thread ID)
     const customer = await resolveOrCreateCustomer(workspaceId, msg.phoneNumber, language)
 
     // 3. Find or create conversation
     let conversation = await findActiveConversation(workspaceId, customer.id)
     if (!conversation) {
-      conversation = await createConversation(workspaceId, customer.id, language)
+      conversation = await createConversation(workspaceId, customer.id, language, msg.threadId)
     }
 
     // 4. Store incoming message (placeholder body for audio, actual body for text)
@@ -130,11 +132,12 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       toolCalls: aiResponse.toolCalls,
     })
 
-    // 11. Send response back to desktop app -> WhatsApp
+    // 11. Send response back via Zernio using thread ID
     sendToWorkspace(workspaceId, {
       type: 'response.send',
       data: {
         conversationId: conversation.id,
+        threadId: msg.threadId || conversation.threadId, // Use Zernio thread ID
         message: {
           id: responseMessage.id,
           body: aiResponse.text,
@@ -143,7 +146,6 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
           status: 'sent',
           createdAt: responseMessage.createdAt,
         },
-        phoneNumber: msg.phoneNumber,
       },
     })
 
@@ -161,9 +163,11 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
     logger.info('Message processed', {
       workspaceId,
       conversationId: conversation.id,
+      threadId: msg.threadId,
       customerId: customer.id,
       language: agentLanguage,
       contentType: msg.contentType,
+      platform: msg.platform,
     })
   } catch (error) {
     logger.error('Failed to process message', {
@@ -186,7 +190,12 @@ async function findActiveConversation(workspaceId: string, customerId: string) {
   return conv ?? null
 }
 
-async function createConversation(workspaceId: string, customerId: string, language: 'en' | 'es') {
+async function createConversation(
+  workspaceId: string,
+  customerId: string,
+  language: 'en' | 'es',
+  threadId?: string // Zernio thread ID
+) {
   const [conv] = await db
     .insert(conversations)
     .values({
@@ -195,6 +204,7 @@ async function createConversation(workspaceId: string, customerId: string, langu
       channel: 'whatsapp',
       mode: 'auto',
       language,
+      threadId, // Store Zernio thread ID for routing
     })
     .returning()
   return conv
@@ -267,6 +277,7 @@ async function handleOnboardingMessage(
       type: 'response.send',
       data: {
         conversationId,
+        threadId: msg.threadId, // Use Zernio thread ID
         message: {
           id: responseMessage.id,
           body: questionData.question,
@@ -275,7 +286,6 @@ async function handleOnboardingMessage(
           status: 'sent',
           createdAt: responseMessage.createdAt,
         },
-        phoneNumber: msg.phoneNumber,
       },
     })
     return
@@ -307,6 +317,7 @@ async function handleOnboardingMessage(
     type: 'response.send',
     data: {
       conversationId,
+      threadId: msg.threadId, // Use Zernio thread ID
       message: {
         id: responseMessage.id,
         body: reply,
@@ -315,7 +326,6 @@ async function handleOnboardingMessage(
         status: 'sent',
         createdAt: responseMessage.createdAt,
       },
-      phoneNumber: msg.phoneNumber,
     },
   })
 

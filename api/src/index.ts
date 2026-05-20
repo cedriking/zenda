@@ -22,6 +22,8 @@ import { adminModule } from './modules/admin/index.js'
 import { monitoringModule } from './modules/monitoring/index.js'
 import { translationModule } from './modules/ai/translation.js'
 import { supportModule } from './modules/support/index.js'
+import { zernioModule } from './modules/integrations/zernio/index.js'
+import { composioModule } from './modules/integrations/composio/index.js'
 import { API_PORT, CORS_ORIGINS, NODE_ENV, JWT_SECRET } from './config/env.js'
 import { rateLimit } from './middleware/rate-limit.js'
 import { db } from '@zenda/db/client'
@@ -33,7 +35,7 @@ import { processDueReminders } from './modules/appointment/reminder-service.js'
 const corsOrigins = CORS_ORIGINS.split(',').map(o => o.trim()).filter(Boolean)
 const jwtSecret = new TextEncoder().encode(JWT_SECRET)
 
-const PUBLIC_PATHS = ['/auth', '/health', '/billing/webhook']
+const PUBLIC_PATHS = ['/auth', '/health', '/billing/webhook', '/integrations/zernio/webhook']
 
 function isPublicPath(path: string): boolean {
   return PUBLIC_PATHS.some(p => path === p || path.startsWith(p + '/'))
@@ -121,6 +123,7 @@ const app = new Elysia()
   // ── Public routes ───────────────────────────────────────────────
   .use(authModule)
   .use(billingModule)
+  .use(zernioModule) // Zernio webhook endpoint (public)
 
   // ── Authenticated routes ────────────────────────────────────────
   .use(workspaceModule)
@@ -142,6 +145,7 @@ const app = new Elysia()
   .use(monitoringModule)
   .use(translationModule)
   .use(supportModule)
+  .use(composioModule) // Composio integration (authenticated)
 
   .onError(({ error, set, code }) => {
     if (code === 'NOT_FOUND') {
