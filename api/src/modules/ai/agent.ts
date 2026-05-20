@@ -13,6 +13,8 @@ import {
   getBusinessInfo, getBusinessInfoToolDef,
   escalateToHuman, escalateToHumanToolDef,
 } from './tools/index.js'
+import { sanitizeCustomerMessage } from './input-guard.js'
+import { logInputSanitized, logToolFailure } from '../audit/logger.js'
 import { logger } from '../../infra/logger.js'
 import type { Language, AIProvider } from '@zenda/shared'
 
@@ -53,7 +55,14 @@ export async function runAgent(
     // 1. Build system prompt with business context
     const systemPrompt = await buildSystemPrompt(workspaceId, language)
 
-    // 2. Load recent conversation history
+    // 2. Sanitize customer input
+    const { sanitized, wasModified, flags } = sanitizeCustomerMessage(userMessage)
+    if (wasModified) {
+      logger.warn('Customer message sanitized', { workspaceId, conversationId, flags })
+      await logInputSanitized(workspaceId, conversationId, flags, userMessage)
+    }
+
+    // 3. Load recent conversation history
     const history = await db
       .select()
       .from(messages)
@@ -75,7 +84,10 @@ export async function runAgent(
       }
     }
 
-    // 3. Select model for response generation
+    // Add the sanitized user message
+    chatMessages.push({ role: 'user', content: sanitized })
+
+    // 4. Select model for response generation
     const modelConfig = selectModel({
       task: 'response_generation',
       plan: 'pro',
@@ -84,18 +96,26 @@ export async function runAgent(
 
     const provider = await getProviderClient(modelConfig.provider)
 
-    // 4. Agent loop: call LLM -> execute tools -> repeat
+    // 5. Agent loop: call LLM -> execute tools -> repeat
     let iterations = 0
     let lastResult = await provider.chat(modelConfig.model, chatMessages, ALL_TOOLS, modelConfig.maxTokens)
 
     while (lastResult.toolCalls?.length && iterations < MAX_ITERATIONS) {
       iterations++
 
-      // Add assistant's tool call message
-      chatMessages.push({
+      // Add assistant's tool call message with tool_calls for API compatibility
+      const assistantMsg: Record<string, unknown> = {
         role: 'assistant',
         content: lastResult.text,
-      })
+      }
+      if (lastResult.toolCalls?.length) {
+        assistantMsg.tool_calls = lastResult.toolCalls.map((tc: ToolCall) => ({
+          id: tc.id,
+          type: 'function',
+          function: tc.function,
+        }))
+      }
+      chatMessages.push(assistantMsg as any)
 
       // Execute each tool call
       for (const tc of lastResult.toolCalls) {
@@ -106,8 +126,14 @@ export async function runAgent(
             await executeTool(tc.function.name, workspaceId, conversationId, customerId, args, language),
           )
         } catch (err) {
+          const errMsg = err instanceof Error ? err.message : 'Tool execution failed'
+          logger.error('Tool execution failed', { workspaceId, toolName: tc.function.name, error: errMsg })
+          await logToolFailure(workspaceId, tc.function.name, errMsg).catch(() => {})
           toolResult = JSON.stringify({
-            error: err instanceof Error ? err.message : 'Tool execution failed',
+            error: errMsg,
+            // Signal that the agent should consider escalating to a human,
+            // unless the tool itself is the escalation handler.
+            ...(tc.function.name !== 'escalate_to_human' ? { shouldEscalate: true } : {}),
           })
         }
 
@@ -163,10 +189,10 @@ async function executeTool(
       return confirmAppointment(workspaceId, args as any)
 
     case 'reschedule_appointment':
-      return rescheduleAppointment(workspaceId, args as any)
+      return rescheduleAppointment(workspaceId, args as any, language)
 
     case 'cancel_appointment':
-      return cancelAppointment(workspaceId, args as any)
+      return cancelAppointment(workspaceId, args as any, language)
 
     case 'get_services':
       return getServices(workspaceId)

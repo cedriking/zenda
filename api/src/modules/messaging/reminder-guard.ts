@@ -1,0 +1,86 @@
+/**
+ * Reminder Deduplication Guard (§15)
+ *
+ * Before any reminder send, checks that:
+ * - Same reminder type hasn't been sent for this appointment
+ * - Appointment isn't cancelled/completed
+ * - Appointment time hasn't passed
+ */
+import { db } from '@zenda/db/client'
+import { sentReminderLog, appointments } from '@zenda/db/schema'
+import { eq, and } from 'drizzle-orm'
+import type { ReminderType } from '@zenda/shared'
+
+interface ReminderGuardResult {
+  canSend: boolean
+  reason?: string
+}
+
+/**
+ * Check if a reminder can be sent for the given appointment.
+ */
+export async function canSendReminder(
+  appointmentId: string,
+  reminderType: ReminderType,
+): Promise<ReminderGuardResult> {
+  // 1. Check for duplicate
+  const [existing] = await db
+    .select()
+    .from(sentReminderLog)
+    .where(and(
+      eq(sentReminderLog.appointmentId, appointmentId),
+      eq(sentReminderLog.reminderType, reminderType),
+    ))
+    .limit(1)
+
+  if (existing) {
+    return { canSend: false, reason: `Reminder '${reminderType}' already sent for this appointment` }
+  }
+
+  // 2. Check appointment state
+  const [appointment] = await db
+    .select({
+      status: appointments.status,
+      startAt: appointments.startAt,
+    })
+    .from(appointments)
+    .where(eq(appointments.id, appointmentId))
+    .limit(1)
+
+  if (!appointment) {
+    return { canSend: false, reason: 'Appointment not found' }
+  }
+
+  if (appointment.status === 'cancelled') {
+    return { canSend: false, reason: 'Appointment has been cancelled' }
+  }
+
+  if (appointment.status === 'completed') {
+    return { canSend: false, reason: 'Appointment has been completed' }
+  }
+
+  if (appointment.status === 'no_show') {
+    return { canSend: false, reason: 'Appointment was marked as no-show' }
+  }
+
+  // 3. Check appointment time hasn't passed
+  if (new Date(appointment.startAt) < new Date()) {
+    return { canSend: false, reason: 'Appointment time has already passed' }
+  }
+
+  return { canSend: true }
+}
+
+/**
+ * Record that a reminder was sent.
+ */
+export async function recordReminderSent(
+  appointmentId: string,
+  reminderType: ReminderType,
+): Promise<void> {
+  await db.insert(sentReminderLog).values({
+    appointmentId,
+    reminderType,
+    sentAt: new Date(),
+  })
+}

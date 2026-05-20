@@ -1,3 +1,11 @@
+/**
+ * Tool: get_services
+ *
+ * Safety constraints:
+ * - All service data comes from the DB query filtered by workspaceId + active flag.
+ * - Nothing is invented or hardcoded.
+ * - Sending policy is enforced at the agent layer, not bypassed here.
+ */
 import { db } from '@zenda/db/client'
 import { services } from '@zenda/db/schema'
 import { eq, and } from 'drizzle-orm'

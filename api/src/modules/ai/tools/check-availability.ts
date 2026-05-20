@@ -1,3 +1,12 @@
+/**
+ * Tool: check_availability
+ *
+ * Safety constraints:
+ * - All time slots are computed from actual DB data: service duration, availability
+ *   rules, and existing bookings. Nothing is guessed or hardcoded.
+ * - Sending policy is enforced at the agent layer, not bypassed here.
+ * - On failure the agent receives a structured error it can relay honestly.
+ */
 import { db } from '@zenda/db/client'
 import { appointments, services, availabilityRules, staffMembers } from '@zenda/db/schema'
 import { eq, and, gte, lte } from 'drizzle-orm'

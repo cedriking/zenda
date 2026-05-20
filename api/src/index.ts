@@ -23,6 +23,7 @@ import { monitoringModule } from './modules/monitoring/index.js'
 import { translationModule } from './modules/ai/translation.js'
 import { supportModule } from './modules/support/index.js'
 import { composioModule } from './modules/integrations/composio/index.js'
+import { messagingModule } from './modules/messaging/index.js'
 import { API_PORT, CORS_ORIGINS, NODE_ENV, JWT_SECRET } from './config/env.js'
 import { rateLimit } from './middleware/rate-limit.js'
 import { db } from '@zenda/db/client'
@@ -144,6 +145,7 @@ const app = new Elysia()
   .use(translationModule)
   .use(supportModule)
   .use(composioModule) // Composio integration (authenticated)
+  .use(messagingModule) // Consent management (authenticated)
 
   .onError(({ error, set, code }) => {
     if (code === 'NOT_FOUND') {

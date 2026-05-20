@@ -23,6 +23,8 @@ export {
   businessCategoryEnum,
   receptionistToneEnum,
   priceDisplayEnum,
+  cancellationStrictnessEnum,
+  personalityPresetEnum,
 } from './business-profiles.js'
 export {
   services,
@@ -72,3 +74,14 @@ export {
   integrationProviderEnum,
   integrationStatusEnum,
 } from './integrations.js'
+export {
+  messagingConsent,
+  outboundMessageLog,
+  sentReminderLog,
+  outboundQueue,
+  messagingConsentStatusEnum,
+  consentSourceEnum,
+  messagePurposeEnum,
+  reminderTypeEnum,
+  queueStatusEnum,
+} from './messaging.js'

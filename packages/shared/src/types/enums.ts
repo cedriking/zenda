@@ -134,3 +134,49 @@ export type OnboardingStep =
   | 'receptionist_config'
   | 'plan_selection'
   | 'ready'
+
+// --- Messaging & Consent (§8, §9, §10) ---
+
+// Messaging consent status per customer
+export type MessagingConsentStatus =
+  | 'unknown'      // No prior interaction or consent not captured
+  | 'allowed'      // Customer has opted in
+  | 'limited'      // Allowed for specific purposes only
+  | 'opted_out'    // Customer explicitly opted out
+
+// How consent was captured
+export type ConsentSource =
+  | 'customer_inbound_message'
+  | 'whatsapp_booking'
+  | 'manual_owner_entry'
+  | 'opt_out_request'
+
+// Purpose of an outbound message (§10.1)
+export type MessagePurpose =
+  | 'appointment_confirmation'
+  | 'appointment_reminder'
+  | 'appointment_reschedule'
+  | 'appointment_cancellation'
+  | 'booking_follow_up'
+  | 'booking_assistance'
+  | 'booking_confirmation'
+  | 'customer_inquiry_reply'
+
+// WhatsApp channel types
+export type WhatsAppChannelType =
+  | 'whatsapp_ba_bridge'   // Business App desktop bridge
+  | 'whatsapp_waba'        // Official WhatsApp Business API (future)
+
+// Personality presets (§6.2)
+export type PersonalityPreset =
+  | 'professional'
+  | 'warm'
+  | 'minimal'
+  | 'premium'
+  | 'friendly'
+
+// Cancellation policy strictness
+export type CancellationStrictness = 'lenient' | 'standard' | 'strict'
+
+// Reminder types for deduplication
+export type ReminderType = 'day_before' | 'same_day'

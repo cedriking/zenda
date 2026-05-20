@@ -1,3 +1,5 @@
+import { db } from '@zenda/db/client'
+import { messages } from '@zenda/db/schema'
 import { logger } from '../../infra/logger.js'
 
 interface QueuedMessage {
@@ -67,7 +69,8 @@ export async function processRetryQueue(
         if (msg.attempts >= msg.maxAttempts) {
           retryQueue.splice(i, 1)
           failed++
-          logger.error('Retry exhausted, dropping message', { id: msg.id, attempts: msg.attempts })
+          logger.error('Retry exhausted, persisting message to DB', { id: msg.id, attempts: msg.attempts })
+          await persistFailedMessage(msg)
         } else {
           msg.nextRetry = now + Math.min(BASE_DELAY * Math.pow(2, msg.attempts), MAX_DELAY)
           logger.warn('Retry failed, rescheduling', { id: msg.id, attempts: msg.attempts })
@@ -86,5 +89,30 @@ export function getQueueStats(): { pending: number; oldest: number } {
   return {
     pending: retryQueue.length,
     oldest: retryQueue.length > 0 ? Date.now() - retryQueue[0].createdAt : 0,
+  }
+}
+
+/**
+ * Persist a failed message to DB for later recovery.
+ * Called when in-memory retry is exhausted.
+ */
+export async function persistFailedMessage(msg: {
+  workspaceId: string
+  conversationId: string
+  content: string
+  contentType: string
+}): Promise<void> {
+  try {
+    await db.insert(messages).values({
+      conversationId: msg.conversationId,
+      workspaceId: msg.workspaceId,
+      senderType: 'ai',
+      contentType: msg.contentType as 'text',
+      body: msg.content,
+      status: 'queued',
+    })
+    logger.info('Failed message persisted to DB for recovery', { conversationId: msg.conversationId })
+  } catch (err) {
+    logger.error('Failed to persist message', { error: (err as Error).message })
   }
 }

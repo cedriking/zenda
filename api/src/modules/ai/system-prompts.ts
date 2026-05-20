@@ -1,7 +1,15 @@
+// Scope Rules (S4):
+// Allowed: appointment scheduling, rescheduling, cancellation, service info,
+//   business hours, location, pricing, general inquiries
+// Disallowed: medical advice, legal advice, financial advice, personal opinions,
+//   political/religious topics, any topic outside business operations
+// Ambiguous: redirect to human escalation
+
 import { db } from '@zenda/db/client'
 import { businessProfiles, receptionistProfiles, services, staffMembers } from '@zenda/db/schema'
 import { eq } from 'drizzle-orm'
-import type { Language } from '@zenda/shared'
+import { PERSONALITY_PRESETS, type PersonalityPresetKey } from '@zenda/shared'
+import type { Language, PersonalityPreset, CancellationStrictness } from '@zenda/shared'
 
 interface BusinessContext {
   businessName: string
@@ -16,6 +24,28 @@ interface BusinessContext {
   greetingTemplate: string | null
   services: { name: string; duration: number; price: number | null }[]
   staff: { name: string }[]
+
+  // Personality fields
+  personalityPreset: PersonalityPreset
+  formalityLevel: number
+  concisenessLevel: number
+  warmthLevel: number
+  useEmoji: boolean
+  speaksAsBusiness: boolean
+  proactivelySuggestTimes: boolean
+  confirmsBeforeBooking: boolean
+  cancellationPolicyStrictness: CancellationStrictness
+
+  // Business policy fields
+  cancellationWindowHours: number
+  reschedulingWindowHours: number
+  depositRequired: boolean
+  depositAmountCents: number | null
+  approvedCancellationText: string | null
+  approvedRefundText: string | null
+  approvedDiscountText: string | null
+  emergencyEscalationInstructions: string | null
+  sensitiveTopics: string[] | null
 }
 
 export async function buildSystemPrompt(
@@ -24,91 +54,365 @@ export async function buildSystemPrompt(
 ): Promise<string> {
   const ctx = await loadBusinessContext(workspaceId)
   const lang = language === 'es' ? 'Spanish' : 'English'
+  const preset = PERSONALITY_PRESETS[ctx.personalityPreset]
+
+  const sections: string[] = []
+
+  // 1. Identity
+  sections.push(buildIdentitySection(ctx, lang))
+
+  // 2. Personality & Tone
+  sections.push(buildPersonalitySection(ctx, preset))
+
+  // 3. Role
+  sections.push(buildRoleSection(ctx))
+
+  // 4. Business Information
+  sections.push(buildBusinessInfoSection(ctx))
+
+  // 5. Services & Staff
+  sections.push(buildServicesSection(ctx))
+
+  // 6. Booking Policies
+  sections.push(buildBookingPoliciesSection(ctx))
+
+  // 7. Approved Texts
+  sections.push(buildApprovedTextsSection(ctx))
+
+  // 8. Sensitive Topics & Escalation
+  sections.push(buildEscalationSection(ctx))
+
+  // 9. Scope Boundaries
+  sections.push(buildScopeBoundariesSection())
+
+  // 10. Natural Language Rules
+  sections.push(buildNaturalLanguageRules(ctx))
+
+  return sections.join('\n\n')
+}
+
+// ---------------------------------------------------------------------------
+// Section builders
+// ---------------------------------------------------------------------------
+
+function buildIdentitySection(ctx: BusinessContext, lang: string): string {
+  const voice = ctx.speaksAsBusiness
+    ? `You represent "${ctx.businessName}" as a business entity. Refer to yourself as the business when appropriate (e.g. "We can offer you..." or "Our next available slot is...").`
+    : `You are ${ctx.receptionistName}, an individual AI receptionist. Speak in first person (e.g. "I can help you..." or "Let me find a slot for you...").`
 
   return `You are ${ctx.receptionistName}, the AI receptionist for ${ctx.businessName}.
 You MUST respond in ${lang}.
 
-## Your Role
-You handle appointment scheduling, answer questions about services, and help customers book, reschedule, or cancel appointments via WhatsApp.
-
-## Business Information
-- Name: ${ctx.businessName}
-- Category: ${ctx.category ?? 'General'}
-${ctx.description ? `- Description: ${ctx.description}` : ''}
-${ctx.location ? `- Location: ${ctx.location}` : ''}
-${ctx.cancellationPolicy ? `- Cancellation Policy: ${ctx.cancellationPolicy}` : ''}
-${ctx.refundPolicy ? `- Refund Policy: ${ctx.refundPolicy}` : ''}
-
-## Services
-${ctx.services.map(s =>
-    `- ${s.name}: ${s.duration} min${s.price !== null && ctx.priceDisplay === 'show' ? ` ($${(s.price / 100).toFixed(2)})` : ''}`,
-  ).join('\n')}
-
-## Staff
-${ctx.staff.map(s => `- ${s.name}`).join('\n')}
-
-## Tone
-Communicate in a ${ctx.tone} tone. Be concise, helpful, and friendly.
-
-## Rules
-1. Always confirm details before booking (service, date, time, staff preference)
-2. If unsure about anything, use the escalate_to_human tool
-3. Never make up prices, policies, or services not listed above
-4. For complaints, refund requests, or sensitive issues — escalate immediately
-5. Keep responses short — this is WhatsApp, not email
-6. If the customer asks something outside your scope, escalate to human
-7. Today's date is ${new Date().toISOString().split('T')[0]}
-
-## Available Tools
-You have these tools to help customers:
-- check_availability: Find available time slots for a service
-- book_appointment: Create a new appointment
-- confirm_appointment: Confirm a pending appointment
-- reschedule_appointment: Change an appointment date/time
-- cancel_appointment: Cancel an appointment
-- get_services: List all available services
-- get_business_info: Get business hours, location, policies
-- escalate_to_human: Transfer conversation to the business owner
-
-Use tools when needed. After getting tool results, respond naturally to the customer.
-${ctx.greetingTemplate ? `\n## Greeting\n${ctx.greetingTemplate}` : ''}`
+${voice}`
 }
 
+function buildPersonalitySection(ctx: BusinessContext, preset: (typeof PERSONALITY_PRESETS)[PersonalityPresetKey]): string {
+  const lines: string[] = ['## Personality & Tone']
+
+  // Preset fragment
+  lines.push(preset.systemPromptFragment)
+
+  // Formality guidance
+  const formalityLabel = levelLabel(ctx.formalityLevel, 'very informal', 'informal', 'balanced', 'formal', 'very formal')
+  lines.push(`Formality level: ${ctx.formalityLevel}/5 (${formalityLabel}).`)
+
+  // Conciseness guidance
+  const concisenessLabel = levelLabel(ctx.concisenessLevel, 'very verbose', 'conversational', 'balanced', 'concise', 'very brief')
+  lines.push(`Conciseness level: ${ctx.concisenessLevel}/5 (${concisenessLabel}).`)
+
+  // Warmth guidance
+  const warmthLabel = levelLabel(ctx.warmthLevel, 'very distant', 'reserved', 'balanced', 'warm', 'very warm')
+  lines.push(`Warmth level: ${ctx.warmthLevel}/5 (${warmthLabel}).`)
+
+  // Emoji rule
+  if (ctx.useEmoji) {
+    lines.push('You may use emoji sparingly to add warmth (e.g. a single smile or check mark). Do not overuse them.')
+  } else {
+    lines.push('Do NOT use emoji in your responses.')
+  }
+
+  return lines.join('\n')
+}
+
+function buildRoleSection(ctx: BusinessContext): string {
+  const lines: string[] = ['## Your Role']
+
+  lines.push('You handle appointment scheduling, answer questions about services, and help customers book, reschedule, or cancel appointments via WhatsApp.')
+
+  if (ctx.proactivelySuggestTimes) {
+    lines.push('When a customer wants to book, proactively suggest available time slots rather than asking open-ended questions about their preferred time.')
+  }
+
+  if (ctx.confirmsBeforeBooking) {
+    lines.push('Always confirm all details (service, date, time, staff) with the customer before finalizing any booking.')
+  }
+
+  return lines.join('\n')
+}
+
+function buildBusinessInfoSection(ctx: BusinessContext): string {
+  const lines: string[] = ['## Business Information']
+
+  lines.push(`- Name: ${ctx.businessName}`)
+  lines.push(`- Category: ${ctx.category ?? 'General'}`)
+
+  if (ctx.description) {
+    lines.push(`- Description: ${ctx.description}`)
+  }
+
+  if (ctx.location) {
+    lines.push(`- Location: ${ctx.location}`)
+  }
+
+  return lines.join('\n')
+}
+
+function buildServicesSection(ctx: BusinessContext): string {
+  const lines: string[] = ['## Services']
+
+  for (const s of ctx.services) {
+    const price =
+      s.price !== null && ctx.priceDisplay === 'show'
+        ? ` ($${(s.price / 100).toFixed(2)})`
+        : ''
+    lines.push(`- ${s.name}: ${s.duration} min${price}`)
+  }
+
+  if (ctx.staff.length > 0) {
+    lines.push('')
+    lines.push('## Staff')
+    for (const s of ctx.staff) {
+      lines.push(`- ${s.name}`)
+    }
+  }
+
+  return lines.join('\n')
+}
+
+function buildBookingPoliciesSection(ctx: BusinessContext): string {
+  const lines: string[] = ['## Booking Policies']
+
+  // Cancellation window & strictness
+  const strictnessDesc: Record<CancellationStrictness, string> = {
+    lenient: 'Lenient — allow cancellations without penalty within the window',
+    standard: 'Standard — cancellations within the window are accepted, late cancellations may require review',
+    strict: 'Strict — no cancellations accepted within the window without owner approval',
+  }
+  lines.push(`Cancellation window: ${ctx.cancellationWindowHours} hours before the appointment.`)
+  lines.push(`Cancellation strictness: ${strictnessDesc[ctx.cancellationPolicyStrictness]}`)
+
+  // Rescheduling window
+  lines.push(`Rescheduling window: At least ${ctx.reschedulingWindowHours} hours before the appointment.`)
+
+  // Deposit info
+  if (ctx.depositRequired && ctx.depositAmountCents) {
+    const deposit = `$${(ctx.depositAmountCents / 100).toFixed(2)}`
+    lines.push(`Deposit required: ${deposit}. Inform the customer about the deposit when booking.`)
+  }
+
+  // Cancellation policy text
+  if (ctx.cancellationPolicy) {
+    lines.push(`Cancellation policy: ${ctx.cancellationPolicy}`)
+  }
+
+  // Refund policy
+  if (ctx.refundPolicy) {
+    lines.push(`Refund policy: ${ctx.refundPolicy}`)
+  }
+
+  return lines.join('\n')
+}
+
+function buildApprovedTextsSection(ctx: BusinessContext): string {
+  const lines: string[] = ['## Pre-Approved Responses']
+
+  let hasAny = false
+
+  if (ctx.approvedCancellationText) {
+    lines.push(`When approving a cancellation, use or adapt this text: "${ctx.approvedCancellationText}"`)
+    hasAny = true
+  }
+
+  if (ctx.approvedRefundText) {
+    lines.push(`When approving a refund, use or adapt this text: "${ctx.approvedRefundText}"`)
+    hasAny = true
+  }
+
+  if (ctx.approvedDiscountText) {
+    lines.push(`When approving a discount, use or adapt this text: "${ctx.approvedDiscountText}"`)
+    hasAny = true
+  }
+
+  if (!hasAny) {
+    lines.push('No pre-approved response texts have been configured. Escalate to the business owner for cancellation, refund, or discount requests.')
+  }
+
+  return lines.join('\n')
+}
+
+function buildEscalationSection(ctx: BusinessContext): string {
+  const lines: string[] = ['## Escalation Rules']
+
+  if (ctx.sensitiveTopics && ctx.sensitiveTopics.length > 0) {
+    lines.push(`Sensitive topics that require automatic escalation to the owner: ${ctx.sensitiveTopics.join(', ')}.`)
+    lines.push('If a customer raises any of these topics, politely redirect them and immediately escalate to the owner.')
+  }
+
+  if (ctx.emergencyEscalationInstructions) {
+    lines.push(`Emergency escalation instructions: ${ctx.emergencyEscalationInstructions}`)
+  }
+
+  return lines.join('\n')
+}
+
+function buildScopeBoundariesSection(): string {
+  return `## Scope Boundaries
+
+You may assist with:
+- Appointment scheduling, rescheduling, and cancellation
+- Service information (name, duration, price if visible)
+- Business hours and availability
+- Location and directions
+- General pricing inquiries (when price display is enabled)
+
+You MUST NOT:
+- Provide medical advice or diagnoses
+- Provide legal advice
+- Provide financial advice
+- Express personal opinions on sensitive matters
+- Discuss political or religious topics
+- Make promises or commitments beyond your configured policies
+
+If a request falls outside your scope, politely explain that you cannot help with that topic and offer to connect them with the business owner.`
+}
+
+function buildNaturalLanguageRules(ctx: BusinessContext): string {
+  const lines: string[] = ['## Communication Rules']
+
+  lines.push('1. Never say "as an AI" or "I am an AI" or reference being artificial.')
+  lines.push('2. Use natural conversational language as if you were a real receptionist.')
+  lines.push('3. Never use robotic prompts like "Reply CONFIRM" or "Send 1 to continue."')
+  lines.push('4. Keep responses short and suitable for WhatsApp messaging.')
+  lines.push('5. If unsure about any request, escalate to the business owner rather than guessing.')
+  lines.push('6. Always respond in the language the customer is using.')
+
+  if (!ctx.useEmoji) {
+    lines.push('7. Do not use emoji.')
+  }
+
+  return lines.join('\n')
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function levelLabel(
+  level: number,
+  label1: string,
+  label2: string,
+  label3: string,
+  label4: string,
+  label5: string,
+): string {
+  const labels = [label1, label2, label3, label4, label5]
+  const idx = Math.max(0, Math.min(4, level - 1))
+  return labels[idx]
+}
+
+// ---------------------------------------------------------------------------
+// Data loader
+// ---------------------------------------------------------------------------
+
 async function loadBusinessContext(workspaceId: string): Promise<BusinessContext> {
-  const [biz] = await db
-    .select()
+  const [business] = await db
+    .select({
+      name: businessProfiles.name,
+      category: businessProfiles.category,
+      description: businessProfiles.description,
+      location: businessProfiles.location,
+      cancellationPolicy: businessProfiles.cancellationPolicy,
+      refundPolicy: businessProfiles.refundPolicy,
+      priceDisplayPreference: businessProfiles.priceDisplayPreference,
+      cancellationWindowHours: businessProfiles.cancellationWindowHours,
+      reschedulingWindowHours: businessProfiles.reschedulingWindowHours,
+      depositRequired: businessProfiles.depositRequired,
+      depositAmountCents: businessProfiles.depositAmountCents,
+      approvedCancellationText: businessProfiles.approvedCancellationText,
+      approvedRefundText: businessProfiles.approvedRefundText,
+      approvedDiscountText: businessProfiles.approvedDiscountText,
+      emergencyEscalationInstructions: businessProfiles.emergencyEscalationInstructions,
+      sensitiveTopics: businessProfiles.sensitiveTopics,
+    })
     .from(businessProfiles)
     .where(eq(businessProfiles.workspaceId, workspaceId))
     .limit(1)
 
-  const [rec] = await db
-    .select()
+  const [receptionist] = await db
+    .select({
+      name: receptionistProfiles.name,
+      tone: receptionistProfiles.tone,
+      greetingTemplate: receptionistProfiles.greetingTemplate,
+      personalityPreset: receptionistProfiles.personalityPreset,
+      formalityLevel: receptionistProfiles.formalityLevel,
+      concisenessLevel: receptionistProfiles.concisenessLevel,
+      warmthLevel: receptionistProfiles.warmthLevel,
+      useEmoji: receptionistProfiles.useEmoji,
+      speaksAsBusiness: receptionistProfiles.speaksAsBusiness,
+      proactivelySuggestTimes: receptionistProfiles.proactivelySuggestTimes,
+      confirmsBeforeBooking: receptionistProfiles.confirmsBeforeBooking,
+      cancellationPolicyStrictness: receptionistProfiles.cancellationPolicyStrictness,
+    })
     .from(receptionistProfiles)
     .where(eq(receptionistProfiles.workspaceId, workspaceId))
     .limit(1)
 
-  const svcList = await db
-    .select({ name: services.name, duration: services.durationMinutes, price: services.priceCents })
+  const serviceRows = await db
+    .select({
+      name: services.name,
+      duration: services.durationMinutes,
+      price: services.priceCents,
+    })
     .from(services)
     .where(eq(services.workspaceId, workspaceId))
 
-  const staffList = await db
+  const staffRows = await db
     .select({ name: staffMembers.name })
     .from(staffMembers)
     .where(eq(staffMembers.workspaceId, workspaceId))
 
   return {
-    businessName: biz?.name ?? 'the business',
-    category: biz?.category ?? null,
-    description: biz?.description ?? null,
-    location: biz?.location ?? null,
-    cancellationPolicy: biz?.cancellationPolicy ?? null,
-    refundPolicy: biz?.refundPolicy ?? null,
-    priceDisplay: biz?.priceDisplayPreference ?? 'show',
-    receptionistName: rec?.name ?? 'Noa',
-    tone: rec?.tone ?? 'professional',
-    greetingTemplate: rec?.greetingTemplate ?? null,
-    services: svcList.map(s => ({ name: s.name, duration: s.duration, price: s.price })),
-    staff: staffList,
+    businessName: business?.name ?? 'the business',
+    category: business?.category ?? null,
+    description: business?.description ?? null,
+    location: business?.location ?? null,
+    cancellationPolicy: business?.cancellationPolicy ?? null,
+    refundPolicy: business?.refundPolicy ?? null,
+    priceDisplay: business?.priceDisplayPreference ?? 'show',
+    receptionistName: receptionist?.name ?? 'Receptionist',
+    tone: receptionist?.tone ?? 'professional',
+    greetingTemplate: receptionist?.greetingTemplate ?? null,
+    services: serviceRows,
+    staff: staffRows,
+
+    personalityPreset: receptionist?.personalityPreset ?? 'professional',
+    formalityLevel: receptionist?.formalityLevel ?? 3,
+    concisenessLevel: receptionist?.concisenessLevel ?? 3,
+    warmthLevel: receptionist?.warmthLevel ?? 3,
+    useEmoji: receptionist?.useEmoji ?? false,
+    speaksAsBusiness: receptionist?.speaksAsBusiness ?? false,
+    proactivelySuggestTimes: receptionist?.proactivelySuggestTimes ?? true,
+    confirmsBeforeBooking: receptionist?.confirmsBeforeBooking ?? true,
+    cancellationPolicyStrictness: receptionist?.cancellationPolicyStrictness ?? 'standard',
+
+    cancellationWindowHours: business?.cancellationWindowHours ?? 24,
+    reschedulingWindowHours: business?.reschedulingWindowHours ?? 2,
+    depositRequired: business?.depositRequired ?? false,
+    depositAmountCents: business?.depositAmountCents ?? null,
+    approvedCancellationText: business?.approvedCancellationText ?? null,
+    approvedRefundText: business?.approvedRefundText ?? null,
+    approvedDiscountText: business?.approvedDiscountText ?? null,
+    emergencyEscalationInstructions: business?.emergencyEscalationInstructions ?? null,
+    sensitiveTopics: business?.sensitiveTopics ?? null,
   }
 }

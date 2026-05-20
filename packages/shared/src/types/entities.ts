@@ -15,6 +15,13 @@ import type {
   NotificationType,
   ActorType,
   OnboardingStep,
+  MessagingConsentStatus,
+  ConsentSource,
+  MessagePurpose,
+  WhatsAppChannelType,
+  PersonalityPreset,
+  CancellationStrictness,
+  ReminderType,
 } from './enums.js'
 
 // --- Auth & Users ---
@@ -56,7 +63,7 @@ export interface Plan {
   tier: PlanTier
   name: string
   monthlyPriceCents: number
-  annualPriceCentsCents: number
+  annualPriceCents: number
   conversationsLimit: number
   appointmentsLimit: number
   voiceMinutesLimit: number
@@ -115,6 +122,15 @@ export interface BusinessProfile {
   cancellationPolicy: string | null
   refundPolicy: string | null
   priceDisplayPreference: 'show' | 'hide' | 'on_request'
+  cancellationWindowHours: number
+  reschedulingWindowHours: number
+  depositRequired: boolean
+  depositAmountCents: number | null
+  approvedCancellationText: string | null
+  approvedRefundText: string | null
+  approvedDiscountText: string | null
+  emergencyEscalationInstructions: string | null
+  sensitiveTopics: string[]
   createdAt: Date
   updatedAt: Date
 }
@@ -126,6 +142,20 @@ export interface ReceptionistProfile {
   tone: ReceptionistTone
   greetingTemplate: string | null
   escalationRules: EscalationRule[]
+  personalityPreset: PersonalityPreset
+  greetingStyle: string | null
+  formalityLevel: number       // 1-5
+  concisenessLevel: number     // 1-5
+  warmthLevel: number          // 1-5
+  useEmoji: boolean
+  speaksAsBusiness: boolean    // false = first person, true = "we"
+  proactivelySuggestTimes: boolean
+  confirmsBeforeBooking: boolean
+  notifyOwnerEveryAppointment: boolean
+  cancellationPolicyStrictness: CancellationStrictness
+  refundHandlingMode: string | null
+  discountHandlingMode: string | null
+  depositHandlingMode: string | null
   createdAt: Date
   updatedAt: Date
 }
@@ -348,3 +378,81 @@ export interface AudioAsset {
   confidence: number | null
   createdAt: Date
 }
+
+// --- Messaging & Consent (§8, §9, §10) ---
+
+export interface MessagingConsent {
+  id: string
+  workspaceId: string
+  customerId: string
+  phoneNumber: string
+  status: MessagingConsentStatus
+  source: ConsentSource
+  allowedPurposes: MessagePurpose[]
+  capturedAt: Date
+  lastInboundMessageAt: Date | null
+  lastOutboundMessageAt: Date | null
+  notes: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface OutboundMessageLog {
+  id: string
+  workspaceId: string
+  customerId: string
+  conversationId: string | null
+  outboundSinceLastInbound: number
+  lastInboundAt: Date | null
+  lastOutboundAt: Date | null
+  purposeOfLastOutbound: MessagePurpose | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface SentReminderLog {
+  id: string
+  appointmentId: string
+  reminderType: ReminderType
+  sentAt: Date
+  createdAt: Date
+}
+
+// --- Sending Policy Engine (§10) ---
+
+export interface SendDecision {
+  allowed: boolean
+  reason?: string
+  details?: {
+    consentStatus: MessagingConsentStatus
+    outboundCount: number
+    maxOutbound: number
+    purposeAllowed: boolean
+    duplicateBlocked: boolean
+    appointmentValid: boolean
+  }
+}
+
+export interface AppointmentAuditEvent {
+  id: string
+  workspaceId: string
+  appointmentId: string
+  actorType: ActorType
+  actorId: string | null
+  action: string
+  channel: string
+  channelProvider: string
+  metadata: Record<string, unknown> | null
+  createdAt: Date
+}
+
+// --- Outbound limits (§9) ---
+
+export const OUTBOUND_LIMITS = {
+  MAX_OUTBOUND_WITHOUT_REPLY: 3,
+  MAX_REMINDERS_PER_APPOINTMENT: 2,
+  MAX_FOLLOW_UPS: 1,
+  FOLLOW_UP_DELAY_MS: 30 * 60 * 1000, // 30 minutes
+  REMINDER_24H_BEFORE_MS: 24 * 60 * 60 * 1000,
+  REMINDER_2H_BEFORE_MS: 2 * 60 * 60 * 1000,
+} as const

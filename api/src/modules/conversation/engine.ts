@@ -1,5 +1,5 @@
 import { db } from '@zenda/db/client'
-import { conversations, messages, workspaces } from '@zenda/db/schema'
+import { conversations, messages, workspaces, businessProfiles } from '@zenda/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { resolveOrCreateCustomer } from './customer-resolver.js'
 import { detectLanguage } from './language-detector.js'
@@ -7,7 +7,48 @@ import { sendToWorkspace } from '../whatsapp/ws-handler.js'
 import { handleAudioMessage } from '../ai/transcription/audio-handler.js'
 import { getNextOnboardingQuestion, processOnboardingResponse } from '../onboarding/conversation-handler.js'
 import { logger } from '../../infra/logger.js'
-import type { OnboardingStep } from '@zenda/shared'
+import type { OnboardingStep, EscalationReason } from '@zenda/shared'
+import { escalateToHuman } from '../ai/tools/escalate-to-human.js'
+import { resetOnInbound } from '../messaging/outbound-tracker.js'
+import {
+  getConsent,
+  recordConsent,
+  optOut,
+  detectOptOutIntent,
+  generateConsentConfirmation,
+  touchInboundTimestamp,
+} from '../messaging/consent-service.js'
+import { logConsentEvent } from '../audit/logger.js'
+
+// Emergency keywords in multiple languages
+const EMERGENCY_KEYWORDS = [
+  'emergency', 'urgente', 'ayuda', 'socorro', '911', 'ambulancia',
+  'incendio', 'fire', 'drowning', 'ahogo', 'bleeding', 'sangrando',
+  'heart attack', 'ataque cardiaco', 'stroke', 'derrame cerebral',
+  'overdose', 'sobredosis', 'suicide', 'suicidio', 'accidente',
+  'accident', 'choque', 'desmayo', 'fainting', 'no respira',
+  'not breathing', 'choking', 'atragantado',
+]
+
+const EMERGENCY_PATTERN = new RegExp(
+  '\\b(' + EMERGENCY_KEYWORDS.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b',
+  'i',
+)
+
+// Low-confidence signals in AI responses
+const LOW_CONFIDENCE_PATTERNS = [
+  /i'?m\s+not\s+sure/i,
+  /i\s+don'?t\s+(?:really\s+)?know/i,
+  /no\s+estoy\s+segur[oa]/i,
+  /no\s+(?:lo\s+)?s[ée]/i,
+  /i\s+cannot\s+(?:help|assist|answer)/i,
+  /fuera\s+de\s+(?:mi|nuestro)\s+(?:alcance|scope)/i,
+  /beyond\s+(?:my|the)\s+(?:scope|knowledge)/i,
+  /i'?m\s+unable\s+to/i,
+  /no\s+puedo\s+(?:ayudar|asistir)/i,
+]
+
+const TOOL_FAILURE_PATTERN = /(?:tool_call_failed|function_call_error|unable_to_complete_action)/i
 
 interface IncomingMessage {
   threadId?: string // Optional thread ID for message routing
@@ -27,6 +68,25 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
 
     // 2. Find or create customer (using phone number or thread ID)
     const customer = await resolveOrCreateCustomer(workspaceId, msg.phoneNumber, language)
+
+    // 2a. Consent management — reset outbound counter, ensure consent record exists
+    await resetOnInbound(workspaceId, customer.id)
+
+    let consent = await getConsent(workspaceId, customer.id)
+    if (!consent) {
+      await recordConsent({
+        workspaceId,
+        customerId: customer.id,
+        phoneNumber: customer.phoneNumber,
+        status: 'unknown',
+        source: 'customer_inbound_message',
+      })
+      consent = await getConsent(workspaceId, customer.id)
+      logger.info('Consent record created for new customer', {
+        workspaceId,
+        customerId: customer.id,
+      })
+    }
 
     // 3. Find or create conversation
     let conversation = await findActiveConversation(workspaceId, customer.id)
@@ -112,6 +172,157 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       .set({ lastMessageAt: new Date(), updatedAt: new Date() })
       .where(eq(conversations.id, conversation.id))
 
+    // 8a. Emergency keyword detection — skip AI, immediately escalate
+    if (EMERGENCY_PATTERN.test(messageBody)) {
+      logger.warn('Emergency keyword detected — auto-escalating', {
+        workspaceId,
+        conversationId: conversation.id,
+        customerId: customer.id,
+      })
+
+      const escalationResult = await escalateToHuman(
+        workspaceId,
+        conversation.id,
+        { reason: 'emergency', message: `Emergency detected in customer message: ${messageBody.slice(0, 200)}` },
+        agentLanguage,
+      )
+
+      // Send emergency response to customer
+      const emergencyResponse = await storeMessage(conversation.id, workspaceId, {
+        senderType: 'ai',
+        contentType: 'text',
+        body: escalationResult.message,
+        language: agentLanguage,
+      })
+
+      sendToWorkspace(workspaceId, {
+        type: 'response.send',
+        data: {
+          conversationId: conversation.id,
+          threadId: msg.threadId || conversation.threadId,
+          message: {
+            id: emergencyResponse.id,
+            body: escalationResult.message,
+            senderType: 'ai',
+            contentType: 'text',
+            status: 'sent',
+            createdAt: emergencyResponse.createdAt,
+          },
+        },
+      })
+
+      sendToWorkspace(workspaceId, {
+        type: 'conversation.update',
+        data: {
+          id: conversation.id,
+          mode: 'needs_attention',
+          lastMessageAt: new Date().toISOString(),
+          needsAttentionReason: 'emergency',
+        },
+      })
+
+      return
+    }
+
+    // 8b. Sensitive topic detection from business config
+    const sensitiveReason = await detectSensitiveTopic(workspaceId, messageBody)
+    if (sensitiveReason) {
+      logger.info('Sensitive topic detected — auto-escalating', {
+        workspaceId,
+        conversationId: conversation.id,
+        topic: sensitiveReason,
+      })
+
+      const escalationResult = await escalateToHuman(
+        workspaceId,
+        conversation.id,
+        { reason: 'sensitive_info', message: `Sensitive topic detected: ${sensitiveReason}` },
+        agentLanguage,
+      )
+
+      const sensitiveResponse = await storeMessage(conversation.id, workspaceId, {
+        senderType: 'ai',
+        contentType: 'text',
+        body: escalationResult.message,
+        language: agentLanguage,
+      })
+
+      sendToWorkspace(workspaceId, {
+        type: 'response.send',
+        data: {
+          conversationId: conversation.id,
+          threadId: msg.threadId || conversation.threadId,
+          message: {
+            id: sensitiveResponse.id,
+            body: escalationResult.message,
+            senderType: 'ai',
+            contentType: 'text',
+            status: 'sent',
+            createdAt: sensitiveResponse.createdAt,
+          },
+        },
+      })
+
+      sendToWorkspace(workspaceId, {
+        type: 'conversation.update',
+        data: {
+          id: conversation.id,
+          mode: 'needs_attention',
+          lastMessageAt: new Date().toISOString(),
+          needsAttentionReason: 'sensitive_info',
+        },
+      })
+
+      return
+    }
+
+    // 8c. Consent opt-out detection — before routing to AI agent
+    await touchInboundTimestamp(workspaceId, customer.id)
+
+    if (detectOptOutIntent(messageBody)) {
+      logger.info('Opt-out intent detected', {
+        workspaceId,
+        customerId: customer.id,
+        conversationId: conversation.id,
+      })
+
+      await optOut(workspaceId, customer.id)
+      await logConsentEvent(workspaceId, customer.id, 'opt_out', {
+        source: 'customer_inbound_message',
+        messageBody: messageBody.slice(0, 100),
+      })
+
+      const confirmationText = generateConsentConfirmation(agentLanguage)
+      const optOutMessage = await storeMessage(conversation.id, workspaceId, {
+        senderType: 'system',
+        contentType: 'text',
+        body: confirmationText,
+        language: agentLanguage,
+      })
+
+      sendToWorkspace(workspaceId, {
+        type: 'response.send',
+        data: {
+          conversationId: conversation.id,
+          threadId: msg.threadId || conversation.threadId,
+          message: {
+            id: optOutMessage.id,
+            body: confirmationText,
+            senderType: 'system',
+            contentType: 'text',
+            status: 'sent',
+            createdAt: optOutMessage.createdAt,
+          },
+        },
+      })
+
+      logger.info('Opt-out processed — skipping AI response', {
+        workspaceId,
+        customerId: customer.id,
+      })
+      return
+    }
+
     // 9. Route to AI agent (using transcribed text for audio, raw body for text)
     const { runAgent } = await import('../ai/agent.js')
     const aiResponse = await runAgent(workspaceId, conversation.id, customer.id, messageBody, agentLanguage)
@@ -131,6 +342,23 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       aiModel: aiResponse.model,
       toolCalls: aiResponse.toolCalls,
     })
+
+    // 10a. Post-AI auto-escalation: detect low confidence or tool failure
+    const autoEscalationReason = detectAutoEscalation(aiResponse.text, aiResponse.toolCalls)
+    if (autoEscalationReason) {
+      logger.info('Auto-escalating due to low confidence or tool failure', {
+        workspaceId,
+        conversationId: conversation.id,
+        reason: autoEscalationReason,
+      })
+
+      await escalateToHuman(
+        workspaceId,
+        conversation.id,
+        { reason: autoEscalationReason, message: `Auto-escalated: AI response showed low confidence or tool failure` },
+        aiResponse.language as 'en' | 'es',
+      )
+    }
 
     // 11. Send response back via WebSocket
     sendToWorkspace(workspaceId, {
@@ -154,9 +382,9 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       type: 'conversation.update',
       data: {
         id: conversation.id,
-        mode: conversation.mode,
+        mode: autoEscalationReason ? 'needs_attention' : conversation.mode,
         lastMessageAt: new Date().toISOString(),
-        needsAttentionReason: null,
+        needsAttentionReason: autoEscalationReason ?? null,
       },
     })
 
@@ -168,6 +396,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       language: agentLanguage,
       contentType: msg.contentType,
       platform: msg.platform,
+      autoEscalated: !!autoEscalationReason,
     })
   } catch (error) {
     logger.error('Failed to process message', {
@@ -194,7 +423,7 @@ async function createConversation(
   workspaceId: string,
   customerId: string,
   language: 'en' | 'es',
-  threadId?: string
+  _threadId?: string
 ) {
   const [conv] = await db
     .insert(conversations)
@@ -204,7 +433,6 @@ async function createConversation(
       channel: 'whatsapp',
       mode: 'auto',
       language,
-      threadId,
     })
     .returning()
   return conv
@@ -335,4 +563,63 @@ async function handleOnboardingMessage(
     nextStep: result.nextStep,
     language,
   })
+}
+
+/**
+ * Check if the customer message matches any sensitive topics from business config.
+ * Returns the matched topic string, or null if no match.
+ */
+async function detectSensitiveTopic(workspaceId: string, messageBody: string): Promise<string | null> {
+  try {
+    const [profile] = await db
+      .select({ sensitiveTopics: businessProfiles.sensitiveTopics })
+      .from(businessProfiles)
+      .where(eq(businessProfiles.workspaceId, workspaceId))
+      .limit(1)
+
+    const topics = profile?.sensitiveTopics
+    if (!topics || topics.length === 0) return null
+
+    const lowerMessage = messageBody.toLowerCase()
+    for (const topic of topics) {
+      if (lowerMessage.includes(topic.toLowerCase())) {
+        return topic
+      }
+    }
+  } catch (err) {
+    logger.error('Failed to check sensitive topics', {
+      workspaceId,
+      error: err instanceof Error ? err.message : String(err),
+    })
+  }
+
+  return null
+}
+
+/**
+ * Detect if an AI response should trigger auto-escalation.
+ * Returns an escalation reason, or null if no escalation needed.
+ */
+function detectAutoEscalation(
+  aiResponseText: string,
+  toolCalls?: unknown[],
+): EscalationReason | null {
+  // Check for low-confidence signals in AI response
+  for (const pattern of LOW_CONFIDENCE_PATTERNS) {
+    if (pattern.test(aiResponseText)) {
+      return 'low_confidence'
+    }
+  }
+
+  // Check for tool failure patterns in tool calls
+  if (toolCalls && Array.isArray(toolCalls)) {
+    for (const tc of toolCalls) {
+      const tcStr = JSON.stringify(tc)
+      if (TOOL_FAILURE_PATTERN.test(tcStr)) {
+        return 'technology_question'
+      }
+    }
+  }
+
+  return null
 }

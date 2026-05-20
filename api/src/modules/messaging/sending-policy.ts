@@ -1,0 +1,175 @@
+/**
+ * Sending Policy Engine (§10.4)
+ *
+ * Pure function — no DB, no side effects. All inputs are passed explicitly.
+ * This makes it trivially unit-testable and composable.
+ */
+import type {
+  MessagingConsentStatus,
+  MessagePurpose,
+  SendDecision,
+} from '@zenda/shared'
+
+const ALLOWED_PURPOSES_FOR_UNKNOWN: MessagePurpose[] = [
+  'customer_inquiry_reply',
+  'booking_assistance',
+  'booking_confirmation',
+]
+
+const ALL_PURPOSES: MessagePurpose[] = [
+  'appointment_confirmation',
+  'appointment_reminder',
+  'appointment_reschedule',
+  'appointment_cancellation',
+  'booking_follow_up',
+  'booking_assistance',
+  'booking_confirmation',
+  'customer_inquiry_reply',
+]
+
+interface SendingPolicyInput {
+  channel: 'whatsapp_ba_bridge' | 'whatsapp_waba'
+  purpose: MessagePurpose
+  consentStatus: MessagingConsentStatus
+  allowedPurposes?: MessagePurpose[]
+  outboundSinceLastInbound: number
+  maxOutboundWithoutReply: number
+  isDuplicate: boolean      // Has this exact reminder/message already been sent?
+  appointmentCancelled: boolean
+  appointmentCompleted: boolean
+  appointmentTimePassed: boolean
+  connectorSessionStable: boolean
+}
+
+export function canSendOutboundMessage(input: SendingPolicyInput): SendDecision {
+  const {
+    channel,
+    purpose,
+    consentStatus,
+    allowedPurposes,
+    outboundSinceLastInbound,
+    maxOutboundWithoutReply,
+    isDuplicate,
+    appointmentCancelled,
+    appointmentCompleted,
+    appointmentTimePassed,
+    connectorSessionStable,
+  } = input
+
+  // 1. Check consent status
+  if (consentStatus === 'opted_out') {
+    return {
+      allowed: false,
+      reason: 'Customer has opted out of messaging',
+      details: makeDetails(input, { purposeAllowed: false }),
+    }
+  }
+
+  // 2. Check purpose is allowed for this consent level
+  const purposeAllowed = isPurposeAllowed(purpose, consentStatus, allowedPurposes)
+  if (!purposeAllowed) {
+    return {
+      allowed: false,
+      reason: `Purpose '${purpose}' not allowed for consent status '${consentStatus}'`,
+      details: makeDetails(input, { purposeAllowed: false }),
+    }
+  }
+
+  // 3. Check outbound rate limit
+  if (outboundSinceLastInbound >= maxOutboundWithoutReply) {
+    return {
+      allowed: false,
+      reason: `Outbound limit reached (${outboundSinceLastInbound}/${maxOutboundWithoutReply} without reply)`,
+      details: makeDetails(input),
+    }
+  }
+
+  // 4. Check for duplicates
+  if (isDuplicate) {
+    return {
+      allowed: false,
+      reason: 'Duplicate message — already sent',
+      details: makeDetails(input, { duplicateBlocked: true }),
+    }
+  }
+
+  // 5. Check appointment state (for appointment-related purposes)
+  if (isAppointmentPurpose(purpose)) {
+    if (appointmentCancelled) {
+      return {
+        allowed: false,
+        reason: 'Appointment has been cancelled',
+        details: makeDetails(input, { appointmentValid: false }),
+      }
+    }
+    if (appointmentCompleted) {
+      return {
+        allowed: false,
+        reason: 'Appointment has already been completed',
+        details: makeDetails(input, { appointmentValid: false }),
+      }
+    }
+    if (appointmentTimePassed && purpose !== 'appointment_cancellation') {
+      return {
+        allowed: false,
+        reason: 'Appointment time has already passed',
+        details: makeDetails(input, { appointmentValid: false }),
+      }
+    }
+  }
+
+  // 6. Check connector stability
+  if (!connectorSessionStable) {
+    return {
+      allowed: false,
+      reason: 'WhatsApp connector session is not stable',
+      details: makeDetails(input),
+    }
+  }
+
+  // All checks passed
+  return {
+    allowed: true,
+    details: makeDetails(input),
+  }
+}
+
+function isPurposeAllowed(
+  purpose: MessagePurpose,
+  consentStatus: MessagingConsentStatus,
+  explicitPurposes?: MessagePurpose[],
+): boolean {
+  if (consentStatus === 'allowed') return ALL_PURPOSES.includes(purpose)
+  if (consentStatus === 'limited') {
+    const allowed = explicitPurposes ?? []
+    return allowed.includes(purpose)
+  }
+  // 'unknown' — allow only reactive purposes
+  return ALLOWED_PURPOSES_FOR_UNKNOWN.includes(purpose)
+}
+
+function isAppointmentPurpose(purpose: MessagePurpose): boolean {
+  return [
+    'appointment_confirmation',
+    'appointment_reminder',
+    'appointment_reschedule',
+    'appointment_cancellation',
+    'booking_follow_up',
+    'booking_confirmation',
+  ].includes(purpose)
+}
+
+function makeDetails(
+  input: SendingPolicyInput,
+  overrides: Partial<NonNullable<SendDecision['details']>> = {},
+): NonNullable<SendDecision['details']> {
+  return {
+    consentStatus: input.consentStatus,
+    outboundCount: input.outboundSinceLastInbound,
+    maxOutbound: input.maxOutboundWithoutReply,
+    purposeAllowed: true,
+    duplicateBlocked: false,
+    appointmentValid: true,
+    ...overrides,
+  }
+}

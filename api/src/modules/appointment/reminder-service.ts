@@ -1,65 +1,74 @@
 import { db } from '@zenda/db/client'
-import { reminders, appointments, customers, services, workspaces } from '@zenda/db/schema'
+import { reminders, appointments, customers, services, workspaces, messagingConsent } from '@zenda/db/schema'
 import { eq, and, lte } from 'drizzle-orm'
 import { sendToWorkspace } from '../whatsapp/ws-handler.js'
 import { logger } from '../../infra/logger.js'
+import { canSendReminder, recordReminderSent } from '../messaging/reminder-guard.js'
+import { incrementOutbound } from '../messaging/outbound-tracker.js'
+import { checkSendingPolicy } from '../ai/policy-gate.js'
+import type { Language, ReminderType } from '@zenda/shared'
 
 interface ReminderTemplate {
   titleEn: string
   titleEs: string
-  bodyEn: (data: { customerName: string; serviceName: string; dateTime: string }) => string
-  bodyEs: (data: { customerName: string; serviceName: string; dateTime: string }) => string
+  bodyEn: (data: { customerName: string; serviceName: string; time: string; date: string }) => string
+  bodyEs: (data: { customerName: string; serviceName: string; time: string; date: string }) => string
 }
 
 const REMINDER_TEMPLATES: Record<string, ReminderTemplate> = {
   '24h': {
     titleEn: 'Appointment Reminder',
     titleEs: 'Recordatorio de Cita',
-    bodyEn: ({ customerName, serviceName, dateTime }) =>
-      `Hi ${customerName}, this is a reminder for your ${serviceName} appointment tomorrow at ${dateTime}. Reply CONFIRM to confirm or CANCEL to reschedule.`,
-    bodyEs: ({ customerName, serviceName, dateTime }) =>
-      `Hola ${customerName}, le recordamos su cita de ${serviceName} mañana a las ${dateTime}. Responda CONFIRMAR para confirmar o CANCELAR para reprogramar.`,
+    bodyEn: ({ customerName, serviceName, time, date }) =>
+      `Hi ${customerName}, just a friendly reminder that you have a ${serviceName} appointment tomorrow (${date}) at ${time}. Looking forward to seeing you.`,
+    bodyEs: ({ customerName, serviceName, time, date }) =>
+      `Hola ${customerName}, te recuerdo que tienes cita de ${serviceName} mañana (${date}) a las ${time}. Te esperamos.`,
   },
   '2h': {
     titleEn: 'Appointment Soon',
-    titleEs: 'Cita Próxima',
-    bodyEn: ({ customerName, serviceName, dateTime }) =>
-      `Hi ${customerName}, your ${serviceName} appointment is in 2 hours (${dateTime}). See you soon!`,
-    bodyEs: ({ customerName, serviceName, dateTime }) =>
-      `Hola ${customerName}, su cita de ${serviceName} es en 2 horas (${dateTime}). ¡Nos vemos pronto!`,
+    titleEs: 'Cita Proxima',
+    bodyEn: ({ customerName, serviceName, time }) =>
+      `Hi ${customerName}, your ${serviceName} appointment is coming up at ${time}. See you soon.`,
+    bodyEs: ({ customerName, serviceName, time }) =>
+      `Hola ${customerName}, en un rato tienes tu cita de ${serviceName} a las ${time}. Todo bien para asistir?`,
   },
 }
 
-/** Default template key – used when scheduled time doesn't match 24h/2h windows */
 const DEFAULT_TEMPLATE = '24h'
 
-/**
- * Pick a template based on how far in advance the reminder fires.
- * If the appointment is <4 hours away we use the "2h" tone; otherwise "24h".
- */
 function pickTemplateKey(appointmentStart: Date, reminderScheduledAt: Date): string {
   const diffHours = (appointmentStart.getTime() - reminderScheduledAt.getTime()) / 3_600_000
   return diffHours <= 4 ? '2h' : '24h'
 }
 
-/**
- * Format an appointment Date into a locale-friendly time string.
- * Uses the workspace timezone when available.
- */
-function formatDateTime(date: Date, timezone: string): string {
+function formatTime(date: Date, timezone: string): string {
   try {
-    return date.toLocaleString('en-US', {
+    return date.toLocaleTimeString('en-US', {
       timeZone: timezone,
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
+    })
+  } catch {
+    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+  }
+}
+
+function formatDate(date: Date, timezone: string): string {
+  try {
+    return date.toLocaleDateString('en-US', {
+      timeZone: timezone,
       weekday: 'short',
       month: 'short',
       day: 'numeric',
     })
   } catch {
-    return date.toLocaleString()
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
   }
+}
+
+function pickReminderType(templateKey: string): ReminderType {
+  return templateKey === '2h' ? 'same_day' : 'day_before'
 }
 
 export async function scheduleReminder(
@@ -76,7 +85,6 @@ export async function scheduleReminder(
 export async function processDueReminders(): Promise<number> {
   const now = new Date()
 
-  // Fetch pending reminders that are due
   const dueReminders = await db
     .select()
     .from(reminders)
@@ -92,18 +100,20 @@ export async function processDueReminders(): Promise<number> {
 
   for (const reminder of dueReminders) {
     try {
-      // ── 1. Fetch appointment with customer, service, and workspace info ──
+      // ── 1. Fetch appointment with all related data including consent ──
       const [appointmentRow] = await db
         .select({
           appointment: appointments,
           customer: customers,
           service: services,
           workspace: workspaces,
+          consent: messagingConsent,
         })
         .from(appointments)
         .innerJoin(customers, eq(appointments.customerId, customers.id))
         .innerJoin(services, eq(appointments.serviceId, services.id))
         .innerJoin(workspaces, eq(appointments.workspaceId, workspaces.id))
+        .leftJoin(messagingConsent, eq(customers.id, messagingConsent.customerId))
         .where(eq(appointments.id, reminder.appointmentId))
         .limit(1)
 
@@ -119,7 +129,13 @@ export async function processDueReminders(): Promise<number> {
         continue
       }
 
-      const { appointment: apt, customer: cust, service: svc, workspace: ws } = appointmentRow
+      const {
+        appointment: apt,
+        customer: cust,
+        service: svc,
+        workspace: ws,
+        consent,
+      } = appointmentRow
 
       // Skip if appointment is already cancelled
       if (apt.status === 'cancelled') {
@@ -130,19 +146,64 @@ export async function processDueReminders(): Promise<number> {
         continue
       }
 
-      // ── 2. Pick template and compose message ──
+      // ── 2. Reminder deduplication guard ──
       const templateKey = pickTemplateKey(apt.startAt, reminder.scheduledAt)
+      const reminderType = pickReminderType(templateKey)
+
+      const guardResult = await canSendReminder(apt.id, reminderType)
+      if (!guardResult.canSend) {
+        logger.info('Reminder blocked by guard', {
+          reminderId: reminder.id,
+          appointmentId: apt.id,
+          reason: guardResult.reason,
+        })
+        await db
+          .update(reminders)
+          .set({ status: 'failed' })
+          .where(eq(reminders.id, reminder.id))
+        continue
+      }
+
+      // ── 3. Sending policy engine check (via policy-gate) ──
+      const policyDecision = await checkSendingPolicy({
+        workspaceId: ws.id,
+        customerId: cust.id,
+        purpose: 'appointment_reminder',
+        channel: 'whatsapp_ba_bridge',
+        appointmentCancelled: apt.status === 'cancelled',
+        appointmentCompleted: apt.status === 'completed',
+        appointmentTimePassed: new Date(apt.startAt) < now,
+        isDuplicate: false,
+        connectorSessionStable: true, // assume stable when processing reminders
+      })
+
+      if (!policyDecision.allowed) {
+        logger.info('Reminder blocked by sending policy', {
+          reminderId: reminder.id,
+          appointmentId: apt.id,
+          reason: policyDecision.reason,
+        })
+        await db
+          .update(reminders)
+          .set({ status: 'failed' })
+          .where(eq(reminders.id, reminder.id))
+        continue
+      }
+
+      // ── 4. Compose message with natural templates ──
       const template = REMINDER_TEMPLATES[templateKey] ?? REMINDER_TEMPLATES[DEFAULT_TEMPLATE]
-      const language = (cust.language ?? ws.defaultLanguage) as 'en' | 'es'
+      const language = (cust.language ?? ws.defaultLanguage) as Language
       const customerName = cust.name ?? cust.phoneNumber
-      const dateTime = formatDateTime(apt.startAt, apt.timezone || ws.timezone)
+      const tz = apt.timezone || ws.timezone
+      const time = formatTime(apt.startAt, tz)
+      const date = formatDate(apt.startAt, tz)
 
-      const title = language === 'en' ? template.titleEn : template.titleEs
-      const body = language === 'en'
-        ? template.bodyEn({ customerName, serviceName: svc.name, dateTime })
-        : template.bodyEs({ customerName, serviceName: svc.name, dateTime })
+      const title = language === 'es' ? template.titleEs : template.titleEn
+      const body = language === 'es'
+        ? template.bodyEs({ customerName, serviceName: svc.name, time, date })
+        : template.bodyEn({ customerName, serviceName: svc.name, time, date })
 
-      // ── 3. Send reminder via WebSocket to the desktop app ──
+      // ── 5. Send reminder ──
       const delivered = sendToWorkspace(ws.id, {
         type: 'whatsapp.message',
         data: {
@@ -156,7 +217,7 @@ export async function processDueReminders(): Promise<number> {
         },
       })
 
-      // ── 4. Update reminder status ──
+      // ── 6. Update statuses ──
       const newStatus = delivered ? 'sent' : 'failed'
       await db
         .update(reminders)
@@ -166,12 +227,15 @@ export async function processDueReminders(): Promise<number> {
         })
         .where(eq(reminders.id, reminder.id))
 
-      // Also bump the appointment reminderStatus for dashboard visibility
       if (delivered) {
         await db
           .update(appointments)
           .set({ reminderStatus: 'sent', updatedAt: new Date() })
           .where(eq(appointments.id, apt.id))
+
+        // Record in deduplication log and track outbound
+        await recordReminderSent(apt.id, reminderType)
+        await incrementOutbound(ws.id, cust.id, 'appointment_reminder')
       }
 
       logger.info('Reminder processed', {
@@ -180,6 +244,7 @@ export async function processDueReminders(): Promise<number> {
         workspaceId: ws.id,
         delivered,
         language,
+        templateKey,
       })
 
       if (delivered) sentCount++

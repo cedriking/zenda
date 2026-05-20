@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, pgEnum, uniqueIndex, index } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, timestamp, pgEnum, uniqueIndex, index, integer, jsonb } from 'drizzle-orm/pg-core'
 import { users } from './users.js'
 
 export const onboardingStepEnum = pgEnum('onboarding_step', [
@@ -28,6 +28,10 @@ export const workspaces = pgTable('workspaces', {
   composioAccountId: varchar('composio_account_id', { length: 255 }),
   composioCalendarId: varchar('composio_calendar_id', { length: 255 }),
   composioConnectedAt: timestamp('composio_connected_at', { withTimezone: true }),
+  // Messaging config (§9, §10)
+  maxRemindersPerAppointment: integer('max_reminders_per_appointment').notNull().default(2),
+  maxOutboundWithoutReply: integer('max_outbound_without_reply').notNull().default(3),
+  outboundLimitsConfig: jsonb('outbound_limits_config').$type<Record<string, unknown>>().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })

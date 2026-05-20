@@ -1,0 +1,272 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
+import { apiFetch } from '../../../services/api-client'
+import { Calendar, AlertCircle } from 'lucide-react'
+
+export const Route = createFileRoute('/dashboard/settings/appointments')({
+  component: AppointmentSettingsPage,
+})
+
+type CancellationStrictness = 'flexible' | 'moderate' | 'strict'
+
+interface AppointmentSettings {
+  cancellationWindowHours: number
+  reschedulingWindowHours: number
+  cancellationPolicyStrictness: CancellationStrictness
+  depositRequired: boolean
+  depositAmountCents: number
+  approvedCancellationText: string
+  approvedRefundText: string
+}
+
+const DEFAULT_SETTINGS: AppointmentSettings = {
+  cancellationWindowHours: 24,
+  reschedulingWindowHours: 12,
+  cancellationPolicyStrictness: 'moderate',
+  depositRequired: false,
+  depositAmountCents: 0,
+  approvedCancellationText: '',
+  approvedRefundText: '',
+}
+
+function AppointmentSettingsPage() {
+  const [settings, setSettings] = useState<AppointmentSettings>(DEFAULT_SETTINGS)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [saveSuccess, setSaveSuccess] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function load() {
+      try {
+        setLoadError(null)
+        const data = await apiFetch<AppointmentSettings>('/settings/appointments')
+        setSettings({ ...DEFAULT_SETTINGS, ...data })
+      } catch {
+        setLoadError('Failed to load appointment settings. Using defaults.')
+      }
+    }
+    load()
+  }, [])
+
+  async function handleSave() {
+    if (settings.cancellationWindowHours < 0) {
+      setSaveError('Cancellation window must be 0 or more hours')
+      return
+    }
+    if (settings.reschedulingWindowHours < 0) {
+      setSaveError('Rescheduling window must be 0 or more hours')
+      return
+    }
+    if (settings.depositRequired && settings.depositAmountCents <= 0) {
+      setSaveError('Deposit amount must be greater than 0 when deposits are required')
+      return
+    }
+
+    setSaving(true)
+    setSaveError(null)
+    setSaveSuccess(false)
+
+    try {
+      await apiFetch('/settings/appointments', {
+        method: 'PATCH',
+        body: settings,
+      })
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to save settings')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function updateField<K extends keyof AppointmentSettings>(key: K, value: AppointmentSettings[K]) {
+    setSettings(prev => ({ ...prev, [key]: value }))
+  }
+
+  return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+          <Calendar size={24} />
+          Appointment Policies
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          Set cancellation, rescheduling, and deposit policies for appointments
+        </p>
+      </div>
+
+      {loadError && (
+        <div className="mb-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-3 text-sm text-yellow-700 dark:text-yellow-400 flex items-center gap-2">
+          <AlertCircle size={16} />
+          {loadError}
+        </div>
+      )}
+
+      {saveError && (
+        <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 text-sm text-red-700 dark:text-red-400 flex items-center gap-2">
+          <AlertCircle size={16} />
+          {saveError}
+        </div>
+      )}
+
+      {saveSuccess && (
+        <div className="mb-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 text-sm text-green-700 dark:text-green-400">
+          Appointment policies saved successfully.
+        </div>
+      )}
+
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6">
+        {/* Window Settings */}
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-4">Cancellation & Rescheduling Windows</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Cancellation window (hours)
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={settings.cancellationWindowHours}
+                onChange={e => updateField('cancellationWindowHours', parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Minimum hours before an appointment that cancellation is allowed
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Rescheduling window (hours)
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={settings.reschedulingWindowHours}
+                onChange={e => updateField('reschedulingWindowHours', parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Minimum hours before an appointment that rescheduling is allowed
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Policy Strictness */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Cancellation policy strictness
+          </label>
+          <select
+            value={settings.cancellationPolicyStrictness}
+            onChange={e => updateField('cancellationPolicyStrictness', e.target.value as CancellationStrictness)}
+            className="w-full max-w-xs px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          >
+            <option value="flexible">Flexible</option>
+            <option value="moderate">Moderate</option>
+            <option value="strict">Strict</option>
+          </select>
+          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 space-y-1">
+            <p><span className="font-medium text-gray-700 dark:text-gray-300">Flexible:</span> Customers can cancel anytime with a full refund</p>
+            <p><span className="font-medium text-gray-700 dark:text-gray-300">Moderate:</span> Cancellations within the window may incur a partial charge</p>
+            <p><span className="font-medium text-gray-700 dark:text-gray-300">Strict:</span> No refunds for cancellations within the window</p>
+          </div>
+        </div>
+
+        {/* Deposit */}
+        <div className="space-y-3">
+          <label className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+            <div>
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Require deposit</span>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Charge a deposit when customers book appointments</p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={settings.depositRequired}
+              onClick={() => updateField('depositRequired', !settings.depositRequired)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                settings.depositRequired ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  settings.depositRequired ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </label>
+
+          {settings.depositRequired && (
+            <div className="pl-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Deposit amount ($)
+              </label>
+              <input
+                type="number"
+                min={0}
+                step={0.01}
+                value={settings.depositAmountCents / 100}
+                onChange={e => updateField('depositAmountCents', Math.round(parseFloat(e.target.value) * 100) || 0)}
+                placeholder="0.00"
+                className="w-full max-w-xs px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Policy Texts */}
+        <div className="space-y-4">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Customer-Facing Policy Text</h3>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Approved cancellation message
+            </label>
+            <textarea
+              value={settings.approvedCancellationText}
+              onChange={e => updateField('approvedCancellationText', e.target.value)}
+              rows={3}
+              placeholder="e.g., Your appointment has been cancelled. We hope to see you again soon!"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Message sent to the customer when their cancellation is approved
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Approved refund message
+            </label>
+            <textarea
+              value={settings.approvedRefundText}
+              onChange={e => updateField('approvedRefundText', e.target.value)}
+              rows={3}
+              placeholder="e.g., A refund of {amount} has been issued and will appear in 3-5 business days."
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Message sent when a refund is approved. Use {'{amount}'} as a placeholder for the refund value
+            </p>
+          </div>
+        </div>
+
+        {/* Save */}
+        <div className="pt-2">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : 'Save Appointment Policies'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}

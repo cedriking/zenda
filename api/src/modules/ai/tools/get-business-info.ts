@@ -1,3 +1,11 @@
+/**
+ * Tool: get_business_info
+ *
+ * Safety constraints:
+ * - All business info comes from the DB query filtered by workspaceId.
+ * - Business hours are derived from actual availability_rules rows, not hardcoded.
+ * - Sending policy is enforced at the agent layer, not bypassed here.
+ */
 import { db } from '@zenda/db/client'
 import { businessProfiles, availabilityRules } from '@zenda/db/schema'
 import { eq } from 'drizzle-orm'
