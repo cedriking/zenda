@@ -2,18 +2,12 @@
  * Integrations Module
  *
  * This module provides server-side integrations for external services:
- * - Zernio: WhatsApp and other messaging platforms
  * - Composio: Google Calendar and other productivity tools
- *
- * These integrations replace the client-side Baileys implementation and
- * enable server-side control over messaging and calendar operations.
  */
 
-export * from './zernio/index.js'
 export * from './composio/index.js'
 
 import { Elysia } from 'elysia'
-import { zernioWebhookRoutes } from './zernio/webhooks.js'
 import { composioRoutes } from './composio/index.js'
 
 /**
@@ -21,7 +15,6 @@ import { composioRoutes } from './composio/index.js'
  * Registers all integration-related endpoints
  */
 export const integrationsRoutes = new Elysia({ prefix: '/integrations' })
-  .use(zernioWebhookRoutes)
   .use(composioRoutes)
 
   /**
@@ -56,7 +49,6 @@ export const integrationsRoutes = new Elysia({ prefix: '/integrations' })
       status: 'ok',
       timestamp: new Date().toISOString(),
       integrations: {
-        zernio: process.env.ZERNIO_API_KEY ? 'configured' : 'not_configured',
         composio: process.env.COMPOSIO_API_KEY ? 'configured' : 'not_configured',
       },
     }

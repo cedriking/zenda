@@ -10,8 +10,8 @@ import { logger } from '../../infra/logger.js'
 import type { OnboardingStep } from '@zenda/shared'
 
 interface IncomingMessage {
-  threadId?: string // Zernio thread ID format: zernio:{accountId}:{conversationId}
-  phoneNumber: string // Legacy support - will be deprecated
+  threadId?: string // Optional thread ID for message routing
+  phoneNumber: string
   body: string
   contentType: 'text' | 'audio' | 'image' | 'file' | 'system'
   mediaUrl?: string
@@ -132,12 +132,12 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       toolCalls: aiResponse.toolCalls,
     })
 
-    // 11. Send response back via Zernio using thread ID
+    // 11. Send response back via WebSocket
     sendToWorkspace(workspaceId, {
       type: 'response.send',
       data: {
         conversationId: conversation.id,
-        threadId: msg.threadId || conversation.threadId, // Use Zernio thread ID
+        threadId: msg.threadId || conversation.threadId,
         message: {
           id: responseMessage.id,
           body: aiResponse.text,
@@ -194,7 +194,7 @@ async function createConversation(
   workspaceId: string,
   customerId: string,
   language: 'en' | 'es',
-  threadId?: string // Zernio thread ID
+  threadId?: string
 ) {
   const [conv] = await db
     .insert(conversations)
@@ -204,7 +204,7 @@ async function createConversation(
       channel: 'whatsapp',
       mode: 'auto',
       language,
-      threadId, // Store Zernio thread ID for routing
+      threadId,
     })
     .returning()
   return conv
@@ -277,7 +277,7 @@ async function handleOnboardingMessage(
       type: 'response.send',
       data: {
         conversationId,
-        threadId: msg.threadId, // Use Zernio thread ID
+        threadId: msg.threadId,
         message: {
           id: responseMessage.id,
           body: questionData.question,
@@ -317,7 +317,7 @@ async function handleOnboardingMessage(
     type: 'response.send',
     data: {
       conversationId,
-      threadId: msg.threadId, // Use Zernio thread ID
+      threadId: msg.threadId,
       message: {
         id: responseMessage.id,
         body: reply,

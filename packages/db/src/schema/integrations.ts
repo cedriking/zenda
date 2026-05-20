@@ -12,7 +12,6 @@ export const integrationTypeEnum = pgEnum('integration_type', [
 ])
 
 export const integrationProviderEnum = pgEnum('integration_provider', [
-  'zernio',
   'composio',
   'stripe',
   'custom',

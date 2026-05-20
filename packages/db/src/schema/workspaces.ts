@@ -24,10 +24,6 @@ export const workspaces = pgTable('workspaces', {
   defaultLanguage: languageEnum('default_language').notNull().default('es'),
   onboardingStep: onboardingStepEnum('onboarding_step').notNull().default('not_started'),
   onboardingCompletedAt: timestamp('onboarding_completed_at', { withTimezone: true }),
-  // Zernio integration
-  zernioAccountId: varchar('zernio_account_id', { length: 255 }),
-  zernioAccessToken: varchar('zernio_access_token', { length: 500 }),
-  zernioConnectedAt: timestamp('zernio_connected_at', { withTimezone: true }),
   // Composio integration
   composioAccountId: varchar('composio_account_id', { length: 255 }),
   composioCalendarId: varchar('composio_calendar_id', { length: 255 }),
