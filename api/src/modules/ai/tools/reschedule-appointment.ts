@@ -16,6 +16,7 @@ import { appointments, services, staffMembers, businessProfiles } from '@zenda/d
 import { eq, and } from 'drizzle-orm'
 import { APPOINTMENT_TRANSITIONS } from '@zenda/shared'
 import type { Language } from '@zenda/shared'
+import { logAppointmentAudit } from '../../audit/logger.js'
 
 interface ToolInput {
   appointmentId: string
@@ -93,6 +94,13 @@ export async function rescheduleAppointment(
     })
     .where(eq(appointments.id, apt.id))
     .returning()
+
+  logAppointmentAudit(workspaceId, updated.id, 'appointment_rescheduled', {
+    channel: 'whatsapp',
+    channelProvider: 'baileys',
+    customerId: apt.customerId,
+    serviceId: svc.id,
+  }).catch(() => {})
 
   const newDateStr = startAt.toLocaleDateString('en-US', {
     weekday: 'long',

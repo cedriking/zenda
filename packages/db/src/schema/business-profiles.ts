@@ -15,6 +15,10 @@ export const personalityPresetEnum = pgEnum('personality_preset', [
   'professional', 'warm', 'minimal', 'premium', 'friendly',
 ])
 
+export const staffAssignmentModeEnum = pgEnum('staff_assignment_mode', [
+  'auto_assign', 'customer_chooses', 'manual_only',
+])
+
 export const businessProfiles = pgTable('business_profiles', {
   id: uuid('id').defaultRandom().primaryKey(),
   workspaceId: uuid('workspace_id').notNull().references(() => workspaces.id, { onDelete: 'cascade' }),
@@ -29,13 +33,27 @@ export const businessProfiles = pgTable('business_profiles', {
   priceDisplayPreference: priceDisplayEnum('price_display_preference').notNull().default('show'),
   cancellationWindowHours: integer('cancellation_window_hours').notNull().default(24),
   reschedulingWindowHours: integer('rescheduling_window_hours').notNull().default(2),
+  minimumNoticeHours: integer('minimum_notice_hours').notNull().default(2),
+  maximumBookingWindowDays: integer('maximum_booking_window_days').notNull().default(30),
   depositRequired: boolean('deposit_required').notNull().default(false),
   depositAmountCents: integer('deposit_amount_cents'),
+  staffAssignmentMode: staffAssignmentModeEnum('staff_assignment_mode').notNull().default('auto_assign'),
   approvedCancellationText: text('approved_cancellation_text'),
   approvedRefundText: text('approved_refund_text'),
   approvedDiscountText: text('approved_discount_text'),
   emergencyEscalationInstructions: text('emergency_escalation_instructions'),
   sensitiveTopics: text('sensitive_topics').array().default([]),
+  escalationBehavior: jsonb('escalation_behavior').$type<{
+    autoPauseAi?: boolean
+    notificationChannel?: 'whatsapp' | 'email' | 'dashboard'
+    responseSlaMinutes?: number
+  }>().default({ autoPauseAi: true, notificationChannel: 'dashboard', responseSlaMinutes: 30 }),
+  ownerNotificationPreferences: jsonb('owner_notification_preferences').$type<{
+    appointmentBooked?: boolean
+    appointmentCancelled?: boolean
+    escalationCreated?: boolean
+    optOut?: boolean
+  }>().default({ appointmentBooked: true, appointmentCancelled: true, escalationCreated: true, optOut: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })

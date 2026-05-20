@@ -144,11 +144,13 @@ export type MessagingConsentStatus =
   | 'limited'      // Allowed for specific purposes only
   | 'opted_out'    // Customer explicitly opted out
 
-// How consent was captured
+// How consent was captured (S8.1)
 export type ConsentSource =
   | 'customer_inbound_message'
   | 'whatsapp_booking'
-  | 'manual_owner_entry'
+  | 'booking_form'               // Customer consented via an online booking form
+  | 'business_import'            // Business imported existing customer contacts
+  | 'manual_owner_confirmation'  // Owner manually confirmed consent for this customer
   | 'opt_out_request'
 
 // Purpose of an outbound message (§10.1)
@@ -161,11 +163,17 @@ export type MessagePurpose =
   | 'booking_assistance'
   | 'booking_confirmation'
   | 'customer_inquiry_reply'
+  | 'inbound_reply'          // Direct reply to a customer's inbound message
+  | 'business_follow_up'     // Follow-up initiated by the business owner
+  | 'marketing'              // Marketing/promotional — BLOCKED by policy engine
+  | 'unknown'                // Unrecognized purpose — BLOCKED by policy engine
 
-// WhatsApp channel types
+// WhatsApp channel types (S10.3)
 export type WhatsAppChannelType =
-  | 'whatsapp_ba_bridge'   // Business App desktop bridge
-  | 'whatsapp_waba'        // Official WhatsApp Business API (future)
+  | 'whatsapp_ba_bridge'               // Business App desktop bridge (Baileys-based)
+  | 'whatsapp_waba'                    // Official WhatsApp Business API (future)
+  | 'business_app_coexistence'         // Business App Coexistence mode (S10.4)
+  | 'baileys_internal_adapter'         // Direct Baileys adapter
 
 // Personality presets (§6.2)
 export type PersonalityPreset =

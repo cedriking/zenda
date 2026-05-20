@@ -11,7 +11,8 @@ export const messagingConsentStatusEnum = pgEnum('messaging_consent_status', [
 ])
 
 export const consentSourceEnum = pgEnum('consent_source', [
-  'customer_inbound_message', 'whatsapp_booking', 'manual_owner_entry', 'opt_out_request',
+  'customer_inbound_message', 'whatsapp_booking', 'booking_form', 'business_import',
+  'manual_owner_confirmation', 'opt_out_request',
 ])
 
 export const messagePurposeEnum = pgEnum('message_purpose', [
@@ -23,6 +24,10 @@ export const messagePurposeEnum = pgEnum('message_purpose', [
   'booking_assistance',
   'booking_confirmation',
   'customer_inquiry_reply',
+  'inbound_reply',
+  'business_follow_up',
+  'marketing',
+  'unknown',
 ])
 
 export const reminderTypeEnum = pgEnum('reminder_type', [
@@ -77,6 +82,8 @@ export const sentReminderLog = pgTable('sent_reminder_log', {
 
 export const queueStatusEnum = pgEnum('queue_status', ['pending', 'processing', 'sent', 'failed', 'dead_letter'])
 
+export const queuePriorityEnum = pgEnum('queue_priority', ['emergency', 'reminder', 'notification', 'low'])
+
 export const outboundQueue = pgTable('outbound_queue', {
   id: uuid('id').defaultRandom().primaryKey(),
   workspaceId: uuid('workspace_id').notNull().references(() => workspaces.id, { onDelete: 'cascade' }),
@@ -86,6 +93,7 @@ export const outboundQueue = pgTable('outbound_queue', {
   content: text('content').notNull(),
   contentType: varchar('content_type', { length: 20 }).notNull().default('text'),
   status: queueStatusEnum('status').notNull().default('pending'),
+  priority: queuePriorityEnum('priority').notNull().default('notification'),
   attempts: integer('attempts').notNull().default(0),
   maxAttempts: integer('max_attempts').notNull().default(5),
   nextRetryAt: timestamp('next_retry_at', { withTimezone: true }),

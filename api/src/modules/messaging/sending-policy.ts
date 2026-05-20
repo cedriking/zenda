@@ -14,7 +14,10 @@ const ALLOWED_PURPOSES_FOR_UNKNOWN: MessagePurpose[] = [
   'customer_inquiry_reply',
   'booking_assistance',
   'booking_confirmation',
+  'inbound_reply',
 ]
+
+const BLOCKED_PURPOSES: MessagePurpose[] = ['marketing', 'unknown']
 
 const ALL_PURPOSES: MessagePurpose[] = [
   'appointment_confirmation',
@@ -25,10 +28,12 @@ const ALL_PURPOSES: MessagePurpose[] = [
   'booking_assistance',
   'booking_confirmation',
   'customer_inquiry_reply',
+  'inbound_reply',
+  'business_follow_up',
 ]
 
 interface SendingPolicyInput {
-  channel: 'whatsapp_ba_bridge' | 'whatsapp_waba'
+  channel: 'whatsapp_ba_bridge' | 'whatsapp_waba' | 'business_app_coexistence' | 'baileys_internal_adapter'
   purpose: MessagePurpose
   consentStatus: MessagingConsentStatus
   allowedPurposes?: MessagePurpose[]
@@ -39,6 +44,7 @@ interface SendingPolicyInput {
   appointmentCompleted: boolean
   appointmentTimePassed: boolean
   connectorSessionStable: boolean
+  hasActiveAppointmentContext?: boolean  // Required for business_app_coexistence channel
 }
 
 export function canSendOutboundMessage(input: SendingPolicyInput): SendDecision {
@@ -61,6 +67,15 @@ export function canSendOutboundMessage(input: SendingPolicyInput): SendDecision 
     return {
       allowed: false,
       reason: 'Customer has opted out of messaging',
+      details: makeDetails(input, { purposeAllowed: false }),
+    }
+  }
+
+  // 1b. Block marketing and unknown purposes (§10.1)
+  if (BLOCKED_PURPOSES.includes(purpose)) {
+    return {
+      allowed: false,
+      reason: `Purpose '${purpose}' is blocked by policy`,
       details: makeDetails(input, { purposeAllowed: false }),
     }
   }
@@ -124,6 +139,15 @@ export function canSendOutboundMessage(input: SendingPolicyInput): SendDecision 
       allowed: false,
       reason: 'WhatsApp connector session is not stable',
       details: makeDetails(input),
+    }
+  }
+
+  // 7. Business App Coexistence: outbound only within active appointment context (§10.4)
+  if (channel === 'business_app_coexistence' && !input.hasActiveAppointmentContext) {
+    return {
+      allowed: false,
+      reason: 'Business App Coexistence mode requires an active appointment context for outbound messages',
+      details: makeDetails(input, { appointmentValid: false }),
     }
   }
 

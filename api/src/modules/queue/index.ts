@@ -1,7 +1,7 @@
 import { Elysia } from 'elysia'
 import { getQueuedItems, clearQueue } from './offline-queue.js'
 import { getQueueStats as getRetryQueueStats } from './retry-queue.js'
-import { getQueueStats, getDeadLetters } from './persistent-queue.js'
+import { getQueueStats, getDeadLetters, retryDeadLetter } from './persistent-queue.js'
 import { pauseOutbound, resumeOutbound, isOutboundPaused } from './processor.js'
 
 export const queueModule = new Elysia({ prefix: '/queue' })
@@ -64,4 +64,12 @@ export const queueModule = new Elysia({ prefix: '/queue' })
     }
     const items = await getDeadLetters(workspaceId, limit ? parseInt(limit) : undefined)
     return { workspaceId, count: items.length, items }
+  })
+
+  .post('/dead-letters/:id/retry', async ({ params }) => {
+    const result = await retryDeadLetter(params.id)
+    if (!result) {
+      return { error: 'Dead letter message not found or not in dead_letter status' }
+    }
+    return { status: 'retried', message: result }
   })

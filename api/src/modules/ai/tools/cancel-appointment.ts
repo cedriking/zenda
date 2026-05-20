@@ -21,6 +21,7 @@ import { appointments, services, staffMembers, businessProfiles, receptionistPro
 import { eq, and } from 'drizzle-orm'
 import { APPOINTMENT_TRANSITIONS } from '@zenda/shared'
 import type { CancellationStrictness, Language } from '@zenda/shared'
+import { logAppointmentAudit } from '../../audit/logger.js'
 
 interface ToolInput {
   appointmentId: string
@@ -121,6 +122,13 @@ export async function cancelAppointment(
     })
     .where(eq(appointments.id, apt.id))
     .returning()
+
+  logAppointmentAudit(workspaceId, updated.id, 'appointment_cancelled', {
+    channel: 'whatsapp',
+    channelProvider: 'baileys',
+    customerId: apt.customerId,
+    serviceId: svc.id,
+  }).catch(() => {})
 
   // ── Deposit note ──
   let depositNote: string | undefined

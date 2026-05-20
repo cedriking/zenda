@@ -5,7 +5,7 @@
  * Detects opt-out intent from customer messages and generates confirmation text.
  */
 import { db } from '@zenda/db/client'
-import { messagingConsent } from '@zenda/db/schema'
+import { messagingConsent, outboundQueue } from '@zenda/db/schema'
 import { eq, and } from 'drizzle-orm'
 import type {
   MessagingConsentStatus,
@@ -83,7 +83,7 @@ export async function getConsent(workspaceId: string, customerId: string) {
 
 /**
  * Mark a customer as opted_out.
- * Returns the confirmation text to send back.
+ * Returns the natural-language confirmation text to send back (§8.4).
  */
 export async function optOut(workspaceId: string, customerId: string): Promise<string> {
   const existing = await getConsent(workspaceId, customerId)
@@ -95,7 +95,11 @@ export async function optOut(workspaceId: string, customerId: string): Promise<s
     source: 'opt_out_request',
     notes: 'Customer requested opt-out via message',
   })
-  return 'You have been unsubscribed from messaging. Reply HELP to re-subscribe.'
+
+  // Cascade: cancel pending queue messages for this customer
+  await cancelPendingMessagesForCustomer(workspaceId, customerId)
+
+  return "Got it — I won't send you any more messages. If you'd like to book an appointment in the future, just send me a message anytime."
 }
 
 /**
@@ -110,14 +114,14 @@ export async function isAllowedToSend(
   const consent = await getConsent(workspaceId, customerId)
 
   if (!consent) {
-    return ['customer_inquiry_reply', 'booking_assistance', 'booking_confirmation'].includes(purpose)
+    return ['customer_inquiry_reply', 'booking_assistance', 'booking_confirmation', 'inbound_reply'].includes(purpose)
   }
   if (consent.status === 'opted_out') return false
   if (consent.status === 'allowed') return true
   if (consent.status === 'limited') return (consent.allowedPurposes ?? []).includes(purpose)
 
   // unknown — allow only reactive purposes
-  return ['customer_inquiry_reply', 'booking_assistance', 'booking_confirmation'].includes(purpose)
+  return ['customer_inquiry_reply', 'booking_assistance', 'booking_confirmation', 'inbound_reply'].includes(purpose)
 }
 
 /**
@@ -129,13 +133,14 @@ export function detectOptOutIntent(messageBody: string): boolean {
 }
 
 /**
- * Generate a natural-language confirmation for consent / subscription.
+ * Generate a natural-language confirmation for consent / subscription (§8.2).
+ * Avoids "Reply STOP" robotic language — uses natural phrasing instead.
  */
 export function generateConsentConfirmation(language: 'en' | 'es'): string {
   if (language === 'es') {
-    return 'Te has suscrito a los mensajes de este negocio. Puedes responder STOP en cualquier momento para cancelar.'
+    return 'Perfecto, te tengo en cuenta para futuras citas. Si en algún momento prefieres que no te envíe mensajes, solo dime y lo respeto.'
   }
-  return 'You have been subscribed to messages from this business. Reply STOP anytime to unsubscribe.'
+  return "Great, I'll keep your info on file for future appointments. If you'd ever prefer not to receive messages, just let me know and I'll respect that."
 }
 
 /**
@@ -152,4 +157,26 @@ export async function touchInboundTimestamp(workspaceId: string, customerId: str
       eq(messagingConsent.workspaceId, workspaceId),
       eq(messagingConsent.customerId, customerId),
     ))
+}
+
+/**
+ * Cancel all pending outbound queue messages for a customer (opt-out cascade).
+ */
+async function cancelPendingMessagesForCustomer(workspaceId: string, customerId: string): Promise<void> {
+  try {
+    await db
+      .update(outboundQueue)
+      .set({ status: 'failed', lastError: 'Cancelled due to customer opt-out', updatedAt: new Date() })
+      .where(and(
+        eq(outboundQueue.workspaceId, workspaceId),
+        eq(outboundQueue.customerId, customerId),
+        eq(outboundQueue.status, 'pending'),
+      ))
+  } catch (err) {
+    logger.error('Failed to cancel pending messages on opt-out', {
+      workspaceId,
+      customerId,
+      error: err instanceof Error ? err.message : String(err),
+    })
+  }
 }

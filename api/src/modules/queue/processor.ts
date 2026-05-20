@@ -8,16 +8,77 @@ import { dequeueNext, markSent, markFailed, type QueuedMessage } from './persist
 import { canSendOutboundMessage } from '../messaging/sending-policy.js'
 import { getOutboundCount, resetOnInbound } from '../messaging/outbound-tracker.js'
 import { getConsent } from '../messaging/consent-service.js'
-import { sendToWorkspace } from '../whatsapp/connection-manager.js'
+import { sendToWorkspace, isWorkspaceConnected } from '../whatsapp/connection-manager.js'
 import { db } from '@zenda/db/client'
-import { appointments, customers } from '@zenda/db/schema'
-import { eq } from 'drizzle-orm'
+import { appointments, customers, outboundQueue } from '@zenda/db/schema'
+import { eq, and, gte, sql } from 'drizzle-orm'
 import { logger } from '../../infra/logger.js'
 
 let processingInterval: ReturnType<typeof setInterval> | null = null
 let isPaused = false
 
 const DEFAULT_INTERVAL_MS = 5000 // 5 seconds
+const WORKSPACE_RATE_LIMIT_PER_HOUR = 100
+const WORKSPACE_RATE_WINDOW_MS = 3_600_000 // 1 hour
+
+// In-memory workspace rate limit counters
+const workspaceSentTimestamps = new Map<string, number[]>()
+let killSwitchState: 'running' | 'paused' | null = null // null = not yet loaded from DB
+
+/**
+ * Check workspace-level outbound rate limit.
+ */
+function isWorkspaceRateLimited(workspaceId: string): boolean {
+  const now = Date.now()
+  const timestamps = workspaceSentTimestamps.get(workspaceId) ?? []
+  const recent = timestamps.filter((t) => now - t < WORKSPACE_RATE_WINDOW_MS)
+  workspaceSentTimestamps.set(workspaceId, recent)
+  return recent.length >= WORKSPACE_RATE_LIMIT_PER_HOUR
+}
+
+function recordWorkspaceSend(workspaceId: string): void {
+  const now = Date.now()
+  const timestamps = workspaceSentTimestamps.get(workspaceId) ?? []
+  timestamps.push(now)
+  workspaceSentTimestamps.set(workspaceId, timestamps)
+}
+
+/**
+ * Persist kill switch state to DB so it survives restarts.
+ */
+async function persistKillSwitch(state: 'running' | 'paused'): Promise<void> {
+  try {
+    await db.execute(sql`
+      INSERT INTO system_settings (key, value, updated_at)
+      VALUES ('outbound_kill_switch', ${state}, NOW())
+      ON CONFLICT (key) DO UPDATE SET value = ${state}, updated_at = NOW()
+    `)
+    killSwitchState = state
+  } catch (err) {
+    logger.error('Failed to persist kill switch state', { error: (err as Error).message })
+  }
+}
+
+/**
+ * Load kill switch state from DB on startup.
+ */
+async function loadKillSwitchState(): Promise<void> {
+  if (killSwitchState !== null) return
+  try {
+    const [row] = await db.execute(sql`
+      SELECT value FROM system_settings WHERE key = 'outbound_kill_switch'
+    `) as any
+    killSwitchState = row?.[0]?.value === 'paused' ? 'paused' : 'running'
+    isPaused = killSwitchState === 'paused'
+    if (isPaused) {
+      logger.warn('Kill switch was paused before restart, maintaining paused state')
+    }
+  } catch {
+    // Table may not exist yet — default to running
+    killSwitchState = 'running'
+    isPaused = false
+  }
+}
 
 /**
  * Process a single message from the queue.
@@ -43,6 +104,13 @@ async function processOne(): Promise<boolean> {
     const consent = await getConsent(msg.workspaceId, msg.customerId)
     const outboundCount = await getOutboundCount(msg.workspaceId, msg.customerId)
 
+    // Workspace-level rate limit check
+    if (isWorkspaceRateLimited(msg.workspaceId)) {
+      await markFailed(msg.id, 'Workspace hourly rate limit exceeded')
+      logger.info('Message dropped by workspace rate limit', { queueId: msg.id, workspaceId: msg.workspaceId })
+      return true
+    }
+
     // Check appointment state if this is appointment-related
     let appointmentCancelled = false
     let appointmentCompleted = false
@@ -62,6 +130,14 @@ async function processOne(): Promise<boolean> {
       }
     }
 
+    // Check connector health
+    const connectorStable = isWorkspaceConnected(msg.workspaceId)
+
+    // Determine if there's an active appointment context
+    const hasActiveAppointmentContext = !!(
+      msg.appointmentId && !appointmentCancelled && !appointmentCompleted && !appointmentTimePassed
+    )
+
     // Run sending policy engine
     const decision = canSendOutboundMessage({
       channel: 'whatsapp_ba_bridge',
@@ -74,7 +150,8 @@ async function processOne(): Promise<boolean> {
       appointmentCancelled,
       appointmentCompleted,
       appointmentTimePassed,
-      connectorSessionStable: true,
+      connectorSessionStable: connectorStable,
+      hasActiveAppointmentContext,
     })
 
     if (!decision.allowed) {
@@ -101,6 +178,7 @@ async function processOne(): Promise<boolean> {
     })
 
     await markSent(msg.id)
+    recordWorkspaceSend(msg.workspaceId)
     logger.info('Queued message sent', {
       queueId: msg.id,
       workspaceId: msg.workspaceId,
@@ -141,6 +219,9 @@ export async function processQueue(batchSize = 10): Promise<{ processed: number 
 export function startProcessor(intervalMs = DEFAULT_INTERVAL_MS): void {
   if (processingInterval) return
 
+  // Load persisted kill switch state on startup
+  loadKillSwitchState().catch(() => {})
+
   logger.info('Starting queue processor', { intervalMs })
   processingInterval = setInterval(async () => {
     try {
@@ -169,6 +250,7 @@ export function stopProcessor(): void {
  */
 export function pauseOutbound(): void {
   isPaused = true
+  persistKillSwitch('paused').catch(() => {})
   logger.warn('Outbound queue paused (kill switch activated)')
 }
 
@@ -177,6 +259,7 @@ export function pauseOutbound(): void {
  */
 export function resumeOutbound(): void {
   isPaused = false
+  persistKillSwitch('running').catch(() => {})
   logger.info('Outbound queue resumed')
 }
 

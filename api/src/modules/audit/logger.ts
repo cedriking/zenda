@@ -9,6 +9,8 @@ interface AuditLogInput {
   action: string
   entityType: string
   entityId?: string
+  channel?: string
+  channelProvider?: string
   details?: Record<string, unknown>
 }
 
@@ -20,6 +22,8 @@ export async function logAudit(input: AuditLogInput) {
     action: input.action,
     entityType: input.entityType,
     entityId: input.entityId ?? null,
+    channel: input.channel ?? null,
+    channelProvider: input.channelProvider ?? null,
     metadata: input.details ?? null,
   })
 }
@@ -129,5 +133,71 @@ export async function logConsentEvent(
     entityType: 'consent',
     entityId: customerId,
     details,
+  })
+}
+
+/** Log an appointment lifecycle event (booked, confirmed, rescheduled, cancelled). */
+export async function logAppointmentAudit(
+  workspaceId: string,
+  appointmentId: string,
+  action: 'appointment_booked' | 'appointment_confirmed' | 'appointment_rescheduled' | 'appointment_cancelled' | 'appointment_completed' | 'appointment_no_show',
+  details?: {
+    actorType?: ActorType
+    actorId?: string
+    channel?: string
+    channelProvider?: string
+    customerId?: string
+    serviceId?: string
+    [key: string]: unknown
+  },
+) {
+  return logAudit({
+    workspaceId,
+    actorType: details?.actorType ?? 'ai',
+    actorId: details?.actorId,
+    action,
+    entityType: 'appointment',
+    entityId: appointmentId,
+    channel: details?.channel,
+    channelProvider: details?.channelProvider,
+    details: {
+      customerId: details?.customerId,
+      serviceId: details?.serviceId,
+    },
+  })
+}
+
+/** Log an escalation creation event. */
+export async function logEscalationCreated(
+  workspaceId: string,
+  conversationId: string,
+  reason: string,
+  metadata?: Record<string, unknown>,
+) {
+  return logAudit({
+    workspaceId,
+    actorType: 'ai',
+    action: 'escalation_created',
+    entityType: 'conversation',
+    entityId: conversationId,
+    channel: 'whatsapp',
+    details: { reason, ...metadata },
+  })
+}
+
+/** Log an opt-out handling event. */
+export async function logOptOutEvent(
+  workspaceId: string,
+  customerId: string,
+  channel: string,
+) {
+  return logAudit({
+    workspaceId,
+    actorType: 'customer',
+    action: 'opt_out',
+    entityType: 'consent',
+    entityId: customerId,
+    channel,
+    details: { source: 'customer_message' },
   })
 }

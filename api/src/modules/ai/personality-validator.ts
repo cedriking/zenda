@@ -23,7 +23,31 @@ const BLOCKED_PATTERNS: RegExp[] = [
   /\b(offensive|ofensiv[oa]|ofensa)\b/i,
   /\b(nazi|fascist|fascista)\b/i,
   /\b(white supremac|supremac[ía])\b/i,
+  // S6.3 additional disallowed patterns
+  /\b(savage|salvaje)\b/i,
+  /\b(dark\s+humor|humor\s+negro|humor\s+oscuro)\b/i,
+  /\b(pressure[-\s]?sales|venta\s+(?:agresiva|a\s+presi[oó]n)|vender\s+a\s+fuerza)\b/i,
+  /\b(fear[-\s]?based|basad[oa]\s+en\s+(?:el\s+)?miedo)\b/i,
+  /\b(emotionally\s+intense|intens[oa]\s+emocionalmente)\b/i,
+  /\b(political|pol[ií]tic[oa]|partido)\b/i,
+  /\b(religious\s+preaching|predicaci[oó]n\s+religiosa|proselyt)\b/i,
 ]
+
+// Suggested safe alternatives for common blocked patterns
+const SAFE_ALTERNATIVES: Record<string, string> = {
+  'savage': "Try 'bold' or 'edgy' instead",
+  'dark humor': "Try 'witty' or 'clever' instead",
+  'pressure-sales': "Try 'persuasive' or 'confident' instead",
+  'fear-based': "Try 'motivating' or 'encouraging' instead",
+  'emotionally intense': "Try 'passionate' or 'enthusiastic' instead",
+  'political': 'Personality instructions should not reference politics',
+  'religious preaching': 'Personality instructions should not reference religion',
+  'angry': "Try 'assertive' or 'direct' instead",
+  'aggressive': "Try 'confident' or 'decisive' instead",
+  'flirty': "Try 'warm' or 'friendly' instead",
+  'manipulative': "Try 'persuasive' or 'helpful' instead",
+  'rude': "Try 'straightforward' or 'candid' instead",
+}
 
 interface PersonalityValidationResult {
   valid: boolean
@@ -90,9 +114,11 @@ export function validateCustomInstructions(text: string): CustomInstructionsVali
   for (const pattern of BLOCKED_PATTERNS) {
     const match = trimmed.match(pattern)
     if (match) {
+      const alternative = SAFE_ALTERNATIVES[match[0].toLowerCase()]
+      const suffix = alternative ? ` ${alternative}.` : ''
       return {
         valid: false,
-        reason: `Custom instructions contain disallowed content near "${match[0]}". Instructions must not include aggressive, hateful, discriminatory, or inappropriate language.`,
+        reason: `Custom instructions contain disallowed content near "${match[0]}". Instructions must not include aggressive, hateful, discriminatory, or inappropriate language.${suffix}`,
       }
     }
   }

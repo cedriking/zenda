@@ -32,6 +32,14 @@ export const workspaces = pgTable('workspaces', {
   maxRemindersPerAppointment: integer('max_reminders_per_appointment').notNull().default(2),
   maxOutboundWithoutReply: integer('max_outbound_without_reply').notNull().default(3),
   outboundLimitsConfig: jsonb('outbound_limits_config').$type<Record<string, unknown>>().default({}),
+  // Reminder schedule config (§14.3)
+  reminderSchedule: jsonb('reminder_schedule').$type<Array<{
+    offsetHours: number
+    type: 'reminder' | 'confirmation_prompt'
+  }>>().default([
+    { offsetHours: 24, type: 'reminder' },
+    { offsetHours: 2, type: 'confirmation_prompt' },
+  ]),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })

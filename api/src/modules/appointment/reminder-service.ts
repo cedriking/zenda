@@ -1,12 +1,12 @@
 import { db } from '@zenda/db/client'
-import { reminders, appointments, customers, services, workspaces, messagingConsent } from '@zenda/db/schema'
+import { reminders, appointments, customers, services, workspaces, messagingConsent, receptionistProfiles } from '@zenda/db/schema'
 import { eq, and, lte } from 'drizzle-orm'
 import { sendToWorkspace } from '../whatsapp/ws-handler.js'
 import { logger } from '../../infra/logger.js'
 import { canSendReminder, recordReminderSent } from '../messaging/reminder-guard.js'
 import { incrementOutbound } from '../messaging/outbound-tracker.js'
 import { checkSendingPolicy } from '../ai/policy-gate.js'
-import type { Language, ReminderType } from '@zenda/shared'
+import type { Language, PersonalityPreset, ReminderType } from '@zenda/shared'
 
 interface ReminderTemplate {
   titleEn: string
@@ -15,30 +15,132 @@ interface ReminderTemplate {
   bodyEs: (data: { customerName: string; serviceName: string; time: string; date: string }) => string
 }
 
-const REMINDER_TEMPLATES: Record<string, ReminderTemplate> = {
-  '24h': {
-    titleEn: 'Appointment Reminder',
-    titleEs: 'Recordatorio de Cita',
-    bodyEn: ({ customerName, serviceName, time, date }) =>
-      `Hi ${customerName}, just a friendly reminder that you have a ${serviceName} appointment tomorrow (${date}) at ${time}. Looking forward to seeing you.`,
-    bodyEs: ({ customerName, serviceName, time, date }) =>
-      `Hola ${customerName}, te recuerdo que tienes cita de ${serviceName} mañana (${date}) a las ${time}. Te esperamos.`,
+// Personality-adaptive reminder templates (S15)
+const PERSONALITY_TEMPLATES: Record<string, Record<string, ReminderTemplate>> = {
+  professional: {
+    '24h': {
+      titleEn: 'Appointment Reminder',
+      titleEs: 'Recordatorio de Cita',
+      bodyEn: ({ customerName, serviceName, time, date }) =>
+        `Dear ${customerName}, this is a confirmation of your ${serviceName} appointment scheduled for ${date} at ${time}. We look forward to welcoming you.`,
+      bodyEs: ({ customerName, serviceName, time, date }) =>
+        `Estimad${customerName.endsWith('a') ? 'a' : 'o'} ${customerName}, le confirmamos su cita de ${serviceName} para el ${date} a las ${time}. Le esperamos.`,
+    },
+    '2h': {
+      titleEn: 'Appointment Soon',
+      titleEs: 'Cita Próxima',
+      bodyEn: ({ customerName, serviceName, time }) =>
+        `Dear ${customerName}, your ${serviceName} appointment is at ${time}. Does this still work for you?`,
+      bodyEs: ({ customerName, serviceName, time }) =>
+        `Estimad${customerName.endsWith('a') ? 'a' : 'o'} ${customerName}, su cita de ${serviceName} es a las ${time}. Confirme su asistencia, por favor.`,
+    },
   },
-  '2h': {
-    titleEn: 'Appointment Soon',
-    titleEs: 'Cita Proxima',
-    bodyEn: ({ customerName, serviceName, time }) =>
-      `Hi ${customerName}, your ${serviceName} appointment is coming up at ${time}. See you soon.`,
-    bodyEs: ({ customerName, serviceName, time }) =>
-      `Hola ${customerName}, en un rato tienes tu cita de ${serviceName} a las ${time}. Todo bien para asistir?`,
+  warm: {
+    '24h': {
+      titleEn: 'Appointment Reminder',
+      titleEs: 'Recordatorio de Cita',
+      bodyEn: ({ customerName, serviceName, time, date }) =>
+        `Hi ${customerName}! Just a friendly reminder that your ${serviceName} appointment is tomorrow (${date}) at ${time}. We're excited to see you! If anything changes, I can help you update it.`,
+      bodyEs: ({ customerName, serviceName, time, date }) =>
+        `¡Hola ${customerName}! Te recuerdo con cariño que tu cita de ${serviceName} es mañana (${date}) a las ${time}. ¡Te esperamos! Si necesitas cambiar algo, avísame.`,
+    },
+    '2h': {
+      titleEn: 'Appointment Soon',
+      titleEs: 'Cita Próxima',
+      bodyEn: ({ customerName, serviceName, time }) =>
+        `Hey ${customerName}, your ${serviceName} appointment is coming up at ${time}! Does this still work for you? Let me know if you need anything.`,
+      bodyEs: ({ customerName, serviceName, time }) =>
+        `¡Hola ${customerName}! En un ratito tienes tu cita de ${serviceName} a las ${time}. ¿Todo bien para asistir? Avísame si necesitas algo.`,
+    },
+  },
+  minimal: {
+    '24h': {
+      titleEn: 'Reminder',
+      titleEs: 'Recordatorio',
+      bodyEn: ({ serviceName, time, date }) =>
+        `${serviceName} appointment: ${date} at ${time}.`,
+      bodyEs: ({ serviceName, time, date }) =>
+        `Cita de ${serviceName}: ${date} a las ${time}.`,
+    },
+    '2h': {
+      titleEn: 'Soon',
+      titleEs: 'Pronto',
+      bodyEn: ({ serviceName, time }) =>
+        `${serviceName} at ${time}. See you soon.`,
+      bodyEs: ({ serviceName, time }) =>
+        `${serviceName} a las ${time}. Te esperamos.`,
+    },
+  },
+  premium: {
+    '24h': {
+      titleEn: 'Appointment Confirmation',
+      titleEs: 'Confirmación de Cita',
+      bodyEn: ({ customerName, serviceName, time, date }) =>
+        `Good day, ${customerName}. We wanted to confirm your ${serviceName} appointment on ${date} at ${time}. We have everything prepared for your visit. Should you need to make any adjustments, please don't hesitate to reach out.`,
+      bodyEs: ({ customerName, serviceName, time, date }) =>
+        `Buenos días, ${customerName}. Deseamos confirmar su cita de ${serviceName} el ${date} a las ${time}. Tenemos todo preparado para su visita. Si necesita algún ajuste, no dude en comunicarse con nosotros.`,
+    },
+    '2h': {
+      titleEn: 'Your Appointment',
+      titleEs: 'Su Cita',
+      bodyEn: ({ customerName, serviceName, time }) =>
+        `${customerName}, your ${serviceName} appointment is at ${time}. Does this still suit your schedule?`,
+      bodyEs: ({ customerName, serviceName, time }) =>
+        `${customerName}, su cita de ${serviceName} es a las ${time}. ¿Le sigue funcionando este horario?`,
+    },
+  },
+  friendly: {
+    '24h': {
+      titleEn: 'Hey, don\'t forget!',
+      titleEs: '¡No lo olvides!',
+      bodyEn: ({ customerName, serviceName, time, date }) =>
+        `Hey ${customerName}! Just wanted to make sure you didn't forget — your ${serviceName} is tomorrow (${date}) at ${time} 😊 If anything comes up, just let me know and I can help reschedule!`,
+      bodyEs: ({ customerName, serviceName, time, date }) =>
+        `¡Hola ${customerName}! Solo quería asegurarme de que no se te olvidara — tu ${serviceName} es mañana (${date}) a las ${time} 😊 Si te surge algo, dime y te ayudo a mover la cita.`,
+    },
+    '2h': {
+      titleEn: 'Almost time!',
+      titleEs: '¡Ya casi!',
+      bodyEn: ({ customerName, serviceName, time }) =>
+        `Hey ${customerName}, your ${serviceName} is at ${time}! All good to go? Let me know if anything changes!`,
+      bodyEs: ({ customerName, serviceName, time }) =>
+        `¡Hola ${customerName}! Tu ${serviceName} es a las ${time}. ¿Todo listo? Avísame si cambia algo.`,
+    },
   },
 }
 
+const DEFAULT_PERSONALITY = 'warm'
 const DEFAULT_TEMPLATE = '24h'
+
+function getTemplateForPersonality(personality: PersonalityPreset | null, templateKey: string): ReminderTemplate {
+  const preset = personality ?? DEFAULT_PERSONALITY
+  return PERSONALITY_TEMPLATES[preset]?.[templateKey] ?? PERSONALITY_TEMPLATES[DEFAULT_PERSONALITY][templateKey]
+}
 
 function pickTemplateKey(appointmentStart: Date, reminderScheduledAt: Date): string {
   const diffHours = (appointmentStart.getTime() - reminderScheduledAt.getTime()) / 3_600_000
   return diffHours <= 4 ? '2h' : '24h'
+}
+
+/**
+ * Generate reminder schedule dates for an appointment based on workspace config.
+ * Falls back to 24h + 2h defaults if no custom schedule is configured.
+ */
+export function generateReminderSchedule(
+  appointmentStart: Date,
+  schedule: Array<{ offsetHours: number; type: 'reminder' | 'confirmation_prompt' }> | null | undefined,
+): Array<{ scheduledAt: Date; type: 'reminder' | 'confirmation_prompt' }> {
+  const config = schedule?.length ? schedule : [
+    { offsetHours: 24, type: 'reminder' as const },
+    { offsetHours: 2, type: 'confirmation_prompt' as const },
+  ]
+
+  return config
+    .map((entry) => ({
+      scheduledAt: new Date(appointmentStart.getTime() - entry.offsetHours * 3_600_000),
+      type: entry.type,
+    }))
+    .filter((entry) => entry.scheduledAt > new Date())
 }
 
 function formatTime(date: Date, timezone: string): string {
@@ -80,6 +182,33 @@ export async function scheduleReminder(
     scheduledAt,
     status: 'pending',
   })
+}
+
+/**
+ * Schedule all reminders for an appointment based on workspace config.
+ * Respects maxRemindersPerAppointment from workspace settings.
+ */
+export async function scheduleAllReminders(
+  appointmentId: string,
+  appointmentStart: Date,
+  workspaceConfig: {
+    maxRemindersPerAppointment?: number
+    reminderSchedule?: Array<{ offsetHours: number; type: 'reminder' | 'confirmation_prompt' }> | null
+  },
+): Promise<void> {
+  const maxReminders = workspaceConfig.maxRemindersPerAppointment ?? 2
+  const schedule = generateReminderSchedule(appointmentStart, workspaceConfig.reminderSchedule)
+  const toSchedule = schedule.slice(0, maxReminders)
+
+  if (toSchedule.length === 0) return
+
+  await db.insert(reminders).values(
+    toSchedule.map((entry) => ({
+      appointmentId,
+      scheduledAt: entry.scheduledAt,
+      status: 'pending',
+    })),
+  )
 }
 
 export async function processDueReminders(): Promise<number> {
@@ -190,8 +319,18 @@ export async function processDueReminders(): Promise<number> {
         continue
       }
 
-      // ── 4. Compose message with natural templates ──
-      const template = REMINDER_TEMPLATES[templateKey] ?? REMINDER_TEMPLATES[DEFAULT_TEMPLATE]
+      // ── 4. Compose message with personality-adaptive templates (S15) ──
+      let personality: PersonalityPreset | null = null
+      try {
+        const [profile] = await db
+          .select({ personalityPreset: receptionistProfiles.personalityPreset })
+          .from(receptionistProfiles)
+          .where(eq(receptionistProfiles.workspaceId, ws.id))
+          .limit(1)
+        personality = (profile?.personalityPreset as PersonalityPreset) ?? null
+      } catch { /* fallback to default personality */ }
+
+      const template = getTemplateForPersonality(personality, templateKey)
       const language = (cust.language ?? ws.defaultLanguage) as Language
       const customerName = cust.name ?? cust.phoneNumber
       const tz = apt.timezone || ws.timezone

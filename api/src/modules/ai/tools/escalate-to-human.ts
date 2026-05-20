@@ -13,6 +13,7 @@ import { eq } from 'drizzle-orm'
 import type { EscalationReason } from '@zenda/shared'
 import { createNotification } from '../../notification/service.js'
 import { logger } from '../../../infra/logger.js'
+import { logEscalationCreated } from '../../audit/logger.js'
 
 interface ToolInput {
   reason: EscalationReason
@@ -77,6 +78,8 @@ export async function escalateToHuman(
       status: 'open',
     })
     .returning()
+
+  logEscalationCreated(workspaceId, conversationId, reason).catch(() => {})
 
   // 3. Notify business owner via notification service
   const notificationTitle = isEmergency

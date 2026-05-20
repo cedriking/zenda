@@ -147,12 +147,26 @@ function extractEntities(message: string): Record<string, string> {
  * If multiple patterns match, pick the one with highest confidence.
  * If nothing matches above a 0.5 threshold, return `ambiguous`.
  */
+// Short-reply confidence boost for confirm intent (S13)
+const SHORT_CONFIRM_WORDS = /^(yes|no|ok|okay|yep|nope|si|sí|claro|dale|vale|perfecto|sure|right|correct|confirmo|exacto)$/i
+
 export function classifyIntent(message: string): IntentResult {
   if (!message || !message.trim()) {
     return { intent: 'ambiguous', confidence: 0 }
   }
 
   const normalized = message.trim()
+
+  // Short-reply confidence boost for confirm intent
+  if (SHORT_CONFIRM_WORDS.test(normalized)) {
+    const affirmative = /^(yes|yep|si|sí|claro|dale|vale|perfecto|sure|right|correct|confirmo|exacto|ok|okay)$/i
+    const intent: ClassifiedIntent = affirmative.test(normalized) ? 'confirm' : 'cancel'
+    return {
+      intent,
+      confidence: 0.92,
+      extractedEntities: extractEntities(normalized),
+    }
+  }
 
   // Collect all matches and pick the best
   let bestMatch: IntentResult = { intent: 'ambiguous', confidence: 0 }

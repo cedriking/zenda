@@ -10,6 +10,8 @@ import { eq, and, lte, isNull, sql, desc } from 'drizzle-orm'
 import type { MessagePurpose } from '@zenda/shared'
 import { logger } from '../../infra/logger.js'
 
+export type QueuePriority = 'emergency' | 'reminder' | 'notification' | 'low'
+
 export interface EnqueueInput {
   workspaceId: string
   customerId: string
@@ -18,6 +20,7 @@ export interface EnqueueInput {
   content: string
   contentType?: string
   appointmentId?: string
+  priority?: QueuePriority
   metadata?: Record<string, unknown>
 }
 
@@ -30,6 +33,7 @@ export interface QueuedMessage {
   content: string
   contentType: string
   status: 'pending' | 'processing' | 'sent' | 'failed' | 'dead_letter'
+  priority: QueuePriority
   attempts: number
   maxAttempts: number
   nextRetryAt: Date | null
@@ -63,6 +67,7 @@ export async function enqueueMessage(input: EnqueueInput): Promise<QueuedMessage
       content: input.content,
       contentType: input.contentType ?? 'text',
       appointmentId: input.appointmentId ?? null,
+      priority: input.priority ?? 'notification',
       metadata: input.metadata ?? {},
       status: 'pending',
     })
@@ -92,7 +97,16 @@ export async function dequeueNext(): Promise<QueuedMessage | null> {
       eq(outboundQueue.status, 'pending'),
       sql`(${outboundQueue.nextRetryAt} IS NULL OR ${outboundQueue.nextRetryAt} <= ${now})`,
     ))
-    .orderBy(outboundQueue.createdAt)
+    .orderBy(
+      sql`CASE ${outboundQueue.priority}
+        WHEN 'emergency' THEN 0
+        WHEN 'reminder' THEN 1
+        WHEN 'notification' THEN 2
+        WHEN 'low' THEN 3
+        ELSE 2
+      END`,
+      outboundQueue.createdAt,
+    )
     .limit(1)
     .for('update', { skipLocked: true })
 
@@ -232,4 +246,30 @@ export async function getPendingMessages(
     .orderBy(outboundQueue.createdAt)
 
   return rows as QueuedMessage[]
+}
+
+/**
+ * Retry a dead letter message by resetting it to pending.
+ */
+export async function retryDeadLetter(id: string): Promise<QueuedMessage | null> {
+  const [row] = await db
+    .update(outboundQueue)
+    .set({
+      status: 'pending',
+      attempts: 0,
+      failureReason: null,
+      nextRetryAt: null,
+      updatedAt: new Date(),
+    })
+    .where(and(
+      eq(outboundQueue.id, id),
+      eq(outboundQueue.status, 'dead_letter'),
+    ))
+    .returning()
+
+  if (row) {
+    logger.info('Dead letter message retried', { queueId: id })
+  }
+
+  return (row as QueuedMessage) ?? null
 }

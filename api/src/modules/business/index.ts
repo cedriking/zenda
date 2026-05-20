@@ -33,6 +33,11 @@ export const businessModule = new Elysia({ prefix: '/business' })
       cancellationPolicy: t.Optional(t.String()),
       refundPolicy: t.Optional(t.String()),
       priceDisplayPreference: t.Optional(t.String()),
+      minimumNoticeHours: t.Optional(t.Number()),
+      maximumBookingWindowDays: t.Optional(t.Number()),
+      staffAssignmentMode: t.Optional(t.String()),
+      escalationBehavior: t.Optional(t.Any()),
+      ownerNotificationPreferences: t.Optional(t.Any()),
     }),
   })
 

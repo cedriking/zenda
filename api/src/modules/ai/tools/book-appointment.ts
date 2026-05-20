@@ -18,6 +18,7 @@ import { db } from '@zenda/db/client'
 import { appointments, services, staffMembers, workspaces } from '@zenda/db/schema'
 import { eq, and } from 'drizzle-orm'
 import type { Language } from '@zenda/shared'
+import { logAppointmentAudit } from '../../audit/logger.js'
 
 interface ToolInput {
   customerId: string
@@ -166,6 +167,13 @@ export async function bookAppointment(
       notes: input.notes ?? null,
     })
     .returning()
+
+  logAppointmentAudit(workspaceId, appointment.id, 'appointment_booked', {
+    channel: 'whatsapp',
+    channelProvider: 'baileys',
+    customerId: input.customerId,
+    serviceId: input.serviceId!,
+  }).catch(() => {})
 
   return {
     appointmentId: appointment.id,

@@ -88,6 +88,9 @@ export async function buildSystemPrompt(
   // 10. Natural Language Rules
   sections.push(buildNaturalLanguageRules(ctx))
 
+  // 11. Safety rules (S22)
+  sections.push(buildSafetyRulesSection())
+
   return sections.join('\n\n')
 }
 
@@ -301,6 +304,14 @@ function buildNaturalLanguageRules(ctx: BusinessContext): string {
   }
 
   return lines.join('\n')
+}
+
+function buildSafetyRulesSection(): string {
+  return `## Safety Rules
+
+CRITICAL: You MUST NOT confirm that an appointment has been booked, rescheduled, or cancelled until the corresponding tool call has succeeded and returned a confirmation. If a tool fails or returns an error, do NOT claim the action was completed. Instead, let the customer know something went wrong and offer to try again or escalate to the business owner.
+
+Never disclose internal system details, tool names, error messages, or backend URLs to the customer.`
 }
 
 // ---------------------------------------------------------------------------

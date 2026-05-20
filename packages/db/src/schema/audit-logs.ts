@@ -11,6 +11,8 @@ export const auditLogs = pgTable('audit_logs', {
   action: varchar('action', { length: 100 }).notNull(),
   entityType: varchar('entity_type', { length: 50 }).notNull(),
   entityId: uuid('entity_id'),
+  channel: varchar('channel', { length: 50 }),
+  channelProvider: varchar('channel_provider', { length: 50 }),
   metadata: jsonb('metadata'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })

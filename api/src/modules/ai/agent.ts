@@ -13,7 +13,8 @@ import {
   getBusinessInfo, getBusinessInfoToolDef,
   escalateToHuman, escalateToHumanToolDef,
 } from './tools/index.js'
-import { sanitizeCustomerMessage } from './input-guard.js'
+import { sanitizeCustomerMessage, isEmergencyMessage } from './input-guard.js'
+import { classifyIntent } from './intent-classifier.js'
 import { logInputSanitized, logToolFailure } from '../audit/logger.js'
 import { logger } from '../../infra/logger.js'
 import type { Language, AIProvider } from '@zenda/shared'
@@ -44,6 +45,19 @@ const ALL_TOOLS = [
 
 const MAX_ITERATIONS = 3
 
+// Per-customer rate limiting (max 10 messages per minute)
+const RATE_LIMIT_WINDOW_MS = 60_000
+const RATE_LIMIT_MAX = 10
+const customerMessageTimestamps = new Map<string, number[]>()
+
+function isRateLimited(customerId: string): boolean {
+  const now = Date.now()
+  const timestamps = customerMessageTimestamps.get(customerId) ?? []
+  const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS)
+  customerMessageTimestamps.set(customerId, [...recent, now])
+  return recent.length >= RATE_LIMIT_MAX
+}
+
 export async function runAgent(
   workspaceId: string,
   conversationId: string,
@@ -52,6 +66,19 @@ export async function runAgent(
   language: Language,
 ): Promise<AgentResponse | null> {
   try {
+    // 0. Per-customer rate limit check
+    if (isRateLimited(customerId)) {
+      logger.warn('Customer rate limited', { workspaceId, customerId })
+      return {
+        text: language === 'es'
+          ? 'Estoy recibiendo muchos mensajes tuyos. Por favor espera un momento y vuelve a escribir.'
+          : "I'm receiving a lot of messages from you. Please wait a moment and try again.",
+        language,
+        provider: 'system',
+        model: 'rate-limit',
+      }
+    }
+
     // 1. Build system prompt with business context
     const systemPrompt = await buildSystemPrompt(workspaceId, language)
 
@@ -62,7 +89,39 @@ export async function runAgent(
       await logInputSanitized(workspaceId, conversationId, flags, userMessage)
     }
 
-    // 3. Load recent conversation history
+    // 3. Emergency detection — bypass LLM for safety-critical messages (S21)
+    if (isEmergencyMessage(sanitized)) {
+      logger.info('Emergency message detected, routing directly', { workspaceId, conversationId })
+      await escalateToHuman(workspaceId, conversationId, {
+        reason: 'Emergency keywords detected in customer message',
+      } as any)
+      return {
+        text: language === 'es'
+          ? 'Parece que necesitas ayuda urgente. Te estoy conectando con el equipo ahora mismo.'
+          : "It sounds like you need urgent help. I'm connecting you with the team right away.",
+        language,
+        provider: 'system',
+        model: 'emergency-route',
+      }
+    }
+
+    // 4. Classify intent for context enrichment
+    const intentResult = classifyIntent(sanitized)
+    logger.info('Intent classified', { workspaceId, conversationId, intent: intentResult.intent, confidence: intentResult.confidence })
+
+    // Short-circuit opt-out intent — bypass LLM (S8)
+    if (intentResult.intent === 'opt_out' && intentResult.confidence >= 0.9) {
+      const { optOut } = await import('../messaging/consent-service.js')
+      const confirmationText = await optOut(workspaceId, customerId)
+      return {
+        text: confirmationText,
+        language,
+        provider: 'system',
+        model: 'opt-out-route',
+      }
+    }
+
+    // 5. Load recent conversation history
     const history = await db
       .select()
       .from(messages)
@@ -84,10 +143,14 @@ export async function runAgent(
       }
     }
 
-    // Add the sanitized user message
-    chatMessages.push({ role: 'user', content: sanitized })
+    // Add the sanitized user message with intent context hint
+    if (intentResult.intent !== 'ambiguous' && intentResult.confidence >= 0.7) {
+      chatMessages.push({ role: 'user', content: `[Intent: ${intentResult.intent}]\n${sanitized}` })
+    } else {
+      chatMessages.push({ role: 'user', content: sanitized })
+    }
 
-    // 4. Select model for response generation
+    // 6. Select model for response generation
     const modelConfig = selectModel({
       task: 'response_generation',
       plan: 'pro',
@@ -96,7 +159,7 @@ export async function runAgent(
 
     const provider = await getProviderClient(modelConfig.provider)
 
-    // 5. Agent loop: call LLM -> execute tools -> repeat
+    // 7. Agent loop: call LLM -> execute tools -> repeat
     let iterations = 0
     let lastResult = await provider.chat(modelConfig.model, chatMessages, ALL_TOOLS, modelConfig.maxTokens)
 

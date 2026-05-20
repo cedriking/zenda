@@ -5,8 +5,12 @@ import { logConsentEvent } from '../audit/logger.js'
 import { logger } from '../../infra/logger.js'
 
 const MESSAGING_CONSENT_STATUSES: MessagingConsentStatus[] = ['unknown', 'allowed', 'limited', 'opted_out']
-const CONSENT_SOURCES: ConsentSource[] = ['customer_inbound_message', 'manual_owner_entry', 'website_form', 'opt_out_request', 're_subscription']
-const MESSAGE_PURPOSES: MessagePurpose[] = ['booking_confirmation', 'booking_assistance', 'appointment_reminder', 'customer_inquiry_reply', 'follow_up', 'promotional']
+const CONSENT_SOURCES: ConsentSource[] = ['customer_inbound_message', 'whatsapp_booking', 'booking_form', 'business_import', 'manual_owner_confirmation', 'opt_out_request']
+const MESSAGE_PURPOSES: MessagePurpose[] = [
+  'appointment_confirmation', 'appointment_reminder', 'appointment_reschedule', 'appointment_cancellation',
+  'booking_follow_up', 'booking_assistance', 'booking_confirmation', 'customer_inquiry_reply',
+  'inbound_reply', 'business_follow_up',
+]
 
 export const messagingModule = new Elysia({ prefix: '/messaging' })
 
@@ -71,7 +75,7 @@ export const messagingModule = new Elysia({ prefix: '/messaging' })
     const consent = await getConsent(workspaceId!, customerId)
 
     await logConsentEvent(workspaceId!, customerId, 'opt_out', {
-      source: 'manual_owner_entry',
+      source: 'opt_out_request',
     })
 
     logger.info('Consent opt-out processed', { workspaceId, customerId })
