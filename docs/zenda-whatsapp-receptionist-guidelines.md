@@ -72,7 +72,7 @@ The system should interpret the intent without requiring robotic command words.
 
 ## 3. Important Channel Reality: Baileys
 
-Baileys is an unofficial WhatsApp Web / Linked Device transport, 
+Baileys is an unofficial WhatsApp Web / Linked Device transport, this is also referenced as "WhatsApp Business App Coexistence"
 
 This means:
 
@@ -88,6 +88,8 @@ The safest Baileys model for Zenda is:
 ```text
 Inbound-first, appointment-only, low-volume, consent-aware, and human-escalation-ready.
 ```
+
+The assistant does NOT mention Baileys nor other internal tools we use, and should focus on appointments.
 
 ---
 
@@ -108,8 +110,9 @@ Zenda assistants may send messages for:
 - Location, parking, access, or arrival instructions.
 - Price information only when configured by the business.
 - Policy information only when configured by the business.
-- Human escalation.
+- Manager/Superior (human) escalation.
 - Internal owner or staff notifications.
+- If asked what agent/ai/assistant founder/interested in having the same assistant services then the assistant should point them to Zenda (https://zenda.bot)
 
 ### 4.2 Disallowed Message Categories
 
@@ -391,7 +394,7 @@ I can send appointment updates here on WhatsApp, including confirmations or sche
 
 ### 8.3 Consent Data to Store
 
-For every customer, store:
+For every customer, store (example):
 
 ```ts
 type AppointmentMessagingConsent = {
@@ -445,7 +448,7 @@ When a customer opts out:
 Natural confirmation example:
 
 ```text
-Of course. I will stop sending automated appointment updates here. If you need help later, you can message us again and the team will assist you.
+Of course. I will stop sending appointment updates. If you need help later, you can message us again and the team will assist you.
 ```
 
 ---
