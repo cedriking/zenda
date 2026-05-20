@@ -2,130 +2,101 @@ import Link from 'next/link'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Bot, CalendarClock, Smartphone, Bell, Brain, UserCheck } from 'lucide-react'
-
-const FEATURES = [
-  { icon: Bot, title: 'AI Receptionist', desc: 'Handles customer conversations naturally in English and Spanish, 24/7.' },
-  { icon: CalendarClock, title: 'Smart Scheduling', desc: 'Books, confirms, reschedules, and cancels appointments automatically.' },
-  { icon: Smartphone, title: 'WhatsApp Native', desc: 'Your customers chat via WhatsApp — no app to install, no friction.' },
-  { icon: Bell, title: 'Automated Reminders', desc: '24h and 2h reminders reduce no-shows by up to 40%.' },
-  { icon: Brain, title: 'Learns Your Business', desc: 'Trains on your services, hours, and policies. Gets smarter over time.' },
-  { icon: UserCheck, title: 'Human Takeover', desc: 'You or your staff can step in anytime. Seamless handoff back to AI.' },
-]
-
-const HOW_IT_WORKS = [
-  { step: '1', title: 'Connect WhatsApp', desc: 'Link your business WhatsApp in seconds via the desktop app.' },
-  { step: '2', title: 'Set Up Your Profile', desc: 'Tell Zenda about your services, hours, and staff. Takes 5 minutes.' },
-  { step: '3', title: 'Go Live', desc: 'Zenda starts handling customer messages and booking appointments.' },
-]
-
-const FAQS = [
-  { q: 'Do my customers need to install anything?', a: 'No. They just message your WhatsApp number as usual. Zenda works behind the scenes.' },
-  { q: 'Can I take over a conversation manually?', a: 'Yes. One click to take over, one click to hand back to AI. Full control, always.' },
-  { q: 'What languages does Zenda support?', a: 'English and Spanish, with natural, conversational responses in both languages.' },
-  { q: 'Is my data secure?', a: 'All conversations are encrypted. Your data stays in your workspace. We never share it.' },
-  { q: 'Can I cancel anytime?', a: 'Yes, no contracts. Cancel from the dashboard or billing portal at any time.' },
-]
+import { HomeAnimations } from '@/components/home-animations'
 
 export default function Home() {
   return (
     <div className="min-h-screen">
       <Nav variant="home" />
 
-      {/* Hero */}
       <main>
-      <section className="pt-32 pb-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-block bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-6">
-            AI Receptionist for Appointment-Based Businesses
-          </div>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
-            Your AI receptionist<br />that never misses a message
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            Zenda handles customer conversations, books appointments, and sends reminders — all through WhatsApp. Built for businesses in Latin America.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Button asChild size="lg" className="text-base px-8 h-12">
-              <Link href="/signup">Start Free Trial</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="text-base px-8 h-12">
-              <Link href="#how-it-works">See How It Works</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+        {/* Hero */}
+        <section className="relative pt-32 pb-24 px-6 overflow-hidden">
+          {/* Background gradient orbs */}
+          <div className="gradient-orb w-[500px] h-[500px] -top-40 -right-40 bg-primary/30" />
+          <div className="gradient-orb w-[400px] h-[400px] top-20 -left-40 bg-chart-2/20" />
 
-      {/* Features */}
-      <section id="features" className="py-20 px-6 bg-muted">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-4">Everything you need to stop missing appointments</h2>
-          <p className="text-muted-foreground text-center mb-14 max-w-2xl mx-auto">
-            From first message to confirmed appointment, Zenda handles it all.
-          </p>
-          <div className="grid md:grid-cols-3 gap-8">
-            {FEATURES.map(f => {
-              const Icon = f.icon
-              return (
-                <Card key={f.title} className="bg-card hover:shadow-lg transition">
-                  <CardContent>
-                    <Icon className="size-8 text-primary mb-4" strokeWidth={1.5} />
-                    <h3 className="text-lg font-semibold mb-2">{f.title}</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        </div>
-      </section>
+          <div className="relative max-w-4xl mx-auto text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-8 border border-primary/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              AI Receptionist for Appointment-Based Businesses
+            </div>
 
-      {/* How It Works */}
-      <section id="how-it-works" className="py-20 px-6">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-14">Up and running in 3 steps</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {HOW_IT_WORKS.map(h => (
-              <div key={h.step} className="text-center">
-                <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-bold mx-auto mb-4">
-                  {h.step}
-                </div>
-                <h3 className="font-semibold mb-2">{h.title}</h3>
-                <p className="text-muted-foreground text-sm">{h.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            {/* Headline */}
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.1]">
+              Your AI receptionist<br />
+              <span className="gradient-text">that never misses a message</span>
+            </h1>
 
-      {/* Pricing Teaser */}
-      <section className="py-20 px-6 bg-muted">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Simple pricing, powerful features</h2>
-          <p className="text-muted-foreground mb-8">Starting at $19/month for solo businesses. No per-message fees.</p>
-          <Button asChild size="lg" className="text-base px-8 h-12">
-            <Link href="/pricing">View Plans</Link>
-          </Button>
-        </div>
-      </section>
+            {/* Subtitle */}
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+              Zenda handles customer conversations, books appointments, and sends reminders — all through WhatsApp. Built for businesses in Latin America.
+            </p>
 
-      {/* FAQ */}
-      <section id="faq" className="py-20 px-6">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-14">Frequently Asked Questions</h2>
-          <div className="space-y-6">
-            {FAQS.map(f => (
-              <Card key={f.q}>
-                <CardContent>
-                  <h3 className="font-semibold mb-2">{f.q}</h3>
-                  <p className="text-muted-foreground text-sm">{f.a}</p>
-                </CardContent>
-              </Card>
-            ))}
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild size="lg" className="text-base px-8 h-12 shadow-lg shadow-primary/20">
+                <Link href="/signup">Start Free Trial</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="text-base px-8 h-12">
+                <Link href="#how-it-works">See How It Works</Link>
+              </Button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* Features */}
+        <section id="features" className="relative py-24 px-6">
+          <div className="gradient-orb w-[300px] h-[300px] top-0 left-1/2 bg-chart-3/15" />
+          <div className="relative max-w-6xl mx-auto">
+            <HomeAnimations variant="section-header">
+              <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Everything you need to stop missing appointments</h2>
+              <p className="text-muted-foreground text-center mb-16 max-w-2xl mx-auto text-lg">
+                From first message to confirmed appointment, Zenda handles it all.
+              </p>
+            </HomeAnimations>
+
+            <HomeAnimations variant="features" />
+          </div>
+        </section>
+
+        {/* How It Works */}
+        <section id="how-it-works" className="relative py-24 px-6">
+          <div className="gradient-orb w-[400px] h-[400px] -bottom-20 right-0 bg-primary/10" />
+          <div className="relative max-w-4xl mx-auto">
+            <HomeAnimations variant="section-header">
+              <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">Up and running in 3 steps</h2>
+            </HomeAnimations>
+
+            <HomeAnimations variant="steps" />
+          </div>
+        </section>
+
+        {/* CTA / Pricing Teaser */}
+        <section className="relative py-24 px-6 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-primary/10 to-primary/5" />
+          <div className="gradient-orb w-[500px] h-[500px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary/20" />
+          <div className="relative max-w-3xl mx-auto text-center">
+            <HomeAnimations variant="section-header">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Simple pricing, powerful features</h2>
+              <p className="text-muted-foreground mb-8 text-lg">Starting at $19/month for solo businesses. No per-message fees.</p>
+              <Button asChild size="lg" className="text-base px-8 h-12 shadow-lg shadow-primary/20">
+                <Link href="/pricing">View Plans</Link>
+              </Button>
+            </HomeAnimations>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section id="faq" className="py-24 px-6">
+          <div className="max-w-3xl mx-auto">
+            <HomeAnimations variant="section-header">
+              <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">Frequently Asked Questions</h2>
+            </HomeAnimations>
+            <HomeAnimations variant="faq" />
+          </div>
+        </section>
       </main>
 
       <Footer />

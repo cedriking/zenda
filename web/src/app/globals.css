@@ -92,6 +92,7 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  --animate-gradient-shift: gradient-shift 6s ease infinite;
 }
 
 @layer base {
@@ -133,4 +134,87 @@ textarea:focus-visible,
 button:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
+}
+
+/* ── Custom animation utilities ── */
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, oklch(0.5534 0.2107 267), oklch(0.65 0.25 290), oklch(0.7 0.18 310));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 6s ease infinite;
+}
+
+.dark .gradient-text {
+  background: linear-gradient(135deg, oklch(0.67 0.18 275), oklch(0.75 0.22 300), oklch(0.8 0.15 320));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glass effect */
+.glass {
+  background: oklch(1 0 0 / 70%);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+}
+.dark .glass {
+  background: oklch(0.145 0 0 / 70%);
+}
+
+/* Gradient orb decorations */
+.gradient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  pointer-events: none;
+}
+.dark .gradient-orb {
+  opacity: 0.2;
+}
+
+/* Gradient border card */
+.gradient-border {
+  position: relative;
+  background: var(--card);
+  border-radius: var(--radius);
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--radius) + 1px);
+  background: linear-gradient(135deg, oklch(0.5534 0.2107 267 / 30%), transparent 60%);
+  z-index: -1;
+}
+
+/* Keyframes */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
 }

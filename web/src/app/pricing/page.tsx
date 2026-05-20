@@ -3,8 +3,7 @@ import type { Metadata } from 'next'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
-import { Check } from 'lucide-react'
+import { PricingAnimations } from '@/components/pricing-animations'
 
 export const metadata: Metadata = {
   title: 'Pricing — Zenda',
@@ -69,56 +68,15 @@ export default function PricingPage() {
     <div className="min-h-screen">
       <Nav variant="simple" />
 
-      <main>
-      <section className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <div className="inline-block bg-amber-100 text-amber-800 px-4 py-2 rounded-lg text-sm font-semibold mb-4">
-              Founding Member Pricing — Limited Time
-            </div>
-            <h1 className="text-4xl font-bold mb-4">Simple, transparent pricing</h1>
-            <p className="text-muted-foreground text-lg">No per-message fees. No surprises. Cancel anytime.</p>
-          </div>
+      <main className="relative overflow-hidden">
+        <div className="gradient-orb w-[400px] h-[400px] -top-20 right-0 bg-primary/15" />
+        <div className="gradient-orb w-[300px] h-[300px] bottom-0 -left-20 bg-chart-2/10" />
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {PLANS.map(plan => (
-              <Card key={plan.name} className={`relative ${plan.highlight ? 'ring-2 ring-primary shadow-lg' : ''}`}>
-                {plan.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium">
-                    Most Popular
-                  </div>
-                )}
-                <CardHeader>
-                  <CardTitle className="text-xl">{plan.name}</CardTitle>
-                  <CardDescription>{plan.desc}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold">${plan.price}</span>
-                    <span className="text-muted-foreground">/month</span>
-                    {plan.originalPrice && (
-                      <span className="ml-2 text-lg text-muted-foreground line-through">${plan.originalPrice}</span>
-                    )}
-                  </div>
-                  <ul className="space-y-3">
-                    {plan.features.map(f => (
-                      <li key={f} className="flex items-start gap-2 text-sm">
-                        <Check className="size-4 text-primary mt-0.5 shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button asChild variant={plan.highlight ? 'default' : 'outline'} className="w-full">
-                    <Link href="/signup">{plan.cta}</Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+        <section className="relative py-20 px-6">
+          <div className="max-w-6xl mx-auto">
+            <PricingAnimations plans={PLANS} />
           </div>
-        </div>
-      </section>
+        </section>
       </main>
 
       <Footer />

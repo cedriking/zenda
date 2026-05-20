@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Menu, X } from 'lucide-react'
@@ -14,12 +14,20 @@ const NAV_LINKS = [
 
 export function Nav({ variant = 'home' }: { variant?: 'home' | 'simple' }) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   if (variant === 'simple') {
     return (
-      <nav className="border-b border-border">
+      <nav className={`border-b border-border transition-all duration-300 ${scrolled ? 'glass' : 'bg-background'}`}>
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-primary">Zenda</Link>
+          <Link href="/" className="text-xl font-bold gradient-text">Zenda</Link>
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition hidden sm:inline">Log in</Link>
             <Button asChild>
@@ -32,9 +40,13 @@ export function Nav({ variant = 'home' }: { variant?: 'home' | 'simple' }) {
   }
 
   return (
-    <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md border-b border-border z-50">
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+      scrolled
+        ? 'glass border-b border-border/50 shadow-sm'
+        : 'bg-transparent border-b border-transparent'
+    }`}>
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold text-primary">Zenda</Link>
+        <Link href="/" className="text-xl font-bold gradient-text">Zenda</Link>
 
         {/* Desktop links */}
         <div className="hidden md:flex gap-8 text-sm text-muted-foreground">
@@ -44,6 +56,7 @@ export function Nav({ variant = 'home' }: { variant?: 'home' | 'simple' }) {
         </div>
 
         <div className="flex items-center gap-3">
+          <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition hidden sm:inline">Log in</Link>
           <Button asChild className="hidden sm:inline-flex">
             <Link href="/signup">Get Started</Link>
           </Button>
@@ -62,7 +75,7 @@ export function Nav({ variant = 'home' }: { variant?: 'home' | 'simple' }) {
 
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border bg-background">
+        <div className="md:hidden border-t border-border glass">
           <div className="px-6 py-4 space-y-3">
             {NAV_LINKS.map(l => (
               <Link

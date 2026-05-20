@@ -11,17 +11,20 @@ interface OnboardingQuestion {
 }
 
 const ONBOARDING_QUESTIONS: Record<string, OnboardingQuestion> = {
+  // 'not_started' and 'whatsapp_connected' are handled as auto-advance steps
+  // — business name is already collected during signup, so we skip straight
+  // to business_info. See getNextOnboardingQuestion() below.
   not_started: {
     step: 'not_started',
-    questionEn: "Great, your WhatsApp is connected! What's the name of your business?",
-    questionEs: '¡Genial, tu WhatsApp está conectado! ¿Cuál es el nombre de tu negocio?',
-    field: 'businessName',
+    questionEn: '',
+    questionEs: '',
+    field: '_skip',
   },
   whatsapp_connected: {
     step: 'whatsapp_connected',
-    questionEn: "Great, your WhatsApp is connected! What's the name of your business?",
-    questionEs: '¡Genial, tu WhatsApp está conectado! ¿Cuál es el nombre de tu negocio?',
-    field: 'businessName',
+    questionEn: '',
+    questionEs: '',
+    field: '_skip',
   },
   business_info: {
     step: 'business_info',
@@ -90,16 +93,12 @@ function getAcknowledgment(step: string, response: string, language: 'en' | 'es'
     },
     receptionist_config: {
       en: (r) => {
-        const nameMatch = r.match(/(?:name(?:d|s)?\s+(?:it\s+)?|llama[rs]?e?\s+(?:')?)(\w+)/i)
-          ?? r.match(/^(\w+)/)
-        const name = nameMatch?.[1] ?? 'your receptionist'
-        return `${name} is ready to greet your customers!`
+        const parsed = parseReceptionistConfig(r)
+        return `${parsed.name} is ready to greet your customers!`
       },
       es: (r) => {
-        const nameMatch = r.match(/(?:llamar?\s+(?:se\s+)?(?:')?|nombre\s+(?:es\s+)?(?:')?|sea\s+(?:')?)(\w+)/i)
-          ?? r.match(/^(\w+)/)
-        const name = nameMatch?.[1] ?? 'tu recepcionista'
-        return `¡${name} está lista para recibir a tus clientes!`
+        const parsed = parseReceptionistConfig(r)
+        return `¡${parsed.name} está lista para recibir a tus clientes!`
       },
     },
     plan_selection: {
@@ -124,7 +123,15 @@ export async function getNextOnboardingQuestion(
 
   if (!ws) return null
 
-  const currentStep = (ws.onboardingStep as OnboardingStep) ?? 'not_started'
+  let currentStep = (ws.onboardingStep as OnboardingStep) ?? 'not_started'
+
+  // Auto-advance past steps where business name was already collected at signup
+  const skipSteps: OnboardingStep[] = ['not_started', 'whatsapp_connected']
+  while (skipSteps.includes(currentStep)) {
+    const { advanceOnboarding } = await import('./flow.js')
+    currentStep = await advanceOnboarding(workspaceId, currentStep)
+  }
+
   if (currentStep === 'ready') return { question: language === 'en' ? 'You\'re all set! Your AI receptionist is ready to go.' : '¡Todo listo! Tu recepcionista IA está lista.', step: 'ready' }
 
   const questionData = ONBOARDING_QUESTIONS[currentStep]
@@ -164,8 +171,9 @@ export async function processOnboardingResponse(
   // Save onboarding data for each step
   try {
     await saveStepData(workspaceId, step, response, language)
-  } catch {
-    // Don't block onboarding if data save fails — still advance the step
+  } catch (err) {
+    console.error(`[onboarding] Failed to save data for step "${step}":`, err)
+    // Still advance the step so the user isn't stuck, but the error is now logged
   }
 
   // Advance the onboarding step
@@ -225,6 +233,8 @@ async function saveStepData(
 
     case 'availability': {
       const rules = parseAvailability(response)
+      // Delete existing rules before inserting to prevent duplicates
+      await db.delete(availabilityRules).where(eq(availabilityRules.workspaceId, workspaceId))
       for (const rule of rules) {
         await db.insert(availabilityRules).values({
           workspaceId,
@@ -283,20 +293,28 @@ function mapCategory(response: string): 'beauty' | 'wellness' | 'health' | 'coac
 }
 
 function parseServices(input: string): Array<{ name: string; durationMinutes: number; priceCents: number }> {
-  const lines = input.split('\n').map(l => l.trim()).filter(Boolean)
+  // Split by newline, numbered list markers, or bullet points
+  const lines = input.split(/\n|(?:(?:^|\s)\d+[.)]\s+)/)
+    .map(l => l.trim().replace(/^\s*[-•*]\s*/, '').trim())
+    .filter(Boolean)
+
   return lines.map(line => {
-    const parts = line.split(/[-–—,;]+/).map(s => s.trim())
+    // Split by common delimiters: -, –, —, comma, semicolon, tab, or "for"
+    const parts = line.split(/\s*[-–—,;\t]+\s*|\s+for\s+/i).map(s => s.trim())
     const name = parts[0] ?? 'Service'
     let durationMinutes = 30
     let priceCents = 0
 
     for (const part of parts.slice(1)) {
-      const durMatch = part.match(/(\d+)\s*(?:min|minutos?|hours?|hrs?|h)/i)
+      // Match duration: "30min", "30 min", "30 minutos", "1 hour", "1h", "1 hr", "1 hora"
+      const durMatch = part.match(/(\d+)\s*(?:min(?:utos?)?|hours?|hrs?|h(?:oras?)?)/i)
       if (durMatch) {
         durationMinutes = parseInt(durMatch[1])
-        if (/h(?:ours?|rs?)?/i.test(part) && durationMinutes < 10) durationMinutes *= 60
+        if (/h(?:ours?|rs?|oras?)?/i.test(part) && durationMinutes < 10) durationMinutes *= 60
       }
-      const priceMatch = part.match(/\$?\s*(\d+(?:\.\d{2})?)/)
+
+      // Match price: "$25", "25 dollars", "25 dólares", "$25.00", "25 usd", "$25 CAD"
+      const priceMatch = part.match(/\$?\s*(\d+(?:\.\d{1,2})?)\s*(?:dollars?|dólares?|usd|cad|mxn|euros?)?/i)
       if (priceMatch && !durMatch) {
         priceCents = Math.round(parseFloat(priceMatch[1]) * 100)
       }
@@ -385,20 +403,42 @@ function parseReceptionistConfig(input: string): { name: string; tone: 'professi
   let name = 'Noa'
   let tone: 'professional' | 'warm' | 'friendly' | 'elegant' | 'casual' = 'professional'
 
-  // Extract name
+  // Extract name — try multiple patterns in order of specificity
   const namePatterns = [
-    /(?:llamar?\s*(?:se\s+)?|nombre\s+(?:es\s+)?|name(?:d|s)?\s+(?:it\s+)?(?:')?|sea\s+(?:')?)(\w+)/i,
-    /(?:called|nombre|name)\s+(?:is\s+)?['"]?(\w+)/i,
+    // "call her/him/it X", "llámalo/se X", "name it X", "nómbrala X"
+    /(?:call\s+(?:her|him|it|the\s+receptionist)\s+|ll[aá]m(?:alo|ala|ar\s+(?:la\s+)?)?\s*|n[oó]mbr(?:alo|ala)\s+|name\s+(?:her|him|it|the\s+receptionist)\s+)(['"]?\w+['"]?)/i,
+    // "name is X", "nombre es X", "called X", "se llama X"
+    /(?:name(?:'s| is)?\s+|nombre\s+(?:es\s+)?|llama\s+(?:se\s+)?|called\s+|sea\s+)(['"]?\w+['"]?)/i,
+    // "her/his name is X"
+    /(?:her|his|its|su)\s+nombre\s+(?:es\s+)?(['"]?\w+['"]?)/i,
+    // Match quoted name
+    /['"](\w+)['"]/,
   ]
   for (const pattern of namePatterns) {
     const match = input.match(pattern)
-    if (match) { name = match[1]; break }
+    if (match) {
+      name = match[1].replace(/['"]/g, '')
+      break
+    }
+  }
+
+  // If no pattern matched, try to extract a proper name (capitalized word not matching common tone words)
+  if (name === 'Noa') {
+    const toneWords = /^(professional|profesional|warm|c[aá]lid|friendly|amigable|elegant|elegante|casual|informal|tone|tono|and|y|the|la|el|with|con|prefer|preferido|prefiero)$/i
+    const words = input.split(/\s+/)
+    for (const word of words) {
+      const clean = word.replace(/[.,!?;:'"]/g, '')
+      if (clean.length >= 2 && clean[0] === clean[0].toUpperCase() && !toneWords.test(clean)) {
+        name = clean
+        break
+      }
+    }
   }
 
   // Extract tone
   if (/profesional|professional/i.test(input)) tone = 'professional'
   else if (/c[aá]lid[oa]|warm/i.test(input)) tone = 'warm'
-  else if (/amigable|friendly|casual/i.test(input)) tone = 'friendly'
+  else if (/amigable|friendly/i.test(input)) tone = 'friendly'
   else if (/elegante|elegant/i.test(input)) tone = 'elegant'
   else if (/casual|informal/i.test(input)) tone = 'casual'
 
