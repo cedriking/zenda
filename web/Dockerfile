@@ -9,7 +9,7 @@ COPY packages/db/package.json ./packages/db/
 COPY api/package.json ./api/
 COPY app/package.json ./app/
 COPY web/package.json ./web/
-RUN npm ci
+RUN npm ci --legacy-peer-deps && npm install lightningcss-linux-x64-musl
 
 # Build shared package
 FROM base AS build-shared
