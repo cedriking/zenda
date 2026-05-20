@@ -27,10 +27,8 @@ function ConversationsPage() {
 
   useEffect(() => {
     const handleConversationUpdate = () => loadConversations()
-    window.electron?.on('conversation:update', handleConversationUpdate)
-    return () => {
-      window.electron?.removeListener('conversation:update', handleConversationUpdate)
-    }
+    const cleanup = window.electron?.on('conversation:update', handleConversationUpdate)
+    return () => cleanup?.()
   }, [loadConversations])
 
   const filtered = searchQuery.trim()
