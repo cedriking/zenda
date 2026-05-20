@@ -19,12 +19,12 @@ export const CORS_ORIGINS = process.env.CORS_ORIGINS ?? 'http://localhost:5173,h
 export const UPDATE_BASE_URL = process.env.UPDATE_BASE_URL ?? 'https://zenda.bot/updates'
 export const NODE_ENV = process.env.NODE_ENV ?? 'development'
 
-// Zernio Integration (Required)
-export const ZERNIO_API_KEY = requireEnv('ZERNIO_API_KEY')
-export const ZERNIO_WEBHOOK_SECRET = requireEnv('ZERNIO_WEBHOOK_SECRET')
+// Zernio Integration
+export const ZERNIO_API_KEY = process.env.ZERNIO_API_KEY ?? ''
+export const ZERNIO_WEBHOOK_SECRET = process.env.ZERNIO_WEBHOOK_SECRET ?? ''
 export const ZERNIO_WEBHOOK_URL = process.env.ZERNIO_WEBHOOK_URL ?? ''
 export const ZERNIO_API_BASE_URL = process.env.ZERNIO_API_BASE_URL ?? 'https://zernio.com/api'
 
-// Composio Integration (Required)
-export const COMPOSIO_API_KEY = requireEnv('COMPOSIO_API_KEY')
+// Composio Integration
+export const COMPOSIO_API_KEY = process.env.COMPOSIO_API_KEY ?? ''
 export const COMPOSIO_BASE_URL = process.env.COMPOSIO_BASE_URL ?? 'https://api.composio.dev'
