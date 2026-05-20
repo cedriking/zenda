@@ -81,8 +81,8 @@ function LoginPage() {
           </button>
 
           <div className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-              <Mail className="text-blue-600" size={24} />
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <Mail className="text-primary" size={24} />
             </div>
             <h1 className="text-2xl font-bold">Reset password</h1>
             <p className="text-muted-foreground mt-1">
@@ -93,7 +93,7 @@ function LoginPage() {
           </div>
 
           {resetSent ? (
-            <div className="rounded-md bg-green-50 border border-green-200 p-4 text-sm text-green-700">
+            <div className="rounded-md bg-emerald-500/10 border border-border p-4 text-sm text-emerald-600">
               Reset link sent to <strong>{resetEmail}</strong>. Check your inbox and spam folder.
             </div>
           ) : (

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
+import { Button } from '@/components/ui/button'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -53,6 +54,8 @@ export default function SignupPage() {
     }
   }
 
+  const inputClass = "w-full border border-input rounded-lg px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+
   return (
     <div className="min-h-screen flex flex-col">
       <Nav variant="simple" />
@@ -61,63 +64,34 @@ export default function SignupPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold mt-6 mb-2">Create your account</h1>
-            <p className="text-[var(--text-muted)]">Start your 14-day free trial. No credit card required.</p>
+            <p className="text-muted-foreground">Start your 14-day free trial. No credit card required.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg text-sm">
                 {error}
               </div>
             )}
 
             <div>
               <label className="block text-sm font-medium mb-1.5">Full Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                required
-                className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                placeholder="Your name"
-              />
+              <input type="text" value={name} onChange={e => setName(e.target.value)} required className={inputClass} placeholder="Your name" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1.5">Business Name</label>
-              <input
-                type="text"
-                value={businessName}
-                onChange={e => setBusinessName(e.target.value)}
-                required
-                className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                placeholder="Your business name"
-              />
+              <input type="text" value={businessName} onChange={e => setBusinessName(e.target.value)} required className={inputClass} placeholder="Your business name" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1.5">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                placeholder="you@business.com"
-              />
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className={inputClass} placeholder="you@business.com" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1.5">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                minLength={8}
-                className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                placeholder="At least 8 characters"
-              />
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} className={inputClass} placeholder="At least 8 characters" />
               {password.length > 0 && (
                 <div className="mt-2">
                   <div className="flex gap-1 mb-1">
@@ -128,9 +102,9 @@ export default function SignupPage() {
                           passwordStrength >= i
                             ? passwordStrength <= 1 ? 'bg-red-400'
                             : passwordStrength <= 2 ? 'bg-yellow-400'
-                            : passwordStrength <= 3 ? 'bg-blue-400'
+                            : passwordStrength <= 3 ? 'bg-primary'
                             : 'bg-green-500'
-                          : 'bg-gray-200'
+                          : 'bg-muted'
                         }`}
                       />
                     ))}
@@ -138,7 +112,7 @@ export default function SignupPage() {
                   <p className={`text-xs ${
                     passwordStrength <= 1 ? 'text-red-500'
                     : passwordStrength <= 2 ? 'text-yellow-600'
-                    : passwordStrength <= 3 ? 'text-blue-500'
+                    : passwordStrength <= 3 ? 'text-primary'
                     : 'text-green-600'
                   }`}>
                     {passwordStrength <= 1 ? 'Weak' : passwordStrength <= 2 ? 'Fair' : passwordStrength <= 3 ? 'Good' : 'Strong'}
@@ -147,24 +121,20 @@ export default function SignupPage() {
               )}
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[var(--primary)] text-white py-3 rounded-lg font-medium hover:bg-[var(--primary-dark)] transition disabled:opacity-50"
-            >
+            <Button type="submit" disabled={loading} className="w-full h-11 text-sm">
               {loading ? 'Creating account...' : 'Create Account'}
-            </button>
+            </Button>
 
-            <p className="text-xs text-[var(--text-muted)] text-center">
+            <p className="text-xs text-muted-foreground text-center">
               By signing up, you agree to our{' '}
               <Link href="/legal/terms" className="underline">Terms of Service</Link> and{' '}
               <Link href="/legal/privacy" className="underline">Privacy Policy</Link>.
             </p>
           </form>
 
-          <p className="text-center text-sm text-[var(--text-muted)] mt-6">
+          <p className="text-center text-sm text-muted-foreground mt-6">
             Already have an account?{' '}
-            <Link href="/login" className="text-[var(--primary)] underline">Log in</Link>
+            <Link href="/login" className="text-primary underline">Log in</Link>
           </p>
         </div>
       </main>

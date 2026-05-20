@@ -2,6 +2,9 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
+import { Check } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Pricing — Zenda',
@@ -74,52 +77,44 @@ export default function PricingPage() {
               Founding Member Pricing — Limited Time
             </div>
             <h1 className="text-4xl font-bold mb-4">Simple, transparent pricing</h1>
-            <p className="text-[var(--text-muted)] text-lg">No per-message fees. No surprises. Cancel anytime.</p>
+            <p className="text-muted-foreground text-lg">No per-message fees. No surprises. Cancel anytime.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {PLANS.map(plan => (
-              <div
-                key={plan.name}
-                className={`rounded-xl border p-8 ${
-                  plan.highlight
-                    ? 'border-[var(--primary)] shadow-lg relative'
-                    : 'border-[var(--border)]'
-                }`}
-              >
+              <Card key={plan.name} className={`relative ${plan.highlight ? 'ring-2 ring-primary shadow-lg' : ''}`}>
                 {plan.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--primary)] text-white px-3 py-1 rounded-full text-xs font-medium">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium">
                     Most Popular
                   </div>
                 )}
-                <h3 className="text-xl font-bold mb-1">{plan.name}</h3>
-                <p className="text-sm text-[var(--text-muted)] mb-4">{plan.desc}</p>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold">${plan.price}</span>
-                  <span className="text-[var(--text-muted)]">/month</span>
-                  {plan.originalPrice && (
-                    <span className="ml-2 text-lg text-gray-400 line-through">${plan.originalPrice}</span>
-                  )}
-                </div>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <span className="text-[var(--accent-green)] mt-0.5">&#10003;</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/signup"
-                  className={`block text-center py-3 rounded-lg font-medium transition ${
-                    plan.highlight
-                      ? 'bg-[var(--primary)] text-white hover:bg-[var(--primary-dark)]'
-                      : 'border border-[var(--border)] text-[var(--text)] hover:bg-gray-50'
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
-              </div>
+                <CardHeader>
+                  <CardTitle className="text-xl">{plan.name}</CardTitle>
+                  <CardDescription>{plan.desc}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold">${plan.price}</span>
+                    <span className="text-muted-foreground">/month</span>
+                    {plan.originalPrice && (
+                      <span className="ml-2 text-lg text-muted-foreground line-through">${plan.originalPrice}</span>
+                    )}
+                  </div>
+                  <ul className="space-y-3">
+                    {plan.features.map(f => (
+                      <li key={f} className="flex items-start gap-2 text-sm">
+                        <Check className="size-4 text-primary mt-0.5 shrink-0" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button asChild variant={plan.highlight ? 'default' : 'outline'} className="w-full">
+                    <Link href="/signup">{plan.cta}</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
             ))}
           </div>
         </div>

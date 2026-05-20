@@ -79,17 +79,17 @@ function ConversationDetailPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+      <div className="flex items-center justify-between p-4 border-b border-border bg-card">
         <div className="flex items-center gap-3">
-          <Link to="/dashboard/conversations" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Back to conversations">
+          <Link to="/dashboard/conversations" className="text-muted-foreground hover:text-foreground" aria-label="Back to conversations">
             <ArrowLeft size={20} />
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-medium text-gray-900 dark:text-gray-100">{conv?.customerName ?? conv?.customerId ?? 'Customer'}</h3>
+              <h3 className="font-medium text-foreground">{conv?.customerName ?? conv?.customerId ?? 'Customer'}</h3>
               <button
                 onClick={() => setShowCustomerInfo(prev => !prev)}
-                className="p-1 rounded-full text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 aria-label="Toggle customer information"
                 aria-expanded={showCustomerInfo}
               >
@@ -97,9 +97,9 @@ function ConversationDetailPage() {
               </button>
             </div>
             <span className={`text-xs px-2 py-0.5 rounded-full ${
-              conv?.mode === 'auto' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-              conv?.mode === 'human_takeover' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-              'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+              conv?.mode === 'auto' ? 'bg-emerald-500/10 text-emerald-600' :
+              conv?.mode === 'human_takeover' ? 'bg-destructive/10 text-destructive' :
+              'bg-amber-500/10 text-amber-600'
             }`}>
               {conv?.mode === 'auto' ? 'AI Handling' :
                conv?.mode === 'human_takeover' ? 'You are handling' :
@@ -113,8 +113,8 @@ function ConversationDetailPage() {
               onClick={handleTakeOverClick}
               className={`px-3 py-1.5 text-sm rounded-lg ${
                 confirmTakeOver
-                  ? 'bg-red-600 text-white hover:bg-red-700'
-                  : 'bg-orange-500 text-white hover:bg-orange-600'
+                  ? 'bg-destructive text-white hover:bg-destructive/90'
+                  : 'bg-amber-500 text-white hover:bg-amber-600'
               }`}
               aria-label={confirmTakeOver ? 'Confirm take over' : 'Take over this conversation from AI'}
             >
@@ -124,7 +124,7 @@ function ConversationDetailPage() {
           {conv?.mode === 'human_takeover' && (
             <button
               onClick={handleReturnToAuto}
-              className="px-3 py-1.5 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600"
+              className="px-3 py-1.5 text-sm bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
               aria-label="Return conversation to AI"
             >
               Return to Auto
@@ -135,33 +135,33 @@ function ConversationDetailPage() {
 
       {/* Collapsible customer info panel */}
       {showCustomerInfo && (
-        <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+        <div className="border-b border-border bg-muted p-4">
           <div className="grid grid-cols-3 gap-4 max-w-lg">
             <div className="flex items-center gap-2">
-              <Phone size={14} className="text-gray-400 dark:text-gray-500" />
+              <Phone size={14} className="text-muted-foreground" />
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">Phone</p>
-                <p className="text-sm text-gray-700 dark:text-gray-300">{conv?.customerId ?? 'N/A'}</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Phone</p>
+                <p className="text-sm text-foreground">{conv?.customerId ?? 'N/A'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Globe size={14} className="text-gray-400 dark:text-gray-500" />
+              <Globe size={14} className="text-muted-foreground" />
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">Language</p>
-                <p className="text-sm text-gray-700 dark:text-gray-300">{conv?.language === 'es' ? 'Spanish' : conv?.language === 'en' ? 'English' : conv?.language ?? 'Unknown'}</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Language</p>
+                <p className="text-sm text-foreground">{conv?.language === 'es' ? 'Spanish' : conv?.language === 'en' ? 'English' : conv?.language ?? 'Unknown'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <CalendarDays size={14} className="text-gray-400 dark:text-gray-500" />
+              <CalendarDays size={14} className="text-muted-foreground" />
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">Mode</p>
-                <p className="text-sm text-gray-700 dark:text-gray-300">{conv?.mode === 'auto' ? 'Automated' : conv?.mode === 'human_takeover' ? 'Human' : conv?.mode ?? 'N/A'}</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Mode</p>
+                <p className="text-sm text-foreground">{conv?.mode === 'auto' ? 'Automated' : conv?.mode === 'human_takeover' ? 'Human' : conv?.mode ?? 'N/A'}</p>
               </div>
             </div>
           </div>
           <a
             href="/dashboard/appointments"
-            className="inline-flex items-center gap-1 mt-3 text-xs text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline"
+            className="inline-flex items-center gap-1 mt-3 text-xs text-primary hover:text-primary/80 hover:underline"
           >
             <CalendarDays size={12} />
             View all appointments
@@ -171,7 +171,7 @@ function ConversationDetailPage() {
 
       {/* Error */}
       {error && (
-        <div className="p-3 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400 flex items-center gap-2" role="alert">
+        <div className="p-3 bg-destructive/10 border-b border-border text-sm text-destructive flex items-center gap-2" role="alert">
           <AlertCircle size={16} aria-hidden="true" />
           {error}
         </div>
@@ -180,21 +180,21 @@ function ConversationDetailPage() {
       {/* Mode switch error */}
       {modeError && (
         <div
-          className="p-3 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400 flex items-center justify-between"
+          className="p-3 bg-destructive/10 border-b border-border text-sm text-destructive flex items-center justify-between"
           role="alert"
         >
           <span className="flex items-center gap-2">
             <AlertCircle size={16} aria-hidden="true" />
             {modeError}
           </span>
-          <button onClick={clearModeError} className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs underline">Dismiss</button>
+          <button onClick={clearModeError} className="text-destructive hover:text-destructive/80 text-xs underline">Dismiss</button>
         </div>
       )}
 
       {/* Messages */}
       <div className="flex-1 overflow-auto p-4 space-y-3" role="log" aria-label="Conversation messages" aria-live="polite">
         {convMessages.length === 0 && !error && (
-          <div className="text-center py-8 text-gray-400 dark:text-gray-500 text-sm">No messages yet</div>
+          <div className="text-center py-8 text-muted-foreground text-sm">No messages yet</div>
         )}
         {convMessages.map((msg) => (
           <div
@@ -203,10 +203,10 @@ function ConversationDetailPage() {
           >
             <div className={`max-w-[70%] rounded-lg px-4 py-2 ${
               msg.senderType === 'customer'
-                ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                ? 'bg-muted text-foreground'
                 : msg.senderType === 'ai'
-                ? 'bg-blue-500 text-white'
-                : 'bg-green-500 text-white'
+                ? 'bg-primary text-white'
+                : 'bg-emerald-500 text-white'
             }`}>
               <div className="flex items-center gap-1 mb-1">
                 {msg.senderType === 'ai' ? <Bot size={12} aria-label="AI" /> : <User size={12} aria-label="Human" />}
@@ -224,7 +224,7 @@ function ConversationDetailPage() {
 
       {/* Input */}
       {(conv?.mode === 'human_takeover' || conv?.mode === 'needs_attention') && (
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="p-4 border-t border-border bg-card">
           <div className="flex gap-2">
             <input
               type="text"
@@ -232,12 +232,12 @@ function ConversationDetailPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Type a message..."
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-primary bg-card text-foreground placeholder-muted-foreground"
               aria-label="Type your message"
             />
             <button
               onClick={handleSend}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
               aria-label="Send message"
             >
               <Send size={16} />

@@ -1,14 +1,17 @@
 import Link from 'next/link'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Bot, CalendarClock, Smartphone, Bell, Brain, UserCheck } from 'lucide-react'
 
 const FEATURES = [
-  { icon: '🤖', title: 'AI Receptionist', desc: 'Handles customer conversations naturally in English and Spanish, 24/7.' },
-  { icon: '📅', title: 'Smart Scheduling', desc: 'Books, confirms, reschedules, and cancels appointments automatically.' },
-  { icon: '📱', title: 'WhatsApp Native', desc: 'Your customers chat via WhatsApp — no app to install, no friction.' },
-  { icon: '🔔', title: 'Automated Reminders', desc: '24h and 2h reminders reduce no-shows by up to 40%.' },
-  { icon: '🧠', title: 'Learns Your Business', desc: 'Trains on your services, hours, and policies. Gets smarter over time.' },
-  { icon: '👩‍💼', title: 'Human Takeover', desc: 'You or your staff can step in anytime. Seamless handoff back to AI.' },
+  { icon: Bot, title: 'AI Receptionist', desc: 'Handles customer conversations naturally in English and Spanish, 24/7.' },
+  { icon: CalendarClock, title: 'Smart Scheduling', desc: 'Books, confirms, reschedules, and cancels appointments automatically.' },
+  { icon: Smartphone, title: 'WhatsApp Native', desc: 'Your customers chat via WhatsApp — no app to install, no friction.' },
+  { icon: Bell, title: 'Automated Reminders', desc: '24h and 2h reminders reduce no-shows by up to 40%.' },
+  { icon: Brain, title: 'Learns Your Business', desc: 'Trains on your services, hours, and policies. Gets smarter over time.' },
+  { icon: UserCheck, title: 'Human Takeover', desc: 'You or your staff can step in anytime. Seamless handoff back to AI.' },
 ]
 
 const HOW_IT_WORKS = [
@@ -34,41 +37,46 @@ export default function Home() {
       <main>
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-block bg-indigo-50 text-[var(--primary)] px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+          <div className="inline-block bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-6">
             AI Receptionist for Appointment-Based Businesses
           </div>
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
             Your AI receptionist<br />that never misses a message
           </h1>
-          <p className="text-xl text-[var(--text-muted)] max-w-2xl mx-auto mb-10">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
             Zenda handles customer conversations, books appointments, and sends reminders — all through WhatsApp. Built for businesses in Latin America.
           </p>
           <div className="flex gap-4 justify-center">
-            <Link href="/signup" className="bg-[var(--primary)] text-white px-8 py-3.5 rounded-lg font-medium text-lg hover:bg-[var(--primary-dark)] transition">
-              Start Free Trial
-            </Link>
-            <Link href="#how-it-works" className="border border-[var(--border)] text-[var(--text)] px-8 py-3.5 rounded-lg font-medium text-lg hover:bg-gray-50 transition">
-              See How It Works
-            </Link>
+            <Button asChild size="lg" className="text-base px-8 h-12">
+              <Link href="/signup">Start Free Trial</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="text-base px-8 h-12">
+              <Link href="#how-it-works">See How It Works</Link>
+            </Button>
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section id="features" className="py-20 px-6 bg-[var(--bg-muted)]">
+      <section id="features" className="py-20 px-6 bg-muted">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-4">Everything you need to stop missing appointments</h2>
-          <p className="text-[var(--text-muted)] text-center mb-14 max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-center mb-14 max-w-2xl mx-auto">
             From first message to confirmed appointment, Zenda handles it all.
           </p>
           <div className="grid md:grid-cols-3 gap-8">
-            {FEATURES.map(f => (
-              <div key={f.title} className="bg-white rounded-xl p-6 border border-[var(--border)] hover:shadow-lg transition">
-                <div className="text-3xl mb-4">{f.icon}</div>
-                <h3 className="text-lg font-semibold mb-2">{f.title}</h3>
-                <p className="text-[var(--text-muted)] text-sm leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
+            {FEATURES.map(f => {
+              const Icon = f.icon
+              return (
+                <Card key={f.title} className="bg-card hover:shadow-lg transition">
+                  <CardContent>
+                    <Icon className="size-8 text-primary mb-4" strokeWidth={1.5} />
+                    <h3 className="text-lg font-semibold mb-2">{f.title}</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -80,11 +88,11 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {HOW_IT_WORKS.map(h => (
               <div key={h.step} className="text-center">
-                <div className="w-12 h-12 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-lg font-bold mx-auto mb-4">
+                <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-bold mx-auto mb-4">
                   {h.step}
                 </div>
                 <h3 className="font-semibold mb-2">{h.title}</h3>
-                <p className="text-[var(--text-muted)] text-sm">{h.desc}</p>
+                <p className="text-muted-foreground text-sm">{h.desc}</p>
               </div>
             ))}
           </div>
@@ -92,13 +100,13 @@ export default function Home() {
       </section>
 
       {/* Pricing Teaser */}
-      <section className="py-20 px-6 bg-[var(--bg-muted)]">
+      <section className="py-20 px-6 bg-muted">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Simple pricing, powerful features</h2>
-          <p className="text-[var(--text-muted)] mb-8">Starting at $19/month for solo businesses. No per-message fees.</p>
-          <Link href="/pricing" className="inline-block bg-[var(--primary)] text-white px-8 py-3.5 rounded-lg font-medium text-lg hover:bg-[var(--primary-dark)] transition">
-            View Plans
-          </Link>
+          <p className="text-muted-foreground mb-8">Starting at $19/month for solo businesses. No per-message fees.</p>
+          <Button asChild size="lg" className="text-base px-8 h-12">
+            <Link href="/pricing">View Plans</Link>
+          </Button>
         </div>
       </section>
 
@@ -108,10 +116,12 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-center mb-14">Frequently Asked Questions</h2>
           <div className="space-y-6">
             {FAQS.map(f => (
-              <div key={f.q} className="border border-[var(--border)] rounded-lg p-6">
-                <h3 className="font-semibold mb-2">{f.q}</h3>
-                <p className="text-[var(--text-muted)] text-sm">{f.a}</p>
-              </div>
+              <Card key={f.q}>
+                <CardContent>
+                  <h3 className="font-semibold mb-2">{f.q}</h3>
+                  <p className="text-muted-foreground text-sm">{f.a}</p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>

@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
+import { Button } from '@/components/ui/button'
+import { PartyPopper } from 'lucide-react'
 
 export default function EarlyAccessPage() {
   const [email, setEmail] = useState('')
@@ -27,6 +29,8 @@ export default function EarlyAccessPage() {
     setLoading(false)
   }
 
+  const inputClass = "w-full border border-input rounded-lg px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+
   return (
     <div className="min-h-screen flex flex-col">
       <Nav variant="simple" />
@@ -38,39 +42,22 @@ export default function EarlyAccessPage() {
               Founding Member Early Access
             </div>
             <h1 className="text-4xl font-bold mb-4">Be first in line</h1>
-            <p className="text-lg text-[var(--text-muted)] mb-8">
+            <p className="text-lg text-muted-foreground mb-8">
               Join the waitlist for exclusive founding member pricing. Limited spots available.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4 text-left">
               <div>
                 <label className="block text-sm font-medium mb-1.5">Full Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-                  placeholder="Your name"
-                />
+                <input type="text" value={name} onChange={e => setName(e.target.value)} className={inputClass} placeholder="Your name" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  required
-                  className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-                  placeholder="you@business.com"
-                />
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className={inputClass} placeholder="you@business.com" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5">Business Type</label>
-                <select
-                  value={businessType}
-                  onChange={e => setBusinessType(e.target.value)}
-                  className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-                >
+                <select value={businessType} onChange={e => setBusinessType(e.target.value)} className={inputClass}>
                   <option value="">Select your industry</option>
                   <option value="beauty">Beauty Salon</option>
                   <option value="wellness">Wellness / Spa</option>
@@ -80,23 +67,19 @@ export default function EarlyAccessPage() {
                   <option value="other">Other</option>
                 </select>
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[var(--primary)] text-white py-3 rounded-lg font-medium hover:bg-[var(--primary-dark)] disabled:opacity-50"
-              >
+              <Button type="submit" disabled={loading} className="w-full h-11 text-sm">
                 {loading ? 'Joining...' : 'Join the Waitlist'}
-              </button>
+              </Button>
             </form>
           </>
         ) : (
           <>
-            <div className="text-5xl mb-6">&#127881;</div>
+            <PartyPopper className="size-12 text-primary mx-auto mb-6" />
             <h1 className="text-3xl font-bold mb-4">You&apos;re on the list!</h1>
-            <p className="text-lg text-[var(--text-muted)] mb-8">
+            <p className="text-lg text-muted-foreground mb-8">
               We&apos;ll reach out to {email} when it&apos;s your turn. Founding members get special pricing.
             </p>
-            <Link href="/" className="text-[var(--primary)] underline">
+            <Link href="/" className="text-primary underline">
               Back to homepage
             </Link>
           </>

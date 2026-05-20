@@ -81,47 +81,47 @@ function ReceptionistSettingsPage() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Bot size={24} />
           AI Receptionist Personality
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Configure how your AI receptionist communicates with customers
         </p>
       </div>
 
       {loadError && (
-        <div className="mb-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-3 text-sm text-yellow-700 dark:text-yellow-400 flex items-center gap-2">
+        <div className="mb-4 rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-sm text-amber-600 flex items-center gap-2">
           <AlertCircle size={16} />
           {loadError}
         </div>
       )}
 
       {saveError && (
-        <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 text-sm text-red-700 dark:text-red-400 flex items-center gap-2">
+        <div className="mb-4 rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive flex items-center gap-2">
           <AlertCircle size={16} />
           {saveError}
         </div>
       )}
 
       {saveSuccess && (
-        <div className="mb-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 text-sm text-green-700 dark:text-green-400">
+        <div className="mb-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm text-emerald-600">
           Receptionist settings saved successfully.
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6">
+      <div className="bg-card rounded-lg border border-border p-6 space-y-6">
         {/* Personality Preset */}
         <fieldset>
-          <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Personality Preset</legend>
+          <legend className="block text-sm font-medium text-foreground mb-3">Personality Preset</legend>
           <div className="flex flex-wrap gap-3">
             {PERSONALITY_PRESETS.map(preset => (
               <label
                 key={preset}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer transition-colors ${
                   settings.personalityPreset === preset
-                    ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 dark:border-blue-400 text-blue-700 dark:text-blue-300'
-                    : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                    ? 'bg-primary/10 border-primary text-primary'
+                    : 'bg-card border-border text-foreground hover:bg-muted'
                 }`}
               >
                 <input
@@ -193,7 +193,7 @@ function ReceptionistSettingsPage() {
 
         {/* Greeting Style */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-foreground mb-1">
             Greeting Style
           </label>
           <input
@@ -201,9 +201,9 @@ function ReceptionistSettingsPage() {
             value={settings.greetingStyle}
             onChange={e => updateField('greetingStyle', e.target.value)}
             placeholder="e.g., Hi! Welcome to {business}. I'm {name}, how can I help?"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary bg-card text-foreground"
           />
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Use {'{business}'} and {'{name}'} as placeholders for your business and receptionist name
           </p>
         </div>
@@ -213,7 +213,7 @@ function ReceptionistSettingsPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Save Receptionist Settings'}
           </button>
@@ -238,7 +238,7 @@ function SliderField({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
       <input
         type="range"
         min={1}
@@ -246,11 +246,11 @@ function SliderField({
         step={1}
         value={value}
         onChange={e => onChange(parseInt(e.target.value))}
-        className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
+        className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
       />
-      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+      <div className="flex justify-between text-xs text-muted-foreground mt-1">
         <span>{lowLabel}</span>
-        <span className="font-medium text-gray-700 dark:text-gray-300">{value} / 5</span>
+        <span className="font-medium text-foreground">{value} / 5</span>
         <span>{highLabel}</span>
       </div>
     </div>
@@ -269,10 +269,10 @@ function ToggleField({
   onChange: (value: boolean) => void
 }) {
   return (
-    <label className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+    <label className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted cursor-pointer">
       <div>
-        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{label}</span>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
+        <span className="text-sm font-medium text-foreground">{label}</span>
+        <p className="text-xs text-muted-foreground">{description}</p>
       </div>
       <button
         type="button"
@@ -280,7 +280,7 @@ function ToggleField({
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-          checked ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+          checked ? 'bg-primary' : 'bg-muted'
         }`}
       >
         <span

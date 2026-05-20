@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
+import { Button } from '@/components/ui/button'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -44,12 +45,12 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold mt-6 mb-2">Welcome back</h1>
-            <p className="text-[var(--text-muted)]">Log in to your Zenda account.</p>
+            <p className="text-muted-foreground">Log in to your Zenda account.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg text-sm">
                 {error}
               </div>
             )}
@@ -61,7 +62,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                className="w-full border border-input rounded-lg px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                 placeholder="you@business.com"
               />
             </div>
@@ -74,23 +75,19 @@ export default function LoginPage() {
                 onChange={e => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                className="w-full border border-input rounded-lg px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                 placeholder="Enter your password"
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[var(--primary)] text-white py-3 rounded-lg font-medium hover:bg-[var(--primary-dark)] transition disabled:opacity-50"
-            >
+            <Button type="submit" disabled={loading} className="w-full h-11 text-sm">
               {loading ? 'Logging in...' : 'Log In'}
-            </button>
+            </Button>
           </form>
 
-          <p className="text-center text-sm text-[var(--text-muted)] mt-6">
+          <p className="text-center text-sm text-muted-foreground mt-6">
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-[var(--primary)] underline">Sign up</Link>
+            <Link href="/signup" className="text-primary underline">Sign up</Link>
           </p>
         </div>
       </main>

@@ -131,10 +131,10 @@ function DashboardPage() {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Dashboard</h2>
+      <h2 className="text-2xl font-bold text-foreground mb-6">Dashboard</h2>
 
       {error && (
-        <div className="mb-6 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 text-sm text-red-700 dark:text-red-400">
+        <div className="mb-6 rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
           Failed to load dashboard data: {error}
           <button onClick={() => loadAll()} className="ml-2 underline">Retry</button>
         </div>
@@ -144,33 +144,33 @@ function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {loading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 animate-pulse">
+            <div key={i} className="bg-card rounded-lg border border-border p-4 animate-pulse">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded" />
-                <div className="h-4 w-28 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="w-6 h-6 bg-muted rounded" />
+                <div className="h-4 w-28 bg-muted rounded" />
               </div>
-              <div className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded" />
+              <div className="h-8 w-16 bg-muted rounded" />
             </div>
           ))
         ) : (
           <>
             <StatCard
-              icon={<Calendar className="text-blue-500" size={24} />}
+              icon={<Calendar className="text-primary" size={24} />}
               title="Today's Appointments"
               value={stats.todayAppointments}
             />
             <StatCard
-              icon={<MessageSquare className="text-green-500" size={24} />}
+              icon={<MessageSquare className="text-emerald-500" size={24} />}
               title="Active Conversations"
               value={stats.activeConversations}
             />
             <StatCard
-              icon={<AlertTriangle className="text-orange-500" size={24} />}
+              icon={<AlertTriangle className="text-amber-500" size={24} />}
               title="Needs Attention"
               value={stats.needsAttention}
             />
             <StatCard
-              icon={<Activity className="text-purple-500" size={24} />}
+              icon={<Activity className="text-violet-500" size={24} />}
               title="Messages Today"
               value={stats.todayMessages}
             />
@@ -180,22 +180,22 @@ function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activity */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Recent Activity</h3>
+        <div className="bg-card rounded-lg border border-border p-6">
+          <h3 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h3>
           {loading ? (
             <div className="space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="flex items-start gap-3 animate-pulse">
-                  <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex-shrink-0" />
+                  <div className="w-8 h-8 bg-muted rounded-full flex-shrink-0" />
                   <div className="flex-1">
-                    <div className="h-4 w-40 bg-gray-200 dark:bg-gray-700 rounded" />
-                    <div className="h-3 w-24 bg-gray-100 dark:bg-gray-600 rounded mt-1" />
+                    <div className="h-4 w-40 bg-muted rounded" />
+                    <div className="h-3 w-24 bg-muted rounded mt-1" />
                   </div>
                 </div>
               ))}
             </div>
           ) : recentActivity.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-gray-400 dark:text-gray-500">
+            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
               <Inbox size={32} className="mb-2" />
               <p className="text-sm">No activity yet</p>
             </div>
@@ -209,12 +209,12 @@ function DashboardPage() {
         </div>
 
         {/* Today's Schedule */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-card rounded-lg border border-border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Today's Schedule</h3>
+            <h3 className="text-lg font-semibold text-foreground">Today's Schedule</h3>
             <Link
               to="/dashboard/appointments"
-              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+              className="text-sm text-primary hover:text-primary/80"
             >
               View all
             </Link>
@@ -223,16 +223,16 @@ function DashboardPage() {
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 animate-pulse">
-                  <div className="w-14 h-8 bg-gray-200 dark:bg-gray-700 rounded" />
+                  <div className="w-14 h-8 bg-muted rounded" />
                   <div className="flex-1">
-                    <div className="h-4 w-28 bg-gray-200 dark:bg-gray-700 rounded" />
-                    <div className="h-3 w-20 bg-gray-100 dark:bg-gray-600 rounded mt-1" />
+                    <div className="h-4 w-28 bg-muted rounded" />
+                    <div className="h-3 w-20 bg-muted rounded mt-1" />
                   </div>
                 </div>
               ))}
             </div>
           ) : todaySchedule.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-gray-400 dark:text-gray-500">
+            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
               <Calendar size={32} className="mb-2" />
               <p className="text-sm">No appointments today</p>
             </div>
@@ -246,21 +246,21 @@ function DashboardPage() {
                   return (
                     <div
                       key={appt.id}
-                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted"
                     >
-                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300 w-14 flex-shrink-0">{time}</div>
+                      <div className="text-sm font-medium text-foreground w-14 flex-shrink-0">{time}</div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                        <p className="text-sm font-medium text-foreground truncate">
                           {appt.customerName ?? 'Unknown'}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        <p className="text-xs text-muted-foreground truncate">
                           {appt.serviceName ?? 'No service'}
                         </p>
                       </div>
                       <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${
                         appt.status === 'confirmed'
-                          ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                          : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                          : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
                       }`}>
                         {appt.status === 'confirmed' ? 'Confirmed' : 'Pending'}
                       </span>
@@ -277,12 +277,12 @@ function DashboardPage() {
 
 function StatCard({ icon, title, value }: { icon: React.ReactNode; title: string; value: number }) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+    <div className="bg-card rounded-lg border border-border p-4">
       <div className="flex items-center gap-3 mb-2">
         {icon}
-        <span className="text-sm text-gray-500 dark:text-gray-400">{title}</span>
+        <span className="text-sm text-muted-foreground">{title}</span>
       </div>
-      <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
+      <p className="text-2xl font-bold text-foreground">{value}</p>
     </div>
   )
 }
@@ -291,14 +291,14 @@ function ActivityRow({ item }: { item: ActivityItem }) {
   if (item.type === 'conversation') {
     return (
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 bg-green-50 rounded-full flex items-center justify-center flex-shrink-0">
-          <MessageSquare size={14} className="text-green-600" />
+        <div className="w-8 h-8 bg-emerald-500/10 rounded-full flex items-center justify-center flex-shrink-0">
+          <MessageSquare size={14} className="text-emerald-600 dark:text-emerald-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-900 dark:text-gray-100">
+          <p className="text-sm text-foreground">
             New conversation with <span className="font-medium">{item.customerName ?? 'Unknown'}</span>
           </p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">{formatRelativeTime(item.createdAt)}</p>
+          <p className="text-xs text-muted-foreground">{formatRelativeTime(item.createdAt)}</p>
         </div>
       </div>
     )
@@ -307,14 +307,14 @@ function ActivityRow({ item }: { item: ActivityItem }) {
   if (item.type === 'appointment_booked') {
     return (
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center flex-shrink-0">
-          <Calendar size={14} className="text-blue-600" />
+        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+          <Calendar size={14} className="text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-900 dark:text-gray-100">
+          <p className="text-sm text-foreground">
             Appointment booked for <span className="font-medium">{item.date}</span> at <span className="font-medium">{item.time}</span>
           </p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">{item.customerName ?? 'Unknown'}</p>
+          <p className="text-xs text-muted-foreground">{item.customerName ?? 'Unknown'}</p>
         </div>
       </div>
     )
@@ -323,14 +323,14 @@ function ActivityRow({ item }: { item: ActivityItem }) {
   // appointment_completed
   return (
     <div className="flex items-start gap-3">
-      <div className="w-8 h-8 bg-purple-50 rounded-full flex items-center justify-center flex-shrink-0">
-        <CheckCircle size={14} className="text-purple-600" />
+      <div className="w-8 h-8 bg-violet-500/10 rounded-full flex items-center justify-center flex-shrink-0">
+        <CheckCircle size={14} className="text-violet-600 dark:text-violet-400" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-900 dark:text-gray-100">
+        <p className="text-sm text-foreground">
           Appointment completed with <span className="font-medium">{item.customerName ?? 'Unknown'}</span>
         </p>
-        <p className="text-xs text-gray-400 dark:text-gray-500">{formatRelativeTime(item.createdAt)}</p>
+        <p className="text-xs text-muted-foreground">{formatRelativeTime(item.createdAt)}</p>
       </div>
     </div>
   )

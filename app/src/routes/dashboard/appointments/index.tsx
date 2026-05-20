@@ -9,13 +9,13 @@ export const Route = createFileRoute('/dashboard/appointments/')({
 })
 
 const STATUS_COLORS: Record<string, string> = {
-  pending_confirmation: 'bg-yellow-100 text-yellow-700',
-  confirmed: 'bg-green-100 text-green-700',
-  cancelled: 'bg-red-100 text-red-700',
-  completed: 'bg-blue-100 text-blue-700',
-  no_show: 'bg-gray-100 text-gray-700',
-  rescheduled: 'bg-purple-100 text-purple-700',
-  needs_attention: 'bg-orange-100 text-orange-700',
+  pending_confirmation: 'bg-amber-100 text-amber-700',
+  confirmed: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  cancelled: 'bg-destructive/10 text-destructive',
+  completed: 'bg-primary/10 text-primary',
+  no_show: 'bg-muted text-muted-foreground',
+  rescheduled: 'bg-violet-100 text-violet-700',
+  needs_attention: 'bg-amber-100 text-amber-700',
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -130,19 +130,19 @@ function AppointmentsPage() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Calendar</h2>
+        <h2 className="text-2xl font-bold text-foreground">Calendar</h2>
         <div className="flex items-center gap-3">
-          <div className="flex border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+          <div className="flex border border-border rounded-lg overflow-hidden">
             <button
               onClick={() => setView('calendar')}
-              className={`px-3 py-1.5 text-sm ${view === 'calendar' ? 'bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}
+              className={`px-3 py-1.5 text-sm ${view === 'calendar' ? 'bg-primary text-white' : 'bg-card text-foreground'}`}
               aria-label="Calendar view"
             >
               Week
             </button>
             <button
               onClick={() => setView('list')}
-              className={`px-3 py-1.5 text-sm ${view === 'list' ? 'bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}
+              className={`px-3 py-1.5 text-sm ${view === 'list' ? 'bg-primary text-white' : 'bg-card text-foreground'}`}
               aria-label="List view"
             >
               List
@@ -150,7 +150,7 @@ function AppointmentsPage() {
           </div>
           <button
             onClick={() => setShowCreateForm(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm"
             aria-label="Create new appointment"
           >
             <Plus size={16} />
@@ -160,7 +160,7 @@ function AppointmentsPage() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 text-sm text-red-700 dark:text-red-400 flex items-center gap-2" role="alert">
+        <div className="mb-4 rounded-lg bg-destructive/10 border border-destructive/30 p-3 text-sm text-destructive flex items-center gap-2" role="alert">
           <AlertCircle size={16} />
           {error}
           <button onClick={() => loadAppointments()} className="ml-2 underline">Retry</button>
@@ -170,17 +170,17 @@ function AppointmentsPage() {
       {/* Date navigation */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <button onClick={prevWeek} className="p-1 hover:bg-gray-100 rounded" aria-label="Previous week">
+          <button onClick={prevWeek} className="p-1 hover:bg-muted rounded" aria-label="Previous week">
             <ChevronLeft size={20} />
           </button>
-          <button onClick={goToday} className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+          <button onClick={goToday} className="px-3 py-1 text-sm border border-border rounded-lg hover:bg-muted">
             Today
           </button>
-          <button onClick={nextWeek} className="p-1 hover:bg-gray-100 rounded" aria-label="Next week">
+          <button onClick={nextWeek} className="p-1 hover:bg-muted rounded" aria-label="Next week">
             <ChevronRight size={20} />
           </button>
         </div>
-        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <h3 className="text-sm font-medium text-foreground">
           {weekDays[0].toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} — {weekDays[6].toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
         </h3>
       </div>
@@ -188,13 +188,13 @@ function AppointmentsPage() {
       {/* Search and filters */}
       <div className="mb-4 space-y-3">
         <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search by customer or service name..."
-            className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+            className="w-full pl-9 pr-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary bg-card text-foreground placeholder-muted-foreground/50"
           />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -204,8 +204,8 @@ function AppointmentsPage() {
               onClick={() => setStatusFilter(f.id)}
               className={`px-3 py-1 text-xs rounded-full border transition-colors ${
                 statusFilter === f.id
-                  ? 'bg-blue-500 text-white border-blue-500'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-card text-muted-foreground border-border hover:bg-muted'
               }`}
             >
               {f.label}
@@ -217,15 +217,15 @@ function AppointmentsPage() {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 animate-pulse">
+            <div key={i} className="flex items-center justify-between p-4 bg-card rounded-lg border border-border animate-pulse">
               <div className="flex items-center gap-4">
-                <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="h-4 w-16 bg-muted rounded" />
                 <div>
-                  <div className="h-4 w-28 bg-gray-200 dark:bg-gray-700 rounded" />
-                  <div className="h-3 w-20 bg-gray-100 dark:bg-gray-600 rounded mt-1" />
+                  <div className="h-4 w-28 bg-muted rounded" />
+                  <div className="h-3 w-20 bg-muted rounded mt-1" />
                 </div>
               </div>
-              <div className="h-5 w-20 bg-gray-100 dark:bg-gray-600 rounded-full" />
+              <div className="h-5 w-20 bg-muted rounded-full" />
             </div>
           ))}
         </div>
@@ -260,16 +260,16 @@ function CalendarWeekView({
   today: string
 }) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-auto">
+    <div className="bg-card rounded-lg border border-border overflow-auto">
       <table className="w-full min-w-[700px]" role="grid" aria-label="Weekly calendar">
         <thead>
-          <tr className="border-b border-gray-200 dark:border-gray-700">
-            <th className="w-16 p-2 text-xs text-gray-400 dark:text-gray-500 text-left" scope="col">Time</th>
+          <tr className="border-b border-border">
+            <th className="w-16 p-2 text-xs text-muted-foreground/50 text-left" scope="col">Time</th>
             {weekDays.map(day => {
               const dateStr = day.toISOString().split('T')[0]
               const isToday = dateStr === today
               return (
-                <th key={dateStr} className={`p-2 text-center text-xs font-medium ${isToday ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-500 dark:text-gray-400'}`} scope="col">
+                <th key={dateStr} className={`p-2 text-center text-xs font-medium ${isToday ? 'text-primary bg-primary/10' : 'text-muted-foreground'}`} scope="col">
                   <div>{DAYS[day.getDay()]}</div>
                   <div className={`text-lg ${isToday ? 'font-bold' : ''}`}>{day.getDate()}</div>
                 </th>
@@ -279,23 +279,23 @@ function CalendarWeekView({
         </thead>
         <tbody>
           {HOURS.map(hour => (
-            <tr key={hour} className="border-b border-gray-100 dark:border-gray-700/50 h-12">
-              <td className="p-1 text-xs text-gray-400 dark:text-gray-500 align-top">{formatHour(hour)}</td>
+            <tr key={hour} className="border-b border-border h-12">
+              <td className="p-1 text-xs text-muted-foreground/50 align-top">{formatHour(hour)}</td>
               {weekDays.map(day => {
                 const dateStr = day.toISOString().split('T')[0]
                 const dayApts = appointmentsByDate.get(dateStr) ?? []
                 const hourApts = dayApts.filter(apt => new Date(apt.startAt).getHours() === hour)
 
                 return (
-                  <td key={dateStr} className={`p-0.5 align-top ${dateStr === today ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}>
+                  <td key={dateStr} className={`p-0.5 align-top ${dateStr === today ? 'bg-primary/5' : ''}`}>
                     {hourApts.map(apt => (
                       <div
                         key={apt.id}
                         className={`text-[10px] px-1 py-0.5 rounded truncate mb-0.5 ${
-                          apt.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                          apt.status === 'pending_confirmation' ? 'bg-yellow-100 text-yellow-700' :
-                          apt.status === 'cancelled' ? 'bg-red-100 text-red-700 line-through' :
-                          'bg-blue-100 text-blue-700'
+                          apt.status === 'confirmed' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
+                          apt.status === 'pending_confirmation' ? 'bg-amber-100 text-amber-700' :
+                          apt.status === 'cancelled' ? 'bg-destructive/10 text-destructive line-through' :
+                          'bg-primary/10 text-primary'
                         }`}
                         title={`${apt.customerName ?? apt.customerId} — ${apt.serviceName ?? apt.serviceId} (${STATUS_LABELS[apt.status] ?? apt.status})`}
                       >
@@ -318,7 +318,7 @@ function ListView({ appointments, selectedDate }: { appointments: any[]; selecte
   return (
     <div className="space-y-2">
       {appointments.length === 0 ? (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-12 text-muted-foreground">
           <Calendar size={48} className="mx-auto mb-4 opacity-50" />
           <p>No appointments for {selectedDate.toLocaleDateString()}</p>
           <p className="text-sm">Appointments will appear when the AI books them.</p>
@@ -327,24 +327,24 @@ function ListView({ appointments, selectedDate }: { appointments: any[]; selecte
         appointments.map((apt) => (
           <div
             key={apt.id}
-            className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+            className="flex items-center justify-between p-4 bg-card rounded-lg border border-border"
           >
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock size={16} />
                 <span className="text-sm">
                   {new Date(apt.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
               <div>
-                <p className="font-medium text-gray-900 dark:text-gray-100">
+                <p className="font-medium text-foreground">
                   <User size={14} className="inline mr-1" />
                   {apt.customerName ?? apt.customerId}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{apt.serviceName ?? apt.serviceId}</p>
+                <p className="text-sm text-muted-foreground">{apt.serviceName ?? apt.serviceId}</p>
               </div>
             </div>
-            <span className={`text-xs px-2 py-1 rounded-full ${STATUS_COLORS[apt.status] ?? 'bg-gray-100 text-gray-700'}`}>
+            <span className={`text-xs px-2 py-1 rounded-full ${STATUS_COLORS[apt.status] ?? 'bg-muted text-muted-foreground'}`}>
               {STATUS_LABELS[apt.status] ?? apt.status.replace(/_/g, ' ')}
             </span>
           </div>
@@ -399,70 +399,70 @@ function CreateAppointmentModal({ onClose, onCreated }: { onClose: () => void; o
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+      <div className="bg-card rounded-xl w-full max-w-md p-6 shadow-xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">New Appointment</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300" aria-label="Close">
+          <h3 className="text-lg font-semibold text-foreground">New Appointment</h3>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
             <X size={20} />
           </button>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 text-sm text-red-700 dark:text-red-400" role="alert">
+          <div className="mb-4 rounded-lg bg-destructive/10 border border-destructive/30 p-3 text-sm text-destructive" role="alert">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer Name</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Customer Name</label>
             <input
               type="text"
               value={form.customerName}
               onChange={e => setForm({ ...form, customerName: e.target.value })}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-muted text-foreground"
               placeholder="e.g., Maria Garcia"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone (optional)</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Phone (optional)</label>
             <input
               type="tel"
               value={form.customerPhone}
               onChange={e => setForm({ ...form, customerPhone: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-muted text-foreground"
               placeholder="+52 55 1234 5678"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Date</label>
               <input
                 type="date"
                 value={form.date}
                 onChange={e => setForm({ ...form, date: e.target.value })}
                 required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-muted text-foreground"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Time</label>
               <input
                 type="time"
                 value={form.startTime}
                 onChange={e => setForm({ ...form, startTime: e.target.value })}
                 required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-muted text-foreground"
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Service</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Service</label>
             <select
               value={form.serviceId}
               onChange={e => setForm({ ...form, serviceId: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-muted text-foreground"
             >
               <option value="">Select a service</option>
               {services.map(s => (
@@ -471,12 +471,12 @@ function CreateAppointmentModal({ onClose, onCreated }: { onClose: () => void; o
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes (optional)</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Notes (optional)</label>
             <textarea
               value={form.notes}
               onChange={e => setForm({ ...form, notes: e.target.value })}
               rows={2}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-muted text-foreground"
               placeholder="Any additional notes"
             />
           </div>
@@ -484,14 +484,14 @@ function CreateAppointmentModal({ onClose, onCreated }: { onClose: () => void; o
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 text-sm font-medium"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 text-sm font-medium"
             >
               {saving ? 'Creating...' : 'Create Appointment'}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm text-gray-700 dark:text-gray-300"
+              className="px-4 py-2 border border-border rounded-lg hover:bg-muted text-sm text-foreground"
             >
               Cancel
             </button>
