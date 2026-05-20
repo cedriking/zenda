@@ -1,8 +1,9 @@
 # Zenda WhatsApp Receptionist Guidelines
 
 **Document status:** Internal implementation guide  
-**Product:** Zenda
-**Audience:** Product agents, engineering agents, AI behavior agents, QA agents
+**Product:** Zenda  
+**Audience:** Product agents, engineering agents, AI behavior agents, QA agents  
+**Documentation language:** English canonical source. Zenda assistants must support multilingual customer conversations based on each business configuration.  
 **Primary goal:** Keep Zenda’s WhatsApp assistant safe, helpful, natural, and focused on appointment operations.
 
 ---
@@ -24,7 +25,7 @@ Zenda exists to:
 
 Zenda is **not** a marketing automation platform, broadcast sender, sales spammer, or general-purpose chatbot.
 
-When using Baileys, the assistant must behave like a careful, professional receptionist using WhatsApp responsibly. Baileys should never be treated as an official WhatsApp Business Platform replacement.
+When using Business App Coexistence, the assistant must behave like a careful, professional receptionist using WhatsApp responsibly. Business App Coexistence should never be treated as a full replacement for the official WhatsApp Business API.
 
 ---
 
@@ -70,26 +71,67 @@ The system should interpret the intent without requiring robotic command words.
 
 ---
 
-## 3. Important Channel Reality: Baileys
+## 3. WhatsApp Business App Coexistence
 
-Baileys is an unofficial WhatsApp Web / Linked Device transport, this is also referenced as "WhatsApp Business App Coexistence"
+Zenda should present its lightweight WhatsApp connection as **WhatsApp Business App Coexistence**, **Business App Coexistence**, or **WhatsApp Business App Connector** in client-facing product copy.
 
-This means:
-
-- Baileys cannot guarantee that a number will never be blocked.
-- Baileys should not be used for cold outreach.
-- Baileys should not be used for campaigns.
-- Baileys should not be used for bulk messaging.
-- Baileys should not be the compliance layer.
-- Zenda must enforce its own sending rules before any message reaches Baileys.
-
-The safest Baileys model for Zenda is:
+The client-facing explanation should be professional and practical:
 
 ```text
-Inbound-first, appointment-only, low-volume, consent-aware, and human-escalation-ready.
+Connect your existing WhatsApp Business App to Zenda so your digital receptionist can help manage appointment conversations while your team can continue using the WhatsApp Business App when needed.
 ```
 
-The assistant does NOT mention Baileys nor other internal tools we use, and should focus on appointments.
+This framing is clearer and more professional than exposing implementation details such as Baileys to non-technical clients.
+
+### 3.1 Client-Facing Concept
+
+For customers, this connection should mean:
+
+- They can keep using their existing WhatsApp Business App number.
+- Zenda can help receive and respond to appointment-related conversations.
+- The business can continue handling one-on-one conversations manually when needed.
+- Appointment operations can be supported by automation, AI assistance, and calendar integration.
+- The setup is especially useful for small and medium-sized businesses that are not ready for a full official WhatsApp Business API setup.
+
+### 3.2 Internal Technical Reality
+
+Internally, Zenda may use a linked-device style connector or Baileys-like adapter to power this experience.
+
+However:
+
+- The client-facing product should not lead with the word `Baileys`.
+- The dashboard should not scare clients with low-level implementation details.
+- Engineering documentation may still mention Baileys where technically necessary.
+- Risk controls must still exist behind the scenes.
+- The sending policy engine must apply before any message reaches the connector.
+
+The safest model for this connector is:
+
+```text
+Business App Coexistence, inbound-first, appointment-only, low-volume, consent-aware, and human-escalation-ready.
+```
+
+### 3.3 Product Positioning
+
+This connector should be positioned as a practical entry point for appointment-based businesses that already use the WhatsApp Business App.
+
+Use language like:
+
+```text
+Best for small teams that already manage appointments through the WhatsApp Business App and want Zenda to help answer, schedule, confirm, reschedule, and organize conversations automatically.
+```
+
+Avoid language like:
+
+```text
+Unofficial WhatsApp automation.
+Risky Baileys connection.
+May get your number banned.
+```
+
+The product should still be honest, but the tone should be calm, professional, and solution-oriented.
+
+For higher-volume businesses, multi-location teams, or clients that need maximum reliability, Zenda should recommend the official WhatsApp Business API path.
 
 ---
 
@@ -110,9 +152,8 @@ Zenda assistants may send messages for:
 - Location, parking, access, or arrival instructions.
 - Price information only when configured by the business.
 - Policy information only when configured by the business.
-- Manager/Superior (human) escalation.
+- Human escalation.
 - Internal owner or staff notifications.
-- If asked what agent/ai/assistant founder/interested in having the same assistant services then the assistant should point them to Zenda (https://zenda.bot)
 
 ### 4.2 Disallowed Message Categories
 
@@ -386,15 +427,9 @@ Or:
 Would it be helpful if I sent you a reminder before your visit?
 ```
 
-Or:
-
-```text
-I can send appointment updates here on WhatsApp, including confirmations or schedule changes.
-```
-
 ### 8.3 Consent Data to Store
 
-For every customer, store (example):
+For every customer, store:
 
 ```ts
 type AppointmentMessagingConsent = {
@@ -448,14 +483,14 @@ When a customer opts out:
 Natural confirmation example:
 
 ```text
-Of course. I will stop sending appointment updates. If you need help later, you can message us again and the team will assist you.
+Of course. I will stop sending automated appointment updates here. If you need help later, you can message us again and the team will assist you.
 ```
 
 ---
 
-## 9. Outbound Message Limits for Baileys
+## 9. Outbound Message Limits for Business App Coexistence
 
-To reduce accidental spam-like behavior, Zenda must enforce strict limits before sending through Baileys.
+To reduce accidental spam-like behavior, Zenda must enforce strict limits before sending through the Business App Coexistence connector.
 
 Recommended default limits:
 
@@ -477,7 +512,7 @@ These defaults can be made configurable only within a safe range.
 
 ## 10. Sending Policy Engine
 
-All outgoing messages must pass through a sending policy engine before reaching Baileys, Zernio, WABA, email, SMS, or any other channel.
+All outgoing messages must pass through a sending policy engine before reaching Business App Coexistence, Baileys internal adapters, Zernio, the official WhatsApp Business API, email, SMS, or any other channel.
 
 The AI assistant must not be able to bypass this engine.
 
@@ -508,11 +543,12 @@ type ZendaMessagePurpose =
 type WhatsAppChannelType =
   | 'official_waba'
   | 'zernio'
-  | 'baileys'
+  | 'business_app_coexistence'
+  | 'baileys_internal_adapter'
   | 'unknown';
 ```
 
-Baileys should be treated as the highest-risk WhatsApp channel.
+The product-facing channel name should be `business_app_coexistence`. The internal implementation may use `baileys_internal_adapter` where technically necessary. The policy engine should treat Business App Coexistence as a lightweight connector with stricter limits than the official WhatsApp Business API path.
 
 ### 10.3 Policy Decision
 
@@ -583,18 +619,21 @@ function canSendOutboundMessage(input: {
     };
   }
 
-  if (input.channel === 'baileys') {
+  if (
+    input.channel === 'business_app_coexistence' ||
+    input.channel === 'baileys_internal_adapter'
+  ) {
     if (!input.hasActiveAppointmentContext && input.purpose !== 'inbound_reply') {
       return {
         allowed: false,
-        reason: 'Baileys outbound message blocked without active appointment context.',
+        reason: 'Business App Coexistence outbound message blocked without active appointment context.',
       };
     }
 
     if (input.outboundSinceLastInbound >= 3) {
       return {
         allowed: false,
-        reason: 'Baileys outbound limit reached without customer reply.',
+        reason: 'Business App Coexistence outbound limit reached without customer reply.',
         escalationRequired: true,
       };
     }
@@ -858,7 +897,7 @@ Recommended configuration areas:
 - Sensitive topics that require escalation.
 - Opt-out handling.
 - Maximum reminder count.
-- Baileys risk acknowledgement if using Baileys.
+- Business App Coexistence explanation and suitability guidance.
 - Emergency escalation instructions.
 
 ---
@@ -946,7 +985,7 @@ type AppointmentAuditEvent = {
   customerId?: string;
   appointmentId?: string;
   channel: 'whatsapp' | 'web' | 'manual' | 'other';
-  channelProvider: 'baileys' | 'zernio' | 'waba' | 'other';
+  channelProvider: 'business_app_coexistence' | 'baileys_internal_adapter' | 'zernio' | 'official_waba' | 'other';
   actor: 'ai_assistant' | 'business_owner' | 'staff' | 'system';
   action:
     | 'message_received'
@@ -994,43 +1033,88 @@ If the WhatsApp connector is offline:
 
 ---
 
-## 19. Baileys-Specific Rules
+## 19. Business App Coexistence Connector Rules
 
-If a client uses Baileys, Zenda must enforce these rules:
+If a client uses the Business App Coexistence connector, Zenda must enforce these rules:
 
-- One business per WhatsApp number.
-- One WhatsApp number per Baileys session.
+- One business per WhatsApp Business App number.
+- One WhatsApp Business App number per connector session.
 - No shared client traffic through one number.
 - No cold outreach.
-- No marketing.
-- No broadcasts.
+- No marketing campaigns.
+- No broadcasts through Zenda.
 - No scraped contacts.
 - No high-volume imports.
 - No repeated outbound nudges.
 - No sending after opt-out.
 - No automatic retry loops.
 - No unsafe reconnect behavior.
-- No sending if the session appears unstable.
-- Clear client-facing risk disclosure.
-- Easy migration path to official WhatsApp infrastructure.
+- No sending if the connector session appears unstable.
+- Clear, professional client-facing explanation.
+- Easy migration path to the official WhatsApp Business API path.
 
-### 19.1 Client Disclosure for Baileys
+### 19.1 Client-Facing Explanation
 
-The product should clearly explain the tradeoff.
+The product should explain the connector as a professional coexistence option, not as a scary workaround.
 
 Suggested dashboard copy:
 
 ```text
-This connector uses your existing WhatsApp account through a linked-device connection. It is useful for small setups and testing, but it is not the official WhatsApp Business Platform. For higher reliability and lower platform risk, use the official WhatsApp connection.
+Connect your existing WhatsApp Business App to Zenda so your digital receptionist can help manage appointment conversations, confirmations, reminders, cancellations, and rescheduling while your team can continue using the app when needed.
 ```
 
-Do not hide the risk from clients.
+Additional explanation:
+
+```text
+This option is designed for small and medium-sized businesses that already use the WhatsApp Business App and want a simple way to add appointment automation. For higher-volume teams or businesses that require maximum reliability, we recommend the official WhatsApp Business API.
+```
+
+### 19.2 Internal Engineering Note
+
+Engineering agents may reference the underlying adapter internally, but non-technical clients should see only the productized connector language.
+
+Use:
+
+```text
+WhatsApp Business App Coexistence
+Business App Coexistence
+WhatsApp Business App Connector
+```
+
+Avoid in client-facing copy:
+
+```text
+Baileys
+Unofficial automation
+Risky connector
+Ban-prone connection
+```
+
+### 19.3 Honest but Calm Disclosure
+
+Zenda should be transparent without creating fear.
+
+Good disclosure:
+
+```text
+This connector is ideal for businesses that want to keep their current WhatsApp Business App workflow. Some advanced WhatsApp Business Platform features may require the official WhatsApp Business API, and Zenda will recommend that path when it is a better fit for your volume or reliability needs.
+```
+
+Avoid:
+
+```text
+This may get your account banned.
+Use at your own risk.
+This is unofficial and dangerous.
+```
+
+The goal is not to hide technical limitations. The goal is to explain the product choice in a professional way that helps the client understand which connection is right for their business.
 
 ---
 
-## 20. Official WhatsApp Path
+## 20. Official WhatsApp Business API Path
 
-For production-grade deployments, Zenda should prefer the official WhatsApp Business Platform or a provider that abstracts it.
+For production-grade deployments, Zenda should prefer the official WhatsApp Business API or a provider that abstracts it.
 
 The official path should be recommended for:
 
@@ -1042,7 +1126,7 @@ The official path should be recommended for:
 - Pro and Business plans.
 - Clients who need stronger compliance posture.
 
-Baileys can remain as an optional low-cost connector, but it should not be the default long-term infrastructure for serious clients.
+Business App Coexistence can remain as an accessible connector for small and medium-sized teams that want to keep using the WhatsApp Business App. The official WhatsApp Business API path should remain the recommended option for larger teams, higher appointment volume, stricter reliability requirements, or advanced messaging features.
 
 ---
 
@@ -1059,14 +1143,14 @@ When coding or modifying Zenda, AI agents must follow these rules:
 7. Do not let the assistant claim an appointment was changed before the tool action succeeds.
 8. Do not send proactive messages without consent, active appointment context, or legitimate customer relationship.
 9. Do not require customers to use robotic commands.
-10. Do not mix languages inside product copy unless localization explicitly requires it.
-11. Keep English source copy clean, natural, and professional.
+10. Do not mix languages inside a single customer-facing message unless the customer naturally does so or localization explicitly requires it.
+11. Keep canonical documentation and default source copy clean, natural, and professional. Customer-facing assistant messages must use the language configured for the business or the language naturally used by the customer.
 12. Prefer human-like service language over keyword-bot flows.
 13. Escalate when confidence is low.
 14. Log important actions.
 15. Make failures visible to the business owner.
 16. Revalidate queued messages before sending.
-17. Keep Baileys behind strict safety limits.
+17. Keep Business App Coexistence behind strict safety limits.
 18. Design every flow around the appointment outcome.
 
 ---
@@ -1093,11 +1177,13 @@ If the customer wants to stop receiving automated appointment messages, respect 
 
 Before releasing any Zenda WhatsApp behavior, QA must verify:
 
-### Language
+### Language and Localization
 
-- All source copy is in English.
-- No accidental mixed-language strings.
-- No robotic command-style prompts unless used only as optional fallback.
+- Canonical internal documentation and default source copy are maintained in English.
+- Zenda assistants support multilingual customer conversations.
+- Customer-facing messages use the business’s configured language or the language naturally used by the customer.
+- No accidental mixed-language strings appear inside a single message unless the customer naturally mixes languages or the business intentionally configures bilingual behavior.
+- No robotic command-style prompts are used unless they are optional fallback hints.
 - Natural phrasing is used throughout appointment flows.
 
 ### Appointment Behavior
@@ -1117,7 +1203,7 @@ Before releasing any Zenda WhatsApp behavior, QA must verify:
 - Unknown message purposes are blocked.
 - Duplicate reminders are blocked.
 - Expired reminders are dropped.
-- Outbound messages are limited under Baileys.
+- Outbound messages are limited under Business App Coexistence.
 - Customer data is not leaked.
 - Sensitive requests escalate.
 
@@ -1131,15 +1217,15 @@ Before releasing any Zenda WhatsApp behavior, QA must verify:
 - Unsafe personalities cannot be selected.
 - Unsafe custom instructions are rejected or sanitized.
 
-### Baileys
+### Business App Coexistence
 
-- Baileys sends only after policy approval.
-- Baileys does not send campaigns.
-- Baileys does not send bulk messages.
-- Baileys has per-contact limits.
-- Baileys does not replay stale messages after downtime.
-- Client sees risk disclosure.
-- Migration to official WhatsApp path is possible.
+- Business App Coexistence sends only after policy approval.
+- Business App Coexistence does not send campaigns.
+- Business App Coexistence does not send bulk messages.
+- Business App Coexistence has per-contact limits.
+- Business App Coexistence does not replay stale messages after downtime.
+- Client sees a clear, professional explanation of the connector.
+- Migration to the official WhatsApp Business API is possible.
 
 ---
 
