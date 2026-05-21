@@ -8,6 +8,13 @@
       "when": 1779375900713,
       "tag": "0000_short_crusher_hogan",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779401483916,
+      "tag": "0001_update_4tier_pricing",
+      "breakpoints": true
     }
   ]
 }

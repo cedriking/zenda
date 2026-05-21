@@ -446,6 +446,26 @@ export interface AppointmentAuditEvent {
   createdAt: Date
 }
 
+// --- Message Sender Interface (ZEN-11) ---
+
+/**
+ * Abstract interface for sending messages/events to a workspace.
+ * Decouples the conversation engine from any specific channel transport.
+ * Implementations: WebSocket (current), SMS, email, push, etc.
+ */
+export interface MessageSender {
+  /**
+   * Send an event payload to a connected workspace.
+   * @returns true if delivered, false if workspace not connected
+   */
+  send(workspaceId: string, data: unknown): boolean
+
+  /**
+   * Check whether a workspace is currently reachable.
+   */
+  isConnected(workspaceId: string): boolean
+}
+
 // --- Outbound limits (§9) ---
 
 export const OUTBOUND_LIMITS = {

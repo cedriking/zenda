@@ -1,47 +1,25 @@
 import { db } from '../client.js'
 import { plans } from '../schema/subscriptions.js'
+import { PLANS } from '@zenda/shared'
 
 async function seed() {
   console.log('Seeding database...')
 
-  // Seed plans
+  // Seed plans from shared constants (single source of truth)
   const existingPlans = await db.select().from(plans)
   if (existingPlans.length === 0) {
-    await db.insert(plans).values([
-      {
-        tier: 'starter',
-        name: 'Starter',
-        monthlyPriceCents: 2900,
-        annualPriceCents: 28800,
-        conversationsLimit: 300,
-        appointmentsLimit: 150,
-        voiceMinutesLimit: 120,
-        staffLimit: 1,
-        retentionDays: 30,
-      },
-      {
-        tier: 'pro',
-        name: 'Pro',
-        monthlyPriceCents: 6900,
-        annualPriceCents: 70800,
-        conversationsLimit: 1000,
-        appointmentsLimit: 500,
-        voiceMinutesLimit: 300,
-        staffLimit: 5,
-        retentionDays: 90,
-      },
-      {
-        tier: 'business',
-        name: 'Business',
-        monthlyPriceCents: 14900,
-        annualPriceCents: 142800,
-        conversationsLimit: 3000,
-        appointmentsLimit: 1500,
-        voiceMinutesLimit: 800,
-        staffLimit: 15,
-        retentionDays: 180,
-      },
-    ])
+    await db.insert(plans).values(
+      Object.values(PLANS).map((p) => ({
+        tier: p.tier,
+        name: p.name,
+        monthlyPriceCents: p.monthlyPriceCents,
+        activeContactsLimit: p.activeContactsLimit,
+        calendarsStaffLimit: p.calendarsStaffLimit,
+        locationsLimit: p.locationsLimit,
+        setupType: p.setupType,
+        retentionDays: p.retentionDays,
+      })),
+    )
     console.log('Plans seeded')
   } else {
     console.log('Plans already exist, skipping')

@@ -9,6 +9,8 @@ export {
   plans,
   subscriptions,
   usageRecords,
+  activeContactDedup,
+  processedStripeEvents,
   planTierEnum,
   billingPeriodEnum,
   subscriptionStatusEnum,
