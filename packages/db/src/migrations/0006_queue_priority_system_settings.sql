@@ -1,10 +1,6 @@
--- Add queue priority enum and column (idempotent)
-DO $$ BEGIN
-  CREATE TYPE "public"."queue_priority" AS ENUM ('emergency', 'reminder', 'notification', 'low');
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-
+-- Add priority column to outbound_queue if not present (queue_priority type created in 0005)
 ALTER TABLE outbound_queue ADD COLUMN IF NOT EXISTS priority "queue_priority" NOT NULL DEFAULT 'notification';
+--> statement-breakpoint
 
 -- Add system_settings table for persistent kill switch and other runtime config
 CREATE TABLE IF NOT EXISTS system_settings (
@@ -12,6 +8,7 @@ CREATE TABLE IF NOT EXISTS system_settings (
   value TEXT NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+--> statement-breakpoint
 
 -- Seed kill switch default
 INSERT INTO system_settings (key, value) VALUES ('outbound_kill_switch', 'running')

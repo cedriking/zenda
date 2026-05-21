@@ -5,11 +5,13 @@ DO $$ BEGIN
   CREATE TYPE "public"."messaging_consent_status" AS ENUM('unknown', 'allowed', 'limited', 'opted_out');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+--> statement-breakpoint
 
 DO $$ BEGIN
   CREATE TYPE "public"."consent_source" AS ENUM('customer_inbound_message', 'whatsapp_booking', 'booking_form', 'business_import', 'manual_owner_confirmation', 'opt_out_request');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+--> statement-breakpoint
 
 DO $$ BEGIN
   CREATE TYPE "public"."message_purpose" AS ENUM(
@@ -20,16 +22,25 @@ DO $$ BEGIN
   );
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+--> statement-breakpoint
 
 DO $$ BEGIN
   CREATE TYPE "public"."reminder_type" AS ENUM('day_before', 'same_day');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+--> statement-breakpoint
 
 DO $$ BEGIN
   CREATE TYPE "public"."queue_status" AS ENUM('pending', 'processing', 'sent', 'failed', 'dead_letter');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+--> statement-breakpoint
+
+DO $$ BEGIN
+  CREATE TYPE "public"."queue_priority" AS ENUM ('emergency', 'reminder', 'notification', 'low');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
 
 -- Tables
 CREATE TABLE IF NOT EXISTS "messaging_consent" (
@@ -47,6 +58,7 @@ CREATE TABLE IF NOT EXISTS "messaging_consent" (
   "created_at" timestamp with time zone DEFAULT now() NOT NULL,
   "updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
+--> statement-breakpoint
 
 CREATE TABLE IF NOT EXISTS "outbound_message_log" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
@@ -60,6 +72,7 @@ CREATE TABLE IF NOT EXISTS "outbound_message_log" (
   "created_at" timestamp with time zone DEFAULT now() NOT NULL,
   "updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
+--> statement-breakpoint
 
 CREATE TABLE IF NOT EXISTS "sent_reminder_log" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
@@ -68,6 +81,7 @@ CREATE TABLE IF NOT EXISTS "sent_reminder_log" (
   "sent_at" timestamp with time zone NOT NULL DEFAULT now(),
   "created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
+--> statement-breakpoint
 
 CREATE TABLE IF NOT EXISTS "outbound_queue" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
@@ -89,68 +103,86 @@ CREATE TABLE IF NOT EXISTS "outbound_queue" (
   "created_at" timestamp with time zone DEFAULT now() NOT NULL,
   "updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
+--> statement-breakpoint
 
 -- Indexes (idempotent)
 CREATE UNIQUE INDEX IF NOT EXISTS "messaging_consent_workspace_customer_idx" ON "messaging_consent" ("workspace_id", "customer_id");
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "messaging_consent_phone_idx" ON "messaging_consent" ("phone_number");
+--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "outbound_message_log_workspace_customer_idx" ON "outbound_message_log" ("workspace_id", "customer_id");
+--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "sent_reminder_log_appointment_type_idx" ON "sent_reminder_log" ("appointment_id", "reminder_type");
+--> statement-breakpoint
 
 -- Foreign keys (idempotent via DO blocks)
 DO $$ BEGIN
   ALTER TABLE "messaging_consent" ADD CONSTRAINT "messaging_consent_workspace_id_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."workspaces"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+--> statement-breakpoint
 
 DO $$ BEGIN
   ALTER TABLE "messaging_consent" ADD CONSTRAINT "messaging_consent_customer_id_customers_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+--> statement-breakpoint
 
 DO $$ BEGIN
   ALTER TABLE "outbound_message_log" ADD CONSTRAINT "outbound_message_log_workspace_id_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."workspaces"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+--> statement-breakpoint
 
 DO $$ BEGIN
   ALTER TABLE "outbound_message_log" ADD CONSTRAINT "outbound_message_log_customer_id_customers_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+--> statement-breakpoint
 
 DO $$ BEGIN
   ALTER TABLE "outbound_message_log" ADD CONSTRAINT "outbound_message_log_conversation_id_conversations_id_fk" FOREIGN KEY ("conversation_id") REFERENCES "public"."conversations"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+--> statement-breakpoint
 
 DO $$ BEGIN
   ALTER TABLE "sent_reminder_log" ADD CONSTRAINT "sent_reminder_log_appointment_id_appointments_id_fk" FOREIGN KEY ("appointment_id") REFERENCES "public"."appointments"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+--> statement-breakpoint
 
 DO $$ BEGIN
   ALTER TABLE "outbound_queue" ADD CONSTRAINT "outbound_queue_workspace_id_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."workspaces"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+--> statement-breakpoint
 
 DO $$ BEGIN
   ALTER TABLE "outbound_queue" ADD CONSTRAINT "outbound_queue_customer_id_customers_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+--> statement-breakpoint
 
 DO $$ BEGIN
   ALTER TABLE "outbound_queue" ADD CONSTRAINT "outbound_queue_conversation_id_conversations_id_fk" FOREIGN KEY ("conversation_id") REFERENCES "public"."conversations"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+--> statement-breakpoint
 
--- Phase 1.1: Expand consent_source and message_purpose enums to match shared types
+-- Phase 1.1: Expand consent_source and message_purpose enums (idempotent)
 
--- Add new consent sources (idempotent)
 ALTER TYPE "public"."consent_source" ADD VALUE IF NOT EXISTS 'booking_form';
+--> statement-breakpoint
 ALTER TYPE "public"."consent_source" ADD VALUE IF NOT EXISTS 'business_import';
+--> statement-breakpoint
 ALTER TYPE "public"."consent_source" ADD VALUE IF NOT EXISTS 'manual_owner_confirmation';
+--> statement-breakpoint
 
--- Add new message purposes (idempotent)
 ALTER TYPE "public"."message_purpose" ADD VALUE IF NOT EXISTS 'inbound_reply';
+--> statement-breakpoint
 ALTER TYPE "public"."message_purpose" ADD VALUE IF NOT EXISTS 'business_follow_up';
+--> statement-breakpoint
 ALTER TYPE "public"."message_purpose" ADD VALUE IF NOT EXISTS 'marketing';
+--> statement-breakpoint
 ALTER TYPE "public"."message_purpose" ADD VALUE IF NOT EXISTS 'unknown';
