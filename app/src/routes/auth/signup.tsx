@@ -8,11 +8,6 @@ import { setAppLanguage, detectSystemLanguage } from '@/actions/language'
 import { supportedLanguages, type UILanguage } from '@zenda/shared/i18n'
 
 export const Route = createFileRoute('/auth/signup')({
-  beforeLoad: ({ context }) => {
-    if (context.auth?.isAuthenticated) {
-      throw redirect({ to: getPostAuthRoute() })
-    }
-  },
   component: SignupPage,
 })
 

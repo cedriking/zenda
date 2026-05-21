@@ -8,11 +8,6 @@ import { ArrowLeft, Mail } from 'lucide-react'
 import LangToggle from '@/components/lang-toggle'
 
 export const Route = createFileRoute('/auth/login')({
-  beforeLoad: ({ context }) => {
-    if (context.auth?.isAuthenticated) {
-      throw redirect({ to: getPostAuthRoute() })
-    }
-  },
   component: LoginPage,
 })
 

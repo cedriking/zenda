@@ -114,7 +114,7 @@ function SettingsPage() {
       return
     }
     setTab(tabs[nextIndex].id)
-    const tabButtons = document.querySelectorAll('[role="tab"]')
+    const tabButtons = document.querySelectorAll<HTMLElement>('[role="tab"]')
     tabButtons[nextIndex]?.focus()
   }, [tab, tabs])
 

@@ -55,9 +55,10 @@ export function useAppointments() {
   }, [])
 
   useEffect(() => {
-    const unsub = window.electron?.on?.('appointment:update', (data: Partial<Appointment>) => {
+    const unsub = window.electron?.on?.('appointment:update', (data: unknown) => {
+      const partial = data as Partial<Appointment>
       setAppointments(prev =>
-        prev.map(a => a.id === data.id ? { ...a, ...data } : a),
+        prev.map(a => a.id === partial.id ? { ...a, ...partial } : a),
       )
     })
     return () => { unsub?.() }

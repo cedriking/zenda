@@ -27,23 +27,30 @@ const STEP_ICONS = ['📱', '🏢', '✂️', '🕐', '📋', '🤖', '🚀']
 
 const PLAN_TIERS = [
   {
-    id: 'starter' as const,
-    price: 19,
-    originalPrice: 29,
+    id: 'local_solo' as const,
+    price: 29,
+    contacts: 50,
     icon: Zap,
     highlight: false,
   },
   {
-    id: 'pro' as const,
+    id: 'local_starter' as const,
     price: 49,
-    originalPrice: 69,
+    contacts: 150,
+    icon: MessageSquare,
+    highlight: false,
+  },
+  {
+    id: 'local_pro' as const,
+    price: 89,
+    contacts: 500,
     icon: Users,
     highlight: true,
   },
   {
-    id: 'business' as const,
-    price: 99,
-    originalPrice: 149,
+    id: 'local_business' as const,
+    price: 149,
+    contacts: 1500,
     icon: Building2,
     highlight: false,
   },
@@ -215,11 +222,11 @@ function OnboardingPage() {
 
       setCurrentStep(result.nextStep)
 
-      if (tier === 'pro' || tier === 'business') {
+      if (tier === 'local_pro' || tier === 'local_business') {
         const email = user?.email ?? ''
         const checkout = await apiFetch<{ url: string }>('/billing/checkout', {
           method: 'POST',
-          body: { tier, period: 'monthly', email },
+          body: { tier, email },
         })
         if (checkout.url) {
           openExternalLink(checkout.url)
@@ -482,31 +489,33 @@ function PlanSelectionView({
   const { t } = useTranslation()
 
   const planFeatures: Record<string, string[]> = {
-    starter: [
-      t('onboarding.plans.starter.features.conversations'),
-      t('onboarding.plans.starter.features.appointments'),
-      t('onboarding.plans.starter.features.whatsapp'),
-      t('onboarding.plans.starter.features.reminders'),
-      t('onboarding.plans.starter.features.languages'),
-      t('onboarding.plans.starter.features.staff'),
+    local_solo: [
+      t('onboarding.plans.local_solo.features.contacts', { count: 50 }),
+      t('onboarding.plans.local_solo.features.whatsapp'),
+      t('onboarding.plans.local_solo.features.reminders'),
+      t('onboarding.plans.local_solo.features.languages'),
     ],
-    pro: [
-      t('onboarding.plans.pro.features.conversations'),
-      t('onboarding.plans.pro.features.appointments'),
-      t('onboarding.plans.pro.features.everythingStarter'),
-      t('onboarding.plans.pro.features.staff'),
-      t('onboarding.plans.pro.features.voice'),
-      t('onboarding.plans.pro.features.support'),
-      t('onboarding.plans.pro.features.knowledge'),
+    local_starter: [
+      t('onboarding.plans.local_starter.features.contacts', { count: 150 }),
+      t('onboarding.plans.local_starter.features.whatsapp'),
+      t('onboarding.plans.local_starter.features.reminders'),
+      t('onboarding.plans.local_starter.features.staff'),
+      t('onboarding.plans.local_starter.features.languages'),
     ],
-    business: [
-      t('onboarding.plans.business.features.conversations'),
-      t('onboarding.plans.business.features.appointments'),
-      t('onboarding.plans.business.features.everythingPro'),
-      t('onboarding.plans.business.features.staff'),
-      t('onboarding.plans.business.features.api'),
-      t('onboarding.plans.business.features.training'),
-      t('onboarding.plans.business.features.support'),
+    local_pro: [
+      t('onboarding.plans.local_pro.features.contacts', { count: 500 }),
+      t('onboarding.plans.local_pro.features.everythingStarter'),
+      t('onboarding.plans.local_pro.features.staff'),
+      t('onboarding.plans.local_pro.features.voice'),
+      t('onboarding.plans.local_pro.features.support'),
+    ],
+    local_business: [
+      t('onboarding.plans.local_business.features.contacts', { count: 1500 }),
+      t('onboarding.plans.local_business.features.everythingPro'),
+      t('onboarding.plans.local_business.features.staff'),
+      t('onboarding.plans.local_business.features.api'),
+      t('onboarding.plans.local_business.features.training'),
+      t('onboarding.plans.local_business.features.support'),
     ],
   }
 
@@ -526,7 +535,7 @@ function PlanSelectionView({
 
       {/* Plan cards */}
       <div
-        className="grid grid-cols-3 gap-5 max-w-4xl mx-auto"
+        className="grid grid-cols-2 md:grid-cols-4 gap-5 max-w-5xl mx-auto"
         style={{ animation: 'fadeSlideIn 0.6s ease-out 0.3s both' }}
       >
         {PLAN_TIERS.map((plan, idx) => {
@@ -562,9 +571,7 @@ function PlanSelectionView({
               <div className="mb-5">
                 <span className="text-3xl font-extrabold text-foreground">${plan.price}</span>
                 <span className="text-muted-foreground text-sm">{t('plan.perMonth')}</span>
-                {plan.originalPrice && (
-                  <span className="ml-2 text-sm text-muted-foreground line-through">${plan.originalPrice}</span>
-                )}
+                <p className="text-xs text-muted-foreground mt-1">{t('plan.upToContacts', { count: plan.contacts })}</p>
               </div>
               <ul className="space-y-2 mb-6">
                 {features.map(f => (

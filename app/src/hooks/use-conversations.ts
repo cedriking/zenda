@@ -11,6 +11,7 @@ interface Conversation {
   lastMessageAt: string
   lastMessagePreview: string | null
   needsAttentionReason: string | null
+  unreadCount: number
   createdAt: string
 }
 
@@ -86,9 +87,10 @@ export function useConversations() {
 
   // Listen for real-time updates from main process
   useEffect(() => {
-    const unsubUpdate = window.electron?.on?.('conversation:update', (data: Partial<Conversation>) => {
+    const unsubUpdate = window.electron?.on?.('conversation:update', (data: unknown) => {
+      const partial = data as Partial<Conversation>
       setConversations(prev =>
-        prev.map(c => c.id === data.id ? { ...c, ...data } : c),
+        prev.map(c => c.id === partial.id ? { ...c, ...partial } : c),
       )
     })
     return () => { unsubUpdate?.() }

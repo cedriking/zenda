@@ -1,3 +1,4 @@
+import { typedContext } from '../../middleware/typed-context.js'
 import { Elysia, t } from 'elysia'
 import { db } from '@zenda/db/client'
 import { auditLogs } from '@zenda/db/schema'
@@ -5,6 +6,7 @@ import { eq, and, desc, sql, count, gte, lte } from 'drizzle-orm'
 import { logger } from '../../infra/logger.js'
 
 export const auditModule = new Elysia({ prefix: '/audit' })
+  .use(typedContext)
 
   // List audit logs with pagination and optional filters
   .get('/', async ({ workspaceId, query }) => {

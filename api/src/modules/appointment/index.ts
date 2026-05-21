@@ -1,3 +1,4 @@
+import { typedContext } from '../../middleware/typed-context.js'
 import { Elysia, t } from 'elysia'
 import { db } from '@zenda/db/client'
 import { appointments } from '@zenda/db/schema'
@@ -9,6 +10,7 @@ import { logger } from '../../infra/logger.js'
 import { notFound, badRequest, conflict, serverError } from '../../utils/errors.js'
 
 export const appointmentModule = new Elysia({ prefix: '/appointments' })
+  .use(typedContext)
 
   // List appointments
   .get('/', async ({ workspaceId, query, set }) => {

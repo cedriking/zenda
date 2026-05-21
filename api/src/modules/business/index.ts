@@ -1,3 +1,4 @@
+import { typedContext } from '../../middleware/typed-context.js'
 import { Elysia, t } from 'elysia'
 import { db } from '@zenda/db/client'
 import { businessProfiles, receptionistProfiles } from '@zenda/db/schema'
@@ -7,6 +8,7 @@ import { logger } from '../../infra/logger.js'
 import { notFound, badRequest, serverError } from '../../utils/errors.js'
 
 export const businessModule = new Elysia({ prefix: '/business' })
+  .use(typedContext)
 
   // Get business profile
   .get('/profile', async ({ workspaceId, set }) => {

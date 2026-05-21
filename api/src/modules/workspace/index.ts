@@ -1,3 +1,4 @@
+import { typedContext } from '../../middleware/typed-context.js'
 import { Elysia } from 'elysia'
 import { db } from '@zenda/db/client'
 import { workspaces } from '@zenda/db/schema'
@@ -6,6 +7,7 @@ import { logger } from '../../infra/logger.js'
 import { notFound, serverError } from '../../utils/errors.js'
 
 export const workspaceModule = new Elysia({ prefix: '/workspace' })
+  .use(typedContext)
   .get('/', async ({ workspaceId, set }) => {
     try {
       const [ws] = await db.select().from(workspaces).where(eq(workspaces.id, workspaceId!)).limit(1)

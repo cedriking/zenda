@@ -1,7 +1,17 @@
 import { Elysia } from 'elysia'
-import type { WSContext } from 'elysia/ws'
 
-interface AuthenticatedWS extends WSContext {
+/**
+ * Minimal type for the WS connection used in this module.
+ * Elysia's ElysiaWS provides send, close, readyState via its raw Bun WS socket.
+ */
+interface WSConnection {
+  send(data: string | ArrayBuffer, compress?: boolean): number
+  close(code?: number, reason?: string): void
+  readyState: number
+  raw?: { rawListeners?: (event: string) => unknown[] }
+}
+
+interface AuthenticatedWS extends WSConnection {
   data: {
     userId: string
     workspaceId: string
@@ -67,7 +77,7 @@ export function startHeartbeat(workspaceId: string, ws: AuthenticatedWS) {
   }, HEARTBEAT_INTERVAL)
 
   // Listen for pong
-  const originalOnMessage = ws.rawListeners('message')
+  const originalOnMessage = ws.raw?.rawListeners?.('message') ?? []
   // Note: Elysia WS handles messages through its own pipeline
   // We track pong via the message handler in ws-handler
   return {

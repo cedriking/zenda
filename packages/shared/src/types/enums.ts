@@ -124,7 +124,7 @@ export type AITaskType =
   | 'transcription'
 
 // AI providers
-export type AIProvider = 'zai' | 'openai' | 'ollama'
+export type AIProvider = 'zai' | 'openai' | 'ollama' | 'system'
 
 // Onboarding steps
 export type OnboardingStep =

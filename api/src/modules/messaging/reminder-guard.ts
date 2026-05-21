@@ -6,14 +6,15 @@
  * - Appointment isn't cancelled/completed
  * - Appointment time hasn't passed
  */
-import { db } from '@zenda/db/client'
-import { sentReminderLog, appointments } from '@zenda/db/schema'
-import { eq, and } from 'drizzle-orm'
-import type { ReminderType } from '@zenda/shared'
+import { db } from "@zenda/db/client";
+import { appointments, sentReminderLog } from "@zenda/db/schema";
+import type { ReminderType } from "@zenda/shared";
+import { and, eq } from "drizzle-orm";
+import { shouldRestrictProactive } from "../usage/tracker.js";
 
 interface ReminderGuardResult {
-  canSend: boolean
-  reason?: string
+  canSend: boolean;
+  reason?: string;
 }
 
 /**
@@ -22,19 +23,35 @@ interface ReminderGuardResult {
 export async function canSendReminder(
   appointmentId: string,
   reminderType: ReminderType,
+  workspaceId?: string
 ): Promise<ReminderGuardResult> {
+  // 0. Usage gate: suppress reminders when at 100% of active contact limit
+  if (workspaceId) {
+    const restricted = await shouldRestrictProactive(workspaceId);
+    if (restricted) {
+      return {
+        canSend: false,
+        reason: "Usage limit reached — proactive messages suppressed",
+      };
+    }
+  }
   // 1. Check for duplicate
   const [existing] = await db
     .select()
     .from(sentReminderLog)
-    .where(and(
-      eq(sentReminderLog.appointmentId, appointmentId),
-      eq(sentReminderLog.reminderType, reminderType),
-    ))
-    .limit(1)
+    .where(
+      and(
+        eq(sentReminderLog.appointmentId, appointmentId),
+        eq(sentReminderLog.reminderType, reminderType)
+      )
+    )
+    .limit(1);
 
   if (existing) {
-    return { canSend: false, reason: `Reminder '${reminderType}' already sent for this appointment` }
+    return {
+      canSend: false,
+      reason: `Reminder '${reminderType}' already sent for this appointment`,
+    };
   }
 
   // 2. Check appointment state
@@ -45,30 +62,30 @@ export async function canSendReminder(
     })
     .from(appointments)
     .where(eq(appointments.id, appointmentId))
-    .limit(1)
+    .limit(1);
 
   if (!appointment) {
-    return { canSend: false, reason: 'Appointment not found' }
+    return { canSend: false, reason: "Appointment not found" };
   }
 
-  if (appointment.status === 'cancelled') {
-    return { canSend: false, reason: 'Appointment has been cancelled' }
+  if (appointment.status === "cancelled") {
+    return { canSend: false, reason: "Appointment has been cancelled" };
   }
 
-  if (appointment.status === 'completed') {
-    return { canSend: false, reason: 'Appointment has been completed' }
+  if (appointment.status === "completed") {
+    return { canSend: false, reason: "Appointment has been completed" };
   }
 
-  if (appointment.status === 'no_show') {
-    return { canSend: false, reason: 'Appointment was marked as no-show' }
+  if (appointment.status === "no_show") {
+    return { canSend: false, reason: "Appointment was marked as no-show" };
   }
 
   // 3. Check appointment time hasn't passed
   if (new Date(appointment.startAt) < new Date()) {
-    return { canSend: false, reason: 'Appointment time has already passed' }
+    return { canSend: false, reason: "Appointment time has already passed" };
   }
 
-  return { canSend: true }
+  return { canSend: true };
 }
 
 /**
@@ -76,11 +93,11 @@ export async function canSendReminder(
  */
 export async function recordReminderSent(
   appointmentId: string,
-  reminderType: ReminderType,
+  reminderType: ReminderType
 ): Promise<void> {
   await db.insert(sentReminderLog).values({
     appointmentId,
     reminderType,
     sentAt: new Date(),
-  })
+  });
 }

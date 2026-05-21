@@ -1,3 +1,4 @@
+import { typedContext } from '../../middleware/typed-context.js'
 import { Elysia, t } from 'elysia'
 import { getOnboardingStatus, advanceOnboarding } from './flow.js'
 import { getNextOnboardingQuestion, processOnboardingResponse } from './conversation-handler.js'
@@ -17,6 +18,7 @@ async function getWorkspaceLanguage(workspaceId: string): Promise<'en' | 'es'> {
 }
 
 export const onboardingModule = new Elysia({ prefix: '/onboarding' })
+  .use(typedContext)
 
   .get('/status', async ({ workspaceId, set }) => {
     try {

@@ -1,9 +1,11 @@
+import { typedContext } from '../../middleware/typed-context.js'
 import { Elysia } from 'elysia'
 import { getNotifications, markNotificationRead } from './service.js'
 import { logger } from '../../infra/logger.js'
 import { serverError, notFound } from '../../utils/errors.js'
 
 export const notificationModule = new Elysia({ prefix: '/notifications' })
+  .use(typedContext)
 
   .get('/', async ({ workspaceId, query, set }) => {
     try {

@@ -385,15 +385,15 @@ export const en = {
   },
   // Plan
   plan: {
-    starter: 'Starter',
-    pro: 'Pro',
-    business: 'Business',
-    monthly: 'Monthly',
-    annual: 'Annual',
+    local_solo: 'Solo',
+    local_starter: 'Starter',
+    local_pro: 'Pro',
+    local_business: 'Business',
     currentPlan: 'Current Plan',
     upgrade: 'Upgrade',
     manage: 'Manage Subscription',
     perMonth: '/month',
+    upToContacts: 'Up to {{count}} active contacts',
   },
   // Onboarding
   onboarding: {
@@ -403,7 +403,7 @@ export const en = {
     setupAssistantDesc: 'Answer a few questions to configure your AI receptionist',
     progress: 'Progress',
     typeAnswer: 'Type your answer...',
-    foundingPricing: 'Founding Member Pricing — Limited Time',
+    foundingPricing: 'WhatsApp-Local Pricing',
     mostPopular: 'Most Popular',
     selectPlan: 'Select Plan',
     processing: 'Processing...',
@@ -419,39 +419,45 @@ export const en = {
       choosePlan: 'Choose Plan',
     },
     plans: {
-      starter: {
-        name: 'Starter',
+      local_solo: {
+        name: 'Solo',
         desc: 'For solo businesses just getting started',
         features: {
-          conversations: '500 conversations/month',
-          appointments: '100 appointments/month',
+          contacts: 'Up to {{count}} active contacts/mo',
           whatsapp: 'WhatsApp integration',
           reminders: 'Automated reminders',
           languages: 'English & Spanish',
-          staff: '1 staff member',
         },
       },
-      pro: {
+      local_starter: {
+        name: 'Starter',
+        desc: 'For small businesses growing their clientele',
+        features: {
+          contacts: 'Up to {{count}} active contacts/mo',
+          whatsapp: 'WhatsApp integration',
+          reminders: 'Automated reminders',
+          staff: 'Up to 3 staff members',
+          languages: 'All languages',
+        },
+      },
+      local_pro: {
         name: 'Pro',
         desc: 'For growing businesses with a team',
         features: {
-          conversations: '2,000 conversations/month',
-          appointments: '500 appointments/month',
+          contacts: 'Up to {{count}} active contacts/mo',
           everythingStarter: 'Everything in Starter',
-          staff: 'Up to 5 staff members',
+          staff: 'Up to 10 staff members',
           voice: 'Voice note transcription',
           support: 'Priority support',
-          knowledge: 'Knowledge base',
         },
       },
-      business: {
+      local_business: {
         name: 'Business',
         desc: 'For established businesses with high volume',
         features: {
-          conversations: 'Unlimited conversations',
-          appointments: 'Unlimited appointments',
+          contacts: 'Up to {{count}} active contacts/mo',
           everythingPro: 'Everything in Pro',
-          staff: 'Up to 20 staff members',
+          staff: 'Up to 25 staff members',
           api: 'API access',
           training: 'Custom AI training',
           support: 'Dedicated support',

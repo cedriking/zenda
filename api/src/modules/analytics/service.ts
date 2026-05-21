@@ -202,7 +202,7 @@ async function getAIStats(workspaceId: string, period: AnalyticsPeriod) {
   let totalTokens = 0
 
   for (const record of usage) {
-    const provider = record.provider ?? 'unknown'
+    const provider = record.provider
     breakdown[provider] = (breakdown[provider] ?? 0) + 1
     totalTokens += record.inputTokens ?? 0 + record.outputTokens ?? 0
   }

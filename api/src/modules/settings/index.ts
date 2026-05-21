@@ -1,3 +1,4 @@
+import { typedContext } from '../../middleware/typed-context.js'
 import { Elysia, t } from 'elysia'
 import { db } from '@zenda/db/client'
 import { businessProfiles, receptionistProfiles, escalations, messagingConsent, customers, systemSettings } from '@zenda/db/schema'
@@ -23,6 +24,7 @@ async function setWorkspaceSetting(workspaceId: string, key: string, value: stri
 }
 
 export const settingsModule = new Elysia({ prefix: '/settings' })
+  .use(typedContext)
 
   // ── Receptionist settings ────────────────────────────────────────
   .get('/receptionist', async ({ workspaceId, set }) => {

@@ -17,9 +17,21 @@ export default async function PricingPage() {
 
   const PLANS = [
     {
+      name: t('soloName'),
+      price: 29,
+      desc: t('soloDesc'),
+      features: [
+        t('soloFeature1'),
+        t('soloFeature2'),
+        t('soloFeature3'),
+        t('soloFeature4'),
+      ],
+      cta: t('ctaTrial'),
+      highlight: false,
+    },
+    {
       name: t('starterName'),
-      price: 19,
-      originalPrice: 29,
+      price: 49,
       desc: t('starterDesc'),
       features: [
         t('starterFeature1'),
@@ -27,15 +39,13 @@ export default async function PricingPage() {
         t('starterFeature3'),
         t('starterFeature4'),
         t('starterFeature5'),
-        t('starterFeature6'),
       ],
       cta: t('ctaTrial'),
       highlight: false,
     },
     {
       name: t('proName'),
-      price: 49,
-      originalPrice: 69,
+      price: 89,
       desc: t('proDesc'),
       features: [
         t('proFeature1'),
@@ -43,16 +53,13 @@ export default async function PricingPage() {
         t('proFeature3'),
         t('proFeature4'),
         t('proFeature5'),
-        t('proFeature6'),
-        t('proFeature7'),
       ],
       cta: t('ctaTrial'),
       highlight: true,
     },
     {
       name: t('businessName'),
-      price: 99,
-      originalPrice: 149,
+      price: 149,
       desc: t('businessDesc'),
       features: [
         t('businessFeature1'),
@@ -61,7 +68,6 @@ export default async function PricingPage() {
         t('businessFeature4'),
         t('businessFeature5'),
         t('businessFeature6'),
-        t('businessFeature7'),
       ],
       cta: t('ctaSales'),
       highlight: false,

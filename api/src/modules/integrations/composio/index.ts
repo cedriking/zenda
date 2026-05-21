@@ -1,3 +1,4 @@
+import { typedContext } from '../../../middleware/typed-context.js'
 import { Elysia } from 'elysia'
 import { authBase } from '../../../middleware/auth.js'
 import { logger } from '../../../infra/logger.js'
@@ -7,6 +8,7 @@ import { logger } from '../../../infra/logger.js'
  * Handles Google Calendar and other external integrations via Composio
  */
 export const composioModule = new Elysia({ prefix: '/integrations/composio' })
+  .use(typedContext)
   .use(authBase)
   /**
    * Get connection URL for Google Calendar

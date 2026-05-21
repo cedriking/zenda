@@ -1,3 +1,4 @@
+import { typedContext } from '../../middleware/typed-context.js'
 import { Elysia, t } from 'elysia'
 import { db } from '@zenda/db/client'
 import { services } from '@zenda/db/schema'
@@ -7,6 +8,7 @@ import { logger } from '../../infra/logger.js'
 import { notFound, badRequest, serverError } from '../../utils/errors.js'
 
 export const serviceModule = new Elysia({ prefix: '/services' })
+  .use(typedContext)
 
   .get('/', async ({ workspaceId, set }) => {
     try {

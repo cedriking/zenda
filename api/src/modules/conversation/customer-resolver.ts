@@ -23,7 +23,7 @@ export async function resolveOrCreateCustomer(
     if (existing.language !== detectedLanguage) {
       await db
         .update(customers)
-        .set({ language: detectedLanguage, updatedAt: new Date() })
+        .set({ language: detectedLanguage as 'en' | 'es', updatedAt: new Date() })
         .where(eq(customers.id, existing.id))
     }
     return existing
@@ -35,7 +35,7 @@ export async function resolveOrCreateCustomer(
     .values({
       workspaceId,
       phoneNumber,
-      language: detectedLanguage,
+      language: detectedLanguage as 'en' | 'es',
     })
     .returning()
 

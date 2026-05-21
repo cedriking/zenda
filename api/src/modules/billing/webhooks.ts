@@ -51,9 +51,18 @@ async function handleCheckoutCompleted(event: Stripe.Event): Promise<void> {
     return;
   }
 
-  const stripeSubscription = await stripe.subscriptions.retrieve(
+  if (!stripe) {
+    throw new Error("Stripe not configured");
+  }
+
+  // Stripe API returns current_period_start/end at runtime even though
+  // the v18 TypeScript types don't include them on Subscription directly.
+  const stripeSubscription = (await stripe.subscriptions.retrieve(
     session.subscription as string
-  );
+  )) as Stripe.Subscription & {
+    current_period_start: number;
+    current_period_end: number;
+  };
 
   await db
     .update(subscriptions)
@@ -75,7 +84,11 @@ async function handleCheckoutCompleted(event: Stripe.Event): Promise<void> {
 }
 
 async function handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
-  const sub = event.data.object as Stripe.Subscription;
+  const sub = event.data.object as Stripe.Subscription & {
+    current_period_start: number;
+    current_period_end: number;
+    cancel_at_period_end: boolean;
+  };
   const workspaceId = sub.metadata?.workspaceId;
 
   if (!workspaceId) {
@@ -131,6 +144,10 @@ export async function handleWebhook(
   rawBody: string,
   signature: string
 ): Promise<void> {
+  if (!stripe) {
+    throw new Error("Stripe not configured");
+  }
+
   let event: Stripe.Event;
 
   try {
@@ -211,7 +228,12 @@ export async function handleWebhook(
   }
 }
 
-const TIER_RANK: Record<string, number> = { local_solo: 0, local_starter: 1, local_pro: 2, local_business: 3 };
+const TIER_RANK: Record<string, number> = {
+  local_solo: 0,
+  local_starter: 1,
+  local_pro: 2,
+  local_business: 3,
+};
 
 function detectTierFromPrice(priceId: string | undefined): string | null {
   if (!priceId) {

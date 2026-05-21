@@ -1,3 +1,4 @@
+import { typedContext } from '../../middleware/typed-context.js'
 import { Elysia, t } from 'elysia'
 import { recordConsent, getConsent, optOut } from './consent-service.js'
 import type { MessagingConsentStatus, ConsentSource, MessagePurpose } from '@zenda/shared'
@@ -14,6 +15,7 @@ const MESSAGE_PURPOSES: MessagePurpose[] = [
 ]
 
 export const messagingModule = new Elysia({ prefix: '/messaging' })
+  .use(typedContext)
 
   // Get consent status for a customer
   .get('/consent/:customerId', async ({ workspaceId, params, set }) => {

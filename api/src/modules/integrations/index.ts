@@ -8,22 +8,24 @@
 export * from './composio/index.js'
 
 import { Elysia } from 'elysia'
-import { composioRoutes } from './composio/index.js'
+import { composioModule as composioRoutes } from './composio/index.js'
+import { typedContext } from '../../middleware/typed-context.js'
+import { db } from '@zenda/db/client'
+import { integrations } from '@zenda/db/schema'
+import { eq } from 'drizzle-orm'
 
 /**
  * Main integrations routes module
  * Registers all integration-related endpoints
  */
 export const integrationsRoutes = new Elysia({ prefix: '/integrations' })
+  .use(typedContext)
   .use(composioRoutes)
 
   /**
    * Get integration status for a workspace
    */
-  .get('/:workspaceId', async ({ params }) => {
-    const { db } = await import('@zenda/db/client')
-    const { integrations, eq } = await import('drizzle-orm')
-
+  .get('/:workspaceId', async ({ params }: { params: { workspaceId: string } }) => {
     const workspaceIntegrations = await db
       .select()
       .from(integrations)

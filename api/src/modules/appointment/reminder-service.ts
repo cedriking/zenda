@@ -279,7 +279,7 @@ export async function processDueReminders(): Promise<number> {
       const templateKey = pickTemplateKey(apt.startAt, reminder.scheduledAt)
       const reminderType = pickReminderType(templateKey)
 
-      const guardResult = await canSendReminder(apt.id, reminderType)
+      const guardResult = await canSendReminder(apt.id, reminderType, apt.workspaceId)
       if (!guardResult.canSend) {
         logger.info('Reminder blocked by guard', {
           reminderId: reminder.id,
@@ -299,7 +299,7 @@ export async function processDueReminders(): Promise<number> {
         customerId: cust.id,
         purpose: 'appointment_reminder',
         channel: 'whatsapp_ba_bridge',
-        appointmentCancelled: apt.status === 'cancelled',
+        appointmentCancelled: (apt.status as string) === 'cancelled',
         appointmentCompleted: apt.status === 'completed',
         appointmentTimePassed: new Date(apt.startAt) < now,
         isDuplicate: false,

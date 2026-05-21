@@ -1,82 +1,112 @@
-'use client'
+"use client";
 
-import { Link } from '@/i18n/navigation'
-import { useTranslations } from 'next-intl'
-import { FadeUp, StaggerContainer, StaggerChild } from '@/components/motion'
-import { Check, ArrowRight } from 'lucide-react'
+import { ArrowRight, Check } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { FadeUp, StaggerChild, StaggerContainer } from "@/components/motion";
+import { Link } from "@/i18n/navigation";
 
 interface Plan {
-  name: string
-  price: number
-  originalPrice: number
-  desc: string
-  features: string[]
-  cta: string
-  highlight: boolean
+  cta: string;
+  desc: string;
+  features: string[];
+  highlight: boolean;
+  name: string;
+  originalPrice?: number;
+  price: number;
 }
 
 export function PricingAnimations({ plans }: { plans: Plan[] }) {
-  const t = useTranslations('pricing')
+  const t = useTranslations("pricing");
 
   return (
     <>
       <FadeUp>
-        <div className="text-center mb-14">
-          <div className="inline-block bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
-            {t('badge')}
+        <div className="mb-14 text-center">
+          <div className="mb-4 inline-block rounded-full bg-amber-100 px-4 py-2 font-semibold text-amber-800 text-sm">
+            {t("badge")}
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4">{t('title')}</h1>
-          <p className="text-slate-500 text-lg">{t('desc')}</p>
+          <h1 className="mb-4 font-black text-4xl text-slate-900 md:text-5xl">
+            {t("title")}
+          </h1>
+          <p className="text-lg text-slate-500">{t("desc")}</p>
         </div>
       </FadeUp>
 
-      <StaggerContainer className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto" stagger={0.15}>
-        {plans.map(plan => (
+      <StaggerContainer
+        className="mx-auto grid max-w-6xl gap-6 md:grid-cols-4"
+        stagger={0.15}
+      >
+        {plans.map((plan) => (
           <StaggerChild key={plan.name}>
-            <div className={`relative rounded-[1.5rem] p-6 flex flex-col h-full transition-all duration-300 hover:-translate-y-1 ${
-              plan.highlight
-                ? 'bg-slate-950 text-white shadow-2xl ring-2 ring-emerald-500/30'
-                : 'bg-white border border-slate-100 shadow-lg hover:shadow-xl'
-            }`}>
+            <div
+              className={`relative flex h-full flex-col rounded-[1.5rem] p-6 transition-all duration-300 hover:-translate-y-1 ${
+                plan.highlight
+                  ? "bg-slate-950 text-white shadow-2xl ring-2 ring-emerald-500/30"
+                  : "border border-slate-100 bg-white shadow-lg hover:shadow-xl"
+              }`}
+            >
               {plan.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-4 py-1 rounded-full text-xs font-bold">
-                  {t('mostPopular')}
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-4 py-1 font-bold text-white text-xs">
+                  {t("mostPopular")}
                 </div>
               )}
 
               <div className="mb-6">
-                <h3 className={`text-xl font-black ${plan.highlight ? 'text-white' : 'text-slate-900'}`}>{plan.name}</h3>
-                <p className={`text-sm mt-1 ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>{plan.desc}</p>
+                <h3
+                  className={`font-black text-xl ${plan.highlight ? "text-white" : "text-slate-900"}`}
+                >
+                  {plan.name}
+                </h3>
+                <p
+                  className={`mt-1 text-sm ${plan.highlight ? "text-slate-400" : "text-slate-500"}`}
+                >
+                  {plan.desc}
+                </p>
               </div>
 
               <div className="mb-6">
-                {plan.originalPrice > plan.price && (
-                  <span className={`text-sm line-through mr-2 ${plan.highlight ? 'text-slate-600' : 'text-slate-300'}`}>
-                    ${plan.originalPrice}
-                  </span>
-                )}
-                <span className={`text-4xl font-black ${plan.highlight ? 'text-white' : 'text-slate-900'}`}>
+                {plan.originalPrice != null &&
+                  plan.originalPrice > plan.price && (
+                    <span
+                      className={`mr-2 text-sm line-through ${plan.highlight ? "text-slate-600" : "text-slate-300"}`}
+                    >
+                      ${plan.originalPrice}
+                    </span>
+                  )}
+                <span
+                  className={`font-black text-4xl ${plan.highlight ? "text-white" : "text-slate-900"}`}
+                >
                   ${plan.price}
                 </span>
-                <span className={`text-sm ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>{t('perMonth')}</span>
+                <span
+                  className={`text-sm ${plan.highlight ? "text-slate-400" : "text-slate-500"}`}
+                >
+                  {t("perMonth")}
+                </span>
               </div>
 
-              <ul className="space-y-3 mb-8 flex-1">
-                {plan.features.map(f => (
-                  <li key={f} className="flex items-start gap-3">
-                    <Check className={`size-4 shrink-0 mt-0.5 ${plan.highlight ? 'text-emerald-400' : 'text-emerald-500'}`} />
-                    <span className={`text-sm ${plan.highlight ? 'text-slate-300' : 'text-slate-600'}`}>{f}</span>
+              <ul className="mb-8 flex-1 space-y-3">
+                {plan.features.map((f) => (
+                  <li className="flex items-start gap-3" key={f}>
+                    <Check
+                      className={`mt-0.5 size-4 shrink-0 ${plan.highlight ? "text-emerald-400" : "text-emerald-500"}`}
+                    />
+                    <span
+                      className={`text-sm ${plan.highlight ? "text-slate-300" : "text-slate-600"}`}
+                    >
+                      {f}
+                    </span>
                   </li>
                 ))}
               </ul>
 
               <Link
-                href="/signup"
-                className={`inline-flex items-center justify-center rounded-full py-3 text-sm font-semibold transition-colors ${
+                className={`inline-flex items-center justify-center rounded-full py-3 font-semibold text-sm transition-colors ${
                   plan.highlight
-                    ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/25'
-                    : 'bg-slate-900 text-white hover:bg-slate-800'
+                    ? "bg-emerald-500 text-white shadow-emerald-500/25 shadow-lg hover:bg-emerald-600"
+                    : "bg-slate-900 text-white hover:bg-slate-800"
                 }`}
+                href="/signup"
               >
                 {plan.cta}
                 <ArrowRight className="ml-2 size-4" />
@@ -86,5 +116,5 @@ export function PricingAnimations({ plans }: { plans: Plan[] }) {
         ))}
       </StaggerContainer>
     </>
-  )
+  );
 }

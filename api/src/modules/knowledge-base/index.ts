@@ -1,3 +1,4 @@
+import { typedContext } from '../../middleware/typed-context.js'
 import { Elysia, t } from 'elysia'
 import {
   getKnowledgeBase,
@@ -9,6 +10,7 @@ import { logger } from '../../infra/logger.js'
 import { serverError, badRequest } from '../../utils/errors.js'
 
 export const knowledgeBaseModule = new Elysia({ prefix: '/knowledge-base' })
+  .use(typedContext)
 
   .get('/', async ({ workspaceId, set }) => {
     try {
