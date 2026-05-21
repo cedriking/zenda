@@ -18,12 +18,14 @@
     "@zenda/shared": "*",
     "drizzle-orm": "^0.44.2",
     "elysia": "^1.3.2",
+    "ioredis": "^5.10.1",
     "postgres": "^3.4.5",
     "stripe": "^18.3.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/bun": "^1.2.16",
+    "@types/ioredis": "^5.0.0",
     "typescript": "^5.9.3"
   }
 }
