@@ -1,7 +1,7 @@
 CREATE TYPE "public"."integration_provider" AS ENUM('zernio', 'composio', 'stripe', 'custom', 'other');--> statement-breakpoint
 CREATE TYPE "public"."integration_status" AS ENUM('active', 'inactive', 'error', 'pending');--> statement-breakpoint
 CREATE TYPE "public"."integration_type" AS ENUM('whatsapp', 'instagram', 'telegram', 'google_calendar', 'google_mail', 'stripe', 'other');--> statement-breakpoint
-ALTER TYPE "public"."onboarding_step" ADD VALUE 'plan_selection' BEFORE 'ready';--> statement-breakpoint
+ALTER TYPE "public"."onboarding_step" ADD VALUE IF NOT EXISTS 'plan_selection' BEFORE 'ready';--> statement-breakpoint
 CREATE TABLE "integrations" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"workspace_id" uuid NOT NULL,

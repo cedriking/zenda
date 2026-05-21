@@ -1,7 +1,10 @@
--- Add queue priority enum and column
-CREATE TYPE queue_priority AS ENUM ('emergency', 'reminder', 'notification', 'low');
+-- Add queue priority enum and column (idempotent)
+DO $$ BEGIN
+  CREATE TYPE "public"."queue_priority" AS ENUM ('emergency', 'reminder', 'notification', 'low');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-ALTER TABLE outbound_queue ADD COLUMN priority queue_priority NOT NULL DEFAULT 'notification';
+ALTER TABLE outbound_queue ADD COLUMN IF NOT EXISTS priority "queue_priority" NOT NULL DEFAULT 'notification';
 
 -- Add system_settings table for persistent kill switch and other runtime config
 CREATE TABLE IF NOT EXISTS system_settings (

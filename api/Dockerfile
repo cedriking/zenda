@@ -29,4 +29,4 @@ COPY --from=build-shared /app/packages/db ./packages/db
 COPY package.json ./package.json
 COPY api/ ./api/
 EXPOSE 3001
-CMD ["sh", "-c", "cd packages/db && bunx drizzle-kit migrate && cd /app && bun run api/src/index.ts"]
+CMD ["sh", "-c", "cd packages/db && echo 'Running migrations...' && bunx drizzle-kit migrate 2>&1 && echo 'Migrations complete.' && cd /app && bun run api/src/index.ts || (echo 'FATAL: Migration or startup failed' >&2; exit 1)"]
