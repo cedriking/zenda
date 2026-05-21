@@ -235,6 +235,17 @@ export function disconnectWhatsApp() {
   emitStatus({ status: 'disconnected' })
 }
 
+/**
+ * Soft shutdown for app quit — nulls out the socket without sending
+ * a close frame so WhatsApp treats this as a dropped connection and
+ * queues messages for delivery on reconnect.
+ */
+export function shutdownWhatsApp() {
+  sock = null
+  isInitializing = false
+  reconnectAttempts = 0
+}
+
 export function onStatus(callback: (status: WhatsAppStatus) => void) {
   emitter.on('status', callback)
   return () => emitter.off('status', callback)

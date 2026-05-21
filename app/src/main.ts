@@ -43,8 +43,18 @@ function createWindow() {
     }
   });
 
-  app.on("before-quit", () => {
+  app.on("before-quit", async () => {
     (app as any).isQuitting = true;
+    try {
+      const { shutdownWhatsApp } = await import("./main/whatsapp/client.js");
+      const { disconnectBridge } = await import("./main/whatsapp/bridge.js");
+      const { stopHealthMonitor } = await import("./main/health-monitor.js");
+      shutdownWhatsApp();
+      disconnectBridge();
+      stopHealthMonitor();
+    } catch {
+      // best-effort cleanup
+    }
   });
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
