@@ -14,7 +14,7 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: 'bg-destructive/10 text-destructive',
   completed: 'bg-primary/10 text-primary',
   no_show: 'bg-muted text-muted-foreground',
-  rescheduled: 'bg-violet-100 text-violet-700',
+  rescheduled: 'bg-primary/10 text-primary',
   needs_attention: 'bg-amber-100 text-amber-700',
 }
 

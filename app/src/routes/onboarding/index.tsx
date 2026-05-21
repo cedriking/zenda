@@ -295,7 +295,7 @@ function OnboardingPage() {
         }`}
       >
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
             <Sparkles size={20} className="text-white" />
           </div>
           <div>
@@ -347,7 +347,7 @@ function OnboardingPage() {
           </div>
           <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-1000 ease-out"
+              className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full transition-all duration-1000 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -359,7 +359,7 @@ function OnboardingPage() {
         {/* Header */}
         <div className="px-6 py-4 border-b border-border bg-white/60 backdrop-blur-sm">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
               <MessageSquare size={16} className="text-white" />
             </div>
             <div>
@@ -443,7 +443,7 @@ function ChatView({
           <button
             type="submit"
             disabled={loading || isTyping || !input.trim()}
-            className="p-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl hover:from-blue-600 hover:to-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 active:scale-95"
+            className="p-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 active:scale-95"
           >
             <Send size={18} />
           </button>
@@ -468,7 +468,7 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
       <div
         className={`max-w-lg px-4 py-3 rounded-2xl ${
           isUser
-            ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-br-md shadow-lg shadow-blue-500/15'
+            ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-br-md shadow-lg shadow-emerald-500/15'
             : 'bg-card border border-border text-foreground rounded-bl-md shadow-sm'
         }`}
       >
@@ -523,7 +523,7 @@ function PlanSelectionView({
               style={{ animationDelay: `${0.4 + idx * 0.1}s` }}
             >
               {plan.highlight && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-1 rounded-full text-xs font-semibold shadow-lg shadow-blue-500/30">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-1 rounded-full text-xs font-semibold shadow-lg shadow-emerald-500/30">
                   Most Popular
                 </div>
               )}
@@ -554,7 +554,7 @@ function PlanSelectionView({
                 disabled={checkoutLoading !== null}
                 className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
                   plan.highlight
-                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 shadow-lg shadow-blue-500/20'
+                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/20'
                     : 'border-border text-muted-foreground hover:bg-muted hover:border-border'
                 }`}
               >

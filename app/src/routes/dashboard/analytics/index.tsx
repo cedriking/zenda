@@ -129,10 +129,10 @@ function AnalyticsPage() {
   const cards = [
     { label: 'Conversations', value: data.conversations.total, icon: <MessageSquare size={20} />, iconClass: 'text-primary' },
     { label: 'Appointments', value: data.appointments.total, icon: <Calendar size={20} />, iconClass: 'text-emerald-500' },
-    { label: 'Messages', value: data.messages.total, icon: <Zap size={20} />, iconClass: 'text-violet-500' },
+    { label: 'Messages', value: data.messages.total, icon: <Zap size={20} />, iconClass: 'text-primary' },
     { label: 'Escalations', value: data.escalations.total, icon: <AlertTriangle size={20} />, iconClass: 'text-amber-500' },
     { label: 'No-Show Rate', value: `${(data.appointments.noShowRate * 100).toFixed(1)}%`, icon: <Clock size={20} />, iconClass: 'text-destructive' },
-    { label: 'AI Tokens', value: data.ai.totalTokens.toLocaleString(), icon: <BarChart3 size={20} />, iconClass: 'text-indigo-500' },
+    { label: 'AI Tokens', value: data.ai.totalTokens.toLocaleString(), icon: <BarChart3 size={20} />, iconClass: 'text-primary' },
   ]
 
   return (
@@ -206,7 +206,7 @@ function AnalyticsPage() {
                   <span className="text-muted-foreground">{count} calls ({pct.toFixed(0)}%)</span>
                 </div>
                 <div className="w-full h-2 bg-muted rounded-full">
-                  <div className="h-2 bg-indigo-500 rounded-full" style={{ width: `${pct}%` }} />
+                  <div className="h-2 bg-primary rounded-full" style={{ width: `${pct}%` }} />
                 </div>
               </div>
             )

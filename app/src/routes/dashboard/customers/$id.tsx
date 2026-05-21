@@ -97,7 +97,7 @@ function CustomerProfilePage() {
         {/* AI Memory */}
         <div className="bg-card rounded-lg border border-border p-6">
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
-            <Brain size={20} className="text-violet-500" />
+            <Brain size={20} className="text-primary" />
             What Zenda Knows
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
@@ -113,7 +113,7 @@ function CustomerProfilePage() {
             <div className="space-y-3">
               {customer.memory.map((mem, idx) => (
                 <div key={idx} className="flex items-start gap-3 bg-muted rounded-lg p-3">
-                  <div className="text-xs bg-violet-500/10 text-violet-500 px-2 py-0.5 rounded mt-0.5">
+                  <div className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded mt-0.5">
                     {mem.key}
                   </div>
                   <div className="flex-1">

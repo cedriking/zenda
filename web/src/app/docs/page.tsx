@@ -1,8 +1,6 @@
-import Link from 'next/link'
 import type { Metadata } from 'next'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
-import { Card, CardContent } from '@/components/ui/card'
 import { DocsAnimations } from '@/components/docs-animations'
 
 export const metadata: Metadata = {
@@ -12,13 +10,14 @@ export const metadata: Metadata = {
 
 export default function DocsPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-neutral-200">
       <Nav variant="simple" />
 
-      <main className="relative max-w-4xl mx-auto px-6 py-16 overflow-hidden">
-        <div className="gradient-orb w-[300px] h-[300px] -top-20 right-0 bg-primary/10" />
-
-        <DocsAnimations />
+      <main className="bg-white rounded-b-[2rem] shadow-2xl">
+        <div className="relative max-w-4xl mx-auto px-6 py-16 overflow-hidden">
+          <div className="absolute top-0 right-0 w-[300px] h-[300px] -top-20 bg-emerald-500/5 rounded-full" />
+          <DocsAnimations />
+        </div>
       </main>
 
       <Footer />

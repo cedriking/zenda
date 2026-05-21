@@ -1,103 +1,129 @@
-import Link from 'next/link'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
-import { Button } from '@/components/ui/button'
 import { HomeAnimations } from '@/components/home-animations'
 
 export default function Home() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-neutral-200">
       <Nav variant="home" />
 
-      <main>
-        {/* Hero */}
-        <section className="relative pt-32 pb-24 px-6 overflow-hidden">
-          {/* Background gradient orbs */}
-          <div className="gradient-orb w-[500px] h-[500px] -top-40 -right-40 bg-primary/30" />
-          <div className="gradient-orb w-[400px] h-[400px] top-20 -left-40 bg-chart-2/20" />
+      {/* White container with rounded corners for hero + audiences */}
+      <div className="bg-white rounded-b-[2rem] shadow-2xl overflow-hidden">
+        <main>
+          {/* Hero */}
+          <section className="relative pt-32 pb-24 px-6 overflow-hidden">
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/5 rounded-full -translate-y-1/2 translate-x-1/4" />
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-500/5 rounded-full translate-y-1/2 -translate-x-1/4" />
 
-          <div className="relative max-w-4xl mx-auto text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-8 border border-primary/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              AI Receptionist for Appointment-Based Businesses
+            <div className="relative max-w-4xl mx-auto text-center">
+              <HomeAnimations variant="hero" />
             </div>
+          </section>
 
-            {/* Headline */}
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.1]">
-              Your AI receptionist<br />
-              <span className="gradient-text">that never misses a message</span>
-            </h1>
+          {/* Audiences — Who it's for */}
+          <section className="py-20 px-6">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-12">
+                <span className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 border border-emerald-100">
+                  Who It&apos;s For
+                </span>
+                <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">Built for appointment-based businesses</h2>
+                <p className="text-slate-500 text-center mb-12 max-w-2xl mx-auto text-lg">
+                  Whether you run a salon, clinic, or studio — Zenda adapts to your business.
+                </p>
+              </div>
+              <HomeAnimations variant="audiences" />
+            </div>
+          </section>
+        </main>
+      </div>
 
-            {/* Subtitle */}
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-              Zenda handles customer conversations, books appointments, and sends reminders — all through WhatsApp. Built for businesses in Latin America.
+      {/* Capabilities */}
+      <section className="py-20 px-6 bg-neutral-200">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 border border-emerald-100">
+              Capabilities
+            </span>
+            <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">Everything you need to stop missing appointments</h2>
+            <p className="text-slate-500 text-lg max-w-2xl mx-auto">
+              From first message to confirmed appointment, Zenda handles it all.
             </p>
-
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="text-base px-8 h-12 shadow-lg shadow-primary/20">
-                <Link href="/signup">Start Free Trial</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="text-base px-8 h-12">
-                <Link href="#how-it-works">See How It Works</Link>
-              </Button>
-            </div>
           </div>
-        </section>
+          <div className="mt-12">
+            <HomeAnimations variant="capabilities" />
+          </div>
+        </div>
+      </section>
 
-        {/* Features */}
-        <section id="features" className="relative py-24 px-6">
-          <div className="gradient-orb w-[300px] h-[300px] top-0 left-1/2 bg-chart-3/15" />
-          <div className="relative max-w-6xl mx-auto">
-            <HomeAnimations variant="section-header">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Everything you need to stop missing appointments</h2>
-              <p className="text-muted-foreground text-center mb-16 max-w-2xl mx-auto text-lg">
-                From first message to confirmed appointment, Zenda handles it all.
+      {/* Features with visuals */}
+      <section className="py-20 px-6 bg-neutral-200">
+        <div className="max-w-6xl mx-auto">
+          <HomeAnimations variant="features" />
+        </div>
+      </section>
+
+      {/* Safety (dark section) */}
+      <section className="py-20 px-6 bg-neutral-200">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-slate-950 rounded-[2rem] p-8 md:p-16 overflow-hidden">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <span className="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 border border-emerald-500/20">
+                Safety & Compliance
+              </span>
+              <h2 className="text-3xl md:text-4xl font-black text-white mb-4">Built-in messaging safeguards</h2>
+              <p className="text-slate-400 text-lg">
+                Every message is consent-aware, rate-limited, and policy-compliant out of the box.
               </p>
-            </HomeAnimations>
-
-            <HomeAnimations variant="features" />
+            </div>
+            <HomeAnimations variant="safety" />
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* How It Works */}
-        <section id="how-it-works" className="relative py-24 px-6">
-          <div className="gradient-orb w-[400px] h-[400px] -bottom-20 right-0 bg-primary/10" />
-          <div className="relative max-w-4xl mx-auto">
-            <HomeAnimations variant="section-header">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">Up and running in 3 steps</h2>
-            </HomeAnimations>
-
-            <HomeAnimations variant="steps" />
+      {/* How It Works */}
+      <section id="how-it-works" className="py-20 px-6 bg-neutral-200">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 border border-emerald-100">
+              How It Works
+            </span>
+            <h2 className="text-3xl md:text-4xl font-black text-slate-900">Up and running in 3 steps</h2>
           </div>
-        </section>
+          <HomeAnimations variant="how-it-works" />
+        </div>
+      </section>
 
-        {/* CTA / Pricing Teaser */}
-        <section className="relative py-24 px-6 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-primary/10 to-primary/5" />
-          <div className="gradient-orb w-[500px] h-[500px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary/20" />
-          <div className="relative max-w-3xl mx-auto text-center">
-            <HomeAnimations variant="section-header">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Simple pricing, powerful features</h2>
-              <p className="text-muted-foreground mb-8 text-lg">Starting at $19/month for solo businesses. No per-message fees.</p>
-              <Button asChild size="lg" className="text-base px-8 h-12 shadow-lg shadow-primary/20">
-                <Link href="/pricing">View Plans</Link>
-              </Button>
-            </HomeAnimations>
+      {/* Dashboard mockup */}
+      <section className="py-20 px-6 bg-neutral-200">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 border border-emerald-100">
+              Dashboard Preview
+            </span>
+            <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">See everything at a glance</h2>
+            <p className="text-slate-500 text-lg max-w-2xl mx-auto">
+              Monitor conversations, appointments, and customer activity from a single dashboard.
+            </p>
           </div>
-        </section>
+          <HomeAnimations variant="dashboard" />
+        </div>
+      </section>
 
-        {/* FAQ */}
-        <section id="faq" className="py-24 px-6">
-          <div className="max-w-3xl mx-auto">
-            <HomeAnimations variant="section-header">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">Frequently Asked Questions</h2>
-            </HomeAnimations>
-            <HomeAnimations variant="faq" />
-          </div>
-        </section>
-      </main>
+      {/* Industries */}
+      <section className="py-20 px-6 bg-neutral-200">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-8">Trusted across industries</h2>
+          <HomeAnimations variant="industries" />
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 px-6 bg-neutral-200">
+        <div className="max-w-4xl mx-auto">
+          <HomeAnimations variant="cta" />
+        </div>
+      </section>
 
       <Footer />
     </div>

@@ -2,7 +2,6 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
-import { Button } from '@/components/ui/button'
 import { PricingAnimations } from '@/components/pricing-animations'
 
 export const metadata: Metadata = {
@@ -65,16 +64,32 @@ const PLANS = [
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-neutral-200">
       <Nav variant="simple" />
 
       <main className="relative overflow-hidden">
-        <div className="gradient-orb w-[400px] h-[400px] -top-20 right-0 bg-primary/15" />
-        <div className="gradient-orb w-[300px] h-[300px] bottom-0 -left-20 bg-chart-2/10" />
-
-        <section className="relative py-20 px-6">
-          <div className="max-w-6xl mx-auto">
+        <div className="bg-white rounded-b-[2rem] shadow-2xl">
+          <div className="max-w-6xl mx-auto px-6 py-20">
             <PricingAnimations plans={PLANS} />
+          </div>
+        </div>
+
+        {/* Bottom section */}
+        <section className="py-20 px-6">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-2xl font-black text-slate-900 mb-4">Frequently Asked Questions</h2>
+            <div className="space-y-4 mt-8">
+              {[
+                { q: 'Can I switch plans anytime?', a: 'Yes. Upgrade or downgrade from the dashboard. Changes take effect immediately.' },
+                { q: 'Is there a free trial?', a: 'Yes — 14 days free, no credit card required. Cancel anytime during the trial.' },
+                { q: 'What happens if I exceed my limits?', a: 'We\'ll notify you before you hit limits. You can upgrade or wait until the next cycle.' },
+              ].map(item => (
+                <div key={item.q} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-lg text-left">
+                  <h3 className="font-bold text-slate-900 mb-1">{item.q}</h3>
+                  <p className="text-sm text-slate-500">{item.a}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       </main>

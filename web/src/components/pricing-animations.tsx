@@ -1,9 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { FadeUp, StaggerContainer, StaggerChild } from '@/components/motion'
-import { Check } from 'lucide-react'
+import { Check, ArrowRight } from 'lucide-react'
 
 interface Plan {
   name: string
@@ -20,53 +19,65 @@ export function PricingAnimations({ plans }: { plans: Plan[] }) {
     <>
       <FadeUp>
         <div className="text-center mb-14">
-          <div className="inline-block bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-400 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+          <div className="inline-block bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
             Founding Member Pricing — Limited Time
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Simple, transparent pricing</h1>
-          <p className="text-muted-foreground text-lg">No per-message fees. No surprises. Cancel anytime.</p>
+          <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4">Simple, transparent pricing</h1>
+          <p className="text-slate-500 text-lg">No per-message fees. No surprises. Cancel anytime.</p>
         </div>
       </FadeUp>
 
-      <StaggerContainer className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto" stagger={0.15}>
+      <StaggerContainer className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto" stagger={0.15}>
         {plans.map(plan => (
           <StaggerChild key={plan.name}>
-            <div className={`relative rounded-2xl border bg-card p-6 flex flex-col h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
-              plan.highlight ? 'border-primary shadow-lg shadow-primary/10 ring-1 ring-primary/30' : 'border-border hover:shadow-primary/5'
+            <div className={`relative rounded-[1.5rem] p-6 flex flex-col h-full transition-all duration-300 hover:-translate-y-1 ${
+              plan.highlight
+                ? 'bg-slate-950 text-white shadow-2xl ring-2 ring-emerald-500/30'
+                : 'bg-white border border-slate-100 shadow-lg hover:shadow-xl'
             }`}>
               {plan.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-4 py-1 rounded-full text-xs font-bold">
                   Most Popular
                 </div>
               )}
 
-              <div className="mb-1">
-                <h3 className="text-xl font-bold">{plan.name}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{plan.desc}</p>
+              <div className="mb-6">
+                <h3 className={`text-xl font-black ${plan.highlight ? 'text-white' : 'text-slate-900'}`}>{plan.name}</h3>
+                <p className={`text-sm mt-1 ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>{plan.desc}</p>
               </div>
 
-              <div className="my-6">
-                <span className="text-4xl font-bold">${plan.price}</span>
-                <span className="text-muted-foreground">/month</span>
-                {plan.originalPrice && (
-                  <span className="ml-2 text-lg text-muted-foreground line-through">${plan.originalPrice}</span>
+              <div className="mb-6">
+                {plan.originalPrice > plan.price && (
+                  <span className={`text-sm line-through mr-2 ${plan.highlight ? 'text-slate-600' : 'text-slate-300'}`}>
+                    ${plan.originalPrice}
+                  </span>
                 )}
+                <span className={`text-4xl font-black ${plan.highlight ? 'text-white' : 'text-slate-900'}`}>
+                  ${plan.price}
+                </span>
+                <span className={`text-sm ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>/month</span>
               </div>
 
-              <ul className="space-y-3 flex-1">
+              <ul className="space-y-3 mb-8 flex-1">
                 {plan.features.map(f => (
-                  <li key={f} className="flex items-start gap-2 text-sm">
-                    <Check className="size-4 text-primary mt-0.5 shrink-0" />
-                    {f}
+                  <li key={f} className="flex items-start gap-3">
+                    <Check className={`size-4 shrink-0 mt-0.5 ${plan.highlight ? 'text-emerald-400' : 'text-emerald-500'}`} />
+                    <span className={`text-sm ${plan.highlight ? 'text-slate-300' : 'text-slate-600'}`}>{f}</span>
                   </li>
                 ))}
               </ul>
 
-              <div className="mt-6">
-                <Button asChild variant={plan.highlight ? 'default' : 'outline'} className="w-full">
-                  <Link href="/signup">{plan.cta}</Link>
-                </Button>
-              </div>
+              <Link
+                href="/signup"
+                className={`inline-flex items-center justify-center rounded-full py-3 text-sm font-semibold transition-colors ${
+                  plan.highlight
+                    ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/25'
+                    : 'bg-slate-900 text-white hover:bg-slate-800'
+                }`}
+              >
+                {plan.cta}
+                <ArrowRight className="ml-2 size-4" />
+              </Link>
             </div>
           </StaggerChild>
         ))}

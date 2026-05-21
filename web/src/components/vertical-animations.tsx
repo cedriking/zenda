@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { FadeUp, StaggerContainer, StaggerChild } from '@/components/motion'
+import { ArrowRight } from 'lucide-react'
 
 interface VerticalAnimationsProps {
   variant: 'hero' | 'features'
@@ -17,15 +17,24 @@ export function VerticalAnimations({ variant, headline, description, title, feat
     return (
       <>
         <FadeUp>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{headline}</h1>
+          <span className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 border border-emerald-100">
+            WhatsApp AI Receptionist
+          </span>
         </FadeUp>
         <FadeUp delay={0.1}>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">{description}</p>
+          <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4">{headline}</h1>
         </FadeUp>
         <FadeUp delay={0.2}>
-          <Button asChild size="lg" className="text-base px-8 h-12 shadow-lg shadow-primary/20">
-            <Link href="/signup">Start Free Trial</Link>
-          </Button>
+          <p className="text-lg text-slate-500 max-w-2xl mx-auto mb-8">{description}</p>
+        </FadeUp>
+        <FadeUp delay={0.3}>
+          <Link
+            href="/signup"
+            className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-3.5 text-base font-semibold text-white hover:bg-emerald-600 transition-colors shadow-xl shadow-emerald-500/25"
+          >
+            Start Free Trial
+            <ArrowRight className="ml-2 size-4" />
+          </Link>
         </FadeUp>
       </>
     )
@@ -35,14 +44,14 @@ export function VerticalAnimations({ variant, headline, description, title, feat
     return (
       <>
         <FadeUp>
-          <h2 className="text-2xl font-bold text-center mb-10">{title}</h2>
+          <h2 className="text-2xl font-black text-center mb-10 text-slate-900">{title}</h2>
         </FadeUp>
         <StaggerContainer className="grid md:grid-cols-3 gap-6" stagger={0.1}>
           {features.map(f => (
             <StaggerChild key={f.title}>
-              <div className="rounded-2xl border border-border bg-card p-6 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1">
-                <h3 className="font-semibold mb-2">{f.title}</h3>
-                <p className="text-sm text-muted-foreground">{f.desc}</p>
+              <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <h3 className="font-bold text-slate-900 mb-2">{f.title}</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">{f.desc}</p>
               </div>
             </StaggerChild>
           ))}

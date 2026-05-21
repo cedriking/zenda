@@ -170,7 +170,7 @@ function DashboardPage() {
               value={stats.needsAttention}
             />
             <StatCard
-              icon={<Activity className="text-violet-500" size={24} />}
+              icon={<Activity className="text-primary" size={24} />}
               title="Messages Today"
               value={stats.todayMessages}
             />
@@ -323,8 +323,8 @@ function ActivityRow({ item }: { item: ActivityItem }) {
   // appointment_completed
   return (
     <div className="flex items-start gap-3">
-      <div className="w-8 h-8 bg-violet-500/10 rounded-full flex items-center justify-center flex-shrink-0">
-        <CheckCircle size={14} className="text-violet-600 dark:text-violet-400" />
+      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+        <CheckCircle size={14} className="text-primary" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm text-foreground">
