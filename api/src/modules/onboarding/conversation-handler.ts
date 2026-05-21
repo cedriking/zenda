@@ -113,7 +113,7 @@ function getAcknowledgment(step: string, response: string, language: 'en' | 'es'
 
 export async function getNextOnboardingQuestion(
   workspaceId: string,
-  language: 'en' | 'es' = 'es',
+  language: 'en' | 'es' = 'en',
 ): Promise<{ question: string; step: string } | null> {
   const [ws] = await db
     .select()
@@ -147,7 +147,7 @@ export async function processOnboardingResponse(
   workspaceId: string,
   step: string,
   response: string,
-  language: 'en' | 'es' = 'es',
+  language: 'en' | 'es' = 'en',
 ): Promise<{ acknowledged: string; nextStep: string }> {
   // Handle plan_selection step
   if (step === 'plan_selection') {

@@ -64,7 +64,7 @@ interface IncomingMessage {
 export async function processIncomingMessage(workspaceId: string, msg: IncomingMessage) {
   try {
     // 1. Detect language (for audio, body may be empty — refined after transcription)
-    const language: 'en' | 'es' = detectLanguage(msg.body) || 'es'
+    const language: 'en' | 'es' = detectLanguage(msg.body) || 'en'
 
     // 2. Find or create customer (using phone number or thread ID)
     const customer = await resolveOrCreateCustomer(workspaceId, msg.phoneNumber, language)

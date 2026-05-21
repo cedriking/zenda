@@ -1,8 +1,20 @@
 import { Elysia, t } from 'elysia'
 import { getOnboardingStatus, advanceOnboarding } from './flow.js'
 import { getNextOnboardingQuestion, processOnboardingResponse } from './conversation-handler.js'
+import { db } from '@zenda/db/client'
+import { workspaces } from '@zenda/db/schema'
+import { eq } from 'drizzle-orm'
 import { logger } from '../../infra/logger.js'
 import { serverError } from '../../utils/errors.js'
+
+async function getWorkspaceLanguage(workspaceId: string): Promise<'en' | 'es'> {
+  const [ws] = await db
+    .select({ defaultLanguage: workspaces.defaultLanguage })
+    .from(workspaces)
+    .where(eq(workspaces.id, workspaceId))
+    .limit(1)
+  return (ws?.defaultLanguage as 'en' | 'es') ?? 'en'
+}
 
 export const onboardingModule = new Elysia({ prefix: '/onboarding' })
 
@@ -17,7 +29,8 @@ export const onboardingModule = new Elysia({ prefix: '/onboarding' })
 
   .get('/question', async ({ workspaceId, set }) => {
     try {
-    return getNextOnboardingQuestion(workspaceId!)
+    const language = await getWorkspaceLanguage(workspaceId!)
+    return getNextOnboardingQuestion(workspaceId!, language)
     } catch (err: any) {
       logger.error('Get onboarding question error', { workspaceId, error: err?.message })
       return serverError(set, 'Failed to get onboarding question')
@@ -42,7 +55,8 @@ export const onboardingModule = new Elysia({ prefix: '/onboarding' })
   .post('/respond', async ({ workspaceId, body, set }) => {
     const { step, response } = body as { step: string; response: string }
     try {
-    return await processOnboardingResponse(workspaceId!, step, response)
+    const language = await getWorkspaceLanguage(workspaceId!)
+    return await processOnboardingResponse(workspaceId!, step, response, language)
     } catch (err: any) {
       logger.error('Onboarding respond error', { step, response, error: err?.message, stack: err?.stack })
       return serverError(set, 'Failed to process onboarding response')

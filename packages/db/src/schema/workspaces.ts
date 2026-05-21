@@ -21,7 +21,7 @@ export const workspaces = pgTable('workspaces', {
   slug: varchar('slug', { length: 100 }).notNull().unique(),
   timezone: varchar('timezone', { length: 50 }).notNull().default('America/Mexico_City'),
   country: varchar('country', { length: 2 }).notNull().default('MX'),
-  defaultLanguage: languageEnum('default_language').notNull().default('es'),
+  defaultLanguage: languageEnum('default_language').notNull().default('en'),
   onboardingStep: onboardingStepEnum('onboarding_step').notNull().default('not_started'),
   onboardingCompletedAt: timestamp('onboarding_completed_at', { withTimezone: true }),
   // Composio integration

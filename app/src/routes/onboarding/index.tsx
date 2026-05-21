@@ -100,6 +100,7 @@ function OnboardingPage() {
   const [sidebarVisible, setSidebarVisible] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const typingRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const loadedRef = useRef(false)
 
   useEffect(() => {
     // Stagger sidebar entrance
@@ -108,7 +109,10 @@ function OnboardingPage() {
   }, [])
 
   useEffect(() => {
-    loadStatus()
+    if (!loadedRef.current) {
+      loadedRef.current = true
+      loadStatus()
+    }
   }, [])
 
   useEffect(() => {
@@ -288,7 +292,7 @@ function OnboardingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex">
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex">
       {/* Progress sidebar */}
       <aside
         className={`w-80 bg-white/80 backdrop-blur-sm border-r border-border p-8 flex flex-col transition-all duration-700 ease-out ${
