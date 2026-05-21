@@ -1,6 +1,6 @@
 import { db } from "@zenda/db/client";
-import { messages } from "@zenda/db/schema";
-import type { AIProvider, Language } from "@zenda/shared";
+import { messages, subscriptions } from "@zenda/db/schema";
+import type { AIProvider, Language, PlanTier } from "@zenda/shared";
 import { desc, eq } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 import { redis } from "../../infra/redis.js";
@@ -194,10 +194,17 @@ export async function runAgent(
       chatMessages.push({ role: "user", content: sanitized });
     }
 
-    // 6. Select model for response generation
+    // 6. Get workspace plan and select model for response generation
+    const [sub] = await db
+      .select({ planTier: subscriptions.planTier })
+      .from(subscriptions)
+      .where(eq(subscriptions.workspaceId, workspaceId))
+      .limit(1);
+    const planTier: PlanTier = (sub?.planTier as PlanTier) ?? "local_solo";
+
     const modelConfig = selectModel({
       task: "response_generation",
-      plan: "pro",
+      plan: planTier,
       language,
     });
 

@@ -60,7 +60,7 @@ async function handleCheckoutCompleted(event: Stripe.Event): Promise<void> {
     .set({
       stripeCustomerId: session.customer as string,
       stripeSubscriptionId: session.subscription as string,
-      planTier: (tier ?? "starter") as PlanTier,
+      planTier: (tier ?? "local_solo") as PlanTier,
       billingPeriod: (period ?? "monthly") as BillingPeriod,
       status: "active",
       currentPeriodStart: new Date(
@@ -211,20 +211,23 @@ export async function handleWebhook(
   }
 }
 
-const TIER_RANK: Record<string, number> = { starter: 0, pro: 1, business: 2 };
+const TIER_RANK: Record<string, number> = { local_solo: 0, local_starter: 1, local_pro: 2, local_business: 3 };
 
 function detectTierFromPrice(priceId: string | undefined): string | null {
   if (!priceId) {
     return null;
   }
-  if (priceId.includes("starter")) {
-    return "starter";
+  if (priceId.includes("local_solo") || priceId.includes("solo")) {
+    return "local_solo";
   }
-  if (priceId.includes("pro")) {
-    return "pro";
+  if (priceId.includes("local_starter") || priceId.includes("starter")) {
+    return "local_starter";
   }
-  if (priceId.includes("business")) {
-    return "business";
+  if (priceId.includes("local_pro") || priceId.includes("pro")) {
+    return "local_pro";
+  }
+  if (priceId.includes("local_business") || priceId.includes("business")) {
+    return "local_business";
   }
   return null;
 }

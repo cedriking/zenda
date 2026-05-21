@@ -54,3 +54,28 @@ export async function markNotificationRead(workspaceId: string, notificationId: 
     .returning()
   return updated
 }
+
+/**
+ * Send a usage threshold notification to the workspace owner.
+ * Used by the usage tracking engine at 80% (warning) and 100% (limit).
+ */
+export async function sendUsageNotification(
+  workspaceId: string,
+  level: 'warning' | 'limit',
+): Promise<void> {
+  if (level === 'limit') {
+    await createNotification({
+      workspaceId,
+      type: 'usage_limit',
+      title: 'Active contact limit reached',
+      body: 'You\'ve reached your active contact limit. Proactive automations (reminders, follow-ups) are paused. Inbound messages still work. Upgrade your plan for more contacts.',
+    })
+  } else {
+    await createNotification({
+      workspaceId,
+      type: 'usage_warning',
+      title: 'Active contact usage at 80%',
+      body: 'You\'ve used 80% of your active appointment contacts this month. Consider upgrading to avoid hitting your limit.',
+    })
+  }
+}
