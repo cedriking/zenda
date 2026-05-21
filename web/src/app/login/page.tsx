@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
+import { apiFetch, ApiError } from '@/lib/api-client'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -18,17 +19,10 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/auth/login`, {
+      await apiFetch('/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       })
-
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error ?? 'Login failed')
-      }
-
       window.location.href = '/download'
     } catch (err) {
       setError((err as Error).message)

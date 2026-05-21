@@ -88,6 +88,7 @@ let msgId = 0
 
 function OnboardingPage() {
   const navigate = useNavigate()
+  const { user } = useAuthStore()
   const [progress, setProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -227,7 +228,7 @@ function OnboardingPage() {
       setCurrentStep(result.nextStep)
 
       if (tier === 'pro' || tier === 'business') {
-        const email = '' // user?.email ?? ''
+        const email = user?.email ?? ''
         const checkout = await apiFetch<{ url: string }>('/billing/checkout', {
           method: 'POST',
           body: { tier, period: 'monthly', email },

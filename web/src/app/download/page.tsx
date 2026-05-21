@@ -6,6 +6,7 @@ import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { apiFetch } from '@/lib/api-client'
 
 export default function DownloadPage() {
   const [email, setEmail] = useState('')
@@ -20,12 +21,10 @@ export default function DownloadPage() {
     setError('')
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/support/waitlist`, {
+      await apiFetch('/support/waitlist', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       })
-      if (!res.ok) throw new Error('Failed')
       setSent(true)
     } catch {
       setError('Something went wrong. Please try again.')

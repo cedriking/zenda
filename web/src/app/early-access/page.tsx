@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
+import { apiFetch } from '@/lib/api-client'
 import { PartyPopper } from 'lucide-react'
 
 export default function EarlyAccessPage() {
@@ -19,9 +20,8 @@ export default function EarlyAccessPage() {
     setLoading(true)
 
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/support/waitlist`, {
+      await apiFetch('/support/waitlist', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, name, businessType }),
       })
       setSubmitted(true)

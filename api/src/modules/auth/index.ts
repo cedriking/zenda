@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm'
 import { loginSchema, signupSchema } from '@zenda/shared'
 import { authBase } from '../../middleware/auth.js'
 import { logger } from '../../infra/logger.js'
+import { serverError } from '../../utils/errors.js'
 
 export const authModule = new Elysia({ prefix: '/auth' })
   .use(authBase)
@@ -16,6 +17,7 @@ export const authModule = new Elysia({ prefix: '/auth' })
     }
     const { name, email, password, businessName } = parsed.data
 
+    try {
     // Check existing user
     const existing = await db.select().from(users).where(eq(users.email, email)).limit(1)
     if (existing.length > 0) {
@@ -70,6 +72,10 @@ export const authModule = new Elysia({ prefix: '/auth' })
       user: { id: result.user.id, email: result.user.email, name: result.user.name },
       workspace: { id: result.workspace.id, name: result.workspace.name, slug: result.workspace.slug, planTier: 'starter' as const, onboardingStep: result.workspace.onboardingStep },
     }
+    } catch (err: any) {
+      logger.error('Signup error', { email, error: err?.message })
+      return serverError(set, 'Failed to create account')
+    }
   })
   .post('/login', async ({ body, jwt, refreshJwt, set }) => {
     const parsed = loginSchema.safeParse(body)
@@ -79,6 +85,7 @@ export const authModule = new Elysia({ prefix: '/auth' })
     }
     const { email, password } = parsed.data
 
+    try {
     // Find user
     const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1)
     if (!user) {
@@ -117,6 +124,10 @@ export const authModule = new Elysia({ prefix: '/auth' })
       user: { id: user.id, email: user.email, name: user.name },
       workspace: { id: workspace.id, name: workspace.name, slug: workspace.slug, planTier: 'starter' as const, onboardingStep: workspace.onboardingStep },
     }
+    } catch (err: any) {
+      logger.error('Login error', { email, error: err?.message })
+      return serverError(set, 'Login failed')
+    }
   })
   .post('/refresh', async ({ body, jwt, refreshJwt, set }) => {
     const { refreshToken: token } = body as { refreshToken: string }
@@ -125,6 +136,7 @@ export const authModule = new Elysia({ prefix: '/auth' })
       return { error: 'Refresh token required' }
     }
 
+    try {
     const payload = await refreshJwt.verify(token)
     if (!payload) {
       set.status = 401
@@ -149,6 +161,10 @@ export const authModule = new Elysia({ prefix: '/auth' })
     const newRefreshToken = await refreshJwt.sign({ sub: payload.sub, workspaceId: (payload as Record<string, unknown>).workspaceId as string, jti: crypto.randomUUID() })
 
     return { accessToken, refreshToken: newRefreshToken }
+    } catch (err: any) {
+      logger.error('Token refresh error', { error: err?.message })
+      return serverError(set, 'Token refresh failed')
+    }
   })
   .post('/logout', async ({ jwt, refreshJwt, headers, body, set }) => {
     const authHeader = headers.authorization
@@ -157,6 +173,7 @@ export const authModule = new Elysia({ prefix: '/auth' })
       return { error: 'No access token provided' }
     }
 
+    try {
     const accessToken = authHeader.slice(7)
     const payload = await jwt.verify(accessToken)
     if (!payload) {
@@ -193,4 +210,8 @@ export const authModule = new Elysia({ prefix: '/auth' })
 
     logger.info('User logged out', { userId })
     return { success: true }
+    } catch (err: any) {
+      logger.error('Logout error', { error: err?.message })
+      return serverError(set, 'Logout failed')
+    }
   })

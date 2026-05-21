@@ -49,6 +49,9 @@ export function rateLimit(max: number = DEFAULT_MAX) {
 
       return { rateLimitRemaining: remaining, rateLimited }
     })
+    .onAfterHandle(({ rateLimitRemaining, set }) => {
+      set.headers['X-RateLimit-Remaining'] = String(rateLimitRemaining)
+    })
     .onBeforeHandle(({ rateLimited, set }) => {
       if (rateLimited) {
         set.status = 429

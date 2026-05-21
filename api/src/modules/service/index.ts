@@ -2,26 +2,44 @@ import { Elysia, t } from 'elysia'
 import { db } from '@zenda/db/client'
 import { services } from '@zenda/db/schema'
 import { eq, and } from 'drizzle-orm'
+import { createServiceSchema, updateServiceSchema } from '@zenda/shared'
+import { logger } from '../../infra/logger.js'
+import { notFound, badRequest, serverError } from '../../utils/errors.js'
 
 export const serviceModule = new Elysia({ prefix: '/services' })
 
-  .get('/', async ({ workspaceId }) => {
-    return db.select().from(services).where(eq(services.workspaceId, workspaceId!))
+  .get('/', async ({ workspaceId, set }) => {
+    try {
+      return db.select().from(services).where(eq(services.workspaceId, workspaceId!))
+    } catch (err) {
+      logger.error('Failed to list services', { error: (err as Error).message })
+      return serverError(set, 'Failed to list services')
+    }
   })
 
-  .post('/', async ({ workspaceId, body }) => {
-    const data = body as Record<string, unknown>
-    const [svc] = await db
-      .insert(services)
-      .values({
-        workspaceId: workspaceId!,
-        name: data.name as string,
-        description: (data.description as string) ?? null,
-        durationMinutes: data.durationMinutes as number,
-        priceCents: (data.priceCents as number) ?? null,
-      })
-      .returning()
-    return svc
+  .post('/', async ({ workspaceId, body, set }) => {
+    try {
+      const parsed = createServiceSchema.safeParse(body)
+      if (!parsed.success) {
+        return badRequest(set, 'Validation failed: ' + parsed.error.issues.map(i => i.message).join(', '))
+      }
+
+      const { name, description, durationMinutes, priceCents } = parsed.data
+      const [svc] = await db
+        .insert(services)
+        .values({
+          workspaceId: workspaceId!,
+          name,
+          description: description ?? null,
+          durationMinutes,
+          priceCents: priceCents ?? null,
+        })
+        .returning()
+      return svc
+    } catch (err) {
+      logger.error('Failed to create service', { error: (err as Error).message })
+      return serverError(set, 'Failed to create service')
+    }
   }, {
     body: t.Object({
       name: t.String(),
@@ -31,15 +49,24 @@ export const serviceModule = new Elysia({ prefix: '/services' })
     }),
   })
 
-  .patch('/:id', async ({ workspaceId, params, body }) => {
-    const data = body as Record<string, unknown>
-    const [updated] = await db
-      .update(services)
-      .set({ ...data, updatedAt: new Date() })
-      .where(and(eq(services.id, params.id), eq(services.workspaceId, workspaceId!)))
-      .returning()
-    if (!updated) return { error: 'Service not found' }
-    return updated
+  .patch('/:id', async ({ workspaceId, params, body, set }) => {
+    try {
+      const parsed = updateServiceSchema.safeParse(body)
+      if (!parsed.success) {
+        return badRequest(set, 'Validation failed: ' + parsed.error.issues.map(i => i.message).join(', '))
+      }
+
+      const [updated] = await db
+        .update(services)
+        .set({ ...parsed.data, updatedAt: new Date() })
+        .where(and(eq(services.id, params.id), eq(services.workspaceId, workspaceId!)))
+        .returning()
+      if (!updated) return notFound(set, 'Service not found')
+      return updated
+    } catch (err) {
+      logger.error('Failed to update service', { error: (err as Error).message })
+      return serverError(set, 'Failed to update service')
+    }
   }, {
     body: t.Object({
       name: t.Optional(t.String()),
@@ -50,10 +77,15 @@ export const serviceModule = new Elysia({ prefix: '/services' })
     }),
   })
 
-  .delete('/:id', async ({ workspaceId, params }) => {
-    const result = await db
-      .delete(services)
-      .where(and(eq(services.id, params.id), eq(services.workspaceId, workspaceId!)))
-      .returning()
-    return { deleted: result.length > 0 }
+  .delete('/:id', async ({ workspaceId, params, set }) => {
+    try {
+      const result = await db
+        .delete(services)
+        .where(and(eq(services.id, params.id), eq(services.workspaceId, workspaceId!)))
+        .returning()
+      return { deleted: result.length > 0 }
+    } catch (err) {
+      logger.error('Failed to delete service', { error: (err as Error).message })
+      return serverError(set, 'Failed to delete service')
+    }
   })

@@ -2,113 +2,138 @@ import { Elysia, t } from 'elysia'
 import { db } from '@zenda/db/client'
 import { conversations, messages, conversationSummaries } from '@zenda/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
+import { updateConversationModeSchema, sendMessageSchema } from '@zenda/shared'
 import { logger } from '../../infra/logger.js'
+import { notFound, badRequest, serverError } from '../../utils/errors.js'
 
 export const conversationModule = new Elysia({ prefix: '/conversations' })
 
   // List conversations
-  .get('/', async ({ workspaceId, query }) => {
-    const { mode, limit = '50', offset = '0' } = query as Record<string, string>
-    const conditions = [eq(conversations.workspaceId, workspaceId!)]
+  .get('/', async ({ workspaceId, query, set }) => {
+    try {
+      const { mode, limit = '50', offset = '0' } = query as Record<string, string>
+      const parsedLimit = Math.max(1, Math.min(200, Number(limit) || 50))
+      const parsedOffset = Math.max(0, Number(offset) || 0)
 
-    if (mode) conditions.push(eq(conversations.mode, mode))
+      const conditions = [eq(conversations.workspaceId, workspaceId!)]
+      if (mode) conditions.push(eq(conversations.mode, mode))
 
-    return db
-      .select()
-      .from(conversations)
-      .where(and(...conditions))
-      .orderBy(desc(conversations.lastMessageAt))
-      .limit(Number(limit))
-      .offset(Number(offset))
+      return db
+        .select()
+        .from(conversations)
+        .where(and(...conditions))
+        .orderBy(desc(conversations.lastMessageAt))
+        .limit(parsedLimit)
+        .offset(parsedOffset)
+    } catch (err) {
+      logger.error('Failed to list conversations', { error: (err as Error).message })
+      return serverError(set, 'Failed to list conversations')
+    }
   })
 
   // Get conversation by ID
-  .get('/:id', async ({ workspaceId, params }) => {
-    const [conv] = await db
-      .select()
-      .from(conversations)
-      .where(and(eq(conversations.id, params.id), eq(conversations.workspaceId, workspaceId!)))
-      .limit(1)
-    if (!conv) return { error: 'Conversation not found' }
-    return conv
+  .get('/:id', async ({ workspaceId, params, set }) => {
+    try {
+      const [conv] = await db
+        .select()
+        .from(conversations)
+        .where(and(eq(conversations.id, params.id), eq(conversations.workspaceId, workspaceId!)))
+        .limit(1)
+      if (!conv) return notFound(set, 'Conversation not found')
+      return conv
+    } catch (err) {
+      logger.error('Failed to get conversation', { error: (err as Error).message })
+      return serverError(set, 'Failed to get conversation')
+    }
   })
 
   // Get messages for a conversation
-  .get('/:id/messages', async ({ workspaceId, params, query }) => {
-    const { limit = '50', offset = '0' } = query as Record<string, string>
+  .get('/:id/messages', async ({ workspaceId, params, query, set }) => {
+    try {
+      const { limit = '50', offset = '0' } = query as Record<string, string>
+      const parsedLimit = Math.max(1, Math.min(200, Number(limit) || 50))
+      const parsedOffset = Math.max(0, Number(offset) || 0)
 
-    const [conv] = await db
-      .select()
-      .from(conversations)
-      .where(and(eq(conversations.id, params.id), eq(conversations.workspaceId, workspaceId!)))
-      .limit(1)
-    if (!conv) return { error: 'Conversation not found' }
+      const [conv] = await db
+        .select()
+        .from(conversations)
+        .where(and(eq(conversations.id, params.id), eq(conversations.workspaceId, workspaceId!)))
+        .limit(1)
+      if (!conv) return notFound(set, 'Conversation not found')
 
-    return db
-      .select()
-      .from(messages)
-      .where(eq(messages.conversationId, params.id))
-      .orderBy(desc(messages.createdAt))
-      .limit(Number(limit))
-      .offset(Number(offset))
+      return db
+        .select()
+        .from(messages)
+        .where(eq(messages.conversationId, params.id))
+        .orderBy(desc(messages.createdAt))
+        .limit(parsedLimit)
+        .offset(parsedOffset)
+    } catch (err) {
+      logger.error('Failed to get messages', { error: (err as Error).message })
+      return serverError(set, 'Failed to get messages')
+    }
   })
 
   // Update conversation mode (takeover / return to auto)
-  .patch('/:id/mode', async ({ workspaceId, params, body }) => {
-    const { mode } = body as { mode: string }
-
-    const [conv] = await db
-      .select()
-      .from(conversations)
-      .where(and(eq(conversations.id, params.id), eq(conversations.workspaceId, workspaceId!)))
-      .limit(1)
-    if (!conv) return { error: 'Conversation not found' }
-
-    const updates: Record<string, unknown> = {
-      mode,
-      needsAttentionReason: mode === 'auto' ? null : conv.needsAttentionReason,
-      updatedAt: new Date(),
-    }
-
-    // When returning to auto, generate a summary from recent messages
-    if (mode === 'auto' && (conv.mode === 'human_takeover' || conv.mode === 'needs_attention')) {
-      try {
-        const recentMessages = await db
-          .select()
-          .from(messages)
-          .where(eq(messages.conversationId, params.id))
-          .orderBy(desc(messages.createdAt))
-          .limit(20)
-
-        if (recentMessages.length > 0) {
-          const summaryText = recentMessages
-            .reverse()
-            .map(m => `[${m.senderType}]: ${m.body}`)
-            .join('\n')
-            .slice(0, 2000)
-
-          await db.insert(conversationSummaries).values({
-            conversationId: params.id,
-            summary: `Human takeover ended. Last ${recentMessages.length} messages summarized.`,
-            keyTopics: [],
-            extractedPreferences: {},
-          })
-
-          updates.summary = `Human took over from ${conv.mode}. Summary saved with ${recentMessages.length} messages.`
-          logger.info('Conversation summary generated', { conversationId: params.id })
-        }
-      } catch (err) {
-        logger.warn('Failed to generate summary', { conversationId: params.id, error: (err as Error).message })
+  .patch('/:id/mode', async ({ workspaceId, params, body, set }) => {
+    try {
+      const parsed = updateConversationModeSchema.safeParse(body)
+      if (!parsed.success) {
+        return badRequest(set, 'Validation failed: ' + parsed.error.issues.map(i => i.message).join(', '))
       }
+
+      const { mode } = parsed.data
+
+      const [conv] = await db
+        .select()
+        .from(conversations)
+        .where(and(eq(conversations.id, params.id), eq(conversations.workspaceId, workspaceId!)))
+        .limit(1)
+      if (!conv) return notFound(set, 'Conversation not found')
+
+      const updates: Record<string, unknown> = {
+        mode,
+        needsAttentionReason: mode === 'auto' ? null : conv.needsAttentionReason,
+        updatedAt: new Date(),
+      }
+
+      // When returning to auto, generate a summary from recent messages
+      if (mode === 'auto' && (conv.mode === 'human_takeover' || conv.mode === 'needs_attention')) {
+        try {
+          const recentMessages = await db
+            .select()
+            .from(messages)
+            .where(eq(messages.conversationId, params.id))
+            .orderBy(desc(messages.createdAt))
+            .limit(20)
+
+          if (recentMessages.length > 0) {
+            await db.insert(conversationSummaries).values({
+              conversationId: params.id,
+              summary: `Human takeover ended. Last ${recentMessages.length} messages summarized.`,
+              keyTopics: [],
+              extractedPreferences: {},
+            })
+
+            updates.summary = `Human took over from ${conv.mode}. Summary saved with ${recentMessages.length} messages.`
+            logger.info('Conversation summary generated', { conversationId: params.id })
+          }
+        } catch (err) {
+          logger.warn('Failed to generate summary', { conversationId: params.id, error: (err as Error).message })
+        }
+      }
+
+      const [updated] = await db
+        .update(conversations)
+        .set(updates)
+        .where(eq(conversations.id, params.id))
+        .returning()
+
+      return updated
+    } catch (err) {
+      logger.error('Failed to update conversation mode', { error: (err as Error).message })
+      return serverError(set, 'Failed to update conversation mode')
     }
-
-    const [updated] = await db
-      .update(conversations)
-      .set(updates)
-      .where(eq(conversations.id, params.id))
-      .returning()
-
-    return updated
   }, {
     body: t.Object({
       mode: t.String(),
@@ -116,37 +141,48 @@ export const conversationModule = new Elysia({ prefix: '/conversations' })
   })
 
   // Send owner message in a conversation
-  .post('/:id/messages', async ({ workspaceId, params, body }) => {
-    const { text } = body as { text: string }
+  .post('/:id/messages', async ({ workspaceId, params, body, set }) => {
+    try {
+      const parsed = sendMessageSchema.safeParse(body)
+      if (!parsed.success) {
+        return badRequest(set, 'Validation failed: ' + parsed.error.issues.map(i => i.message).join(', '))
+      }
 
-    const [conv] = await db
-      .select()
-      .from(conversations)
-      .where(and(eq(conversations.id, params.id), eq(conversations.workspaceId, workspaceId!)))
-      .limit(1)
-    if (!conv) return { error: 'Conversation not found' }
+      const { body: text, contentType } = parsed.data
 
-    const [msg] = await db
-      .insert(messages)
-      .values({
-        conversationId: params.id,
-        workspaceId: workspaceId!,
-        senderType: 'owner',
-        contentType: 'text',
-        body: text,
-        language: conv.language,
-        status: 'queued',
-      })
-      .returning()
+      const [conv] = await db
+        .select()
+        .from(conversations)
+        .where(and(eq(conversations.id, params.id), eq(conversations.workspaceId, workspaceId!)))
+        .limit(1)
+      if (!conv) return notFound(set, 'Conversation not found')
 
-    await db
-      .update(conversations)
-      .set({ lastMessageAt: new Date(), updatedAt: new Date() })
-      .where(eq(conversations.id, params.id))
+      const [msg] = await db
+        .insert(messages)
+        .values({
+          conversationId: params.id,
+          workspaceId: workspaceId!,
+          senderType: 'owner',
+          contentType,
+          body: text,
+          language: conv.language,
+          status: 'queued',
+        })
+        .returning()
 
-    return msg
+      await db
+        .update(conversations)
+        .set({ lastMessageAt: new Date(), updatedAt: new Date() })
+        .where(eq(conversations.id, params.id))
+
+      return msg
+    } catch (err) {
+      logger.error('Failed to send message', { error: (err as Error).message })
+      return serverError(set, 'Failed to send message')
+    }
   }, {
     body: t.Object({
-      text: t.String(),
+      body: t.String(),
+      contentType: t.Optional(t.String()),
     }),
   })

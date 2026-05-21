@@ -1,5 +1,14 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://api.zenda.bot'
 
+export class ApiError extends Error {
+  status: number
+  constructor(status: number, message: string) {
+    super(message)
+    this.status = status
+    this.name = 'ApiError'
+  }
+}
+
 interface RequestOptions {
   method?: string
   body?: unknown
@@ -59,9 +68,9 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     const data = await response.json().catch(() => null)
     if (data?.details) {
       const msgs = data.details.map((d: { message: string }) => d.message).join('. ')
-      throw new Error(msgs || data?.error || `HTTP ${response.status}`)
+      throw new ApiError(response.status, msgs || data?.error || `HTTP ${response.status}`)
     }
-    throw new Error(data?.error ?? data?.message ?? `HTTP ${response.status}`)
+    throw new ApiError(response.status, data?.error ?? data?.message ?? `HTTP ${response.status}`)
   }
 
   return response.json()

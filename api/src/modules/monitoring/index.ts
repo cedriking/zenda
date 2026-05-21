@@ -4,51 +4,59 @@ import { sql } from 'drizzle-orm'
 import { logger } from '../../infra/logger.js'
 import { getCircuitStatus } from '../ai/circuit-breaker/index.js'
 import { getQueueStats } from '../queue/retry-queue.js'
+import { serverError } from '../../utils/errors.js'
 
 export const monitoringModule = new Elysia({ prefix: '/monitoring' })
 
   // Extended health check
-  .get('/health', async () => {
-    const checks: Record<string, { status: string; latency?: number; details?: string }> = {}
-
-    // Database check
-    const dbStart = Date.now()
+  .get('/health', async ({ set }) => {
     try {
-      await db.execute(sql`SELECT 1`)
-      checks.database = { status: 'ok', latency: Date.now() - dbStart }
+      const checks: Record<string, { status: string; latency?: number; details?: string }> = {}
+
+      // Database check
+      const dbStart = Date.now()
+      try {
+        await db.execute(sql`SELECT 1`)
+        checks.database = { status: 'ok', latency: Date.now() - dbStart }
+      } catch (err) {
+        checks.database = { status: 'error', latency: Date.now() - dbStart, details: (err as Error).message }
+      }
+
+      // AI providers circuit breaker
+      checks.circuitBreaker = { status: 'ok', details: JSON.stringify(getCircuitStatus()) }
+
+      // Queue status
+      const queueStats = getQueueStats()
+      checks.queues = {
+        status: queueStats.pending > 100 ? 'warn' : 'ok',
+        details: `${queueStats.pending} pending retries`,
+      }
+
+      const allOk = Object.values(checks).every(c => c.status === 'ok')
+      const hasError = Object.values(checks).some(c => c.status === 'error')
+
+      return {
+        status: hasError ? 'unhealthy' : allOk ? 'healthy' : 'degraded',
+        timestamp: new Date().toISOString(),
+        version: '0.3.0',
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        checks,
+      }
     } catch (err) {
-      checks.database = { status: 'error', latency: Date.now() - dbStart, details: (err as Error).message }
-    }
-
-    // AI providers circuit breaker
-    checks.circuitBreaker = { status: 'ok', details: JSON.stringify(getCircuitStatus()) }
-
-    // Queue status
-    const queueStats = getQueueStats()
-    checks.queues = {
-      status: queueStats.pending > 100 ? 'warn' : 'ok',
-      details: `${queueStats.pending} pending retries`,
-    }
-
-    const allOk = Object.values(checks).every(c => c.status === 'ok')
-    const hasError = Object.values(checks).some(c => c.status === 'error')
-
-    return {
-      status: hasError ? 'unhealthy' : allOk ? 'healthy' : 'degraded',
-      timestamp: new Date().toISOString(),
-      version: '0.3.0',
-      uptime: process.uptime(),
-      memory: process.memoryUsage(),
-      checks,
+      logger.error('Health check failed', { error: (err as Error).message })
+      return serverError(set, 'Health check failed')
     }
   })
 
   // Readiness probe (for load balancers)
-  .get('/ready', async () => {
+  .get('/ready', async ({ set }) => {
     try {
       await db.execute(sql`SELECT 1`)
       return { ready: true }
-    } catch {
+    } catch (err) {
+      logger.error('Readiness check failed', { error: (err as Error).message })
+      set.status = 503
       return { ready: false }
     }
   })

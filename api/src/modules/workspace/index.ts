@@ -2,27 +2,33 @@ import { Elysia } from 'elysia'
 import { db } from '@zenda/db/client'
 import { workspaces } from '@zenda/db/schema'
 import { eq } from 'drizzle-orm'
+import { logger } from '../../infra/logger.js'
+import { notFound, serverError } from '../../utils/errors.js'
 
 export const workspaceModule = new Elysia({ prefix: '/workspace' })
   .get('/', async ({ workspaceId, set }) => {
-    const [ws] = await db.select().from(workspaces).where(eq(workspaces.id, workspaceId!)).limit(1)
-    if (!ws) {
-      set.status = 404
-      return { error: 'Workspace not found' }
+    try {
+      const [ws] = await db.select().from(workspaces).where(eq(workspaces.id, workspaceId!)).limit(1)
+      if (!ws) return notFound(set, 'Workspace not found')
+      return ws
+    } catch (err) {
+      logger.error('Failed to get workspace', { error: (err as Error).message })
+      return serverError(set, 'Failed to get workspace')
     }
-    return ws
   })
   .patch('/', async ({ workspaceId, body, set }) => {
-    const [updated] = await db
-      .update(workspaces)
-      .set({ ...body, updatedAt: new Date() })
-      .where(eq(workspaces.id, workspaceId))
-      .returning()
-    if (!updated) {
-      set.status = 404
-      return { error: 'Workspace not found' }
+    try {
+      const [updated] = await db
+        .update(workspaces)
+        .set({ ...body, updatedAt: new Date() })
+        .where(eq(workspaces.id, workspaceId))
+        .returning()
+      if (!updated) return notFound(set, 'Workspace not found')
+      return updated
+    } catch (err) {
+      logger.error('Failed to update workspace', { error: (err as Error).message })
+      return serverError(set, 'Failed to update workspace')
     }
-    return updated
   }, {
     body: {
       name: 'string?',
