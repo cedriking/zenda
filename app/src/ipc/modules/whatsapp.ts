@@ -3,6 +3,7 @@ import {
   initWhatsAppClient,
   disconnectWhatsApp,
   onStatus,
+  getStatus,
   type WhatsAppStatus,
 } from '../../main/whatsapp/client.js'
 import {
@@ -12,14 +13,23 @@ import {
 } from '../../main/whatsapp/bridge.js'
 import { updateWhatsAppHealth } from '../../main/health-monitor.js'
 import { updateTrayStatus } from '../../main/tray.js'
+import { clearSession } from '../../main/whatsapp/session.js'
 
 export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
   // Init WhatsApp client (fire-and-forget so it can't block the renderer)
   ipcMain.handle('whatsapp:init', () => {
     console.log('[IPC] whatsapp:init received')
-    initWhatsAppClient(mainWindow).catch((err) => {
-      console.error('[IPC] whatsapp:init error:', err)
-    })
+    const status = getStatus()
+    if (status.status === 'connected') {
+      // Client already exists from auto-init; re-emit status so the
+      // renderer (which loaded after the auto-init) can catch up.
+      console.log('[IPC] Client already connected, re-emitting status')
+      mainWindow.webContents.send('whatsapp:status', status)
+    } else {
+      initWhatsAppClient(mainWindow).catch((err) => {
+        console.error('[IPC] whatsapp:init error:', err)
+      })
+    }
     return { success: true }
   })
 
@@ -27,6 +37,14 @@ export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
   ipcMain.handle('whatsapp:disconnect', () => {
     disconnectWhatsApp()
     disconnectBridge()
+    return { success: true }
+  })
+
+  // Disconnect and clear session (for logout)
+  ipcMain.handle('whatsapp:disconnect-and-clear', () => {
+    disconnectWhatsApp()
+    disconnectBridge()
+    clearSession()
     return { success: true }
   })
 

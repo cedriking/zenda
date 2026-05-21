@@ -26,8 +26,15 @@ let reconnectAttempts = 0
 const MAX_RECONNECT_ATTEMPTS = 5
 const emitter = new EventEmitter()
 
+let currentStatus: WhatsAppStatus = { status: 'disconnected' }
+
 function emitStatus(status: WhatsAppStatus) {
+  currentStatus = status
   emitter.emit('status', status)
+}
+
+export function getStatus(): WhatsAppStatus {
+  return currentStatus
 }
 
 export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<void> {

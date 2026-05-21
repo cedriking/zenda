@@ -79,6 +79,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   setLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error, isLoading: false }),
   logout: () => {
+    // Disconnect WhatsApp and clear session files so auto-init
+    // won't reconnect with stale credentials on next login.
+    window.electron?.invoke?.('whatsapp:disconnect-and-clear')?.catch(() => {})
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
     localStorage.removeItem('workspace')

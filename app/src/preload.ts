@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld("electron", {
     const allowed = [
       "whatsapp:init",
       "whatsapp:disconnect",
+      "whatsapp:disconnect-and-clear",
       "bridge:connect",
     ];
     if (allowed.includes(channel)) {
