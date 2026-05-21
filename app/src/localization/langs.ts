@@ -1,14 +1,3 @@
-import type { Language } from "./language";
+import { supportedLanguages } from '@zenda/shared/i18n'
 
-export default [
-  {
-    key: "en",
-    nativeName: "English",
-    prefix: "EN",
-  },
-  {
-    key: "es",
-    nativeName: "Español",
-    prefix: "ES",
-  },
-] as const satisfies Language[];
+export default supportedLanguages

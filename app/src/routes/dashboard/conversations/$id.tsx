@@ -2,12 +2,14 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useConversations } from '../../../hooks/use-conversations'
 import { ArrowLeft, Bot, User, Send, AlertCircle, Info, Phone, Globe, CalendarDays } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export const Route = createFileRoute('/dashboard/conversations/$id')({
   component: ConversationDetailPage,
 })
 
 function ConversationDetailPage() {
+  const { t } = useTranslation()
   const { id } = Route.useParams()
   const { conversations, messages, error, loadMessages, updateMode, sendMessage } = useConversations()
   const [input, setInput] = useState('')
@@ -81,12 +83,12 @@ function ConversationDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border bg-card">
         <div className="flex items-center gap-3">
-          <Link to="/dashboard/conversations" className="text-muted-foreground hover:text-foreground" aria-label="Back to conversations">
+          <Link to="/dashboard/conversations" className="text-muted-foreground hover:text-foreground" aria-label={t('conversation.backToConversations')}>
             <ArrowLeft size={20} />
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-medium text-foreground">{conv?.customerName ?? conv?.customerId ?? 'Customer'}</h3>
+              <h3 className="font-medium text-foreground">{conv?.customerName ?? conv?.customerId ?? t('conversation.defaultCustomer')}</h3>
               <button
                 onClick={() => setShowCustomerInfo(prev => !prev)}
                 className="p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -101,9 +103,9 @@ function ConversationDetailPage() {
               conv?.mode === 'human_takeover' ? 'bg-destructive/10 text-destructive' :
               'bg-amber-500/10 text-amber-600'
             }`}>
-              {conv?.mode === 'auto' ? 'AI Handling' :
-               conv?.mode === 'human_takeover' ? 'You are handling' :
-               conv?.mode ?? 'Unknown'}
+              {conv?.mode === 'auto' ? t('conversation.modeAi') :
+               conv?.mode === 'human_takeover' ? t('conversation.modeYou') :
+               conv?.mode ?? t('conversation.modeUnknown')}
             </span>
           </div>
         </div>
@@ -116,18 +118,18 @@ function ConversationDetailPage() {
                   ? 'bg-destructive text-white hover:bg-destructive/90'
                   : 'bg-amber-500 text-white hover:bg-amber-600'
               }`}
-              aria-label={confirmTakeOver ? 'Confirm take over' : 'Take over this conversation from AI'}
+              aria-label={confirmTakeOver ? t('conversation.takeOver') : t('conversation.takeOverAria')}
             >
-              {confirmTakeOver ? 'Confirm Take Over?' : 'Take Over'}
+              {confirmTakeOver ? `${t('conversation.takeOver')}?` : t('conversation.takeOver')}
             </button>
           )}
           {conv?.mode === 'human_takeover' && (
             <button
               onClick={handleReturnToAuto}
               className="px-3 py-1.5 text-sm bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
-              aria-label="Return conversation to AI"
+              aria-label={t('conversation.returnToAutoAria')}
             >
-              Return to Auto
+              {t('conversation.returnToAuto')}
             </button>
           )}
         </div>
@@ -140,22 +142,22 @@ function ConversationDetailPage() {
             <div className="flex items-center gap-2">
               <Phone size={14} className="text-muted-foreground" />
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Phone</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t('conversation.phone')}</p>
                 <p className="text-sm text-foreground">{conv?.customerId ?? 'N/A'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Globe size={14} className="text-muted-foreground" />
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Language</p>
-                <p className="text-sm text-foreground">{conv?.language === 'es' ? 'Spanish' : conv?.language === 'en' ? 'English' : conv?.language ?? 'Unknown'}</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t('conversation.language')}</p>
+                <p className="text-sm text-foreground">{conv?.language === 'es' ? t('conversations.langSpanish') : conv?.language === 'en' ? t('conversations.langEnglish') : conv?.language ?? 'Unknown'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <CalendarDays size={14} className="text-muted-foreground" />
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Mode</p>
-                <p className="text-sm text-foreground">{conv?.mode === 'auto' ? 'Automated' : conv?.mode === 'human_takeover' ? 'Human' : conv?.mode ?? 'N/A'}</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t('conversation.mode')}</p>
+                <p className="text-sm text-foreground">{conv?.mode === 'auto' ? t('conversation.modeAi') : conv?.mode === 'human_takeover' ? t('conversation.modeYou') : conv?.mode ?? t('conversation.modeUnknown')}</p>
               </div>
             </div>
           </div>
@@ -164,7 +166,7 @@ function ConversationDetailPage() {
             className="inline-flex items-center gap-1 mt-3 text-xs text-primary hover:text-primary/80 hover:underline"
           >
             <CalendarDays size={12} />
-            View all appointments
+            {t('conversation.viewAppointments')}
           </a>
         </div>
       )}
@@ -187,14 +189,14 @@ function ConversationDetailPage() {
             <AlertCircle size={16} aria-hidden="true" />
             {modeError}
           </span>
-          <button onClick={clearModeError} className="text-destructive hover:text-destructive/80 text-xs underline">Dismiss</button>
+          <button onClick={clearModeError} className="text-destructive hover:text-destructive/80 text-xs underline">{t('common.close')}</button>
         </div>
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-auto p-4 space-y-3" role="log" aria-label="Conversation messages" aria-live="polite">
+      <div className="flex-1 overflow-auto p-4 space-y-3" role="log" aria-label={t('conversation.messagesAria')} aria-live="polite">
         {convMessages.length === 0 && !error && (
-          <div className="text-center py-8 text-muted-foreground text-sm">No messages yet</div>
+          <div className="text-center py-8 text-muted-foreground text-sm">{t('conversation.noMessages')}</div>
         )}
         {convMessages.map((msg) => (
           <div
@@ -231,14 +233,14 @@ function ConversationDetailPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Type a message..."
+              placeholder={t('conversation.inputPlaceholder')}
               className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-primary bg-card text-foreground placeholder-muted-foreground"
-              aria-label="Type your message"
+              aria-label={t('conversation.inputAria')}
             />
             <button
               onClick={handleSend}
               className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
-              aria-label="Send message"
+              aria-label={t('conversation.sendAria')}
             >
               <Send size={16} />
             </button>

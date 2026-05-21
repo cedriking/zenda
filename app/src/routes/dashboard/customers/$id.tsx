@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
 import { ArrowLeft, User, Phone, Globe, Brain, Calendar } from 'lucide-react'
 
@@ -18,6 +19,7 @@ interface CustomerProfile {
 }
 
 function CustomerProfilePage() {
+  const { t } = useTranslation()
   const { id } = Route.useParams()
   const [customer, setCustomer] = useState<CustomerProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -36,11 +38,11 @@ function CustomerProfilePage() {
   }
 
   if (loading) {
-    return <div className="p-6 text-muted-foreground">Loading...</div>
+    return <div className="p-6 text-muted-foreground">{t('common.loading')}</div>
   }
 
   if (!customer) {
-    return <div className="p-6 text-muted-foreground">Customer not found</div>
+    return <div className="p-6 text-muted-foreground">{t('customer.notFound')}</div>
   }
 
   return (
@@ -50,7 +52,7 @@ function CustomerProfilePage() {
         className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
       >
         <ArrowLeft size={16} />
-        Back to conversations
+        {t('customer.backToConversations')}
       </Link>
 
       <div className="max-w-2xl">
@@ -62,7 +64,7 @@ function CustomerProfilePage() {
             </div>
             <div>
               <h2 className="text-xl font-bold text-foreground">
-                {customer.name ?? 'Unknown Customer'}
+                {customer.name ?? t('customer.unknownName')}
               </h2>
               <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                 <span className="flex items-center gap-1">
@@ -71,7 +73,7 @@ function CustomerProfilePage() {
                 </span>
                 <span className="flex items-center gap-1">
                   <Globe size={14} />
-                  {customer.language === 'es' ? 'Spanish' : 'English'}
+                  {customer.language === 'es' ? t('customer.langSpanish') : t('customer.langEnglish')}
                 </span>
               </div>
             </div>
@@ -79,16 +81,16 @@ function CustomerProfilePage() {
 
           <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-border">
             <div>
-              <div className="text-sm text-muted-foreground">Total Appointments</div>
+              <div className="text-sm text-muted-foreground">{t('customer.totalAppointments')}</div>
               <div className="text-lg font-semibold flex items-center gap-1">
                 <Calendar size={16} />
                 {customer.totalAppointments}
               </div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">Last Visit</div>
+              <div className="text-sm text-muted-foreground">{t('customer.lastVisit')}</div>
               <div className="text-lg font-semibold">
-                {customer.lastVisit ? new Date(customer.lastVisit).toLocaleDateString() : 'Never'}
+                {customer.lastVisit ? new Date(customer.lastVisit).toLocaleDateString() : t('customer.never')}
               </div>
             </div>
           </div>
@@ -98,16 +100,16 @@ function CustomerProfilePage() {
         <div className="bg-card rounded-lg border border-border p-6">
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
             <Brain size={20} className="text-primary" />
-            What Zenda Knows
+            {t('customer.aiMemoryHeading')}
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Information your AI receptionist has learned about this customer from conversations.
+            {t('customer.aiMemoryDescription')}
           </p>
 
           {customer.memory.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Brain size={32} className="mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No preferences learned yet. They'll appear as conversations happen.</p>
+              <p className="text-sm">{t('customer.aiMemoryEmpty')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -118,7 +120,7 @@ function CustomerProfilePage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm text-foreground">{mem.value}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Source: {mem.source}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t('customer.aiMemorySource', { source: mem.source })}</p>
                   </div>
                 </div>
               ))}

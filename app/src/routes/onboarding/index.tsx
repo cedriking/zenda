@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../services/api-client'
 import { useAuthStore } from '../../stores/auth'
 import { openExternalLink } from '../../actions/shell'
@@ -12,71 +13,51 @@ export const Route = createFileRoute('/onboarding/')({
   component: OnboardingPage,
 })
 
-const STEPS = [
-  { id: 'whatsapp_connected', label: 'Connect WhatsApp', icon: '📱' },
-  { id: 'business_info', label: 'Business Info', icon: '🏢' },
-  { id: 'services', label: 'Services', icon: '✂️' },
-  { id: 'availability', label: 'Availability', icon: '🕐' },
-  { id: 'policies', label: 'Policies', icon: '📋' },
-  { id: 'receptionist_config', label: 'Receptionist Setup', icon: '🤖' },
-  { id: 'plan_selection', label: 'Choose Plan', icon: '🚀' },
-]
+const STEP_IDS = [
+  'whatsapp_connected',
+  'business_info',
+  'services',
+  'availability',
+  'policies',
+  'receptionist_config',
+  'plan_selection',
+] as const
+
+const STEP_ICONS = ['📱', '🏢', '✂️', '🕐', '📋', '🤖', '🚀']
 
 const PLAN_TIERS = [
   {
     id: 'starter' as const,
-    name: 'Starter',
     price: 19,
     originalPrice: 29,
-    desc: 'For solo businesses just getting started',
     icon: Zap,
-    features: [
-      '500 conversations/month',
-      '100 appointments/month',
-      'WhatsApp integration',
-      'Automated reminders',
-      'English & Spanish',
-      '1 staff member',
-    ],
     highlight: false,
   },
   {
     id: 'pro' as const,
-    name: 'Pro',
     price: 49,
     originalPrice: 69,
-    desc: 'For growing businesses with a team',
     icon: Users,
-    features: [
-      '2,000 conversations/month',
-      '500 appointments/month',
-      'Everything in Starter',
-      'Up to 5 staff members',
-      'Voice note transcription',
-      'Priority support',
-      'Knowledge base',
-    ],
     highlight: true,
   },
   {
     id: 'business' as const,
-    name: 'Business',
     price: 99,
     originalPrice: 149,
-    desc: 'For established businesses with high volume',
     icon: Building2,
-    features: [
-      'Unlimited conversations',
-      'Unlimited appointments',
-      'Everything in Pro',
-      'Up to 20 staff members',
-      'API access',
-      'Custom AI training',
-      'Dedicated support',
-    ],
     highlight: false,
   },
 ]
+
+const STEP_KEYS: Record<string, string> = {
+  whatsapp_connected: 'onboarding.steps.connectWhatsapp',
+  business_info: 'onboarding.steps.businessInfo',
+  services: 'onboarding.steps.services',
+  availability: 'onboarding.steps.availability',
+  policies: 'onboarding.steps.policies',
+  receptionist_config: 'onboarding.steps.receptionistSetup',
+  plan_selection: 'onboarding.steps.choosePlan',
+}
 
 interface ChatMessage {
   role: 'assistant' | 'user'
@@ -87,6 +68,7 @@ interface ChatMessage {
 let msgId = 0
 
 function OnboardingPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const [progress, setProgress] = useState(0)
@@ -102,8 +84,13 @@ function OnboardingPage() {
   const typingRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const loadedRef = useRef(false)
 
+  const steps = STEP_IDS.map((id, idx) => ({
+    id,
+    label: t(STEP_KEYS[id] ?? id),
+    icon: STEP_ICONS[idx],
+  }))
+
   useEffect(() => {
-    // Stagger sidebar entrance
     const t = setTimeout(() => setSidebarVisible(true), 200)
     return () => clearTimeout(t)
   }, [])
@@ -135,7 +122,6 @@ function OnboardingPage() {
         onComplete?.()
       }
     }
-    // Brief pause before typing starts
     typingRef.current = setTimeout(tick, 400)
     return () => { if (typingRef.current) clearTimeout(typingRef.current) }
   }, [])
@@ -164,11 +150,10 @@ function OnboardingPage() {
       const q = await apiFetch<{ question: string; step: string }>('/onboarding/question')
       if (q) {
         setCurrentStep(q.step)
-        // Delay typing start for sidebar entrance animation
         setTimeout(() => typeMessage(q.question), 600)
       }
     } catch {
-      setTimeout(() => typeMessage("Hi! Let's set up your AI receptionist. I'll ask a few quick questions."), 600)
+      setTimeout(() => typeMessage(t('onboarding.setupAssistantDesc')), 600)
     }
   }
 
@@ -199,7 +184,6 @@ function OnboardingPage() {
         return
       }
 
-      // Type acknowledgment, then type next question
       typeMessage(result.acknowledged, () => {
         setLoading(false)
         apiFetch<{ question: string; step: string }>('/onboarding/question').then(q => {
@@ -210,7 +194,7 @@ function OnboardingPage() {
       })
       return
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I didn't catch that. Could you try again?", id: ++msgId }])
+      setMessages(prev => [...prev, { role: 'assistant', content: t('common.error'), id: ++msgId }])
     } finally {
       setLoading(false)
     }
@@ -226,7 +210,7 @@ function OnboardingPage() {
 
       setMessages(prev => [
         ...prev,
-        { role: 'user', content: `Selected ${tier.charAt(0).toUpperCase() + tier.slice(1)} plan`, id: ++msgId },
+        { role: 'user', content: t('onboarding.selectPlan') + ': ' + tier.charAt(0).toUpperCase() + tier.slice(1), id: ++msgId },
       ])
 
       setCurrentStep(result.nextStep)
@@ -251,7 +235,7 @@ function OnboardingPage() {
         }
       })
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Something went wrong. You can choose a plan later from your dashboard.', id: ++msgId }])
+      setMessages(prev => [...prev, { role: 'assistant', content: t('common.error'), id: ++msgId }])
     } finally {
       setCheckoutLoading(null)
     }
@@ -265,7 +249,7 @@ function OnboardingPage() {
         body: { step: currentStep, response: 'skip' },
       })
 
-      setMessages(prev => [...prev, { role: 'user', content: 'Skip for now', id: ++msgId }])
+      setMessages(prev => [...prev, { role: 'user', content: t('common.skip'), id: ++msgId }])
       setCurrentStep(result.nextStep)
 
       const status = await apiFetch<{ currentStep: string; progress: number }>('/onboarding/status')
@@ -277,14 +261,13 @@ function OnboardingPage() {
         }
       })
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: "You're all set! Let's get you to your dashboard.", id: ++msgId }])
       setTimeout(() => navigate({ to: '/dashboard' }), 2000)
     } finally {
       setCheckoutLoading(null)
     }
   }
 
-  const currentStepIndex = STEPS.findIndex(s => s.id === currentStep)
+  const currentStepIndex = STEP_IDS.indexOf(currentStep as any)
   const isPlanSelection = currentStep === 'plan_selection'
   const allMessages = [
     ...messages,
@@ -304,13 +287,13 @@ function OnboardingPage() {
             <Sparkles size={20} className="text-white" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-foreground">Setup</h2>
-            <p className="text-xs text-muted-foreground">Your AI receptionist</p>
+            <h2 className="text-lg font-bold text-foreground">{t('onboarding.setupTitle')}</h2>
+            <p className="text-xs text-muted-foreground">{t('onboarding.setupSubtitle')}</p>
           </div>
         </div>
 
         <div className="space-y-1 flex-1">
-          {STEPS.map((step, idx) => {
+          {steps.map((step, idx) => {
             const isComplete = idx < currentStepIndex
             const isCurrent = step.id === currentStep
             return (
@@ -347,7 +330,7 @@ function OnboardingPage() {
         {/* Progress bar */}
         <div className="mt-6 pt-6 border-t border-border">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-muted-foreground">Progress</span>
+            <span className="text-xs font-medium text-muted-foreground">{t('onboarding.progress')}</span>
             <span className="text-xs font-bold text-primary">{progress}%</span>
           </div>
           <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
@@ -368,8 +351,8 @@ function OnboardingPage() {
               <MessageSquare size={16} className="text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground text-sm">Setup Assistant</h3>
-              <p className="text-xs text-muted-foreground">Answer a few questions to configure your AI receptionist</p>
+              <h3 className="font-semibold text-foreground text-sm">{t('onboarding.setupAssistant')}</h3>
+              <p className="text-xs text-muted-foreground">{t('onboarding.setupAssistantDesc')}</p>
             </div>
           </div>
         </div>
@@ -411,6 +394,8 @@ function ChatView({
   onSubmit: (e: React.FormEvent) => void
   chatEndRef: React.RefObject<HTMLDivElement | null>
 }) {
+  const { t } = useTranslation()
+
   return (
     <>
       <div className="flex-1 overflow-auto px-6 py-6 space-y-4">
@@ -441,7 +426,7 @@ function ChatView({
             type="text"
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder="Type your answer..."
+            placeholder={t('onboarding.typeAnswer')}
             disabled={loading || isTyping}
             className="flex-1 px-4 py-3 bg-muted border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring/40 focus:border-primary text-sm placeholder:text-muted-foreground transition-all duration-200"
           />
@@ -494,9 +479,39 @@ function PlanSelectionView({
   onSkip: () => void
   chatEndRef: React.RefObject<HTMLDivElement | null>
 }) {
+  const { t } = useTranslation()
+
+  const planFeatures: Record<string, string[]> = {
+    starter: [
+      t('onboarding.plans.starter.features.conversations'),
+      t('onboarding.plans.starter.features.appointments'),
+      t('onboarding.plans.starter.features.whatsapp'),
+      t('onboarding.plans.starter.features.reminders'),
+      t('onboarding.plans.starter.features.languages'),
+      t('onboarding.plans.starter.features.staff'),
+    ],
+    pro: [
+      t('onboarding.plans.pro.features.conversations'),
+      t('onboarding.plans.pro.features.appointments'),
+      t('onboarding.plans.pro.features.everythingStarter'),
+      t('onboarding.plans.pro.features.staff'),
+      t('onboarding.plans.pro.features.voice'),
+      t('onboarding.plans.pro.features.support'),
+      t('onboarding.plans.pro.features.knowledge'),
+    ],
+    business: [
+      t('onboarding.plans.business.features.conversations'),
+      t('onboarding.plans.business.features.appointments'),
+      t('onboarding.plans.business.features.everythingPro'),
+      t('onboarding.plans.business.features.staff'),
+      t('onboarding.plans.business.features.api'),
+      t('onboarding.plans.business.features.training'),
+      t('onboarding.plans.business.features.support'),
+    ],
+  }
+
   return (
     <div className="flex-1 overflow-auto px-6 py-6 space-y-6">
-      {/* Chat messages */}
       {messages.map(msg => (
         <MessageBubble key={msg.id} msg={msg} />
       ))}
@@ -505,7 +520,7 @@ function PlanSelectionView({
       <div className="flex justify-center" style={{ animation: 'fadeSlideIn 0.5s ease-out 0.2s both' }}>
         <span className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-50 to-orange-50 text-amber-800 px-5 py-2.5 rounded-full text-sm font-semibold border border-amber-200/60 shadow-sm">
           <Sparkles size={14} className="text-amber-500" />
-          Founding Member Pricing — Limited Time
+          {t('onboarding.foundingPricing')}
         </span>
       </div>
 
@@ -517,6 +532,11 @@ function PlanSelectionView({
         {PLAN_TIERS.map((plan, idx) => {
           const Icon = plan.icon
           const isCheckingOut = checkoutLoading === plan.id
+          const planKey = plan.id
+          const name = t(`onboarding.plans.${planKey}.name`)
+          const desc = t(`onboarding.plans.${planKey}.desc`)
+          const features = planFeatures[planKey] ?? []
+
           return (
             <div
               key={plan.id}
@@ -529,25 +549,25 @@ function PlanSelectionView({
             >
               {plan.highlight && (
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-1 rounded-full text-xs font-semibold shadow-lg shadow-emerald-500/30">
-                  Most Popular
+                  {t('onboarding.mostPopular')}
                 </div>
               )}
               <div className="flex items-center gap-2.5 mb-2">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${plan.highlight ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
                   <Icon size={18} />
                 </div>
-                <h4 className="text-lg font-bold text-foreground">{plan.name}</h4>
+                <h4 className="text-lg font-bold text-foreground">{name}</h4>
               </div>
-              <p className="text-xs text-muted-foreground mb-4">{plan.desc}</p>
+              <p className="text-xs text-muted-foreground mb-4">{desc}</p>
               <div className="mb-5">
                 <span className="text-3xl font-extrabold text-foreground">${plan.price}</span>
-                <span className="text-muted-foreground text-sm">/month</span>
+                <span className="text-muted-foreground text-sm">{t('plan.perMonth')}</span>
                 {plan.originalPrice && (
                   <span className="ml-2 text-sm text-muted-foreground line-through">${plan.originalPrice}</span>
                 )}
               </div>
               <ul className="space-y-2 mb-6">
-                {plan.features.map(f => (
+                {features.map(f => (
                   <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground">
                     <span className="text-emerald-400 mt-0.5 flex-shrink-0">&#10003;</span>
                     {f}
@@ -566,11 +586,11 @@ function PlanSelectionView({
                 {isCheckingOut ? (
                   <span className="flex items-center gap-2">
                     <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    Processing...
+                    {t('onboarding.processing')}
                   </span>
                 ) : (
                   <>
-                    Select Plan
+                    {t('onboarding.selectPlan')}
                     <ArrowRight size={14} />
                   </>
                 )}
@@ -593,10 +613,10 @@ function PlanSelectionView({
           {checkoutLoading === 'skip' ? (
             <span className="flex items-center gap-2">
               <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              Setting up free trial...
+              {t('onboarding.settingUp')}
             </span>
           ) : (
-            'Skip for now — start with free trial'
+            t('onboarding.skipForNow')
           )}
         </button>
       </div>

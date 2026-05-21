@@ -37,6 +37,7 @@
     "date-fns": "^4.1.0",
     "electron-squirrel-startup": "^1.0.1",
     "i18next": "^26.0.3",
+    "i18next-browser-languagedetector": "^8.2.1",
     "lucide-react": "^1.7.0",
     "pino": "^10.3.1",
     "radix-ui": "^1.4.3",

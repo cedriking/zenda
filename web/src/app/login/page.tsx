@@ -32,7 +32,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pt-16">
       <Nav variant="simple" />
 
       <main className="flex-1 flex items-center justify-center px-6">

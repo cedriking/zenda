@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function DocsPage() {
   return (
-    <div className="min-h-screen bg-neutral-200">
+    <div className="min-h-screen bg-neutral-200 pt-16">
       <Nav variant="simple" />
 
       <main className="bg-white rounded-b-[2rem] shadow-2xl">

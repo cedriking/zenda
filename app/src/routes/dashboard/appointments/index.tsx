@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAppointments } from '../../../hooks/use-appointments'
 import { apiFetch } from '../../../services/api-client'
 import { Calendar, Clock, User, AlertCircle, ChevronLeft, ChevronRight, Plus, X, Search } from 'lucide-react'
@@ -18,30 +19,37 @@ const STATUS_COLORS: Record<string, string> = {
   needs_attention: 'bg-amber-100 text-amber-700',
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  pending_confirmation: 'Pending',
-  confirmed: 'Confirmed',
-  cancelled: 'Cancelled',
-  completed: 'Completed',
-  no_show: 'No Show',
-  rescheduled: 'Rescheduled',
-  needs_attention: 'Attention',
-  requested: 'Requested',
-  reminder_sent: 'Reminder Sent',
-  client_confirmed: 'Confirmed by Client',
+function getStatusLabels(t: (key: string) => string): Record<string, string> {
+  return {
+    pending_confirmation: t('status.pending'),
+    confirmed: t('status.confirmed'),
+    cancelled: t('status.cancelled'),
+    completed: t('status.completed'),
+    no_show: t('status.noShow'),
+    rescheduled: t('status.rescheduled'),
+    needs_attention: t('status.attention'),
+    requested: t('status.requested'),
+    reminder_sent: t('status.reminderSent'),
+    client_confirmed: t('status.clientConfirmed'),
+  }
 }
 
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 7) // 7 AM to 10 PM
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-const STATUS_FILTERS = [
-  { id: 'all', label: 'All' },
-  { id: 'confirmed', label: 'Confirmed' },
-  { id: 'pending_confirmation', label: 'Pending' },
-  { id: 'cancelled', label: 'Cancelled' },
-  { id: 'completed', label: 'Completed' },
-  { id: 'no_show', label: 'No-show' },
-] as const
+function getDaysShort(t: (key: string) => string): string[] {
+  return [t('daysShort.sun'), t('daysShort.mon'), t('daysShort.tue'), t('daysShort.wed'), t('daysShort.thu'), t('daysShort.fri'), t('daysShort.sat')]
+}
+
+function getStatusFilters(t: (key: string) => string) {
+  return [
+    { id: 'all', label: t('conversations.all') },
+    { id: 'confirmed', label: t('appointments.confirmed') },
+    { id: 'pending_confirmation', label: t('appointments.pending') },
+    { id: 'cancelled', label: t('appointments.cancelled') },
+    { id: 'completed', label: t('appointments.completed') },
+    { id: 'no_show', label: t('appointments.noShow') },
+  ] as const
+}
 
 function formatHour(hour: number): string {
   if (hour === 0) return '12 AM'
@@ -51,6 +59,7 @@ function formatHour(hour: number): string {
 }
 
 function AppointmentsPage() {
+  const { t } = useTranslation()
   const { appointments, isLoading, error, loadAppointments } = useAppointments()
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [view, setView] = useState<'calendar' | 'list'>('calendar')
@@ -95,6 +104,20 @@ function AppointmentsPage() {
 
   const today = new Date().toISOString().split('T')[0]
 
+  // Filtered appointments based on search and status
+  const filteredAppointments = useMemo(() => {
+    return appointments.filter(apt => {
+      const matchesStatus = statusFilter === 'all' || apt.status === statusFilter
+      if (!matchesStatus) return false
+      if (!searchQuery.trim()) return true
+      const query = searchQuery.toLowerCase()
+      return (
+        (apt.customerName ?? '').toLowerCase().includes(query) ||
+        (apt.serviceName ?? '').toLowerCase().includes(query)
+      )
+    })
+  }, [appointments, statusFilter, searchQuery])
+
   // Group appointments by date and hour for calendar view
   const appointmentsByDateHour = useMemo(() => {
     const map = new Map<string, typeof appointments>()
@@ -113,24 +136,12 @@ function AppointmentsPage() {
     return filteredAppointments.filter(apt => apt.startAt.startsWith(dateStr))
   }, [filteredAppointments, selectedDate])
 
-  // Filtered appointments based on search and status
-  const filteredAppointments = useMemo(() => {
-    return appointments.filter(apt => {
-      const matchesStatus = statusFilter === 'all' || apt.status === statusFilter
-      if (!matchesStatus) return false
-      if (!searchQuery.trim()) return true
-      const query = searchQuery.toLowerCase()
-      return (
-        (apt.customerName ?? '').toLowerCase().includes(query) ||
-        (apt.serviceName ?? '').toLowerCase().includes(query)
-      )
-    })
-  }, [appointments, statusFilter, searchQuery])
+  const statusFilters = getStatusFilters(t)
 
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-foreground">Calendar</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t('calendar.heading')}</h2>
         <div className="flex items-center gap-3">
           <div className="flex border border-border rounded-lg overflow-hidden">
             <button
@@ -138,14 +149,14 @@ function AppointmentsPage() {
               className={`px-3 py-1.5 text-sm ${view === 'calendar' ? 'bg-primary text-white' : 'bg-card text-foreground'}`}
               aria-label="Calendar view"
             >
-              Week
+              {t('calendar.viewWeek')}
             </button>
             <button
               onClick={() => setView('list')}
               className={`px-3 py-1.5 text-sm ${view === 'list' ? 'bg-primary text-white' : 'bg-card text-foreground'}`}
               aria-label="List view"
             >
-              List
+              {t('calendar.viewList')}
             </button>
           </div>
           <button
@@ -154,7 +165,7 @@ function AppointmentsPage() {
             aria-label="Create new appointment"
           >
             <Plus size={16} />
-            New
+            {t('calendar.newButton')}
           </button>
         </div>
       </div>
@@ -163,7 +174,7 @@ function AppointmentsPage() {
         <div className="mb-4 rounded-lg bg-destructive/10 border border-destructive/30 p-3 text-sm text-destructive flex items-center gap-2" role="alert">
           <AlertCircle size={16} />
           {error}
-          <button onClick={() => loadAppointments()} className="ml-2 underline">Retry</button>
+          <button onClick={() => loadAppointments()} className="ml-2 underline">{t('common.retry')}</button>
         </div>
       )}
 
@@ -174,7 +185,7 @@ function AppointmentsPage() {
             <ChevronLeft size={20} />
           </button>
           <button onClick={goToday} className="px-3 py-1 text-sm border border-border rounded-lg hover:bg-muted">
-            Today
+            {t('calendar.today')}
           </button>
           <button onClick={nextWeek} className="p-1 hover:bg-muted rounded" aria-label="Next week">
             <ChevronRight size={20} />
@@ -193,12 +204,12 @@ function AppointmentsPage() {
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search by customer or service name..."
+            placeholder={t('conversations.searchPlaceholder')}
             className="w-full pl-9 pr-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary bg-card text-foreground placeholder-muted-foreground/50"
           />
         </div>
         <div className="flex flex-wrap gap-2">
-          {STATUS_FILTERS.map(f => (
+          {statusFilters.map(f => (
             <button
               key={f.id}
               onClick={() => setStatusFilter(f.id)}
@@ -259,18 +270,22 @@ function CalendarWeekView({
   appointmentsByDate: Map<string, any[]>
   today: string
 }) {
+  const { t } = useTranslation()
+  const days = getDaysShort(t)
+  const statusLabels = getStatusLabels(t)
+
   return (
     <div className="bg-card rounded-lg border border-border overflow-auto">
       <table className="w-full min-w-[700px]" role="grid" aria-label="Weekly calendar">
         <thead>
           <tr className="border-b border-border">
-            <th className="w-16 p-2 text-xs text-muted-foreground/50 text-left" scope="col">Time</th>
+            <th className="w-16 p-2 text-xs text-muted-foreground/50 text-left" scope="col">{t('calendar.time')}</th>
             {weekDays.map(day => {
               const dateStr = day.toISOString().split('T')[0]
               const isToday = dateStr === today
               return (
                 <th key={dateStr} className={`p-2 text-center text-xs font-medium ${isToday ? 'text-primary bg-primary/10' : 'text-muted-foreground'}`} scope="col">
-                  <div>{DAYS[day.getDay()]}</div>
+                  <div>{days[day.getDay()]}</div>
                   <div className={`text-lg ${isToday ? 'font-bold' : ''}`}>{day.getDate()}</div>
                 </th>
               )
@@ -297,9 +312,9 @@ function CalendarWeekView({
                           apt.status === 'cancelled' ? 'bg-destructive/10 text-destructive line-through' :
                           'bg-primary/10 text-primary'
                         }`}
-                        title={`${apt.customerName ?? apt.customerId} — ${apt.serviceName ?? apt.serviceId} (${STATUS_LABELS[apt.status] ?? apt.status})`}
+                        title={`${apt.customerName ?? apt.customerId} — ${apt.serviceName ?? apt.serviceId} (${statusLabels[apt.status] ?? apt.status})`}
                       >
-                        {new Date(apt.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {apt.customerName ?? 'Customer'}
+                        {new Date(apt.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {apt.customerName ?? t('calendar.customer')}
                       </div>
                     ))}
                   </td>
@@ -314,14 +329,16 @@ function CalendarWeekView({
 }
 
 function ListView({ appointments, selectedDate }: { appointments: any[]; selectedDate: Date }) {
+  const { t } = useTranslation()
+  const statusLabels = getStatusLabels(t)
 
   return (
     <div className="space-y-2">
       {appointments.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <Calendar size={48} className="mx-auto mb-4 opacity-50" />
-          <p>No appointments for {selectedDate.toLocaleDateString()}</p>
-          <p className="text-sm">Appointments will appear when the AI books them.</p>
+          <p>{t('calendar.noAppointmentsForDate', { date: selectedDate.toLocaleDateString() })}</p>
+          <p className="text-sm">{t('calendar.appointmentsWillAppear')}</p>
         </div>
       ) : (
         appointments.map((apt) => (
@@ -345,7 +362,7 @@ function ListView({ appointments, selectedDate }: { appointments: any[]; selecte
               </div>
             </div>
             <span className={`text-xs px-2 py-1 rounded-full ${STATUS_COLORS[apt.status] ?? 'bg-muted text-muted-foreground'}`}>
-              {STATUS_LABELS[apt.status] ?? apt.status.replace(/_/g, ' ')}
+              {statusLabels[apt.status] ?? apt.status.replace(/_/g, ' ')}
             </span>
           </div>
         ))
@@ -355,6 +372,7 @@ function ListView({ appointments, selectedDate }: { appointments: any[]; selecte
 }
 
 function CreateAppointmentModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const { t } = useTranslation()
   const [form, setForm] = useState({
     customerName: '',
     customerPhone: '',
@@ -391,7 +409,7 @@ function CreateAppointmentModal({ onClose, onCreated }: { onClose: () => void; o
       })
       onCreated()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create appointment')
+      setError(err instanceof Error ? err.message : t('calendar.errorCreate'))
     } finally {
       setSaving(false)
     }
@@ -401,8 +419,8 @@ function CreateAppointmentModal({ onClose, onCreated }: { onClose: () => void; o
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
       <div className="bg-card rounded-xl w-full max-w-md p-6 shadow-xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-foreground">New Appointment</h3>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+          <h3 className="text-lg font-semibold text-foreground">{t('calendar.newAppointment')}</h3>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label={t('common.close')}>
             <X size={20} />
           </button>
         </div>
@@ -415,29 +433,29 @@ function CreateAppointmentModal({ onClose, onCreated }: { onClose: () => void; o
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Customer Name</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('calendar.customerName')}</label>
             <input
               type="text"
               value={form.customerName}
               onChange={e => setForm({ ...form, customerName: e.target.value })}
               required
               className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-muted text-foreground"
-              placeholder="e.g., Maria Garcia"
+              placeholder={t('calendar.customerNamePlaceholder')}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Phone (optional)</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('calendar.phone')}</label>
             <input
               type="tel"
               value={form.customerPhone}
               onChange={e => setForm({ ...form, customerPhone: e.target.value })}
               className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-muted text-foreground"
-              placeholder="+52 55 1234 5678"
+              placeholder={t('calendar.phonePlaceholder')}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Date</label>
+              <label className="block text-sm font-medium text-foreground mb-1">{t('calendar.date')}</label>
               <input
                 type="date"
                 value={form.date}
@@ -447,7 +465,7 @@ function CreateAppointmentModal({ onClose, onCreated }: { onClose: () => void; o
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Time</label>
+              <label className="block text-sm font-medium text-foreground mb-1">{t('calendar.timeField')}</label>
               <input
                 type="time"
                 value={form.startTime}
@@ -458,26 +476,26 @@ function CreateAppointmentModal({ onClose, onCreated }: { onClose: () => void; o
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Service</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('calendar.service')}</label>
             <select
               value={form.serviceId}
               onChange={e => setForm({ ...form, serviceId: e.target.value })}
               className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-muted text-foreground"
             >
-              <option value="">Select a service</option>
+              <option value="">{t('calendar.servicePlaceholder')}</option>
               {services.map(s => (
                 <option key={s.id} value={s.id}>{s.name} ({s.durationMinutes} min)</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Notes (optional)</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('calendar.notes')}</label>
             <textarea
               value={form.notes}
               onChange={e => setForm({ ...form, notes: e.target.value })}
               rows={2}
               className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-muted text-foreground"
-              placeholder="Any additional notes"
+              placeholder={t('calendar.notesPlaceholder')}
             />
           </div>
           <div className="flex gap-2 pt-2">
@@ -486,14 +504,14 @@ function CreateAppointmentModal({ onClose, onCreated }: { onClose: () => void; o
               disabled={saving}
               className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 text-sm font-medium"
             >
-              {saving ? 'Creating...' : 'Create Appointment'}
+              {saving ? t('calendar.creatingButton') : t('calendar.createButton')}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="px-4 py-2 border border-border rounded-lg hover:bg-muted text-sm text-foreground"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </form>

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pt-16">
       <Nav variant="simple" />
       <article className="flex-1 max-w-3xl mx-auto px-6 py-12 prose prose-slate">
         <h1>Privacy Policy</h1>

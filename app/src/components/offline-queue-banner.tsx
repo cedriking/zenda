@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../services/api-client'
 import { WifiOff, Send, Eye, Trash2, RefreshCw } from 'lucide-react'
 
@@ -8,6 +9,7 @@ interface QueueStats {
 }
 
 export function OfflineQueueBanner() {
+  const { t } = useTranslation()
   const [stats, setStats] = useState<QueueStats | null>(null)
   const [showPanel, setShowPanel] = useState(false)
   const [sending, setSending] = useState(false)
@@ -54,56 +56,53 @@ export function OfflineQueueBanner() {
           className="flex items-center gap-2 bg-amber-500 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-amber-600"
         >
           <WifiOff size={16} />
-          {stats.offlineQueue.total} queued messages
+          {t('offlineQueue.queuedMessages', { count: stats.offlineQueue.total })}
         </button>
       ) : (
-        <div className="bg-white rounded-lg shadow-xl border border-gray-200 w-80">
-          <div className="p-4 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                <WifiOff size={16} className="text-amber-500" />
-                Offline Queue
-              </h3>
-              <button onClick={() => setShowPanel(false)} className="text-gray-400 hover:text-gray-600 text-lg">&times;</button>
-            </div>
-            <p className="text-xs text-gray-500 mt-1">
-              {stats.offlineQueue.total} messages waiting to be sent
-            </p>
+        <div className="bg-white border border-amber-300 rounded-lg shadow-xl p-4 w-80 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-amber-800">{t('offlineQueue.title')}</h3>
+            <button onClick={() => setShowPanel(false)} className="text-amber-600 hover:text-amber-800 text-lg leading-none">&times;</button>
           </div>
 
-          <div className="p-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Ready to send</span>
-              <span className="font-medium">{stats.offlineQueue.unsafe}</span>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">{t('offlineQueue.messagesWaiting', { count: stats.offlineQueue.total })}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Drafts</span>
-              <span className="font-medium">{stats.offlineQueue.safe}</span>
-            </div>
+
             {stats.retryQueue.pending > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Retrying</span>
-                <span className="font-medium text-amber-600">{stats.retryQueue.pending}</span>
+              <div className="flex items-center gap-2 text-amber-600">
+                <RefreshCw size={14} className="animate-spin" />
+                {t('offlineQueue.retrying')} ({stats.retryQueue.pending})
               </div>
             )}
+
+            <div className="flex gap-2 text-xs pt-1">
+              <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded">{t('offlineQueue.readyToSend')}: {stats.offlineQueue.safe}</span>
+              {stats.offlineQueue.unsafe > 0 && (
+                <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded">{t('offlineQueue.drafts')}: {stats.offlineQueue.unsafe}</span>
+              )}
+            </div>
           </div>
 
-          <div className="p-4 border-t border-gray-100 flex gap-2">
+          <div className="flex gap-2">
             <button
               onClick={flushQueue}
               disabled={sending}
-              className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-amber-500 text-white rounded text-sm hover:bg-amber-600 disabled:opacity-50"
             >
               <Send size={14} />
-              {sending ? 'Sending...' : 'Send All'}
+              {sending ? t('offlineQueue.sending') : t('offlineQueue.sendAll')}
             </button>
-            <button
-              onClick={clearQueue}
-              className="flex items-center gap-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
-            >
-              <Trash2 size={14} />
-              Clear
-            </button>
+            {stats.offlineQueue.unsafe > 0 && (
+              <button
+                onClick={clearQueue}
+                className="flex items-center gap-1 px-3 py-1.5 border border-red-300 text-red-600 rounded text-sm hover:bg-red-50"
+              >
+                <Trash2 size={14} />
+                {t('offlineQueue.clear')}
+              </button>
+            )}
           </div>
         </div>
       )}

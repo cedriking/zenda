@@ -1,7 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
 import { Settings as SettingsIcon, Building2, Bot, Clock, Wrench, AlertCircle, Eye } from 'lucide-react'
+import LangToggle from '@/components/lang-toggle'
 
 export const Route = createFileRoute('/dashboard/settings/')({
   component: SettingsPage,
@@ -10,6 +12,7 @@ export const Route = createFileRoute('/dashboard/settings/')({
 type TabId = 'business' | 'receptionist' | 'services' | 'availability'
 
 function SettingsPage() {
+  const { t } = useTranslation()
   const [tab, setTab] = useState<TabId>('business')
   const [businessProfile, setBusinessProfile] = useState<Record<string, any>>({})
   const [receptionistProfile, setReceptionistProfile] = useState<Record<string, any>>({})
@@ -33,22 +36,22 @@ function SettingsPage() {
         setLastSavedBusiness(biz as any)
         setLastSavedReceptionist(rec as any)
       } catch (err) {
-        setLoadError(err instanceof Error ? err.message : 'Failed to load settings')
+        setLoadError(err instanceof Error ? err.message : t('settings.errorLoad'))
       }
     }
     load()
-  }, [])
+  }, [t])
 
   const handleSave = async (endpoint: string, data: Record<string, any>) => {
     if (endpoint === '/business/profile') {
       if (!data.name?.trim()) {
-        setSaveError('Business name is required')
+        setSaveError(t('settings.businessName') + ' is required')
         return
       }
     }
     if (endpoint === '/business/receptionist') {
       if (!data.name?.trim()) {
-        setSaveError('Receptionist name is required')
+        setSaveError(t('settings.receptionistName') + ' is required')
         return
       }
     }
@@ -72,7 +75,7 @@ function SettingsPage() {
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to save'
+      const message = err instanceof Error ? err.message : t('settings.errorSave')
       setSaveError(message)
 
       if (endpoint === '/business/profile' && lastSavedBusiness) {
@@ -86,10 +89,10 @@ function SettingsPage() {
   }
 
   const tabs = [
-    { id: 'business' as const, label: 'Business', icon: <Building2 size={16} /> },
-    { id: 'receptionist' as const, label: 'Receptionist', icon: <Bot size={16} /> },
-    { id: 'services' as const, label: 'Services', icon: <Wrench size={16} /> },
-    { id: 'availability' as const, label: 'Availability', icon: <Clock size={16} /> },
+    { id: 'business' as const, label: t('settings.tabBusiness'), icon: <Building2 size={16} /> },
+    { id: 'receptionist' as const, label: t('settings.tabReceptionist'), icon: <Bot size={16} /> },
+    { id: 'services' as const, label: t('settings.tabServices'), icon: <Wrench size={16} /> },
+    { id: 'availability' as const, label: t('settings.tabAvailability'), icon: <Clock size={16} /> },
   ]
 
   const handleTabKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -117,7 +120,10 @@ function SettingsPage() {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-foreground mb-6">Settings</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-foreground">{t('settings.heading')}</h2>
+        <LangToggle />
+      </div>
 
       {loadError && (
         <div className="mb-4 rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive flex items-center gap-2">
@@ -153,14 +159,14 @@ function SettingsPage() {
       )}
       {saveSuccess && (
         <div className="mb-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm text-emerald-600">
-          Settings saved successfully.
+          {t('settings.saved')}
         </div>
       )}
 
       {tab === 'business' && (
         <div id="panel-business" role="tabpanel" aria-labelledby="tab-business" className="bg-card rounded-lg border border-border p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Business Name</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('settings.businessName')}</label>
             <input
               type="text"
               value={businessProfile.name ?? ''}
@@ -169,22 +175,22 @@ function SettingsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Category</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('settings.category')}</label>
             <select
               value={businessProfile.category ?? 'other'}
               onChange={(e) => setBusinessProfile({ ...businessProfile, category: e.target.value })}
               className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary bg-card text-foreground"
             >
-              <option value="beauty">Beauty</option>
-              <option value="wellness">Wellness</option>
-              <option value="health">Health</option>
-              <option value="coaching">Coaching</option>
-              <option value="fitness">Fitness</option>
-              <option value="other">Other</option>
+              <option value="beauty">{t('settings.categoryBeauty')}</option>
+              <option value="wellness">{t('settings.categoryWellness')}</option>
+              <option value="health">{t('settings.categoryHealth')}</option>
+              <option value="coaching">{t('settings.categoryCoaching')}</option>
+              <option value="fitness">{t('settings.categoryFitness')}</option>
+              <option value="other">{t('settings.categoryOther')}</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Location</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('settings.location')}</label>
             <input
               type="text"
               value={businessProfile.location ?? ''}
@@ -193,17 +199,17 @@ function SettingsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Description</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('settings.description')}</label>
             <textarea
               value={businessProfile.description ?? ''}
               onChange={(e) => setBusinessProfile({ ...businessProfile, description: e.target.value })}
               className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary bg-card text-foreground"
               rows={3}
-              placeholder="Brief description of your business"
+              placeholder={t('settings.descriptionPlaceholder')}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Cancellation Policy</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('settings.cancellationPolicy')}</label>
             <textarea
               value={businessProfile.cancellationPolicy ?? ''}
               onChange={(e) => setBusinessProfile({ ...businessProfile, cancellationPolicy: e.target.value })}
@@ -216,7 +222,7 @@ function SettingsPage() {
             disabled={saving}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
           >
-            {saving ? 'Saving...' : 'Save Business Profile'}
+            {saving ? t('common.saving') : t('settings.saveProfile')}
           </button>
         </div>
       )}
@@ -224,7 +230,7 @@ function SettingsPage() {
       {tab === 'receptionist' && (
         <div id="panel-receptionist" role="tabpanel" aria-labelledby="tab-receptionist" className="bg-card rounded-lg border border-border p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Receptionist Name</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('settings.receptionistName')}</label>
             <input
               type="text"
               value={receptionistProfile.name ?? ''}
@@ -233,27 +239,27 @@ function SettingsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Tone</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('settings.tone')}</label>
             <select
               value={receptionistProfile.tone ?? 'professional'}
               onChange={(e) => setReceptionistProfile({ ...receptionistProfile, tone: e.target.value })}
               className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary bg-card text-foreground"
             >
-              <option value="professional">Professional</option>
-              <option value="warm">Warm</option>
-              <option value="friendly">Friendly</option>
-              <option value="elegant">Elegant</option>
-              <option value="casual">Casual</option>
+              <option value="professional">{t('settings.toneProfessional')}</option>
+              <option value="warm">{t('settings.toneWarm')}</option>
+              <option value="friendly">{t('settings.toneFriendly')}</option>
+              <option value="elegant">{t('settings.toneElegant')}</option>
+              <option value="casual">{t('settings.toneCasual')}</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Greeting Template</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('settings.greetingTemplate')}</label>
             <textarea
               value={receptionistProfile.greetingTemplate ?? ''}
               onChange={(e) => setReceptionistProfile({ ...receptionistProfile, greetingTemplate: e.target.value })}
               className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary bg-card text-foreground"
               rows={3}
-              placeholder="Hi! I'm {name}, the assistant for {business}. How can I help?"
+              placeholder={t('settings.greetingPlaceholder')}
             />
           </div>
           <button
@@ -261,7 +267,7 @@ function SettingsPage() {
             disabled={saving}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
           >
-            {saving ? 'Saving...' : 'Save Receptionist Settings'}
+            {saving ? t('common.saving') : t('settings.saveReceptionist')}
           </button>
         </div>
       )}
@@ -283,6 +289,7 @@ function SettingsPage() {
 // --- Services CRUD ---
 
 function ServicesManager() {
+  const { t } = useTranslation()
   const [services, setServices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -299,7 +306,7 @@ function ServicesManager() {
       const data = await apiFetch<any[]>('/services')
       setServices(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load services')
+      setError(err instanceof Error ? err.message : t('services.errorLoad'))
     } finally {
       setIsLoading(false)
     }
@@ -325,17 +332,17 @@ function ServicesManager() {
       setEditingId(null)
       loadServices()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save service')
+      setError(err instanceof Error ? err.message : t('services.errorSave'))
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this service?')) return
+    if (!confirm(t('services.confirmDelete'))) return
     try {
       await apiFetch(`/services/${id}`, { method: 'DELETE' })
       setServices(prev => prev.filter(s => s.id !== id))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete service')
+      setError(err instanceof Error ? err.message : t('services.errorDelete'))
     }
   }
 
@@ -368,13 +375,13 @@ function ServicesManager() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-foreground">Services</h3>
+        <h3 className="text-lg font-semibold text-foreground">{t('services.heading')}</h3>
         {!showForm && (
           <button
             onClick={() => { setShowForm(true); setEditingId(null) }}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-sm"
           >
-            Add Service
+            {t('services.addService')}
           </button>
         )}
       </div>
@@ -385,21 +392,21 @@ function ServicesManager() {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="bg-card rounded-lg border border-border p-6 mb-6 space-y-4">
-          <h4 className="font-medium text-foreground">{editingId ? 'Edit Service' : 'Add Service'}</h4>
+          <h4 className="font-medium text-foreground">{editingId ? t('services.editService') : t('services.addService')}</h4>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Name</label>
+              <label className="block text-sm font-medium text-foreground mb-1">{t('services.name')}</label>
               <input
                 type="text"
                 value={form.name}
                 onChange={e => setForm({ ...form, name: e.target.value })}
                 required
-                placeholder="e.g., Haircut"
+                placeholder={t('services.namePlaceholder')}
                 className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary bg-card text-foreground"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Duration (min)</label>
+              <label className="block text-sm font-medium text-foreground mb-1">{t('services.duration')}</label>
               <input
                 type="number"
                 value={form.durationMinutes}
@@ -411,31 +418,31 @@ function ServicesManager() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Description (optional)</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('services.descriptionField')}</label>
             <input
               type="text"
               value={form.description}
               onChange={e => setForm({ ...form, description: e.target.value })}
-              placeholder="Brief description"
+              placeholder={t('services.descriptionPlaceholder')}
               className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary bg-card text-foreground"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Price ($)</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('services.price')}</label>
             <input
               type="text"
               value={form.priceCents}
               onChange={e => setForm({ ...form, priceCents: e.target.value })}
-              placeholder="e.g., 25.00"
+              placeholder={t('services.pricePlaceholder')}
               className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary bg-card text-foreground"
             />
           </div>
           <div className="flex gap-2">
             <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-sm">
-              {editingId ? 'Update Service' : 'Add Service'}
+              {editingId ? t('services.updateService') : t('services.addService')}
             </button>
             <button type="button" onClick={cancelForm} className="px-4 py-2 border border-input rounded-lg hover:bg-muted text-sm text-foreground">
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
 
@@ -468,8 +475,8 @@ function ServicesManager() {
       ) : services.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           <Wrench size={36} className="mx-auto mb-3 opacity-50" />
-          <p>No services yet</p>
-          <p className="text-sm">Add services so your AI receptionist can offer them to customers.</p>
+          <p>{t('services.empty')}</p>
+          <p className="text-sm">{t('services.emptyHint')}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -483,8 +490,8 @@ function ServicesManager() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => startEdit(svc)} className="text-sm text-primary hover:text-primary/80">Edit</button>
-                <button onClick={() => handleDelete(svc.id)} className="text-sm text-destructive hover:text-destructive/80">Delete</button>
+                <button onClick={() => startEdit(svc)} className="text-sm text-primary hover:text-primary/80">{t('common.edit')}</button>
+                <button onClick={() => handleDelete(svc.id)} className="text-sm text-destructive hover:text-destructive/80">{t('common.delete')}</button>
               </div>
             </div>
           ))}
@@ -496,9 +503,10 @@ function ServicesManager() {
 
 // --- Availability Manager ---
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const DAY_KEYS = ['daysFull.0', 'daysFull.1', 'daysFull.2', 'daysFull.3', 'daysFull.4', 'daysFull.5', 'daysFull.6']
 
 function AvailabilityManager() {
+  const { t } = useTranslation()
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -514,7 +522,7 @@ function AvailabilityManager() {
       const data = await apiFetch<any[]>('/availability')
       setRules(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load availability')
+      setError(err instanceof Error ? err.message : t('availability.errorLoad'))
     } finally {
       setIsLoading(false)
     }
@@ -536,7 +544,7 @@ function AvailabilityManager() {
       setShowForm(false)
       loadRules()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save availability rule')
+      setError(err instanceof Error ? err.message : t('availability.errorSave'))
     }
   }
 
@@ -545,7 +553,7 @@ function AvailabilityManager() {
       await apiFetch(`/availability/${id}`, { method: 'DELETE' })
       setRules(prev => prev.filter(r => r.id !== id))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete rule')
+      setError(err instanceof Error ? err.message : t('availability.errorDelete'))
     }
   }
 
@@ -557,20 +565,20 @@ function AvailabilityManager() {
       })
       setRules(prev => prev.map(r => r.id === rule.id ? { ...r, available: !r.available } : r))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update rule')
+      setError(err instanceof Error ? err.message : t('availability.errorUpdate'))
     }
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-foreground">Business Hours</h3>
+        <h3 className="text-lg font-semibold text-foreground">{t('availability.heading')}</h3>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-sm"
           >
-            Add Hours
+            {t('availability.addHours')}
           </button>
         )}
       </div>
@@ -581,20 +589,20 @@ function AvailabilityManager() {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="bg-card rounded-lg border border-border p-6 mb-6 space-y-4">
-          <h4 className="font-medium text-foreground">Add Business Hours</h4>
+          <h4 className="font-medium text-foreground">{t('availability.addBusinessHours')}</h4>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Day</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('availability.day')}</label>
             <select
               value={form.dayOfWeek}
               onChange={e => setForm({ ...form, dayOfWeek: parseInt(e.target.value) })}
               className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary bg-card text-foreground"
             >
-              {DAYS.map((d, i) => <option key={i} value={i}>{d}</option>)}
+              {DAY_KEYS.map((key, i) => <option key={i} value={i}>{t(key)}</option>)}
             </select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Open</label>
+              <label className="block text-sm font-medium text-foreground mb-1">{t('availability.open')}</label>
               <input
                 type="time"
                 value={form.startTime}
@@ -604,7 +612,7 @@ function AvailabilityManager() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Close</label>
+              <label className="block text-sm font-medium text-foreground mb-1">{t('availability.close')}</label>
               <input
                 type="time"
                 value={form.endTime}
@@ -615,8 +623,8 @@ function AvailabilityManager() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-sm">Add Hours</button>
-            <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 border border-input rounded-lg hover:bg-muted text-sm text-foreground">Cancel</button>
+            <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-sm">{t('availability.addHours')}</button>
+            <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 border border-input rounded-lg hover:bg-muted text-sm text-foreground">{t('common.cancel')}</button>
           </div>
         </form>
       )}
@@ -632,8 +640,8 @@ function AvailabilityManager() {
       ) : rules.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           <Clock size={36} className="mx-auto mb-3 opacity-50" />
-          <p>No availability rules yet</p>
-          <p className="text-sm">Set your business hours so the AI knows when to book appointments.</p>
+          <p>{t('availability.empty')}</p>
+          <p className="text-sm">{t('availability.emptyHint')}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -644,7 +652,7 @@ function AvailabilityManager() {
                 : 'bg-muted border-border opacity-60'
             }`}>
               <div className="flex items-center gap-4">
-                <span className="font-medium text-foreground w-28">{DAYS[rule.dayOfWeek] ?? `Day ${rule.dayOfWeek}`}</span>
+                <span className="font-medium text-foreground w-28">{t(DAY_KEYS[rule.dayOfWeek] ?? `Day ${rule.dayOfWeek}`)}</span>
                 <span className="text-sm text-muted-foreground">
                   {rule.startTime} — {rule.endTime}
                 </span>
@@ -656,9 +664,9 @@ function AvailabilityManager() {
                     rule.available ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground'
                   }`}
                 >
-                  {rule.available ? 'Open' : 'Closed'}
+                  {rule.available ? t('availability.open') : t('availability.closed')}
                 </button>
-                <button onClick={() => handleDelete(rule.id)} className="text-sm text-destructive hover:text-destructive/80">Delete</button>
+                <button onClick={() => handleDelete(rule.id)} className="text-sm text-destructive hover:text-destructive/80">{t('common.delete')}</button>
               </div>
             </div>
           ))}

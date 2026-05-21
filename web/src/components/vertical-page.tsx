@@ -16,7 +16,7 @@ export interface VerticalPageConfig {
 
 export function VerticalPage({ config }: { config: VerticalPageConfig }) {
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-200">
+    <div className="min-h-screen flex flex-col bg-neutral-200 pt-16">
       <Nav variant="simple" />
 
       <main className="flex-1 relative overflow-hidden">

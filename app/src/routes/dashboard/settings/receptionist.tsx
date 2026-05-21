@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
 import { Bot, AlertCircle } from 'lucide-react'
 
@@ -36,6 +37,7 @@ const DEFAULT_SETTINGS: ReceptionistSettings = {
 const PERSONALITY_PRESETS: PersonalityPreset[] = ['Professional', 'Warm', 'Minimal', 'Premium', 'Friendly']
 
 function ReceptionistSettingsPage() {
+  const { t } = useTranslation()
   const [settings, setSettings] = useState<ReceptionistSettings>(DEFAULT_SETTINGS)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -49,7 +51,7 @@ function ReceptionistSettingsPage() {
         const data = await apiFetch<ReceptionistSettings>('/settings/receptionist')
         setSettings({ ...DEFAULT_SETTINGS, ...data })
       } catch {
-        setLoadError('Failed to load receptionist settings. Using defaults.')
+        setLoadError(t('settings.errorLoad'))
       }
     }
     load()
@@ -68,7 +70,7 @@ function ReceptionistSettingsPage() {
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Failed to save settings')
+      setSaveError(err instanceof Error ? err.message : t('settings.errorSave'))
     } finally {
       setSaving(false)
     }
@@ -83,10 +85,10 @@ function ReceptionistSettingsPage() {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Bot size={24} />
-          AI Receptionist Personality
+          {t('receptionist.settings')}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Configure how your AI receptionist communicates with customers
+          {t('settings.description')}
         </p>
       </div>
 
@@ -106,14 +108,14 @@ function ReceptionistSettingsPage() {
 
       {saveSuccess && (
         <div className="mb-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm text-emerald-600">
-          Receptionist settings saved successfully.
+          {t('settings.saved')}
         </div>
       )}
 
       <div className="bg-card rounded-lg border border-border p-6 space-y-6">
         {/* Personality Preset */}
         <fieldset>
-          <legend className="block text-sm font-medium text-foreground mb-3">Personality Preset</legend>
+          <legend className="block text-sm font-medium text-foreground mb-3">{t('settings.tone')}</legend>
           <div className="flex flex-wrap gap-3">
             {PERSONALITY_PRESETS.map(preset => (
               <label
@@ -132,7 +134,12 @@ function ReceptionistSettingsPage() {
                   onChange={() => updateField('personalityPreset', preset)}
                   className="sr-only"
                 />
-                <span className="text-sm font-medium">{preset}</span>
+                <span className="text-sm font-medium">
+                  {preset === 'Professional' ? t('settings.toneProfessional')
+                    : preset === 'Warm' ? t('settings.toneWarm')
+                    : preset === 'Friendly' ? t('settings.toneFriendly')
+                    : preset}
+                </span>
               </label>
             ))}
           </div>
@@ -144,7 +151,7 @@ function ReceptionistSettingsPage() {
             label="Formality"
             value={settings.formalityLevel}
             onChange={v => updateField('formalityLevel', v)}
-            lowLabel="Casual"
+            lowLabel={t('settings.toneCasual')}
             highLabel="Formal"
           />
           <SliderField
@@ -159,7 +166,7 @@ function ReceptionistSettingsPage() {
             value={settings.warmthLevel}
             onChange={v => updateField('warmthLevel', v)}
             lowLabel="Reserved"
-            highLabel="Warm"
+            highLabel={t('settings.toneWarm')}
           />
         </div>
 
@@ -194,13 +201,13 @@ function ReceptionistSettingsPage() {
         {/* Greeting Style */}
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">
-            Greeting Style
+            {t('settings.greetingTemplate')}
           </label>
           <input
             type="text"
             value={settings.greetingStyle}
             onChange={e => updateField('greetingStyle', e.target.value)}
-            placeholder="e.g., Hi! Welcome to {business}. I'm {name}, how can I help?"
+            placeholder={t('settings.greetingPlaceholder')}
             className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary bg-card text-foreground"
           />
           <p className="text-xs text-muted-foreground mt-1">
@@ -215,7 +222,7 @@ function ReceptionistSettingsPage() {
             disabled={saving}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
           >
-            {saving ? 'Saving...' : 'Save Receptionist Settings'}
+            {saving ? t('common.saving') : t('settings.saveReceptionist')}
           </button>
         </div>
       </div>

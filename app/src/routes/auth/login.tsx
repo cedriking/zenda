@@ -1,9 +1,11 @@
 import { createFileRoute, redirect, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore, getPostAuthRoute } from '@/stores/auth'
 import { apiFetch } from '@/services/api-client'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Mail } from 'lucide-react'
+import LangToggle from '@/components/lang-toggle'
 
 export const Route = createFileRoute('/auth/login')({
   beforeLoad: ({ context }) => {
@@ -15,6 +17,7 @@ export const Route = createFileRoute('/auth/login')({
 })
 
 function LoginPage() {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -43,7 +46,7 @@ function LoginPage() {
       setAuth(data as Parameters<typeof setAuth>[0])
       navigate({ to: getPostAuthRoute() })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed')
+      setError(err instanceof Error ? err.message : t('auth.loginFailed'))
       setLoading(false)
     }
   }
@@ -60,7 +63,7 @@ function LoginPage() {
       })
       setResetSent(true)
     } catch (err) {
-      setResetError(err instanceof Error ? err.message : 'Failed to send reset email')
+      setResetError(err instanceof Error ? err.message : t('auth.sending'))
     } finally {
       setResetLoading(false)
     }
@@ -71,30 +74,31 @@ function LoginPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="w-full max-w-sm space-y-6 p-8">
-          <button
-            onClick={() => { setShowReset(false); setResetSent(false); setResetError(null) }}
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-            aria-label="Back to login"
-          >
-            <ArrowLeft size={16} />
-            Back to login
-          </button>
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => { setShowReset(false); setResetSent(false); setResetError(null) }}
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+              aria-label={t('auth.backToLogin')}
+            >
+              <ArrowLeft size={16} />
+              {t('auth.backToLogin')}
+            </button>
+            <LangToggle />
+          </div>
 
           <div className="text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
               <Mail className="text-primary" size={24} />
             </div>
-            <h1 className="text-2xl font-bold">Reset password</h1>
+            <h1 className="text-2xl font-bold">{t('auth.resetPassword')}</h1>
             <p className="text-muted-foreground mt-1">
-              {resetSent
-                ? 'Check your email for a reset link'
-                : "Enter your email and we'll send you a reset link"}
+              {resetSent ? t('auth.resetLinkSent') : t('auth.enterEmail')}
             </p>
           </div>
 
           {resetSent ? (
             <div className="rounded-md bg-emerald-500/10 border border-border p-4 text-sm text-emerald-600">
-              Reset link sent to <strong>{resetEmail}</strong>. Check your inbox and spam folder.
+              {t('auth.resetLinkSentDetail', { email: resetEmail })}
             </div>
           ) : (
             <form onSubmit={handleResetSubmit} className="space-y-4">
@@ -106,7 +110,7 @@ function LoginPage() {
 
               <div className="space-y-2">
                 <label htmlFor="reset-email" className="text-sm font-medium">
-                  Email
+                  {t('auth.email')}
                 </label>
                 <input
                   id="reset-email"
@@ -121,7 +125,7 @@ function LoginPage() {
               </div>
 
               <Button type="submit" className="w-full" disabled={resetLoading}>
-                {resetLoading ? 'Sending...' : 'Send Reset Link'}
+                {resetLoading ? t('auth.sending') : t('auth.sendResetLink')}
               </Button>
             </form>
           )}
@@ -134,9 +138,13 @@ function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="w-full max-w-sm space-y-6 p-8">
+        <div className="flex justify-end">
+          <LangToggle />
+        </div>
+
         <div className="text-center">
-          <h1 className="text-2xl font-bold">Zenda</h1>
-          <p className="text-muted-foreground">Your AI receptionist for WhatsApp</p>
+          <h1 className="text-2xl font-bold">{t('auth.loginHeading')}</h1>
+          <p className="text-muted-foreground">{t('auth.aiReceptionist')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -148,7 +156,7 @@ function LoginPage() {
 
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              {t('auth.email')}
             </label>
             <input
               id="email"
@@ -163,7 +171,7 @@ function LoginPage() {
 
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">
-              Password
+              {t('auth.password')}
             </label>
             <input
               id="password"
@@ -171,13 +179,12 @@ function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-              placeholder="Enter your password"
               required
             />
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Logging in...' : 'Log in'}
+            {isLoading ? t('auth.loggingIn') : t('auth.login')}
           </Button>
         </form>
 
@@ -186,13 +193,13 @@ function LoginPage() {
             onClick={() => setShowReset(true)}
             className="text-primary underline hover:no-underline"
           >
-            Forgot your password?
+            {t('auth.forgotPassword')}
           </button>
         </p>
         <p className="text-center text-sm text-muted-foreground">
-          Don't have an account?{' '}
+          {t('auth.noAccount')}{' '}
           <Link to="/auth/signup" className="text-primary underline">
-            Create one
+            {t('auth.createOne')}
           </Link>
         </p>
       </div>

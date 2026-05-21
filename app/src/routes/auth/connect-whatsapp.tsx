@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useWhatsApp } from '../../hooks/use-whatsapp'
 import { useAuthStore } from '../../stores/auth'
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
 import { apiFetch } from '../../services/api-client'
 
@@ -13,6 +14,7 @@ function ConnectWhatsAppPage() {
   const { status, initWhatsApp, connectBridge, isConnected, needsQR } = useWhatsApp()
   const { workspace, accessToken } = useAuthStore()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const initCalled = useRef(false)
 
   useEffect(() => {
@@ -46,13 +48,13 @@ function ConnectWhatsAppPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted">
       <div className="bg-card rounded-xl shadow-sm border border-border p-8 max-w-md w-full text-center">
-        <h1 className="text-2xl font-bold text-foreground mb-2">Connect WhatsApp</h1>
-        <p className="text-muted-foreground mb-8">Link your WhatsApp Business to start receiving messages</p>
+        <h1 className="text-2xl font-bold text-foreground mb-2">{t('whatsapp.connectTitle')}</h1>
+        <p className="text-muted-foreground mb-8">{t('whatsapp.connectSubtitle')}</p>
 
         {status.status === 'connecting' && (
           <div className="flex flex-col items-center gap-4">
             <Loader2 size={48} className="text-primary animate-spin" />
-            <p className="text-muted-foreground">Initializing WhatsApp...</p>
+            <p className="text-muted-foreground">{t('whatsapp.initializing')}</p>
           </div>
         )}
 
@@ -63,28 +65,28 @@ function ConnectWhatsAppPage() {
             ) : (
               <Loader2 size={200} className="text-muted-foreground animate-spin" />
             )}
-            <p className="text-muted-foreground">Scan the QR code with your WhatsApp</p>
-            <p className="text-sm text-muted-foreground">Open WhatsApp {'>'} Settings {'>'} Linked Devices {'>'} Link a Device</p>
+            <p className="text-muted-foreground">{t('whatsapp.scanTheQr')}</p>
+            <p className="text-sm text-muted-foreground">{t('whatsapp.scanQrInstruction')}</p>
           </div>
         )}
 
         {isConnected && (
           <div className="flex flex-col items-center gap-4">
             <CheckCircle size={48} className="text-emerald-500" />
-            <p className="text-emerald-600 font-medium">Connected!</p>
-            <p className="text-sm text-muted-foreground">Redirecting to dashboard...</p>
+            <p className="text-emerald-600 font-medium">{t('whatsapp.connectedSuccess')}</p>
+            <p className="text-sm text-muted-foreground">{t('whatsapp.redirecting')}</p>
           </div>
         )}
 
         {status.status === 'error' && (
           <div className="flex flex-col items-center gap-4">
             <XCircle size={48} className="text-destructive" />
-            <p className="text-destructive">{status.error ?? 'Connection failed'}</p>
+            <p className="text-destructive">{status.error ?? t('whatsapp.connectionFailed')}</p>
             <button
               onClick={initWhatsApp}
               className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
             >
-              Try Again
+              {t('whatsapp.tryAgain')}
             </button>
           </div>
         )}
@@ -94,7 +96,7 @@ function ConnectWhatsAppPage() {
             onClick={initWhatsApp}
             className="px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 text-lg"
           >
-            Connect WhatsApp
+            {t('whatsapp.connect')}
           </button>
         )}
       </div>

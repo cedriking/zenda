@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
 import { Calendar, AlertCircle } from 'lucide-react'
 
@@ -30,6 +31,7 @@ const DEFAULT_SETTINGS: AppointmentSettings = {
 }
 
 function AppointmentSettingsPage() {
+  const { t } = useTranslation()
   const [settings, setSettings] = useState<AppointmentSettings>(DEFAULT_SETTINGS)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -43,7 +45,7 @@ function AppointmentSettingsPage() {
         const data = await apiFetch<AppointmentSettings>('/settings/appointments')
         setSettings({ ...DEFAULT_SETTINGS, ...data })
       } catch {
-        setLoadError('Failed to load appointment settings. Using defaults.')
+        setLoadError(t('settings.errorLoad'))
       }
     }
     load()
@@ -75,7 +77,7 @@ function AppointmentSettingsPage() {
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Failed to save settings')
+      setSaveError(err instanceof Error ? err.message : t('settings.errorSave'))
     } finally {
       setSaving(false)
     }
@@ -90,10 +92,10 @@ function AppointmentSettingsPage() {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Calendar size={24} />
-          Appointment Policies
+          {t('settings.cancellationPolicy')}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Set cancellation, rescheduling, and deposit policies for appointments
+          {t('settings.description')}
         </p>
       </div>
 
@@ -113,7 +115,7 @@ function AppointmentSettingsPage() {
 
       {saveSuccess && (
         <div className="mb-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm text-emerald-600">
-          Appointment policies saved successfully.
+          {t('settings.saved')}
         </div>
       )}
 
@@ -263,7 +265,7 @@ function AppointmentSettingsPage() {
             disabled={saving}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
           >
-            {saving ? 'Saving...' : 'Save Appointment Policies'}
+            {saving ? t('common.saving') : t('settings.save')}
           </button>
         </div>
       </div>

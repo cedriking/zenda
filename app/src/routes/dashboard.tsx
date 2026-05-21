@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, Link, useNavigate, useLocation, redirect } from '@tanstack/react-router'
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore, getPostAuthRoute } from '../stores/auth'
 import { useWhatsApp } from '../hooks/use-whatsapp'
 import { useDashboardShortcuts } from '../hooks/use-keyboard-shortcuts'
@@ -8,6 +9,7 @@ import { MessageSquare, Calendar, Settings, LayoutDashboard, LogOut, Wifi, WifiO
 import { ConnectivityBanner } from '../components/connectivity-banner'
 
 function DashboardLayout() {
+  const { t } = useTranslation()
   const { workspace, logout } = useAuthStore()
   const { isConnected } = useWhatsApp()
   const navigate = useNavigate()
@@ -97,39 +99,39 @@ function DashboardLayout() {
       const diffHours = Math.floor(diffMinutes / 60)
       const diffDays = Math.floor(diffHours / 24)
 
-      if (diffSeconds < 60) return 'Just now'
-      if (diffMinutes < 60) return `${diffMinutes} min ago`
-      if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
-      if (diffDays === 1) return 'Yesterday'
-      if (diffDays < 7) return `${diffDays} days ago`
+      if (diffSeconds < 60) return t('timeAgo.justNow')
+      if (diffMinutes < 60) return t('timeAgo.minAgo', { count: diffMinutes })
+      if (diffHours < 24) return t('timeAgo.hourAgo', { count: diffHours })
+      if (diffDays === 1) return t('timeAgo.yesterday')
+      if (diffDays < 7) return t('timeAgo.dayAgo', { count: diffDays })
       return new Date(dateStr).toLocaleDateString()
     }
-  }, [])
+  }, [t])
 
   return (
     <div className="flex h-screen bg-muted">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:text-sm focus:font-medium">
-        Skip to content
+        {t('layout.skipToContent')}
       </a>
       {/* Sidebar */}
       <aside className="w-64 bg-card border-r border-border flex flex-col">
         <div className="p-4 border-b border-border">
-          <h1 className="text-xl font-bold text-foreground">Zenda</h1>
-          <p className="text-sm text-muted-foreground">{workspace?.name ?? 'Business'}</p>
+          <h1 className="text-xl font-bold text-foreground">{t('layout.brandName')}</h1>
+          <p className="text-sm text-muted-foreground">{workspace?.name ?? t('layout.defaultWorkspaceName')}</p>
         </div>
 
         <nav className="flex-1 p-2 space-y-1" role="navigation" aria-label="Main navigation">
-          <NavLink to="/dashboard" icon={<LayoutDashboard size={20} />} label="Dashboard" exact />
-          <NavLink to="/dashboard/conversations" icon={<MessageSquare size={20} />} label="Chats" />
-          <NavLink to="/dashboard/appointments" icon={<Calendar size={20} />} label="Calendar" />
-          <NavLink to="/dashboard/settings" icon={<Settings size={20} />} label="Settings" />
-          <NavLink to="/dashboard/analytics" icon={<BarChart3 size={20} />} label="Analytics" />
+          <NavLink to="/dashboard" icon={<LayoutDashboard size={20} />} label={t('nav.dashboard')} exact />
+          <NavLink to="/dashboard/conversations" icon={<MessageSquare size={20} />} label={t('nav.chats')} />
+          <NavLink to="/dashboard/appointments" icon={<Calendar size={20} />} label={t('nav.calendar')} />
+          <NavLink to="/dashboard/settings" icon={<Settings size={20} />} label={t('nav.settings')} />
+          <NavLink to="/dashboard/analytics" icon={<BarChart3 size={20} />} label={t('nav.analytics')} />
         </nav>
 
         <div className="p-4 border-t border-border space-y-1">
           {isConnected ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1" role="status" aria-label="WhatsApp connected">
-              <Wifi size={16} className="text-emerald-500" /> WhatsApp Connected
+              <Wifi size={16} className="text-emerald-500" /> {t('whatsapp.connected')}
             </div>
           ) : (
             <button
@@ -138,7 +140,7 @@ function DashboardLayout() {
               role="status"
               aria-label="WhatsApp disconnected — click to connect"
             >
-              <WifiOff size={16} /> Connect WhatsApp
+              <WifiOff size={16} /> {t('whatsapp.connect')}
             </button>
           )}
           <div className="flex items-center justify-between">
@@ -148,7 +150,7 @@ function DashboardLayout() {
               aria-label="Logout"
             >
               <LogOut size={16} />
-              Logout
+              {t('layout.logout')}
             </button>
             <div className="flex items-center gap-1">
               <button
@@ -176,7 +178,7 @@ function DashboardLayout() {
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowShortcuts(false)} />
           <div className="relative bg-card rounded-xl border border-border shadow-xl w-96 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-foreground">Keyboard Shortcuts</h3>
+              <h3 className="text-lg font-semibold text-foreground">{t('layout.keyboardShortcuts')}</h3>
               <button
                 onClick={() => setShowShortcuts(false)}
                 className="text-muted-foreground hover:text-foreground"
@@ -205,7 +207,7 @@ function DashboardLayout() {
         {/* Top bar */}
         <header className="h-12 bg-card border-b border-border flex items-center justify-between px-4">
           <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-            {getPageTitle(location.pathname)}
+            {getPageTitle(location.pathname, t)}
           </nav>
           <div className="flex items-center gap-4">
             <div className="relative z-50" ref={notifRef}>
@@ -228,7 +230,7 @@ function DashboardLayout() {
               {showNotifications && (
                 <div className="absolute right-0 top-full mt-2 w-80 bg-card rounded-lg border border-border shadow-lg z-50" role="dialog" aria-label="Notifications">
                   <div className="flex items-center justify-between p-3 border-b border-border">
-                    <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
+                    <h3 className="text-sm font-semibold text-foreground">{t('layout.notificationsTitle')}</h3>
                     <button
                       onClick={() => setShowNotifications(false)}
                       className="text-muted-foreground hover:text-foreground"
@@ -241,8 +243,8 @@ function DashboardLayout() {
                     {notifications.length === 0 ? (
                       <div className="p-6 text-center">
                         <Bell size={24} className="mx-auto mb-2 text-muted-foreground/50" />
-                        <p className="text-sm text-muted-foreground">No notifications yet</p>
-                        <p className="text-xs text-muted-foreground mt-1">You'll see appointment updates and attention alerts here</p>
+                        <p className="text-sm text-muted-foreground">{t('layout.noNotifications')}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{t('layout.noNotificationsHint')}</p>
                       </div>
                     ) : (
                       notifications.map(n => (
@@ -300,21 +302,20 @@ function NavLink({ to, icon, label, exact = false }: { to: string; icon: React.R
   )
 }
 
-const PAGE_TITLES: Record<string, string> = {
-  '/dashboard': 'Dashboard',
-  '/dashboard/conversations': 'Chats',
-  '/dashboard/appointments': 'Calendar',
-  '/dashboard/settings': 'Settings',
-  '/dashboard/analytics': 'Analytics',
+const PAGE_TITLE_KEYS: Record<string, string> = {
+  '/dashboard': 'nav.dashboard',
+  '/dashboard/conversations': 'nav.chats',
+  '/dashboard/appointments': 'nav.calendar',
+  '/dashboard/settings': 'nav.settings',
+  '/dashboard/analytics': 'nav.analytics',
 }
 
-function getPageTitle(pathname: string): string {
-  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname]
-  // Match prefix for nested routes like /dashboard/conversations/123
-  const match = Object.keys(PAGE_TITLES)
+function getPageTitle(pathname: string, t: (key: string) => string): string {
+  if (PAGE_TITLE_KEYS[pathname]) return t(PAGE_TITLE_KEYS[pathname])
+  const match = Object.keys(PAGE_TITLE_KEYS)
     .sort((a, b) => b.length - a.length)
     .find(p => pathname.startsWith(p + '/'))
-  return match ? PAGE_TITLES[match] : 'Dashboard'
+  return match ? t(PAGE_TITLE_KEYS[match]) : t('nav.dashboard')
 }
 
 export const Route = createFileRoute('/dashboard')({

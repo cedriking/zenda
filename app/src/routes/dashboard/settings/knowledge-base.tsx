@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
 import { Plus, Trash2, Search, BookOpen } from 'lucide-react'
 
@@ -17,6 +18,7 @@ interface KBItem {
 }
 
 function KnowledgeBasePage() {
+  const { t } = useTranslation()
   const [items, setItems] = useState<KBItem[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [showForm, setShowForm] = useState(false)
@@ -81,16 +83,16 @@ function KnowledgeBasePage() {
         <div>
           <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <BookOpen size={24} />
-            Knowledge Base
+            {t('knowledgeBase.heading')}
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">Add FAQs and info your AI receptionist can use to answer customers</p>
+          <p className="text-sm text-muted-foreground mt-1">{t('knowledgeBase.subtitle')}</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
         >
           <Plus size={16} />
-          Add Item
+          {t('knowledgeBase.addItem')}
         </button>
       </div>
 
@@ -103,12 +105,12 @@ function KnowledgeBasePage() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            placeholder="Search knowledge base..."
+            placeholder={t('knowledgeBase.searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <button onClick={handleSearch} className="px-4 py-2 bg-muted rounded-lg hover:bg-muted/80 text-sm">
-          Search
+          {t('knowledgeBase.searchButton')}
         </button>
       </div>
 
@@ -116,47 +118,47 @@ function KnowledgeBasePage() {
       {showForm && (
         <form onSubmit={handleAdd} className="bg-card rounded-lg border border-border p-6 mb-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Question / Topic</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('knowledgeBase.question')}</label>
             <input
               type="text"
               value={form.question}
               onChange={e => setForm({ ...form, question: e.target.value })}
               required
-              placeholder="e.g., What are your business hours?"
+              placeholder={t('knowledgeBase.questionPlaceholder')}
               className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Answer</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('knowledgeBase.answer')}</label>
             <textarea
               value={form.answer}
               onChange={e => setForm({ ...form, answer: e.target.value })}
               required
               rows={4}
-              placeholder="The answer your AI receptionist will give..."
+              placeholder={t('knowledgeBase.answerPlaceholder')}
               className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Category</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('knowledgeBase.category')}</label>
             <select
               value={form.category}
               onChange={e => setForm({ ...form, category: e.target.value })}
               className="px-3 py-2 border border-input rounded-lg"
             >
-              <option value="general">General</option>
-              <option value="services">Services</option>
-              <option value="policies">Policies</option>
-              <option value="pricing">Pricing</option>
-              <option value="location">Location</option>
+              <option value="general">{t('knowledgeBase.categoryGeneral')}</option>
+              <option value="services">{t('knowledgeBase.categoryServices')}</option>
+              <option value="policies">{t('knowledgeBase.categoryPolicies')}</option>
+              <option value="pricing">{t('knowledgeBase.categoryPricing')}</option>
+              <option value="location">{t('knowledgeBase.categoryLocation')}</option>
             </select>
           </div>
           <div className="flex gap-2">
             <button type="submit" disabled={loading} className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50">
-              {loading ? 'Adding...' : 'Add to Knowledge Base'}
+              {loading ? t('knowledgeBase.adding') : t('knowledgeBase.addToKnowledgeBase')}
             </button>
             <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 border border-input rounded-lg hover:bg-muted">
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </form>
@@ -167,7 +169,7 @@ function KnowledgeBasePage() {
         {items.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
             <BookOpen size={40} className="mx-auto mb-3 opacity-50" />
-            <p>No items yet. Add FAQs to help your AI receptionist answer customer questions.</p>
+            <p>{t('knowledgeBase.empty')}</p>
           </div>
         )}
         {items.map(item => (

@@ -64,7 +64,7 @@ const PLANS = [
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-neutral-200">
+    <div className="min-h-screen bg-neutral-200 pt-16">
       <Nav variant="simple" />
 
       <main className="relative overflow-hidden">

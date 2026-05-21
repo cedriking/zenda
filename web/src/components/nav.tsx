@@ -62,7 +62,7 @@ export function Nav({ variant = 'home' }: { variant?: 'home' | 'simple' }) {
 
   if (variant === 'simple') {
     return (
-      <nav className={`border-b border-slate-200 transition-all duration-300 bg-white`}>
+      <nav className="fixed top-0 w-full z-50 bg-white border-b border-slate-200 shadow-sm transition-all duration-300">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-3">

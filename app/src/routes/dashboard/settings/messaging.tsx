@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
 import { MessageSquare, AlertCircle } from 'lucide-react'
 
@@ -26,6 +27,7 @@ const DEFAULT_SETTINGS: MessagingSettings = {
 }
 
 function MessagingSettingsPage() {
+  const { t } = useTranslation()
   const [settings, setSettings] = useState<MessagingSettings>(DEFAULT_SETTINGS)
   const [consentRecords, setConsentRecords] = useState<ConsentRecord[]>([])
   const [saving, setSaving] = useState(false)
@@ -48,7 +50,7 @@ function MessagingSettingsPage() {
           setConsentRecords(consentData)
         }
       } catch {
-        setLoadError('Failed to load messaging settings. Using defaults.')
+        setLoadError(t('settings.errorLoad'))
       }
     }
     load()
@@ -76,7 +78,7 @@ function MessagingSettingsPage() {
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Failed to save settings')
+      setSaveError(err instanceof Error ? err.message : t('settings.errorSave'))
     } finally {
       setSaving(false)
     }
@@ -91,10 +93,10 @@ function MessagingSettingsPage() {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <MessageSquare size={24} />
-          Messaging Settings
+          {t('settings.title')}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Configure messaging limits and consent management
+          {t('settings.description')}
         </p>
       </div>
 
@@ -114,7 +116,7 @@ function MessagingSettingsPage() {
 
       {saveSuccess && (
         <div className="mb-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm text-emerald-600">
-          Messaging settings saved successfully.
+          {t('settings.saved')}
         </div>
       )}
 
@@ -164,7 +166,7 @@ function MessagingSettingsPage() {
             disabled={saving}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
           >
-            {saving ? 'Saving...' : 'Save Messaging Settings'}
+            {saving ? t('common.saving') : t('settings.save')}
           </button>
         </div>
       </div>
@@ -178,7 +180,7 @@ function MessagingSettingsPage() {
               <tr className="border-b border-border">
                 <th className="pb-3 font-medium text-foreground">Customer</th>
                 <th className="pb-3 font-medium text-foreground">Phone</th>
-                <th className="pb-3 font-medium text-foreground">Status</th>
+                <th className="pb-3 font-medium text-foreground">{t('receptionist.status')}</th>
                 <th className="pb-3 font-medium text-foreground">Date</th>
               </tr>
             </thead>
@@ -186,7 +188,7 @@ function MessagingSettingsPage() {
               {consentRecords.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-8 text-center text-muted-foreground">
-                    No consent records yet. Records will appear as customers interact with your receptionist.
+                    {t('common.noResults')}
                   </td>
                 </tr>
               ) : (

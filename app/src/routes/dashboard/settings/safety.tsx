@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
 import { Shield, AlertCircle, AlertTriangle } from 'lucide-react'
 
@@ -27,6 +28,7 @@ const DEFAULT_SETTINGS: SafetySettings = {
 }
 
 function SafetySettingsPage() {
+  const { t } = useTranslation()
   const [settings, setSettings] = useState<SafetySettings>(DEFAULT_SETTINGS)
   const [escalations, setEscalations] = useState<EscalationRecord[]>([])
   const [saving, setSaving] = useState(false)
@@ -49,7 +51,7 @@ function SafetySettingsPage() {
           setEscalations(escalationData)
         }
       } catch {
-        setLoadError('Failed to load safety settings. Using defaults.')
+        setLoadError(t('settings.errorLoad'))
       }
     }
     load()
@@ -68,7 +70,7 @@ function SafetySettingsPage() {
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Failed to save settings')
+      setSaveError(err instanceof Error ? err.message : t('settings.errorSave'))
     } finally {
       setSaving(false)
     }
@@ -83,10 +85,10 @@ function SafetySettingsPage() {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Shield size={24} />
-          Safety Configuration
+          {t('settings.title')}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Define sensitive topics and emergency escalation procedures
+          {t('settings.description')}
         </p>
       </div>
 
@@ -106,7 +108,7 @@ function SafetySettingsPage() {
 
       {saveSuccess && (
         <div className="mb-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm text-emerald-600">
-          Safety settings saved successfully.
+          {t('settings.saved')}
         </div>
       )}
 
@@ -152,7 +154,7 @@ function SafetySettingsPage() {
             disabled={saving}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
           >
-            {saving ? 'Saving...' : 'Save Safety Settings'}
+            {saving ? t('common.saving') : t('settings.save')}
           </button>
         </div>
       </div>
@@ -170,7 +172,7 @@ function SafetySettingsPage() {
                 <th className="pb-3 font-medium text-foreground">Trigger</th>
                 <th className="pb-3 font-medium text-foreground">Customer</th>
                 <th className="pb-3 font-medium text-foreground">Escalated</th>
-                <th className="pb-3 font-medium text-foreground">Status</th>
+                <th className="pb-3 font-medium text-foreground">{t('receptionist.status')}</th>
               </tr>
             </thead>
             <tbody>
@@ -178,7 +180,7 @@ function SafetySettingsPage() {
                 <tr>
                   <td colSpan={4} className="py-8 text-center text-muted-foreground">
                     <Shield size={32} className="mx-auto mb-2 opacity-40" />
-                    No escalations recorded yet. The AI will flag conversations matching your sensitive topics here.
+                    {t('common.noResults')}
                   </td>
                 </tr>
               ) : (

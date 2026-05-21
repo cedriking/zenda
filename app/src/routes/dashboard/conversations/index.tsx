@@ -2,12 +2,14 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState, useMemo } from 'react'
 import { useConversations } from '../../../hooks/use-conversations'
 import { MessageSquare, AlertTriangle, User, Bot, Search, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export const Route = createFileRoute('/dashboard/conversations/')({
   component: ConversationsPage,
 })
 
 function ConversationsPage() {
+  const { t } = useTranslation()
   const { conversations, isLoading, error, loadConversations, setActiveConversationId } = useConversations()
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -41,7 +43,7 @@ function ConversationsPage() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-foreground">Chats</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t('conversations.heading')}</h2>
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -49,7 +51,7 @@ function ConversationsPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search conversations..."
+              placeholder={t('conversations.searchPlaceholder')}
               className="pl-9 pr-8 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring w-64 bg-card text-foreground placeholder-muted-foreground"
             />
             {searchQuery && (
@@ -61,14 +63,14 @@ function ConversationsPage() {
               </button>
             )}
           </div>
-          <span className="text-sm text-muted-foreground">{conversations.length} conversations</span>
+          <span className="text-sm text-muted-foreground">{t('conversations.count', { count: conversations.length })}</span>
         </div>
       </div>
 
       {error && (
         <div className="mb-4 rounded-lg bg-destructive/10 border border-border p-3 text-sm text-destructive">
           {error}
-          <button onClick={() => loadConversations()} className="ml-2 underline">Retry</button>
+          <button onClick={() => loadConversations()} className="ml-2 underline">{t('common.retry')}</button>
         </div>
       )}
 
@@ -92,13 +94,13 @@ function ConversationsPage() {
           <MessageSquare size={48} className="mx-auto mb-4 opacity-50" />
           {searchQuery ? (
             <>
-              <p>No conversations match "{searchQuery}"</p>
-              <button onClick={() => setSearchQuery('')} className="text-primary text-sm mt-2">Clear search</button>
+              <p>{t('conversations.noMatch', { query: searchQuery })}</p>
+              <button onClick={() => setSearchQuery('')} className="text-primary text-sm mt-2">{t('conversations.clearSearch')}</button>
             </>
           ) : (
             <>
-              <p>No conversations yet</p>
-              <p className="text-sm">Conversations will appear when customers message via WhatsApp.</p>
+              <p>{t('conversations.empty')}</p>
+              <p className="text-sm">{t('conversations.emptyHint')}</p>
             </>
           )}
         </div>
@@ -128,8 +130,8 @@ function ConversationsPage() {
                       <span className="w-2 h-2 rounded-full bg-primary shrink-0" aria-label="Unread messages" />
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground truncate max-w-[200px]">{conv.lastMessagePreview ?? 'No messages yet'}</p>
-                  <p className="text-sm text-muted-foreground">{conv.language === 'es' ? 'Spanish' : 'English'}</p>
+                  <p className="text-sm text-muted-foreground truncate max-w-[200px]">{conv.lastMessagePreview ?? t('conversation.noMessages')}</p>
+                  <p className="text-sm text-muted-foreground">{conv.language === 'es' ? t('conversations.langSpanish') : t('conversations.langEnglish')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -139,8 +141,9 @@ function ConversationsPage() {
                   conv.mode === 'human_takeover' ? 'bg-destructive/10 text-destructive' :
                   'bg-muted text-foreground'
                 }`}>
-                  {conv.mode === 'auto' ? <><Bot size={12} /> Auto</> :
-                   conv.mode === 'human_takeover' ? <><User size={12} /> You</> :
+                  {conv.mode === 'auto' ? <><Bot size={12} /> {t('conversations.modeAuto')}</> :
+                   conv.mode === 'human_takeover' ? <><User size={12} /> {t('conversations.modeYou')}</> :
+                   conv.mode === 'needs_attention' ? <><AlertTriangle size={12} /> {t('conversations.modeAttention')}</> :
                    conv.mode}
                 </span>
                 <span className="text-xs text-muted-foreground">

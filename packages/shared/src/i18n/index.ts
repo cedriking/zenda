@@ -1,10 +1,28 @@
 export { en } from './en.js'
 export { es } from './es.js'
+export { ar } from './ar.js'
+export { fr } from './fr.js'
+export { de } from './de.js'
+export { ru } from './ru.js'
+export { zh } from './zh.js'
+export { ja } from './ja.js'
+export { ko } from './ko.js'
 export type { TranslationStrings } from './en.js'
 
-export const languages = {
-  en: { name: 'English', nativeName: 'English' },
-  es: { name: 'Spanish', nativeName: 'Español' },
-} as const
+export const supportedLanguages = [
+  { key: 'en', nativeName: 'English', englishName: 'English', dir: 'ltr' as const },
+  { key: 'es', nativeName: 'Español', englishName: 'Spanish', dir: 'ltr' as const },
+  { key: 'ar', nativeName: 'العربية', englishName: 'Arabic', dir: 'rtl' as const },
+  { key: 'fr', nativeName: 'Français', englishName: 'French', dir: 'ltr' as const },
+  { key: 'de', nativeName: 'Deutsch', englishName: 'German', dir: 'ltr' as const },
+  { key: 'ru', nativeName: 'Русский', englishName: 'Russian', dir: 'ltr' as const },
+  { key: 'zh', nativeName: '中文', englishName: 'Chinese', dir: 'ltr' as const },
+  { key: 'ja', nativeName: '日本語', englishName: 'Japanese', dir: 'ltr' as const },
+  { key: 'ko', nativeName: '한국어', englishName: 'Korean', dir: 'ltr' as const },
+] as const
 
-export type LanguageCode = keyof typeof languages
+export type UILanguage = typeof supportedLanguages[number]['key']
+
+export const languageMap = Object.fromEntries(
+  supportedLanguages.map((l) => [l.key, l]),
+) as Record<string, typeof supportedLanguages[number]>

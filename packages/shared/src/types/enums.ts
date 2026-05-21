@@ -71,7 +71,7 @@ export type BusinessCategory =
   | 'other'
 
 // Supported languages
-export type Language = 'en' | 'es'
+export type Language = 'en' | 'es' | 'ar' | 'fr' | 'de' | 'ru' | 'zh' | 'ja' | 'ko'
 
 // Escalation reasons
 export type EscalationReason =
