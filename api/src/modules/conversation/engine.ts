@@ -63,11 +63,22 @@ interface IncomingMessage {
 
 export async function processIncomingMessage(workspaceId: string, msg: IncomingMessage) {
   try {
-    // 1. Detect language (for audio, body may be empty — refined after transcription)
-    const language: 'en' | 'es' = detectLanguage(msg.body) || 'en'
+    // 1. Resolve language: prefer persisted customer language, then workspace default, then detect
+    const detectedLanguage: 'en' | 'es' = detectLanguage(msg.body) || 'en'
+
+    // 1a. Load workspace default language
+    const [wsLang] = await db
+      .select({ defaultLanguage: workspaces.defaultLanguage })
+      .from(workspaces)
+      .where(eq(workspaces.id, workspaceId))
+      .limit(1)
+    const workspaceLanguage = (wsLang?.defaultLanguage as 'en' | 'es') ?? 'en'
 
     // 2. Find or create customer (using phone number or thread ID)
-    const customer = await resolveOrCreateCustomer(workspaceId, msg.phoneNumber, language)
+    const customer = await resolveOrCreateCustomer(workspaceId, msg.phoneNumber, detectedLanguage)
+
+    // 2a. Determine language priority: customer persisted > workspace default > detected
+    const language: 'en' | 'es' = (customer.language as 'en' | 'es') ?? workspaceLanguage ?? detectedLanguage
 
     // 2a. Consent management — reset outbound counter, ensure consent record exists
     await resetOnInbound(workspaceId, customer.id)
@@ -388,6 +399,11 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       },
     })
 
+    // 13. Background: extract customer memory + conversation summarization
+    extractMemoryAndSummarize(workspaceId, conversation.id, customer.id, messageBody, aiResponse.text, agentLanguage).catch(() => {
+      // Non-critical — errors already logged inside
+    })
+
     logger.info('Message processed', {
       workspaceId,
       conversationId: conversation.id,
@@ -622,4 +638,46 @@ function detectAutoEscalation(
   }
 
   return null
+}
+
+/**
+ * Background task: extract customer memory from the conversation turn
+ * and generate a conversation summary if the thread is long enough.
+ */
+async function extractMemoryAndSummarize(
+  workspaceId: string,
+  conversationId: string,
+  customerId: string,
+  customerMessage: string,
+  aiResponse: string,
+  language: 'en' | 'es',
+): Promise<void> {
+  try {
+    // Memory extraction
+    const { extractMemoryFromConversation } = await import('../ai/memory.js')
+    await extractMemoryFromConversation(workspaceId, customerId, [
+      { role: 'customer', content: customerMessage },
+      { role: 'ai', content: aiResponse },
+    ])
+  } catch (err) {
+    logger.error('Memory extraction failed', {
+      workspaceId,
+      conversationId,
+      error: err instanceof Error ? err.message : String(err),
+    })
+  }
+
+  try {
+    // Conversation summarization
+    const { shouldSummarize, generateAndStoreSummary } = await import('./summarization.js')
+    if (await shouldSummarize(conversationId)) {
+      await generateAndStoreSummary(conversationId, workspaceId, language)
+    }
+  } catch (err) {
+    logger.error('Conversation summarization failed', {
+      workspaceId,
+      conversationId,
+      error: err instanceof Error ? err.message : String(err),
+    })
+  }
 }

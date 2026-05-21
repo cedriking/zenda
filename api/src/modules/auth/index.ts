@@ -15,7 +15,7 @@ export const authModule = new Elysia({ prefix: '/auth' })
       set.status = 400
       return { error: 'Validation failed', details: parsed.error.issues }
     }
-    const { name, email, password, businessName } = parsed.data
+    const { name, email, password, businessName, language } = parsed.data
 
     try {
     // Check existing user
@@ -36,6 +36,7 @@ export const authModule = new Elysia({ prefix: '/auth' })
       const [workspace] = await tx.insert(workspaces).values({
         name: businessName,
         slug,
+        defaultLanguage: language,
       }).returning()
 
       await tx.insert(workspaceMembers).values({

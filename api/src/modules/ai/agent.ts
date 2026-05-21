@@ -79,8 +79,8 @@ export async function runAgent(
       }
     }
 
-    // 1. Build system prompt with business context
-    const systemPrompt = await buildSystemPrompt(workspaceId, language)
+    // 1. Build system prompt with business context + customer context
+    const systemPrompt = await buildSystemPrompt(workspaceId, language, customerId, conversationId)
 
     // 2. Sanitize customer input
     const { sanitized, wasModified, flags } = sanitizeCustomerMessage(userMessage)

@@ -19,6 +19,7 @@ function SignupPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [businessName, setBusinessName] = useState('')
+  const [language, setLanguage] = useState<'en' | 'es'>('en')
   const [error, setError] = useState<string | null>(null)
   const setAuth = useAuthStore((s) => s.setAuth)
   const setLoading = useAuthStore((s) => s.setLoading)
@@ -39,7 +40,7 @@ function SignupPage() {
     try {
       const data = await apiFetch('/auth/signup', {
         method: 'POST',
-        body: { name, email, password, businessName },
+        body: { name, email, password, businessName, language },
       })
       setAuth(data as Parameters<typeof setAuth>[0])
       navigate({ to: getPostAuthRoute() })
@@ -129,6 +130,19 @@ function SignupPage() {
               placeholder="Luna Studio"
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="language" className="text-sm font-medium">Language / Idioma</label>
+            <select
+              id="language"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as 'en' | 'es')}
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+            >
+              <option value="en">English</option>
+              <option value="es">Español</option>
+            </select>
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>

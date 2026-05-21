@@ -1,6 +1,6 @@
 import { db } from '@zenda/db/client'
-import { customers, appointments } from '@zenda/db/schema'
-import { eq, and, count, desc } from 'drizzle-orm'
+import { customers, appointments, services as servicesTable } from '@zenda/db/schema'
+import { eq, and, count, desc, asc, sql } from 'drizzle-orm'
 
 interface CustomerProfile {
   id: string
@@ -51,4 +51,39 @@ export async function getCustomerProfile(
     lastVisit: lastAppointmentResult[0]?.startAt?.toISOString() ?? null,
     memory,
   }
+}
+
+export interface AppointmentWithService {
+  id: string
+  serviceName: string
+  startAt: Date
+  endAt: Date
+  status: string
+  confirmationStatus: string
+}
+
+export async function getRecentAppointments(
+  workspaceId: string,
+  customerId: string,
+  limit = 5,
+): Promise<AppointmentWithService[]> {
+  const rows = await db
+    .select({
+      id: appointments.id,
+      serviceName: servicesTable.name,
+      startAt: appointments.startAt,
+      endAt: appointments.endAt,
+      status: appointments.status,
+      confirmationStatus: appointments.confirmationStatus,
+    })
+    .from(appointments)
+    .innerJoin(servicesTable, eq(appointments.serviceId, servicesTable.id))
+    .where(and(
+      eq(appointments.workspaceId, workspaceId),
+      eq(appointments.customerId, customerId),
+    ))
+    .orderBy(desc(appointments.startAt))
+    .limit(limit)
+
+  return rows
 }

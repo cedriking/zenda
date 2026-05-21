@@ -51,6 +51,8 @@ interface BusinessContext {
 export async function buildSystemPrompt(
   workspaceId: string,
   language: Language,
+  customerId?: string,
+  conversationId?: string,
 ): Promise<string> {
   const ctx = await loadBusinessContext(workspaceId)
   const lang = language === 'es' ? 'Spanish' : 'English'
@@ -90,6 +92,12 @@ export async function buildSystemPrompt(
 
   // 11. Safety rules (S22)
   sections.push(buildSafetyRulesSection())
+
+  // 12. Customer Context (if available)
+  if (customerId) {
+    const customerSection = await buildCustomerContextSection(workspaceId, customerId, conversationId)
+    if (customerSection) sections.push(customerSection)
+  }
 
   return sections.join('\n\n')
 }
@@ -425,5 +433,71 @@ async function loadBusinessContext(workspaceId: string): Promise<BusinessContext
     approvedDiscountText: business?.approvedDiscountText ?? null,
     emergencyEscalationInstructions: business?.emergencyEscalationInstructions ?? null,
     sensitiveTopics: business?.sensitiveTopics ?? null,
+  }
+}
+
+async function buildCustomerContextSection(
+  workspaceId: string,
+  customerId: string,
+  conversationId?: string,
+): Promise<string | null> {
+  try {
+    const { getCustomerProfile, getRecentAppointments } = await import('../conversation/customer-profile.js')
+    const [profile, recentAppts] = await Promise.all([
+      getCustomerProfile(workspaceId, customerId),
+      getRecentAppointments(workspaceId, customerId, 5),
+    ])
+
+    if (!profile) return null
+
+    const lines: string[] = ['## Customer Context', '']
+
+    lines.push(`- Customer phone: ${profile.phoneNumber}`)
+    if (profile.name) lines.push(`- Customer name: ${profile.name}`)
+    lines.push(`- Preferred language: ${profile.language}`)
+    lines.push(`- Total past appointments: ${profile.totalAppointments}`)
+    if (profile.lastVisit) lines.push(`- Last visit: ${new Date(profile.lastVisit).toLocaleDateString()}`)
+
+    if (profile.memory.length > 0) {
+      lines.push('- Known preferences:')
+      for (const m of profile.memory) {
+        lines.push(`  - ${m.key}: ${m.value}`)
+      }
+    }
+
+    if (recentAppts.length > 0) {
+      const upcoming = recentAppts.filter(a => new Date(a.startAt) > new Date())
+      const past = recentAppts.filter(a => new Date(a.startAt) <= new Date())
+
+      if (upcoming.length > 0) {
+        lines.push('- Upcoming appointments:')
+        for (const a of upcoming) {
+          lines.push(`  - ${a.serviceName} on ${new Date(a.startAt).toLocaleDateString()} at ${new Date(a.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} (${a.confirmationStatus})`)
+        }
+      }
+
+      if (past.length > 0) {
+        lines.push('- Recent past appointments:')
+        for (const a of past.slice(0, 3)) {
+          lines.push(`  - ${a.serviceName} on ${new Date(a.startAt).toLocaleDateString()} (${a.status})`)
+        }
+      }
+    }
+
+    // Add conversation summary if available
+    if (conversationId) {
+      try {
+        const { getSummariesForConversation } = await import('../conversation/summarization.js')
+        const summaries = await getSummariesForConversation(conversationId)
+        if (summaries.length > 0) {
+          lines.push(`- Previous conversation summary: ${summaries[0].summary}`)
+        }
+      } catch { /* non-critical */ }
+    }
+
+    return lines.join('\n')
+  } catch (err) {
+    // Non-critical: if customer context fails, continue without it
+    return null
   }
 }

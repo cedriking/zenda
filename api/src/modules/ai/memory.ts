@@ -52,23 +52,45 @@ export async function extractMemoryFromConversation(
   customerId: string,
   messages: Array<{ role: string; content: string }>,
 ): Promise<void> {
-  // Simple extraction: look for preferences in the conversation
-  // In production, this would use an LLM call for extraction
+  // Only extract from customer messages that have substance
+  const customerMessages = messages
+    .filter(m => m.role === 'customer' && m.content.length > 10)
+    .map(m => m.content)
+
+  if (customerMessages.length === 0) return
+
+  const text = customerMessages.slice(-5).join('\n')
+  const lowerText = text.toLowerCase()
   const preferences: MemoryEntry[] = []
 
-  const lowerText = messages.map(m => m.content.toLowerCase()).join(' ')
-
-  // Detect common preferences
+  // Time preferences
   const timePatterns = [
-    { pattern: /morning|mañana/i, key: 'preferred_time', value: 'morning' },
-    { pattern: /afternoon|tarde/i, key: 'preferred_time', value: 'afternoon' },
-    { pattern: /evening|noche/i, key: 'preferred_time', value: 'evening' },
+    { pattern: /\b(morning|mañana|temprano)\b/i, key: 'preferred_time', value: 'morning' },
+    { pattern: /\b(afternoon|tarde)\b/i, key: 'preferred_time', value: 'afternoon' },
+    { pattern: /\b(evening|noche)\b/i, key: 'preferred_time', value: 'evening' },
   ]
-
   for (const { pattern, key, value } of timePatterns) {
     if (pattern.test(lowerText)) {
       preferences.push({ key, value, source: 'ai_extraction' })
+      break
     }
+  }
+
+  // Staff preferences — "with Maria", "con Juan"
+  const staffMatch = text.match(/(?:with|con|prefer|prefiero|quiero)\s+(?:a\s+)?([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/)
+  if (staffMatch) {
+    preferences.push({ key: 'preferred_staff', value: staffMatch[1], source: 'ai_extraction' })
+  }
+
+  // Service preferences — "always get a haircut", "suelo pedir corte"
+  const serviceMatch = text.match(/(?:always|usually|suelo|siempre)\s+(?:get|do|hacer|hago)\s+(.{3,40}?)(?:\.|,|$)/i)
+  if (serviceMatch) {
+    preferences.push({ key: 'preferred_service', value: serviceMatch[1].trim(), source: 'ai_extraction' })
+  }
+
+  // Communication style
+  if (/\b(?:por favor|please|gracias|thanks|thank you)\b/i.test(lowerText)) {
+    preferences.push({ key: 'communication_style', value: 'polite', source: 'ai_extraction' })
   }
 
   if (preferences.length > 0) {

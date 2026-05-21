@@ -13,6 +13,7 @@ export const signupSchema = z.object({
   email: z.email('Invalid email address'),
   password: passwordSchema,
   businessName: z.string().min(2, 'Business name must be at least 2 characters').max(100),
+  language: z.enum(['en', 'es']).default('en'),
 })
 
 export const refreshTokenSchema = z.object({
