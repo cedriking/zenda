@@ -13,7 +13,8 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
-    "lint": "turbo run lint",
+    "lint": "biome lint .",
+    "lint:ci": "biome ci .",
     "check": "turbo run check",
     "db:generate": "cd packages/db && bunx drizzle-kit generate",
     "db:migrate": "cd packages/db && bunx drizzle-kit migrate",
@@ -21,8 +22,10 @@
     "db:seed": "cd packages/db && bun run src/seed/index.ts"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.8",
     "turbo": "^2.5.4",
     "typescript": "^5.9.3",
+    "ultracite": "^7.3.2",
     "vite": "^6.4.2"
   },
   "packageManager": "npm@11.4.2",

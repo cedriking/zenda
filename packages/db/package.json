@@ -13,6 +13,7 @@
   "scripts": {
     "build": "tsc",
     "check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "generate": "drizzle-kit generate",
     "migrate": "drizzle-kit migrate",
     "studio": "drizzle-kit studio",

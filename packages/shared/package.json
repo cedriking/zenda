@@ -7,7 +7,8 @@
   "types": "./src/index.ts",
   "scripts": {
     "build": "tsc",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "zod": "^4.4.3"

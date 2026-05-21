@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["ultracite/biome/core"],
+  "files": {
+    "includes": ["!**/node_modules", "!**/dist", "!**/.next", "!**/.vite", "!**/migrations", "!**/src/components/ui"]
+  },
+  "javascript": {
+    "globals": ["MAIN_WINDOW_VITE_DEV_SERVER_URL", "MAIN_WINDOW_VITE_NAME"]
+  },
+  "overrides": [
+    {
+      "includes": ["app/**", "web/**"],
+      "extends": ["ultracite/biome/react"]
+    }
+  ]
+}
