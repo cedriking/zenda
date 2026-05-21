@@ -1,7 +1,7 @@
 import { db } from '@zenda/db/client'
 import { notifications } from '@zenda/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
-import { sendToWorkspace } from '../whatsapp/connection-manager.js'
+import { wsMessageSender } from '../../infra/message-sender.js'
 import type { NotificationType } from '@zenda/shared'
 
 interface CreateNotificationInput {
@@ -25,8 +25,8 @@ export async function createNotification(input: CreateNotificationInput) {
     })
     .returning()
 
-  // Push to connected workspace via WebSocket
-  sendToWorkspace(input.workspaceId, {
+  // Push to connected workspace
+  wsMessageSender.send(input.workspaceId, {
     type: 'notification',
     data: notif,
   })

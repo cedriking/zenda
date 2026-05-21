@@ -8,7 +8,7 @@ import { dequeueNext, markSent, markFailed, type QueuedMessage } from './persist
 import { canSendOutboundMessage } from '../messaging/sending-policy.js'
 import { getOutboundCount, resetOnInbound } from '../messaging/outbound-tracker.js'
 import { getConsent } from '../messaging/consent-service.js'
-import { sendToWorkspace, isWorkspaceConnected } from '../whatsapp/connection-manager.js'
+import { wsMessageSender } from '../../infra/message-sender.js'
 import { db } from '@zenda/db/client'
 import { appointments, customers, outboundQueue } from '@zenda/db/schema'
 import { eq, and, gte, sql } from 'drizzle-orm'
@@ -131,7 +131,7 @@ async function processOne(): Promise<boolean> {
     }
 
     // Check connector health
-    const connectorStable = isWorkspaceConnected(msg.workspaceId)
+    const connectorStable = wsMessageSender.isConnected(msg.workspaceId)
 
     // Determine if there's an active appointment context
     const hasActiveAppointmentContext = !!(
@@ -164,7 +164,7 @@ async function processOne(): Promise<boolean> {
     }
 
     // Send via WebSocket to workspace
-    sendToWorkspace(msg.workspaceId, {
+    wsMessageSender.send(msg.workspaceId, {
       type: 'response.send',
       data: {
         conversationId: msg.conversationId,

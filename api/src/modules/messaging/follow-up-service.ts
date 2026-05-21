@@ -5,7 +5,7 @@
  * Sends at most one natural follow-up per customer after 30 minutes.
  */
 
-import { sendToWorkspace } from '../whatsapp/ws-handler.js'
+import { wsMessageSender } from '../../infra/message-sender.js'
 import { canSendOutboundMessage } from './sending-policy.js'
 import { getOutboundCount, incrementOutbound } from './outbound-tracker.js'
 import { logger } from '../../infra/logger.js'
@@ -139,7 +139,7 @@ export async function checkAndSendFollowUp(): Promise<number> {
         ? `Hola${customerName !== cust.phoneNumber ? ` ${customerName}` : ''}, noté que no terminamos de agendar tu cita. Te gustaría continuar?`
         : `Hi${customerName !== cust.phoneNumber ? ` ${customerName}` : ''}, I noticed we didn't finish booking your appointment. Would you like to continue?`
 
-      const delivered = sendToWorkspace(ws.id, {
+      const delivered = wsMessageSender.send(ws.id, {
         type: 'whatsapp.message',
         data: {
           phoneNumber: cust.phoneNumber,

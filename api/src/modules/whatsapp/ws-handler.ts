@@ -161,5 +161,3 @@ export const wsModule = new Elysia({ prefix: '/ws' })
     },
   })
 
-// Export for use by other modules to send messages back
-export { sendToWorkspace }

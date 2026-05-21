@@ -1,7 +1,7 @@
 import { db } from '@zenda/db/client'
 import { reminders, appointments, customers, services, workspaces, messagingConsent, receptionistProfiles } from '@zenda/db/schema'
 import { eq, and, lte } from 'drizzle-orm'
-import { sendToWorkspace } from '../whatsapp/ws-handler.js'
+import { wsMessageSender } from '../../infra/message-sender.js'
 import { logger } from '../../infra/logger.js'
 import { canSendReminder, recordReminderSent } from '../messaging/reminder-guard.js'
 import { incrementOutbound } from '../messaging/outbound-tracker.js'
@@ -343,7 +343,7 @@ export async function processDueReminders(): Promise<number> {
         : template.bodyEn({ customerName, serviceName: svc.name, time, date })
 
       // ── 5. Send reminder ──
-      const delivered = sendToWorkspace(ws.id, {
+      const delivered = wsMessageSender.send(ws.id, {
         type: 'whatsapp.message',
         data: {
           phoneNumber: cust.phoneNumber,

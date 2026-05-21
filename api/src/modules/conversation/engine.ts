@@ -3,7 +3,8 @@ import { conversations, messages, workspaces, businessProfiles } from '@zenda/db
 import { eq, and, desc } from 'drizzle-orm'
 import { resolveOrCreateCustomer } from './customer-resolver.js'
 import { detectLanguage } from './language-detector.js'
-import { sendToWorkspace } from '../whatsapp/ws-handler.js'
+import type { MessageSender } from '@zenda/shared'
+import { wsMessageSender } from '../../infra/message-sender.js'
 import { handleAudioMessage } from '../ai/transcription/audio-handler.js'
 import { getNextOnboardingQuestion, processOnboardingResponse } from '../onboarding/conversation-handler.js'
 import { logger } from '../../infra/logger.js'
@@ -63,7 +64,7 @@ interface IncomingMessage {
   platform?: string // 'whatsapp', 'instagram', 'telegram', etc.
 }
 
-export async function processIncomingMessage(workspaceId: string, msg: IncomingMessage) {
+export async function processIncomingMessage(workspaceId: string, msg: IncomingMessage, sender: MessageSender = wsMessageSender) {
   try {
     // 1. Resolve language: prefer persisted customer language, then workspace default, then detect
     const detectedLanguage: 'en' | 'es' = detectLanguage(msg.body) || 'en'
@@ -157,7 +158,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
     const onboardingStep = (ws?.onboardingStep ?? 'not_started') as OnboardingStep
     if (onboardingStep !== 'ready') {
       // Workspace hasn't completed onboarding — handle via onboarding flow
-      await handleOnboardingMessage(workspaceId, conversation.id, customer.id, messageBody, agentLanguage, msg)
+      await handleOnboardingMessage(workspaceId, conversation.id, customer.id, messageBody, agentLanguage, msg, sender)
       return
     }
 
@@ -165,7 +166,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
     if (conversation.mode !== 'auto') {
       // Notify owner if needs_attention or human_takeover
       if (conversation.mode === 'needs_attention') {
-        sendToWorkspace(workspaceId, {
+        sender.send(workspaceId, {
           type: 'notification',
           data: {
             id: crypto.randomUUID(),
@@ -208,7 +209,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
         language: agentLanguage,
       })
 
-      sendToWorkspace(workspaceId, {
+      sender.send(workspaceId, {
         type: 'response.send',
         data: {
           conversationId: conversation.id,
@@ -224,7 +225,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
         },
       })
 
-      sendToWorkspace(workspaceId, {
+      sender.send(workspaceId, {
         type: 'conversation.update',
         data: {
           id: conversation.id,
@@ -260,7 +261,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
         language: agentLanguage,
       })
 
-      sendToWorkspace(workspaceId, {
+      sender.send(workspaceId, {
         type: 'response.send',
         data: {
           conversationId: conversation.id,
@@ -276,7 +277,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
         },
       })
 
-      sendToWorkspace(workspaceId, {
+      sender.send(workspaceId, {
         type: 'conversation.update',
         data: {
           id: conversation.id,
@@ -313,7 +314,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
         language: agentLanguage,
       })
 
-      sendToWorkspace(workspaceId, {
+      sender.send(workspaceId, {
         type: 'response.send',
         data: {
           conversationId: conversation.id,
@@ -357,7 +358,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
         language: agentLanguage,
       })
 
-      sendToWorkspace(workspaceId, {
+      sender.send(workspaceId, {
         type: 'response.send',
         data: {
           conversationId: conversation.id,
@@ -377,7 +378,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       // a notification on threshold crossing, but send an extra push if
       // the conversation just crossed the limit)
       if (conversationEnforcement.warningLevel === 'limit') {
-        sendToWorkspace(workspaceId, {
+        sender.send(workspaceId, {
           type: 'plan.limit_reached',
           data: {
             metric: 'conversations',
@@ -447,7 +448,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
     }
 
     // 11. Send response back via WebSocket
-    sendToWorkspace(workspaceId, {
+    sender.send(workspaceId, {
       type: 'response.send',
       data: {
         conversationId: conversation.id,
@@ -464,7 +465,7 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
     })
 
     // 12. Send conversation update event
-    sendToWorkspace(workspaceId, {
+    sender.send(workspaceId, {
       type: 'conversation.update',
       data: {
         id: conversation.id,
@@ -569,6 +570,7 @@ async function handleOnboardingMessage(
   messageBody: string,
   language: 'en' | 'es',
   msg: IncomingMessage,
+  sender: MessageSender,
 ) {
   // Get current onboarding step
   const questionData = await getNextOnboardingQuestion(workspaceId, language)
@@ -592,7 +594,7 @@ async function handleOnboardingMessage(
       language,
     })
 
-    sendToWorkspace(workspaceId, {
+    sender.send(workspaceId, {
       type: 'response.send',
       data: {
         conversationId,
@@ -632,7 +634,7 @@ async function handleOnboardingMessage(
     language,
   })
 
-  sendToWorkspace(workspaceId, {
+  sender.send(workspaceId, {
     type: 'response.send',
     data: {
       conversationId,
