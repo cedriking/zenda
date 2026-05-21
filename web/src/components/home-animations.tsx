@@ -156,17 +156,17 @@ export function HomeAnimations({
             <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
               <Bot className="size-4 text-emerald-600" />
             </div>
-            <span className="text-sm font-semibold text-slate-900">Zenda AI</span>
-            <span className="ml-auto text-xs text-slate-400">Online</span>
+            <span className="text-sm font-semibold text-slate-900">{t('vcBotName')}</span>
+            <span className="ml-auto text-xs text-slate-400">{t('vcOnline')}</span>
           </div>
           <div className="bg-emerald-50 rounded-xl rounded-tl-sm p-3 text-sm text-slate-700 max-w-[85%]">
-            Hi! I&apos;d love to help you book an appointment. What service are you looking for?
+            {t('vcChat1')}
           </div>
           <div className="bg-slate-100 rounded-xl rounded-tr-sm p-3 text-sm text-slate-700 max-w-[85%] ml-auto">
-            I need a haircut and maybe a beard trim
+            {t('vcChat2')}
           </div>
           <div className="bg-emerald-50 rounded-xl rounded-tl-sm p-3 text-sm text-slate-700 max-w-[85%]">
-            Great choice! I have openings tomorrow at 10am and 2pm. Which works better for you?
+            {t('vcChat3')}
           </div>
         </div>
       )
@@ -176,14 +176,14 @@ export function HomeAnimations({
       return (
         <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-semibold text-slate-900">Today</span>
-            <span className="text-xs text-emerald-600 font-medium">3 bookings</span>
+            <span className="text-sm font-semibold text-slate-900">{t('vcCalToday')}</span>
+            <span className="text-xs text-emerald-600 font-medium">{t('vcCalBookings', { count: 3 })}</span>
           </div>
           <div className="space-y-2">
             {[
-              { time: '10:00', name: 'Maria García', service: 'Haircut + Beard', status: 'Confirmed' },
-              { time: '14:00', name: 'Carlos López', service: 'Hair Treatment', status: 'Pending' },
-              { time: '16:30', name: 'Ana Torres', service: 'Manicure', status: 'Confirmed' },
+              { time: '10:00', name: t('vcApt1Name'), service: t('vcApt1Service'), status: t('vcApt1Status'), confirmed: true },
+              { time: '14:00', name: t('vcApt2Name'), service: t('vcApt2Service'), status: t('vcApt2Status'), confirmed: false },
+              { time: '16:30', name: t('vcApt3Name'), service: t('vcApt3Service'), status: t('vcApt3Status'), confirmed: true },
             ].map(apt => (
               <div key={apt.time} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-emerald-50 transition">
                 <span className="text-xs font-mono text-slate-500 w-12">{apt.time}</span>
@@ -192,7 +192,7 @@ export function HomeAnimations({
                   <p className="text-xs text-slate-500">{apt.service}</p>
                 </div>
                 <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                  apt.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                  apt.confirmed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
                 }`}>{apt.status}</span>
               </div>
             ))}
@@ -204,11 +204,11 @@ export function HomeAnimations({
     if (type === 'settings') {
       return (
         <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 space-y-4">
-          <h4 className="text-sm font-semibold text-slate-900">Knowledge Base</h4>
+          <h4 className="text-sm font-semibold text-slate-900">{t('vcKbTitle')}</h4>
           {[
-            { q: 'Do you accept credit cards?', a: 'Yes, all major cards and cash.' },
-            { q: 'Is there parking?', a: 'Free street parking on weekdays.' },
-            { q: 'Do you offer group discounts?', a: 'Groups of 5+ get 10% off.' },
+            { q: t('vcKb1Q'), a: t('vcKb1A') },
+            { q: t('vcKb2Q'), a: t('vcKb2A') },
+            { q: t('vcKb3Q'), a: t('vcKb3A') },
           ].map(item => (
             <div key={item.q} className="p-3 rounded-xl bg-slate-50 border border-slate-100">
               <p className="text-sm font-medium text-slate-700">{item.q}</p>
@@ -224,13 +224,13 @@ export function HomeAnimations({
       <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <Shield className="size-5 text-emerald-500" />
-          <span className="text-sm font-semibold text-slate-900">Safety Dashboard</span>
+          <span className="text-sm font-semibold text-slate-900">{t('vcSafetyTitle')}</span>
         </div>
         {[
-          { label: 'Opt-in Rate', value: '98%', good: true },
-          { label: 'Messages Sent Today', value: '47 / 150', good: true },
-          { label: 'Policy Compliance', value: '100%', good: true },
-          { label: 'Escalations', value: '2 resolved', good: true },
+          { label: t('vcSafety1Label'), value: t('vcSafety1Value'), good: true },
+          { label: t('vcSafety2Label'), value: t('vcSafety2Value'), good: true },
+          { label: t('vcSafety3Label'), value: t('vcSafety3Value'), good: true },
+          { label: t('vcSafety4Label'), value: t('vcSafety4Value'), good: true },
         ].map(item => (
           <div key={item.label} className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
             <span className="text-xs text-slate-600">{item.label}</span>
@@ -349,7 +349,7 @@ export function HomeAnimations({
       <div className="space-y-24">
         {FEATURE_SECTIONS.map((f, i) => (
           <FadeUp key={f.title}>
-            <div className={`grid md:grid-cols-2 gap-12 items-center ${i % 2 === 1 ? 'md:direction-rtl' : ''}`}>
+            <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className={i % 2 === 1 ? 'md:order-2' : ''}>
                 <h3 className="text-2xl md:text-3xl font-black text-slate-900 mb-4">{f.title}</h3>
                 <p className="text-slate-600 leading-relaxed text-lg mb-6">{f.desc}</p>
@@ -420,7 +420,7 @@ export function HomeAnimations({
             <div className="w-3 h-3 rounded-full bg-red-400" />
             <div className="w-3 h-3 rounded-full bg-amber-400" />
             <div className="w-3 h-3 rounded-full bg-emerald-400" />
-            <span className="ml-4 text-xs text-slate-400">Zenda Dashboard</span>
+            <span className="ml-4 text-xs text-slate-400">{t('vcDashLabel')}</span>
           </div>
           <div className="p-6 md:p-8">
             <div className="grid md:grid-cols-3 gap-4 mb-6">
