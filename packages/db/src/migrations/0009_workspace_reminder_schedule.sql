@@ -1,2 +1,6 @@
--- Add reminder schedule config to workspaces
-ALTER TABLE workspaces ADD COLUMN IF NOT EXISTS reminder_schedule JSONB DEFAULT '[{"offsetHours": 24, "type": "reminder"}, {"offsetHours": 2, "type": "confirmation_prompt"}]';
+-- Add reminder schedule columns to workspaces (idempotent)
+ALTER TABLE "workspaces" ADD COLUMN IF NOT EXISTS "day_before_reminder_enabled" boolean DEFAULT true;
+--> statement-breakpoint
+ALTER TABLE "workspaces" ADD COLUMN IF NOT EXISTS "same_day_reminder_enabled" boolean DEFAULT true;
+--> statement-breakpoint
+ALTER TABLE "workspaces" ADD COLUMN IF NOT EXISTS "same_day_reminder_hours_before" integer DEFAULT 2;

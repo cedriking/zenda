@@ -1,3 +1,6 @@
--- Add channel and channel_provider columns to audit_logs
-ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS channel VARCHAR(50);
-ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS channel_provider VARCHAR(50);
+-- Add channel and source columns to audit_logs (idempotent)
+ALTER TABLE "audit_logs" ADD COLUMN IF NOT EXISTS "channel" varchar(50);
+--> statement-breakpoint
+ALTER TABLE "audit_logs" ADD COLUMN IF NOT EXISTS "source" varchar(50);
+--> statement-breakpoint
+ALTER TABLE "audit_logs" ADD COLUMN IF NOT EXISTS "metadata" jsonb;
