@@ -1,104 +1,188 @@
-import { logger } from '../../../infra/logger.js'
-
-interface TranscriptionResult {
-  text: string
-  confidence: number
-  language: string
-  duration: number
+export interface TranscriptionOptions {
+  language?: 'en' | 'es'
+  provider?: 'openai' | 'zai'
+  mimeType?: string
 }
 
+export interface TranscriptionResult {
+  text: string
+  confidence?: number
+  language?: string
+  duration?: number
+}
+
+/**
+ * Transcribe audio buffer using Whisper (OpenAI) with ZAI fallback.
+ * Handles:
+ * - OpenAI Whisper-1 (primary)
+ * - ZAI Whisper (fallback)
+ * - Unsupported formats → converted MIME or error
+ * - Silent/empty audio → returns empty text
+ */
 export async function transcribeAudio(
   audioBuffer: Buffer,
-  options?: { language?: 'en' | 'es'; provider?: 'openai' | 'zai' },
+  options?: TranscriptionOptions,
 ): Promise<TranscriptionResult> {
-  const provider = options?.provider ?? 'openai'
-
-  try {
-    if (provider === 'openai') {
-      return await transcribeWithOpenAI(audioBuffer, options?.language)
-    }
-    return await transcribeWithZAI(audioBuffer, options?.language)
-  } catch (err) {
-    logger.error('Transcription failed', { provider, error: (err as Error).message })
-    throw err
+  if (!audioBuffer || audioBuffer.length === 0) {
+    return { text: '', confidence: 0, language: options?.language ?? 'en' }
   }
+
+  // Minimum size check: < 1KB likely not real audio
+  if (audioBuffer.length < 1024) {
+    return { text: '', confidence: 0, language: options?.language ?? 'en' }
+  }
+
+  const providers: Array<{ name: 'openai' | 'zai'; fn: () => Promise<TranscriptionResult> }> = []
+
+  const preferred = options?.provider ?? 'openai'
+
+  // Build provider list with preferred first
+  if (preferred === 'openai') {
+    providers.push({ name: 'openai', fn: () => transcribeWithOpenAI(audioBuffer, options) })
+    providers.push({ name: 'zai', fn: () => transcribeWithZAI(audioBuffer, options) })
+  } else {
+    providers.push({ name: 'zai', fn: () => transcribeWithZAI(audioBuffer, options) })
+    providers.push({ name: 'openai', fn: () => transcribeWithOpenAI(audioBuffer, options) })
+  }
+
+  let lastError: Error | null = null
+
+  for (const provider of providers) {
+    try {
+      const result = await provider.fn()
+      return result
+    } catch (err) {
+      console.warn(`[transcription] ${provider.name} failed:`, err instanceof Error ? err.message : err)
+      lastError = err instanceof Error ? err : new Error(String(err))
+      continue
+    }
+  }
+
+  // All providers failed
+  throw lastError ?? new Error('All transcription providers failed')
+}
+
+/**
+ * Determine the MIME type and file extension for the audio blob.
+ * Defaults to WhatsApp voice note format (OGG/Opus).
+ */
+function resolveAudioMime(mimeType?: string): { mime: string; ext: string } {
+  if (!mimeType) return { mime: 'audio/ogg; codecs=opus', ext: 'ogg' }
+
+  const lower = mimeType.toLowerCase()
+
+  if (lower.includes('ogg') || lower.includes('opus')) {
+    return { mime: 'audio/ogg; codecs=opus', ext: 'ogg' }
+  }
+  if (lower.includes('webm')) {
+    return { mime: 'audio/webm', ext: 'webm' }
+  }
+  if (lower.includes('mp4') || lower.includes('m4a')) {
+    return { mime: 'audio/mp4', ext: 'm4a' }
+  }
+  if (lower.includes('mpeg') || lower.includes('mp3')) {
+    return { mime: 'audio/mpeg', ext: 'mp3' }
+  }
+  if (lower.includes('wav')) {
+    return { mime: 'audio/wav', ext: 'wav' }
+  }
+
+  // Unknown format — try as OGG (Whisper accepts many formats)
+  return { mime: 'audio/ogg; codecs=opus', ext: 'ogg' }
 }
 
 async function transcribeWithOpenAI(
   audioBuffer: Buffer,
-  language?: string,
+  options?: TranscriptionOptions,
 ): Promise<TranscriptionResult> {
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) throw new Error('OPENAI_API_KEY not configured')
 
+  const { mime, ext } = resolveAudioMime(options?.mimeType)
+  const filename = `voice_note.${ext}`
+
   const formData = new FormData()
-  const blob = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/ogg; codecs=opus' })
-  formData.append('file', blob, 'audio.ogg')
+  formData.append('file', new Blob([new Uint8Array(audioBuffer)], { type: mime }), filename)
   formData.append('model', 'whisper-1')
   formData.append('response_format', 'verbose_json')
-  if (language) formData.append('language', language)
 
-  const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+  if (options?.language) {
+    formData.append('language', options.language)
+  }
+
+  const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}` },
     body: formData,
   })
 
-  if (!res.ok) {
-    const err = await res.text()
-    throw new Error(`OpenAI Whisper error: ${err}`)
+  if (!response.ok) {
+    const errorBody = await response.text()
+    throw new Error(`OpenAI Whisper error ${response.status}: ${errorBody}`)
   }
 
-  const data = await res.json() as {
+  const data = await response.json() as {
     text: string
-    language: string
-    duration: number
+    language?: string
+    duration?: number
     segments?: Array<{ avg_logprob: number }>
   }
 
-  const avgConfidence = data.segments?.length
-    ? Math.exp(data.segments.reduce((sum, s) => sum + s.avg_logprob, 0) / data.segments.length)
-    : 0.9
+  // Compute confidence from segment log probabilities
+  let confidence: number | undefined
+  if (data.segments && data.segments.length > 0) {
+    const avgLogProb = data.segments.reduce((sum, s) => sum + s.avg_logprob, 0) / data.segments.length
+    // Convert log prob to 0-1 scale (log prob typically -1 to 0)
+    confidence = Math.max(0, Math.min(1, (avgLogProb + 1)))
+  }
 
   return {
-    text: data.text,
-    confidence: avgConfidence,
-    language: data.language,
+    text: data.text ?? '',
+    confidence,
+    language: data.language ?? options?.language,
     duration: data.duration,
   }
 }
 
 async function transcribeWithZAI(
   audioBuffer: Buffer,
-  language?: string,
+  options?: TranscriptionOptions,
 ): Promise<TranscriptionResult> {
-  const baseUrl = process.env.ZAI_BASE ?? 'https://api.z.ai/v1'
   const apiKey = process.env.ZAI_API_KEY
   if (!apiKey) throw new Error('ZAI_API_KEY not configured')
 
-  const formData = new FormData()
-  const blob = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/ogg; codecs=opus' })
-  formData.append('file', blob, 'audio.ogg')
-  formData.append('model', 'whisper')
-  if (language) formData.append('language', language)
+  const { mime, ext } = resolveAudioMime(options?.mimeType)
+  const filename = `voice_note.${ext}`
 
-  const res = await fetch(`${baseUrl}/audio/transcriptions`, {
+  const formData = new FormData()
+  formData.append('file', new Blob([new Uint8Array(audioBuffer)], { type: mime }), filename)
+  formData.append('model', 'whisper')
+
+  if (options?.language) {
+    formData.append('language', options.language)
+  }
+
+  const response = await fetch('https://api.z.ai/v1/audio/transcriptions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}` },
     body: formData,
   })
 
-  if (!res.ok) {
-    const err = await res.text()
-    throw new Error(`Z.ai transcription error: ${err}`)
+  if (!response.ok) {
+    const errorBody = await response.text()
+    throw new Error(`ZAI Whisper error ${response.status}: ${errorBody}`)
   }
 
-  const data = await res.json() as { text: string; language?: string; duration?: number }
+  const data = await response.json() as {
+    text: string
+    language?: string
+    duration?: number
+  }
 
   return {
-    text: data.text,
-    confidence: 0.9,
-    language: data.language ?? language ?? 'es',
-    duration: data.duration ?? 0,
+    text: data.text ?? '',
+    confidence: undefined, // ZAI doesn't return segment log probs
+    language: data.language ?? options?.language,
+    duration: data.duration,
   }
 }

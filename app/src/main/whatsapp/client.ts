@@ -5,7 +5,9 @@ import {
   useMultiFileAuthState,
   DisconnectReason,
   fetchLatestBaileysVersion,
+  downloadMediaMessage,
   type WASocket,
+  type WAMessage,
 } from '@whiskeysockets/baileys'
 import QRCode from 'qrcode'
 import { getSessionPath, clearSession } from './session.js'
@@ -208,6 +210,27 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
           ? new Date(ts * 1000).toISOString()
           : new Date().toISOString()
 
+        // For audio messages, download the media and encode as base64 data URI
+        let mediaUrl: string | undefined
+        if (contentType === 'audio' && sock) {
+          try {
+            const audioBuffer = await downloadMediaMessage(
+              msg as WAMessage,
+              'buffer',
+              {},
+            ) as Buffer
+
+            if (audioBuffer && audioBuffer.length > 0) {
+              const mime = msg.message?.audioMessage?.mimetype ?? 'audio/ogg; codecs=opus'
+              mediaUrl = `data:${mime};base64,${audioBuffer.toString('base64')}`
+            } else {
+              log('Audio download returned empty buffer for', msg.key.id)
+            }
+          } catch (downloadErr) {
+            log('Failed to download audio:', downloadErr instanceof Error ? downloadErr.message : downloadErr)
+          }
+        }
+
         sendToBackend({
           type: 'whatsapp.message',
           phoneNumber,
@@ -215,6 +238,7 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
           contentType,
           timestamp,
           externalMessageId: msg.key.id ?? undefined,
+          ...(mediaUrl ? { mediaUrl } : {}),
         })
       }
     })
