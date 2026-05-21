@@ -1,22 +1,7 @@
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
+import { getTranslations } from 'next-intl/server'
 import { MessageCircle, Send } from 'lucide-react'
-
-const FOOTER_LINKS = {
-  Product: [
-    { label: 'Features', href: '/#features' },
-    { label: 'Pricing', href: '/pricing' },
-    { label: 'Documentation', href: '/docs' },
-  ],
-  Company: [
-    { label: 'About', href: '#' },
-    { label: 'Blog', href: '#' },
-    { label: 'Contact', href: '#' },
-  ],
-  Legal: [
-    { label: 'Privacy Policy', href: '/legal/privacy' },
-    { label: 'Terms of Service', href: '/legal/terms' },
-  ],
-}
+import { LanguageSwitcher } from '@/components/language-switcher'
 
 function Logo() {
   return (
@@ -30,7 +15,26 @@ function Logo() {
   )
 }
 
-export function Footer() {
+export async function Footer() {
+  const t = await getTranslations('footer')
+
+  const FOOTER_LINKS = {
+    [t('product')]: [
+      { label: t('features'), href: '/#features' },
+      { label: t('pricing'), href: '/pricing' },
+      { label: t('documentation'), href: '/docs' },
+    ],
+    [t('company')]: [
+      { label: t('about'), href: '#' },
+      { label: t('blog'), href: '#' },
+      { label: t('contact'), href: '#' },
+    ],
+    [t('legal')]: [
+      { label: t('privacyPolicy'), href: '/legal/privacy' },
+      { label: t('termsOfService'), href: '/legal/terms' },
+    ],
+  }
+
   return (
     <footer className="bg-neutral-200 py-6 px-4 md:px-8">
       <div className="bg-slate-950 rounded-[2rem] overflow-hidden">
@@ -40,7 +44,7 @@ export function Footer() {
             <div className="col-span-2">
               <Logo />
               <p className="text-sm text-slate-400 leading-relaxed mt-4 max-w-xs">
-                AI receptionist for appointment-based businesses in Latin America. Available 24/7 on WhatsApp.
+                {t('tagline')}
               </p>
             </div>
 
@@ -63,10 +67,13 @@ export function Footer() {
 
           {/* Bottom bar */}
           <div className="mt-16 pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-slate-500">&copy; {new Date().getFullYear()} Zenda. All rights reserved.</p>
-            <div className="flex items-center gap-2 text-slate-400">
-              <Send className="size-4" />
-              <span className="text-xs">Built in Latin America</span>
+            <p className="text-xs text-slate-500">&copy; {new Date().getFullYear()} Zenda. {t('copyright')}</p>
+            <div className="flex items-center gap-4">
+              <LanguageSwitcher variant="footer" />
+              <div className="flex items-center gap-2 text-slate-400">
+                <Send className="size-4" />
+                <span className="text-xs">{t('builtIn')}</span>
+              </div>
             </div>
           </div>
         </div>

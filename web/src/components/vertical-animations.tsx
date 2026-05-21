@@ -1,6 +1,7 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import { FadeUp, StaggerContainer, StaggerChild } from '@/components/motion'
 import { ArrowRight } from 'lucide-react'
 
@@ -13,12 +14,14 @@ interface VerticalAnimationsProps {
 }
 
 export function VerticalAnimations({ variant, headline, description, title, features }: VerticalAnimationsProps) {
+  const t = useTranslations('verticals')
+
   if (variant === 'hero') {
     return (
       <>
         <FadeUp>
           <span className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 border border-emerald-100">
-            WhatsApp AI Receptionist
+            {t('badge')}
           </span>
         </FadeUp>
         <FadeUp delay={0.1}>
@@ -32,7 +35,7 @@ export function VerticalAnimations({ variant, headline, description, title, feat
             href="/signup"
             className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-3.5 text-base font-semibold text-white hover:bg-emerald-600 transition-colors shadow-xl shadow-emerald-500/25"
           >
-            Start Free Trial
+            {t('ctaButton')}
             <ArrowRight className="ml-2 size-4" />
           </Link>
         </FadeUp>

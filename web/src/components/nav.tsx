@@ -1,15 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import { Menu, X, MessageCircle } from 'lucide-react'
-
-const NAV_LINKS = [
-  { href: '#features', label: 'Features' },
-  { href: '/pricing', label: 'Pricing' },
-  { href: '#how-it-works', label: 'How It Works' },
-  { href: '#faq', label: 'FAQ' },
-]
+import { LanguageSwitcher } from '@/components/language-switcher'
 
 function Logo() {
   return (
@@ -50,8 +45,16 @@ function GhostButton({ href, children, dark = false }: { href: string; children:
 }
 
 export function Nav({ variant = 'home' }: { variant?: 'home' | 'simple' }) {
+  const t = useTranslations('nav')
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+
+  const NAV_LINKS = [
+    { href: '#features', label: t('features') },
+    { href: '/pricing', label: t('pricing') },
+    { href: '#how-it-works', label: t('howItWorks') },
+    { href: '#faq', label: t('faq') },
+  ]
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -66,8 +69,9 @@ export function Nav({ variant = 'home' }: { variant?: 'home' | 'simple' }) {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-3">
-            <GhostButton href="/login">Log in</GhostButton>
-            <PrimaryButton href="/signup">Get Started</PrimaryButton>
+            <LanguageSwitcher />
+            <GhostButton href="/login">{t('login')}</GhostButton>
+            <PrimaryButton href="/signup">{t('getStarted')}</PrimaryButton>
           </div>
         </div>
       </nav>
@@ -96,14 +100,15 @@ export function Nav({ variant = 'home' }: { variant?: 'home' | 'simple' }) {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <GhostButton href="/login">Log in</GhostButton>
-          <PrimaryButton href="/signup">Get Started</PrimaryButton>
+          <LanguageSwitcher />
+          <GhostButton href="/login">{t('login')}</GhostButton>
+          <PrimaryButton href="/signup">{t('getStarted')}</PrimaryButton>
         </div>
 
         <button
           className="md:hidden p-2 text-slate-600"
           onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
+          aria-label={t('menuToggle')}
         >
           {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
@@ -124,8 +129,9 @@ export function Nav({ variant = 'home' }: { variant?: 'home' | 'simple' }) {
               </Link>
             ))}
             <div className="flex flex-col gap-2 pt-2">
-              <GhostButton href="/login">Log in</GhostButton>
-              <PrimaryButton href="/signup">Get Started</PrimaryButton>
+              <LanguageSwitcher />
+              <GhostButton href="/login">{t('login')}</GhostButton>
+              <PrimaryButton href="/signup">{t('getStarted')}</PrimaryButton>
             </div>
           </div>
         </div>

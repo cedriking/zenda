@@ -1,20 +1,21 @@
-import Link from 'next/link'
-import type { Metadata } from 'next'
+import { Link } from '@/i18n/navigation'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
 import { VerticalAnimations } from '@/components/vertical-animations'
+import { getTranslations } from 'next-intl/server'
 
 export interface VerticalPageConfig {
   slug: string
   title: string
   headline: string
   description: string
-  metadata: Metadata
   featuresSectionTitle: string
   features: { title: string; desc: string }[]
 }
 
-export function VerticalPage({ config }: { config: VerticalPageConfig }) {
+export async function VerticalPage({ config }: { config: VerticalPageConfig }) {
+  const t = await getTranslations('verticals')
+
   return (
     <div className="min-h-screen flex flex-col bg-neutral-200 pt-16">
       <Nav variant="simple" />
@@ -40,16 +41,16 @@ export function VerticalPage({ config }: { config: VerticalPageConfig }) {
           <div className="max-w-4xl mx-auto">
             <div className="bg-slate-950 rounded-[2rem] p-8 md:p-12 text-center">
               <h2 className="text-2xl md:text-3xl font-black text-white mb-4">
-                Ready to automate {config.title.toLowerCase()}?
+                {t('ctaTitle', { title: config.title.toLowerCase() })}
               </h2>
               <p className="text-slate-400 mb-6">
-                Start your 14-day free trial today. No credit card required.
+                {t('ctaDesc')}
               </p>
               <Link
                 href="/signup"
                 className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-3.5 text-base font-semibold text-white hover:bg-emerald-600 transition-colors shadow-xl shadow-emerald-500/25"
               >
-                Start Free Trial
+                {t('ctaButton')}
               </Link>
             </div>
           </div>

@@ -1,6 +1,7 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import {
   FadeUp,
@@ -48,190 +49,6 @@ function CheckLine({ children }: { children: React.ReactNode }) {
   )
 }
 
-/* ── Hero stats ── */
-const HERO_STATS = [
-  { value: '10k+', label: 'Appointments booked' },
-  { value: '98%', label: 'Customer satisfaction' },
-  { value: '40%', label: 'Fewer no-shows' },
-]
-
-/* ── Audiences ── */
-const AUDIENCES = [
-  { icon: Scissors, title: 'Beauty Salons', desc: 'Haircuts, manicures, treatments — all booked via WhatsApp.' },
-  { icon: Heart, title: 'Wellness & Spa', desc: 'Massages, facials, and wellness sessions automated end to end.' },
-  { icon: Stethoscope, title: 'Health Clinics', desc: 'Patient scheduling, reminders, and follow-ups handled 24/7.' },
-  { icon: Star, title: 'Other Services', desc: 'Dentists, gyms, consultants — any appointment-based business.' },
-]
-
-/* ── Capabilities ── */
-const CAPABILITIES = [
-  { icon: Bot, title: 'AI Conversations', desc: 'Handles customer messages naturally in English and Spanish, 24/7. Understands context and intent.' },
-  { icon: CalendarClock, title: 'Smart Scheduling', desc: 'Books, confirms, reschedules, and cancels appointments automatically based on your real availability.' },
-  { icon: Bell, title: 'Automated Reminders', desc: '24-hour and 2-hour reminders sent via WhatsApp. Reduce no-shows by up to 40%.' },
-  { icon: Brain, title: 'Learns Your Business', desc: 'Trains on your services, hours, policies, and FAQ. Gets smarter with every conversation.' },
-  { icon: UserCheck, title: 'Human Takeover', desc: 'You or your staff can step in anytime with one click. Seamless handoff back to AI.' },
-  { icon: Smartphone, title: 'WhatsApp Native', desc: 'Your customers chat via WhatsApp — no app to install, no friction. Just their usual messaging app.' },
-]
-
-/* ── Feature sections with visuals ── */
-const FEATURE_SECTIONS = [
-  {
-    title: 'Conversations that feel human',
-    desc: 'Your AI receptionist greets customers, answers questions about services and pricing, and guides them to book — all in natural, friendly language.',
-    visual: 'chat' as const,
-  },
-  {
-    title: 'Scheduling on autopilot',
-    desc: 'When a customer wants an appointment, Zenda checks your availability, proposes times, and confirms the booking. Reschedules and cancellations too.',
-    visual: 'calendar' as const,
-  },
-  {
-    title: 'Your business, always learning',
-    desc: 'Add your services, hours, policies, and FAQ to the knowledge base. The AI uses this to give accurate, personalized responses to every customer.',
-    visual: 'settings' as const,
-  },
-  {
-    title: 'Safe and compliant messaging',
-    desc: 'Built-in safeguards ensure messages comply with WhatsApp business policies. Opt-in management, sending limits, and audit trails keep you protected.',
-    visual: 'safety' as const,
-  },
-]
-
-/* ── Safety pillars ── */
-const SAFETY_PILLARS = [
-  { title: 'Consent-First', desc: 'Every customer must opt in before receiving messages. Easy opt-out at any time.' },
-  { title: 'Sending Limits', desc: 'Maximum 3 outbound messages without a customer reply. Prevents spam and protects your reputation.' },
-  { title: 'Audit Trail', desc: 'Every message is logged with purpose, timestamp, and consent status. Full transparency.' },
-  { title: 'Content Guardrails', desc: 'AI responses are filtered for appropriate content and compliant with messaging policies.' },
-]
-
-/* ── Dashboard cards ── */
-const DASHBOARD_CARDS = [
-  { title: 'Today\'s Appointments', value: '8', change: '+2 from yesterday' },
-  { title: 'Conversations', value: '23', change: '5 need attention' },
-  { title: 'Bookings This Week', value: '34', change: '+12% vs last week' },
-]
-
-/* ── Industries ── */
-const INDUSTRIES = ['Beauty Salons', 'Dental Clinics', 'Health & Wellness', 'Barbershops', 'Gyms & Fitness', 'Pet Grooming', 'Consulting', 'Photography', 'Massage Therapy', 'Nail Studios']
-
-/* ── How It Works ── */
-const HOW_IT_WORKS = [
-  { step: '01', title: 'Connect WhatsApp', desc: 'Link your business WhatsApp number in seconds via the Zenda desktop app. Scan a QR code and you\'re live.' },
-  { step: '02', title: 'Set Up Your Profile', desc: 'Tell Zenda about your services, hours, staff, and policies. Takes about 5 minutes.' },
-  { step: '03', title: 'Go Live', desc: 'Zenda starts handling customer messages and booking appointments immediately. Monitor everything from your dashboard.' },
-]
-
-/* ── FAQs ── */
-const FAQS = [
-  { q: 'Do my customers need to install anything?', a: 'No. They just message your WhatsApp number as usual. Zenda works behind the scenes — no downloads, no sign-ups required.' },
-  { q: 'Can I take over a conversation manually?', a: 'Yes. One click to take over from the dashboard, one click to hand back to AI. Full control, always.' },
-  { q: 'What languages does Zenda support?', a: 'English and Spanish with natural, conversational responses in both. The AI auto-detects which language the customer is using.' },
-  { q: 'Is my data secure?', a: 'All conversations are encrypted. Your data stays in your workspace. We never share it with third parties.' },
-  { q: 'Can I cancel anytime?', a: 'Yes, no contracts. Cancel from the dashboard or billing portal at any time. Your data is yours to export.' },
-  { q: 'What if the AI makes a mistake?', a: 'You can take over any conversation at any time. The AI is designed to escalate to you when unsure. You can also cancel or reschedule any appointment from the calendar.' },
-]
-
-/* ── Visual Card sub-component ── */
-function VisualCard({ type }: { type: 'chat' | 'calendar' | 'settings' | 'safety' }) {
-  if (type === 'chat') {
-    return (
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 space-y-3">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-            <Bot className="size-4 text-emerald-600" />
-          </div>
-          <span className="text-sm font-semibold text-slate-900">Zenda AI</span>
-          <span className="ml-auto text-xs text-slate-400">Online</span>
-        </div>
-        <div className="bg-emerald-50 rounded-xl rounded-tl-sm p-3 text-sm text-slate-700 max-w-[85%]">
-          Hi! I&apos;d love to help you book an appointment. What service are you looking for?
-        </div>
-        <div className="bg-slate-100 rounded-xl rounded-tr-sm p-3 text-sm text-slate-700 max-w-[85%] ml-auto">
-          I need a haircut and maybe a beard trim
-        </div>
-        <div className="bg-emerald-50 rounded-xl rounded-tl-sm p-3 text-sm text-slate-700 max-w-[85%]">
-          Great choice! I have openings tomorrow at 10am and 2pm. Which works better for you?
-        </div>
-      </div>
-    )
-  }
-
-  if (type === 'calendar') {
-    return (
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-sm font-semibold text-slate-900">Today</span>
-          <span className="text-xs text-emerald-600 font-medium">3 bookings</span>
-        </div>
-        <div className="space-y-2">
-          {[
-            { time: '10:00', name: 'Maria García', service: 'Haircut + Beard', status: 'Confirmed' },
-            { time: '14:00', name: 'Carlos López', service: 'Hair Treatment', status: 'Pending' },
-            { time: '16:30', name: 'Ana Torres', service: 'Manicure', status: 'Confirmed' },
-          ].map(apt => (
-            <div key={apt.time} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-emerald-50 transition">
-              <span className="text-xs font-mono text-slate-500 w-12">{apt.time}</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-900 truncate">{apt.name}</p>
-                <p className="text-xs text-slate-500">{apt.service}</p>
-              </div>
-              <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                apt.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-              }`}>{apt.status}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  if (type === 'settings') {
-    return (
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 space-y-4">
-        <h4 className="text-sm font-semibold text-slate-900">Knowledge Base</h4>
-        {[
-          { q: 'Do you accept credit cards?', a: 'Yes, all major cards and cash.' },
-          { q: 'Is there parking?', a: 'Free street parking on weekdays.' },
-          { q: 'Do you offer group discounts?', a: 'Groups of 5+ get 10% off.' },
-        ].map(item => (
-          <div key={item.q} className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-            <p className="text-sm font-medium text-slate-700">{item.q}</p>
-            <p className="text-xs text-slate-500 mt-1">{item.a}</p>
-          </div>
-        ))}
-      </div>
-    )
-  }
-
-  // safety
-  return (
-    <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 space-y-3">
-      <div className="flex items-center gap-2 mb-2">
-        <Shield className="size-5 text-emerald-500" />
-        <span className="text-sm font-semibold text-slate-900">Safety Dashboard</span>
-      </div>
-      {[
-        { label: 'Opt-in Rate', value: '98%', good: true },
-        { label: 'Messages Sent Today', value: '47 / 150', good: true },
-        { label: 'Policy Compliance', value: '100%', good: true },
-        { label: 'Escalations', value: '2 resolved', good: true },
-      ].map(item => (
-        <div key={item.label} className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-          <span className="text-xs text-slate-600">{item.label}</span>
-          <span className={`text-xs font-semibold ${item.good ? 'text-emerald-600' : 'text-amber-600'}`}>{item.value}</span>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-/* ── FAQ Item ── */
-function FAQItem({ question, answer }: { question: string; answer: string }) {
-  const [open, setOpen] = useState(false)
-  return <AccordionItem question={question} answer={answer} isOpen={open} onToggle={() => setOpen(!open)} />
-}
-
 /* ── Main component ── */
 export function HomeAnimations({
   variant,
@@ -240,6 +57,196 @@ export function HomeAnimations({
   variant: 'hero' | 'audiences' | 'capabilities' | 'features' | 'safety' | 'how-it-works' | 'dashboard' | 'industries' | 'pricing-teaser' | 'faq' | 'cta'
   children?: React.ReactNode
 }) {
+  const t = useTranslations('home')
+
+  /* ── Hero stats ── */
+  const HERO_STATS = [
+    { value: '10k+', label: t('statAppointments') },
+    { value: '98%', label: t('statSatisfaction') },
+    { value: '40%', label: t('statNoShows') },
+  ]
+
+  /* ── Audiences ── */
+  const AUDIENCES = [
+    { icon: Scissors, title: t('audienceBeautyTitle'), desc: t('audienceBeautyDesc') },
+    { icon: Heart, title: t('audienceWellnessTitle'), desc: t('audienceWellnessDesc') },
+    { icon: Stethoscope, title: t('audienceHealthTitle'), desc: t('audienceHealthDesc') },
+    { icon: Star, title: t('audienceOtherTitle'), desc: t('audienceOtherDesc') },
+  ]
+
+  /* ── Capabilities ── */
+  const CAPABILITIES = [
+    { icon: Bot, title: t('capAiTitle'), desc: t('capAiDesc') },
+    { icon: CalendarClock, title: t('capSchedulingTitle'), desc: t('capSchedulingDesc') },
+    { icon: Bell, title: t('capRemindersTitle'), desc: t('capRemindersDesc') },
+    { icon: Brain, title: t('capLearningTitle'), desc: t('capLearningDesc') },
+    { icon: UserCheck, title: t('capTakeoverTitle'), desc: t('capTakeoverDesc') },
+    { icon: Smartphone, title: t('capWhatsappTitle'), desc: t('capWhatsappDesc') },
+  ]
+
+  /* ── Feature sections with visuals ── */
+  const FEATURE_SECTIONS = [
+    {
+      title: t('featureChatTitle'),
+      desc: t('featureChatDesc'),
+      visual: 'chat' as const,
+    },
+    {
+      title: t('featureCalendarTitle'),
+      desc: t('featureCalendarDesc'),
+      visual: 'calendar' as const,
+    },
+    {
+      title: t('featureSettingsTitle'),
+      desc: t('featureSettingsDesc'),
+      visual: 'settings' as const,
+    },
+    {
+      title: t('featureSafetyTitle'),
+      desc: t('featureSafetyDesc'),
+      visual: 'safety' as const,
+    },
+  ]
+
+  /* ── Safety pillars ── */
+  const SAFETY_PILLARS = [
+    { title: t('safetyConsentTitle'), desc: t('safetyConsentDesc') },
+    { title: t('safetyLimitsTitle'), desc: t('safetyLimitsDesc') },
+    { title: t('safetyAuditTitle'), desc: t('safetyAuditDesc') },
+    { title: t('safetyGuardrailsTitle'), desc: t('safetyGuardrailsDesc') },
+  ]
+
+  /* ── Dashboard cards ── */
+  const DASHBOARD_CARDS = [
+    { title: t('dashAppointmentsTitle'), value: '8', change: t('dashAppointmentsChange') },
+    { title: t('dashConversationsTitle'), value: '23', change: t('dashConversationsChange') },
+    { title: t('dashBookingsTitle'), value: '34', change: t('dashBookingsChange') },
+  ]
+
+  /* ── Industries ── */
+  const INDUSTRIES = [
+    t('indBeauty'), t('indDental'), t('indHealth'), t('indBarber'),
+    t('indGym'), t('indPet'), t('indConsulting'), t('indPhoto'),
+    t('indMassage'), t('indNail'),
+  ]
+
+  /* ── How It Works ── */
+  const HOW_IT_WORKS = [
+    { step: '01', title: t('step1Title'), desc: t('step1Desc') },
+    { step: '02', title: t('step2Title'), desc: t('step2Desc') },
+    { step: '03', title: t('step3Title'), desc: t('step3Desc') },
+  ]
+
+  /* ── FAQs ── */
+  const FAQS = [
+    { q: t('faq1Q'), a: t('faq1A') },
+    { q: t('faq2Q'), a: t('faq2A') },
+    { q: t('faq3Q'), a: t('faq3A') },
+    { q: t('faq4Q'), a: t('faq4A') },
+    { q: t('faq5Q'), a: t('faq5A') },
+    { q: t('faq6Q'), a: t('faq6A') },
+  ]
+
+  /* ── Visual Card sub-component ── */
+  function VisualCard({ type }: { type: 'chat' | 'calendar' | 'settings' | 'safety' }) {
+    if (type === 'chat') {
+      return (
+        <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 space-y-3">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+              <Bot className="size-4 text-emerald-600" />
+            </div>
+            <span className="text-sm font-semibold text-slate-900">Zenda AI</span>
+            <span className="ml-auto text-xs text-slate-400">Online</span>
+          </div>
+          <div className="bg-emerald-50 rounded-xl rounded-tl-sm p-3 text-sm text-slate-700 max-w-[85%]">
+            Hi! I&apos;d love to help you book an appointment. What service are you looking for?
+          </div>
+          <div className="bg-slate-100 rounded-xl rounded-tr-sm p-3 text-sm text-slate-700 max-w-[85%] ml-auto">
+            I need a haircut and maybe a beard trim
+          </div>
+          <div className="bg-emerald-50 rounded-xl rounded-tl-sm p-3 text-sm text-slate-700 max-w-[85%]">
+            Great choice! I have openings tomorrow at 10am and 2pm. Which works better for you?
+          </div>
+        </div>
+      )
+    }
+
+    if (type === 'calendar') {
+      return (
+        <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-semibold text-slate-900">Today</span>
+            <span className="text-xs text-emerald-600 font-medium">3 bookings</span>
+          </div>
+          <div className="space-y-2">
+            {[
+              { time: '10:00', name: 'Maria García', service: 'Haircut + Beard', status: 'Confirmed' },
+              { time: '14:00', name: 'Carlos López', service: 'Hair Treatment', status: 'Pending' },
+              { time: '16:30', name: 'Ana Torres', service: 'Manicure', status: 'Confirmed' },
+            ].map(apt => (
+              <div key={apt.time} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-emerald-50 transition">
+                <span className="text-xs font-mono text-slate-500 w-12">{apt.time}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-900 truncate">{apt.name}</p>
+                  <p className="text-xs text-slate-500">{apt.service}</p>
+                </div>
+                <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                  apt.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                }`}>{apt.status}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    if (type === 'settings') {
+      return (
+        <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 space-y-4">
+          <h4 className="text-sm font-semibold text-slate-900">Knowledge Base</h4>
+          {[
+            { q: 'Do you accept credit cards?', a: 'Yes, all major cards and cash.' },
+            { q: 'Is there parking?', a: 'Free street parking on weekdays.' },
+            { q: 'Do you offer group discounts?', a: 'Groups of 5+ get 10% off.' },
+          ].map(item => (
+            <div key={item.q} className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+              <p className="text-sm font-medium text-slate-700">{item.q}</p>
+              <p className="text-xs text-slate-500 mt-1">{item.a}</p>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    // safety
+    return (
+      <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 space-y-3">
+        <div className="flex items-center gap-2 mb-2">
+          <Shield className="size-5 text-emerald-500" />
+          <span className="text-sm font-semibold text-slate-900">Safety Dashboard</span>
+        </div>
+        {[
+          { label: 'Opt-in Rate', value: '98%', good: true },
+          { label: 'Messages Sent Today', value: '47 / 150', good: true },
+          { label: 'Policy Compliance', value: '100%', good: true },
+          { label: 'Escalations', value: '2 resolved', good: true },
+        ].map(item => (
+          <div key={item.label} className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+            <span className="text-xs text-slate-600">{item.label}</span>
+            <span className={`text-xs font-semibold ${item.good ? 'text-emerald-600' : 'text-amber-600'}`}>{item.value}</span>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  /* ── FAQ Item ── */
+  function FAQItem({ question, answer }: { question: string; answer: string }) {
+    const [open, setOpen] = useState(false)
+    return <AccordionItem question={question} answer={answer} isOpen={open} onToggle={() => setOpen(!open)} />
+  }
+
   /* ── Hero ── */
   if (variant === 'hero') {
     return (
@@ -247,18 +254,18 @@ export function HomeAnimations({
         <FadeUp>
           <SectionLabel>
             <Sparkles className="size-3" />
-            AI Receptionist for Appointment-Based Businesses
+            {t('heroBadge')}
           </SectionLabel>
         </FadeUp>
         <FadeUp delay={0.1}>
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 leading-[1.05]">
-            Your AI receptionist<br />
-            <span className="text-emerald-500">that never misses a message</span>
+            {t('heroTitle1')}<br />
+            <span className="text-emerald-500">{t('heroTitle2')}</span>
           </h1>
         </FadeUp>
         <FadeUp delay={0.2}>
           <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Zenda handles customer conversations, books appointments, and sends reminders — all through WhatsApp. Built for businesses in Latin America.
+            {t('heroDesc')}
           </p>
         </FadeUp>
         <FadeUp delay={0.3}>
@@ -267,14 +274,14 @@ export function HomeAnimations({
               href="/signup"
               className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-3.5 text-base font-semibold text-white hover:bg-emerald-600 transition-colors shadow-xl shadow-emerald-500/25"
             >
-              Start Free Trial
+              {t('startFreeTrial')}
               <ArrowRight className="ml-2 size-4" />
             </Link>
             <Link
               href="#how-it-works"
               className="inline-flex items-center justify-center rounded-full bg-slate-900 px-8 py-3.5 text-base font-semibold text-white hover:bg-slate-800 transition-colors shadow-xl"
             >
-              See How It Works
+              {t('seeHowItWorks')}
             </Link>
           </div>
         </FadeUp>
@@ -350,7 +357,7 @@ export function HomeAnimations({
                   href="/signup"
                   className="inline-flex items-center text-emerald-600 font-semibold hover:text-emerald-700 transition-colors text-sm"
                 >
-                  Learn more <ArrowRight className="ml-1 size-4" />
+                  {t('learnMore')} <ArrowRight className="ml-1 size-4" />
                 </Link>
               </div>
               <div className={i % 2 === 1 ? 'md:order-1' : ''}>
@@ -429,10 +436,10 @@ export function HomeAnimations({
             <div className="grid md:grid-cols-2 gap-4">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-semibold text-slate-700">Active Conversations</span>
-                  <span className="text-xs text-emerald-600 font-medium">23 active</span>
+                  <span className="text-xs font-semibold text-slate-700">{t('dashActiveTitle')}</span>
+                  <span className="text-xs text-emerald-600 font-medium">{t('dashActiveCount')}</span>
                 </div>
-                {['Maria García — Booking confirmed', 'Carlos López — Needs attention', 'Ana Torres — Asked for reschedule'].map(msg => (
+                {[t('dashMsg1'), t('dashMsg2'), t('dashMsg3')].map(msg => (
                   <div key={msg} className="flex items-center gap-3 py-2 border-t border-slate-200 first:border-0">
                     <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                       <MessageSquare className="size-4 text-emerald-600" />
@@ -443,8 +450,8 @@ export function HomeAnimations({
               </div>
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-semibold text-slate-700">Upcoming Appointments</span>
-                  <span className="text-xs text-emerald-600 font-medium">8 today</span>
+                  <span className="text-xs font-semibold text-slate-700">{t('dashUpcomingTitle')}</span>
+                  <span className="text-xs text-emerald-600 font-medium">{t('dashUpcomingCount')}</span>
                 </div>
                 {[
                   { time: '10:00', name: 'Maria García', service: 'Haircut + Beard' },
@@ -484,12 +491,12 @@ export function HomeAnimations({
   if (variant === 'pricing-teaser') {
     return (
       <div className="text-center">
-        <p className="text-lg text-slate-600 mb-6">Starting at <span className="text-3xl font-black text-slate-900">$19</span>/month for solo businesses.</p>
+        <p className="text-lg text-slate-600 mb-6">{t('pricingTeaser', { price: '$19' })}</p>
         <Link
           href="/pricing"
           className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-3.5 text-base font-semibold text-white hover:bg-emerald-600 transition-colors shadow-xl shadow-emerald-500/25"
         >
-          View Plans
+          {t('viewPlans')}
           <ArrowRight className="ml-2 size-4" />
         </Link>
       </div>
@@ -502,24 +509,24 @@ export function HomeAnimations({
       <FadeUp>
         <div className="bg-slate-950 rounded-[2rem] p-8 md:p-16 text-center">
           <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-            Ready to stop missing appointments?
+            {t('ctaTitle')}
           </h2>
           <p className="text-slate-400 text-lg mb-8 max-w-xl mx-auto">
-            Get started in 5 minutes with a 14-day free trial. No credit card required.
+            {t('ctaDesc')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/signup"
               className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-3.5 text-base font-semibold text-white hover:bg-emerald-600 transition-colors shadow-xl shadow-emerald-500/25"
             >
-              Start Free Trial
+              {t('startFreeTrial')}
               <ArrowRight className="ml-2 size-4" />
             </Link>
             <Link
               href="/docs"
               className="inline-flex items-center justify-center rounded-full bg-white/10 px-8 py-3.5 text-base font-semibold text-white hover:bg-white/20 transition-colors"
             >
-              Read the Docs
+              {t('ctaSecondary')}
             </Link>
           </div>
         </div>

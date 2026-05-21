@@ -1,6 +1,7 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import { FadeUp, StaggerContainer, StaggerChild } from '@/components/motion'
 import { Check, ArrowRight } from 'lucide-react'
 
@@ -15,15 +16,17 @@ interface Plan {
 }
 
 export function PricingAnimations({ plans }: { plans: Plan[] }) {
+  const t = useTranslations('pricing')
+
   return (
     <>
       <FadeUp>
         <div className="text-center mb-14">
           <div className="inline-block bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
-            Founding Member Pricing — Limited Time
+            {t('badge')}
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4">Simple, transparent pricing</h1>
-          <p className="text-slate-500 text-lg">No per-message fees. No surprises. Cancel anytime.</p>
+          <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4">{t('title')}</h1>
+          <p className="text-slate-500 text-lg">{t('desc')}</p>
         </div>
       </FadeUp>
 
@@ -37,7 +40,7 @@ export function PricingAnimations({ plans }: { plans: Plan[] }) {
             }`}>
               {plan.highlight && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-4 py-1 rounded-full text-xs font-bold">
-                  Most Popular
+                  {t('mostPopular')}
                 </div>
               )}
 
@@ -55,7 +58,7 @@ export function PricingAnimations({ plans }: { plans: Plan[] }) {
                 <span className={`text-4xl font-black ${plan.highlight ? 'text-white' : 'text-slate-900'}`}>
                   ${plan.price}
                 </span>
-                <span className={`text-sm ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>/month</span>
+                <span className={`text-sm ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>{t('perMonth')}</span>
               </div>
 
               <ul className="space-y-3 mb-8 flex-1">
