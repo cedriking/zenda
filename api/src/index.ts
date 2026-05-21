@@ -54,7 +54,7 @@ const _app = new Elysia()
       return {
         userId: null as string | null,
         workspaceId: null as string | null,
-        workspace: null as any,
+        workspace: null as Record<string, unknown> | null,
       };
     }
 
@@ -63,7 +63,7 @@ const _app = new Elysia()
       return {
         userId: null as string | null,
         workspaceId: null as string | null,
-        workspace: null as any,
+        workspace: null as Record<string, unknown> | null,
       };
     }
 
@@ -88,11 +88,11 @@ const _app = new Elysia()
           return {
             userId: null as string | null,
             workspaceId: null as string | null,
-            workspace: null as any,
+            workspace: null as Record<string, unknown> | null,
           };
         }
       }
-
+      // biome-ignore lint/suspicious/noExplicitAny: workspace type resolved dynamically from DB
       let workspace: any = null;
       if (userId && workspaceId) {
         const [membership] = await db
@@ -121,7 +121,7 @@ const _app = new Elysia()
       return {
         userId: null as string | null,
         workspaceId: null as string | null,
-        workspace: null as any,
+        workspace: null as Record<string, unknown> | null,
       };
     }
   })
@@ -192,36 +192,28 @@ const _app = new Elysia()
   .use(messagingModule) // Consent management (authenticated)
   .use(settingsModule) // Settings endpoints (authenticated)
 
-  .onError(
-    ({
-      error,
-      set,
-      code,
-    }: {
-      error: Error;
-      set: { status: number };
-      code: string;
-    }) => {
-      if (code === "NOT_FOUND") {
-        set.status = 404;
-        return { error: "Not found" };
-      }
-      if (code === "VALIDATION") {
-        set.status = 400;
-        return { error: "Validation error" };
-      }
-      const message =
-        error instanceof Error ? error.message : "Internal server error";
-      logger.error("Unhandled error", {
-        error: message,
-        ...(NODE_ENV !== "production" && {
-          stack: error instanceof Error ? error.stack : undefined,
-        }),
-      });
-      set.status = 500;
-      return { error: "Internal server error" };
+  // biome-ignore lint/suspicious/noExplicitAny: Elysia onError handler has complex generics
+  .onError((handler: any) => {
+    const { error, set, code } = handler;
+    if (code === "NOT_FOUND") {
+      set.status = 404;
+      return { error: "Not found" };
     }
-  )
+    if (code === "VALIDATION") {
+      set.status = 400;
+      return { error: "Validation error" };
+    }
+    const message =
+      error instanceof Error ? error.message : "Internal server error";
+    logger.error("Unhandled error", {
+      error: message,
+      ...(NODE_ENV !== "production" && {
+        stack: error instanceof Error ? error.stack : undefined,
+      }),
+    });
+    set.status = 500;
+    return { error: "Internal server error" };
+  })
   .listen(Number(API_PORT));
 
 logger.info(`Zenda API running on port ${API_PORT}`);

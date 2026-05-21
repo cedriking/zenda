@@ -1,28 +1,49 @@
-import { db } from '@zenda/db/client'
-import { conversations, messages, appointments, providerUsage } from '@zenda/db/schema'
-import { eq, and, gte, lte, sql, count, inArray } from 'drizzle-orm'
+import { db } from "@zenda/db/client";
+import {
+  appointments,
+  conversations,
+  messages,
+  providerUsage,
+} from "@zenda/db/schema";
+import { and, count, eq, gte, inArray, lte, sql } from "drizzle-orm";
 
 interface AnalyticsPeriod {
-  start: Date
-  end: Date
+  end: Date;
+  start: Date;
 }
 
 interface AnalyticsData {
-  conversations: { total: number; byDay: Array<{ date: string; count: number }> }
-  appointments: { total: number; byDay: Array<{ date: string; count: number }>; noShowRate: number }
-  messages: { total: number; avgResponseTimeMs: number }
-  escalations: { total: number; rate: number }
-  ai: { providerBreakdown: Record<string, number>; totalTokens: number }
+  ai: { providerBreakdown: Record<string, number>; totalTokens: number };
+  appointments: {
+    total: number;
+    byDay: Array<{ date: string; count: number }>;
+    noShowRate: number;
+  };
+  conversations: {
+    total: number;
+    byDay: Array<{ date: string; count: number }>;
+  };
+  escalations: { total: number; rate: number };
+  messages: { total: number; avgResponseTimeMs: number };
 }
 
-export async function getAnalytics(workspaceId: string, period: AnalyticsPeriod): Promise<AnalyticsData> {
-  const [conversationStats, appointmentStats, messageStats, escalationStats, aiStats] = await Promise.all([
+export async function getAnalytics(
+  workspaceId: string,
+  period: AnalyticsPeriod
+): Promise<AnalyticsData> {
+  const [
+    conversationStats,
+    appointmentStats,
+    messageStats,
+    escalationStats,
+    aiStats,
+  ] = await Promise.all([
     getConversationStats(workspaceId, period),
     getAppointmentStats(workspaceId, period),
     getMessageStats(workspaceId, period),
     getEscalationStats(workspaceId, period),
     getAIStats(workspaceId, period),
-  ])
+  ]);
 
   return {
     conversations: conversationStats,
@@ -30,20 +51,25 @@ export async function getAnalytics(workspaceId: string, period: AnalyticsPeriod)
     messages: messageStats,
     escalations: escalationStats,
     ai: aiStats,
-  }
+  };
 }
 
-async function getConversationStats(workspaceId: string, period: AnalyticsPeriod) {
+async function getConversationStats(
+  workspaceId: string,
+  period: AnalyticsPeriod
+) {
   const result = await db
     .select({
       count: count(),
     })
     .from(conversations)
-    .where(and(
-      eq(conversations.workspaceId, workspaceId),
-      gte(conversations.createdAt, period.start),
-      lte(conversations.createdAt, period.end),
-    ))
+    .where(
+      and(
+        eq(conversations.workspaceId, workspaceId),
+        gte(conversations.createdAt, period.start),
+        lte(conversations.createdAt, period.end)
+      )
+    );
 
   const byDay = await db
     .select({
@@ -51,39 +77,49 @@ async function getConversationStats(workspaceId: string, period: AnalyticsPeriod
       count: count(),
     })
     .from(conversations)
-    .where(and(
-      eq(conversations.workspaceId, workspaceId),
-      gte(conversations.createdAt, period.start),
-      lte(conversations.createdAt, period.end),
-    ))
+    .where(
+      and(
+        eq(conversations.workspaceId, workspaceId),
+        gte(conversations.createdAt, period.start),
+        lte(conversations.createdAt, period.end)
+      )
+    )
     .groupBy(sql`DATE(${conversations.createdAt})`)
-    .orderBy(sql`DATE(${conversations.createdAt})`)
+    .orderBy(sql`DATE(${conversations.createdAt})`);
 
-  return { total: result[0]?.count ?? 0, byDay }
+  return { total: result[0]?.count ?? 0, byDay };
 }
 
-async function getAppointmentStats(workspaceId: string, period: AnalyticsPeriod) {
+async function getAppointmentStats(
+  workspaceId: string,
+  period: AnalyticsPeriod
+) {
   const totalResult = await db
     .select({ count: count() })
     .from(appointments)
-    .where(and(
-      eq(appointments.workspaceId, workspaceId),
-      gte(appointments.createdAt, period.start),
-      lte(appointments.createdAt, period.end),
-    ))
+    .where(
+      and(
+        eq(appointments.workspaceId, workspaceId),
+        gte(appointments.createdAt, period.start),
+        lte(appointments.createdAt, period.end)
+      )
+    );
 
   const noShowResult = await db
     .select({ count: count() })
     .from(appointments)
-    .where(and(
-      eq(appointments.workspaceId, workspaceId),
-      eq(appointments.status, 'no_show' as any),
-      gte(appointments.createdAt, period.start),
-      lte(appointments.createdAt, period.end),
-    ))
+    .where(
+      and(
+        eq(appointments.workspaceId, workspaceId),
+        // biome-ignore lint/suspicious/noExplicitAny: pgEnum type inference limitation
+        eq(appointments.status, "no_show" as any),
+        gte(appointments.createdAt, period.start),
+        lte(appointments.createdAt, period.end)
+      )
+    );
 
-  const total = totalResult[0]?.count ?? 0
-  const noShows = noShowResult[0]?.count ?? 0
+  const total = totalResult[0]?.count ?? 0;
+  const noShows = noShowResult[0]?.count ?? 0;
 
   const byDay = await db
     .select({
@@ -91,30 +127,34 @@ async function getAppointmentStats(workspaceId: string, period: AnalyticsPeriod)
       count: count(),
     })
     .from(appointments)
-    .where(and(
-      eq(appointments.workspaceId, workspaceId),
-      gte(appointments.createdAt, period.start),
-      lte(appointments.createdAt, period.end),
-    ))
+    .where(
+      and(
+        eq(appointments.workspaceId, workspaceId),
+        gte(appointments.createdAt, period.start),
+        lte(appointments.createdAt, period.end)
+      )
+    )
     .groupBy(sql`DATE(${appointments.createdAt})`)
-    .orderBy(sql`DATE(${appointments.createdAt})`)
+    .orderBy(sql`DATE(${appointments.createdAt})`);
 
   return {
     total,
     byDay,
     noShowRate: total > 0 ? noShows / total : 0,
-  }
+  };
 }
 
 async function getMessageStats(workspaceId: string, period: AnalyticsPeriod) {
   const totalResult = await db
     .select({ count: count() })
     .from(messages)
-    .where(and(
-      eq(messages.workspaceId, workspaceId),
-      gte(messages.createdAt, period.start),
-      lte(messages.createdAt, period.end),
-    ))
+    .where(
+      and(
+        eq(messages.workspaceId, workspaceId),
+        gte(messages.createdAt, period.start),
+        lte(messages.createdAt, period.end)
+      )
+    );
 
   // Calculate avg response time: time between first customer message and first AI response
   // per conversation, then average across all conversations in the period.
@@ -153,59 +193,68 @@ async function getMessageStats(workspaceId: string, period: AnalyticsPeriod) {
            ORDER BY m2.conversation_id, m2.created_at ASC
           ) AS first_reply`,
       sql`first_customer.conversation_id = first_reply.conversation_id`
-    )
+    );
 
   return {
     total: totalResult[0]?.count ?? 0,
     avgResponseTimeMs: Math.round(responseTimeResult[0]?.avgMs ?? 0),
-  }
+  };
 }
 
-async function getEscalationStats(workspaceId: string, period: AnalyticsPeriod) {
+async function getEscalationStats(
+  workspaceId: string,
+  period: AnalyticsPeriod
+) {
   // Count conversations that were escalated (mode is needs_attention or human_takeover)
   const escalatedResult = await db
     .select({ count: count() })
     .from(conversations)
-    .where(and(
-      eq(conversations.workspaceId, workspaceId),
-      inArray(conversations.mode, ['needs_attention', 'human_takeover']),
-      gte(conversations.createdAt, period.start),
-      lte(conversations.createdAt, period.end),
-    ))
+    .where(
+      and(
+        eq(conversations.workspaceId, workspaceId),
+        inArray(conversations.mode, ["needs_attention", "human_takeover"]),
+        gte(conversations.createdAt, period.start),
+        lte(conversations.createdAt, period.end)
+      )
+    );
 
   const totalResult = await db
     .select({ count: count() })
     .from(conversations)
-    .where(and(
-      eq(conversations.workspaceId, workspaceId),
-      gte(conversations.createdAt, period.start),
-      lte(conversations.createdAt, period.end),
-    ))
+    .where(
+      and(
+        eq(conversations.workspaceId, workspaceId),
+        gte(conversations.createdAt, period.start),
+        lte(conversations.createdAt, period.end)
+      )
+    );
 
-  const total = totalResult[0]?.count ?? 0
-  const escalated = escalatedResult[0]?.count ?? 0
+  const total = totalResult[0]?.count ?? 0;
+  const escalated = escalatedResult[0]?.count ?? 0;
 
-  return { total: escalated, rate: total > 0 ? escalated / total : 0 }
+  return { total: escalated, rate: total > 0 ? escalated / total : 0 };
 }
 
 async function getAIStats(workspaceId: string, period: AnalyticsPeriod) {
   const usage = await db
     .select()
     .from(providerUsage)
-    .where(and(
-      eq(providerUsage.workspaceId, workspaceId),
-      gte(providerUsage.createdAt, period.start),
-      lte(providerUsage.createdAt, period.end),
-    ))
+    .where(
+      and(
+        eq(providerUsage.workspaceId, workspaceId),
+        gte(providerUsage.createdAt, period.start),
+        lte(providerUsage.createdAt, period.end)
+      )
+    );
 
-  const breakdown: Record<string, number> = {}
-  let totalTokens = 0
+  const breakdown: Record<string, number> = {};
+  let totalTokens = 0;
 
   for (const record of usage) {
-    const provider = record.provider
-    breakdown[provider] = (breakdown[provider] ?? 0) + 1
-    totalTokens += record.inputTokens ?? 0 + record.outputTokens ?? 0
+    const provider = record.provider;
+    breakdown[provider] = (breakdown[provider] ?? 0) + 1;
+    totalTokens += record.inputTokens + record.outputTokens;
   }
 
-  return { providerBreakdown: breakdown, totalTokens }
+  return { providerBreakdown: breakdown, totalTokens };
 }

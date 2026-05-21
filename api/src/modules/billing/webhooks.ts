@@ -59,7 +59,7 @@ async function handleCheckoutCompleted(event: Stripe.Event): Promise<void> {
   // the v18 TypeScript types don't include them on Subscription directly.
   const stripeSubscription = (await stripe.subscriptions.retrieve(
     session.subscription as string
-  )) as Stripe.Subscription & {
+  )) as unknown as Stripe.Subscription & {
     current_period_start: number;
     current_period_end: number;
   };
