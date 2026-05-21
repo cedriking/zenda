@@ -29,4 +29,8 @@ COPY --from=build-shared /app/packages/db ./packages/db
 COPY package.json ./package.json
 COPY api/ ./api/
 EXPOSE 3001
-CMD ["sh", "-c", "cd packages/db && bunx drizzle-kit migrate && cd /app && bun run api/src/index.ts"]
+
+# Run migrations using locally installed drizzle-kit, then start API.
+# bun run invokes the bin from node_modules/.bin directly (no download).
+# Errors in migration or API startup will be visible in container logs.
+CMD ["sh", "-c", "echo '[startup] Running DB migrations...' && cd packages/db && bun run migrate 2>&1 && echo '[startup] Migrations complete. Starting API...' && cd /app && exec bun run api/src/index.ts"]

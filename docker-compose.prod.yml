@@ -48,9 +48,12 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:?Set CORS_ORIGINS}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      REDIS_URL: redis://redis:6379
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
     deploy:
       resources:
         limits:
