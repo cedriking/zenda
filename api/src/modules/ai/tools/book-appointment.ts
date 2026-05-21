@@ -15,11 +15,12 @@
  * - On failure the agent receives a structured error it can relay honestly.
  */
 import { db } from '@zenda/db/client'
-import { appointments, services, staffMembers, workspaces } from '@zenda/db/schema'
+import { appointments, services, staffMembers, workspaces, customers } from '@zenda/db/schema'
 import { eq, and } from 'drizzle-orm'
 import type { Language } from '@zenda/shared'
 import { logAppointmentAudit } from '../../audit/logger.js'
-import { enforceLimit, trackAndEnforce } from '../../usage/enforcement.js'
+import { enforceLimit } from '../../usage/enforcement.js'
+import { trackActiveContact } from '../../usage/tracker.js'
 
 interface ToolInput {
   customerId: string
@@ -192,8 +193,19 @@ export async function bookAppointment(
     serviceId: input.serviceId!,
   }).catch(() => {})
 
-  // Track appointment usage (background — non-blocking)
-  trackAndEnforce(workspaceId, 'appointments').catch(() => {})
+  // Track active contact for usage (background — non-blocking)
+  ;(async () => {
+    try {
+      const [customer] = await db
+        .select({ phoneNumber: customers.phoneNumber })
+        .from(customers)
+        .where(eq(customers.id, input.customerId))
+        .limit(1)
+      if (customer) {
+        await trackActiveContact(workspaceId, customer.phoneNumber)
+      }
+    } catch {}
+  })()
 
   return {
     appointmentId: appointment.id,

@@ -12,11 +12,12 @@
  * - On failure the agent receives a structured error it can relay honestly.
  */
 import { db } from '@zenda/db/client'
-import { appointments, services, staffMembers, businessProfiles } from '@zenda/db/schema'
+import { appointments, services, staffMembers, businessProfiles, customers } from '@zenda/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { APPOINTMENT_TRANSITIONS } from '@zenda/shared'
 import type { Language } from '@zenda/shared'
 import { logAppointmentAudit } from '../../audit/logger.js'
+import { trackActiveContact } from '../../usage/tracker.js'
 
 interface ToolInput {
   appointmentId: string
@@ -117,6 +118,20 @@ export async function rescheduleAppointment(
   const confirmMsg = lang === 'es'
     ? `Listo. Tu cita de ${svc.name}${staffName ? ` con ${staffName}` : ''} ha sido reprogramada para el ${newDateStr} a las ${newTimeStr}.`
     : `Done. Your ${svc.name} appointment${staffName ? ` with ${staffName}` : ''} has been moved to ${newDateStr} at ${newTimeStr}.`
+
+  // Track active contact for usage (background — non-blocking)
+  ;(async () => {
+    try {
+      const [customer] = await db
+        .select({ phoneNumber: customers.phoneNumber })
+        .from(customers)
+        .where(eq(customers.id, apt.customerId))
+        .limit(1)
+      if (customer) {
+        await trackActiveContact(workspaceId, customer.phoneNumber)
+      }
+    } catch {}
+  })()
 
   return {
     appointmentId: updated.id,

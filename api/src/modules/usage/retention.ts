@@ -1,13 +1,9 @@
 import { db } from '@zenda/db/client'
 import { workspaces, subscriptions, messages, conversations, auditLogs } from '@zenda/db/schema'
 import { eq, and, lt } from 'drizzle-orm'
+import { PLANS } from '@zenda/shared'
+import type { PlanTier } from '@zenda/shared'
 import { logger } from '../../infra/logger.js'
-
-const RETENTION_DAYS: Record<string, number> = {
-  starter: 90,
-  pro: 365,
-  business: Infinity,
-}
 
 export async function enforceDataRetention(workspaceId: string): Promise<{ deleted: { messages: number; conversations: number; auditLogs: number } }> {
   // Get plan tier
@@ -17,12 +13,8 @@ export async function enforceDataRetention(workspaceId: string): Promise<{ delet
     .where(eq(subscriptions.workspaceId, workspaceId))
     .limit(1)
 
-  const tier = (sub?.planTier as string) ?? 'starter'
-  const maxDays = RETENTION_DAYS[tier] ?? 90
-
-  if (maxDays === Infinity) {
-    return { deleted: { messages: 0, conversations: 0, auditLogs: 0 } }
-  }
+  const tier: PlanTier = (sub?.planTier as PlanTier) ?? 'local_solo'
+  const maxDays = PLANS[tier].retentionDays
 
   const cutoffDate = new Date(Date.now() - maxDays * 24 * 60 * 60 * 1000)
 
