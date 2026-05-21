@@ -4,6 +4,7 @@ import { db } from '@zenda/db/client'
 import { subscriptions } from '@zenda/db/schema'
 import { eq } from 'drizzle-orm'
 import { logger } from '../../infra/logger.js'
+import { resetUsageOnPlanChange } from '../usage/enforcement.js'
 
 // Note: Elysia doesn't have raw body middleware built in.
 // For Stripe webhooks, we need the raw body. This handler
@@ -59,9 +60,32 @@ export async function handleWebhook(rawBody: string, signature: string): Promise
 
       if (!workspaceId) break
 
+      // Detect plan changes from price ID
+      const newPriceId = sub.items.data[0]?.price.id
+      const newTier = detectTierFromPrice(newPriceId)
+
+      // Detect downgrade: if tier changed to a lower plan, reset usage
+      if (newTier) {
+        const [current] = await db
+          .select({ planTier: subscriptions.planTier })
+          .from(subscriptions)
+          .where(eq(subscriptions.workspaceId, workspaceId))
+          .limit(1)
+
+        if (current && isDowngrade(current.planTier as string, newTier)) {
+          logger.info('Plan downgrade detected — resetting usage', {
+            workspaceId,
+            from: current.planTier,
+            to: newTier,
+          })
+          await resetUsageOnPlanChange(workspaceId)
+        }
+      }
+
       await db
         .update(subscriptions)
         .set({
+          ...(newTier ? { planTier: newTier as any } : {}),
           status: sub.status as any,
           currentPeriodStart: new Date(sub.current_period_start * 1000),
           currentPeriodEnd: new Date(sub.current_period_end * 1000),
@@ -70,7 +94,7 @@ export async function handleWebhook(rawBody: string, signature: string): Promise
         })
         .where(eq(subscriptions.stripeSubscriptionId, sub.id))
 
-      logger.info('Subscription updated', { workspaceId, status: sub.status })
+      logger.info('Subscription updated', { workspaceId, status: sub.status, newTier })
       break
     }
 
@@ -118,5 +142,19 @@ export async function handleWebhook(rawBody: string, signature: string): Promise
     default:
       logger.debug('Unhandled webhook event', { type: event.type })
   }
+}
+
+const TIER_RANK: Record<string, number> = { starter: 0, pro: 1, business: 2 }
+
+function detectTierFromPrice(priceId: string | undefined): string | null {
+  if (!priceId) return null
+  if (priceId.includes('starter')) return 'starter'
+  if (priceId.includes('pro')) return 'pro'
+  if (priceId.includes('business')) return 'business'
+  return null
+}
+
+function isDowngrade(from: string, to: string): boolean {
+  return (TIER_RANK[from] ?? 0) > (TIER_RANK[to] ?? 0)
 }
 

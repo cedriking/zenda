@@ -19,6 +19,7 @@ import { appointments, services, staffMembers, workspaces } from '@zenda/db/sche
 import { eq, and } from 'drizzle-orm'
 import type { Language } from '@zenda/shared'
 import { logAppointmentAudit } from '../../audit/logger.js'
+import { enforceLimit, trackAndEnforce } from '../../usage/enforcement.js'
 
 interface ToolInput {
   customerId: string
@@ -141,7 +142,23 @@ export async function bookAppointment(
     }
   }
 
-  // ── Phase 4: Confirmed — create the appointment ──
+  // ── Phase 4: Confirmed — check appointment limit, then create ──
+  const appointmentEnforcement = await enforceLimit(workspaceId, 'appointments')
+  if (!appointmentEnforcement.allowed) {
+    const limitMsg = _language === 'es'
+      ? 'Lo siento, no podemos agendar más citas este mes. Por favor contacta al negocio directamente para asistencia.'
+      : 'I\'m sorry, we can\'t book more appointments this month. Please contact the business directly for assistance.'
+
+    return {
+      error: true,
+      message: limitMsg,
+      reason: 'appointment_limit_reached',
+      usage: {
+        current: appointmentEnforcement.currentUsage,
+        limit: appointmentEnforcement.limit,
+      },
+    }
+  }
   // Derive timezone from workspace settings, fallback to UTC
   let timezone = 'UTC'
   const [ws] = await db
@@ -174,6 +191,9 @@ export async function bookAppointment(
     customerId: input.customerId,
     serviceId: input.serviceId!,
   }).catch(() => {})
+
+  // Track appointment usage (background — non-blocking)
+  trackAndEnforce(workspaceId, 'appointments').catch(() => {})
 
   return {
     appointmentId: appointment.id,

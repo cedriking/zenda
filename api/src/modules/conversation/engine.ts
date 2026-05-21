@@ -19,6 +19,8 @@ import {
   touchInboundTimestamp,
 } from '../messaging/consent-service.js'
 import { logConsentEvent } from '../audit/logger.js'
+import { enforceLimit, trackAndEnforce } from '../usage/enforcement.js'
+import type { UsageMetric } from '../usage/enforcement.js'
 
 // Emergency keywords in multiple languages
 const EMERGENCY_KEYWORDS = [
@@ -334,6 +336,61 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
       return
     }
 
+    // 8d. Plan enforcement — check conversation limit before routing to AI
+    const conversationEnforcement = await enforceLimit(workspaceId, 'conversations')
+    if (!conversationEnforcement.allowed) {
+      logger.warn('Conversation limit reached — notifying owner', {
+        workspaceId,
+        usage: conversationEnforcement.currentUsage,
+        limit: conversationEnforcement.limit,
+      })
+
+      // Send a polite message to the customer and notify the owner
+      const limitMessage = agentLanguage === 'es'
+        ? 'Gracias por tu mensaje. En este momento no podemos responder automáticamente. Un miembro del equipo se comunicará contigo pronto.'
+        : 'Thank you for your message. We are currently unable to respond automatically. A team member will reach out to you soon.'
+
+      const limitResponse = await storeMessage(conversation.id, workspaceId, {
+        senderType: 'system',
+        contentType: 'text',
+        body: limitMessage,
+        language: agentLanguage,
+      })
+
+      sendToWorkspace(workspaceId, {
+        type: 'response.send',
+        data: {
+          conversationId: conversation.id,
+          threadId: msg.threadId || conversation.threadId,
+          message: {
+            id: limitResponse.id,
+            body: limitMessage,
+            senderType: 'system',
+            contentType: 'text',
+            status: 'sent',
+            createdAt: limitResponse.createdAt,
+          },
+        },
+      })
+
+      // Ensure the owner was notified (enforcement service already sends
+      // a notification on threshold crossing, but send an extra push if
+      // the conversation just crossed the limit)
+      if (conversationEnforcement.warningLevel === 'limit') {
+        sendToWorkspace(workspaceId, {
+          type: 'plan.limit_reached',
+          data: {
+            metric: 'conversations',
+            currentUsage: conversationEnforcement.currentUsage,
+            limit: conversationEnforcement.limit,
+            gracePeriodEnd: conversationEnforcement.gracePeriodEnd,
+          },
+        })
+      }
+
+      return
+    }
+
     // 9. Route to AI agent (using transcribed text for audio, raw body for text)
     const { runAgent } = await import('../ai/agent.js')
     const aiResponse = await runAgent(workspaceId, conversation.id, customer.id, messageBody, agentLanguage)
@@ -341,6 +398,24 @@ export async function processIncomingMessage(workspaceId: string, msg: IncomingM
     if (!aiResponse) {
       logger.warn('AI agent returned no response', { workspaceId, conversationId: conversation.id })
       return
+    }
+
+    // 9a. Track conversation usage (background — non-blocking)
+    trackAndEnforce(workspaceId, 'conversations').catch((err) => {
+      logger.error('Failed to track conversation usage', {
+        workspaceId,
+        error: err instanceof Error ? err.message : String(err),
+      })
+    })
+
+    // 9b. Track voice minutes usage for audio messages (background)
+    if (isAudio) {
+      trackAndEnforce(workspaceId, 'voice_minutes').catch((err) => {
+        logger.error('Failed to track voice minutes usage', {
+          workspaceId,
+          error: err instanceof Error ? err.message : String(err),
+        })
+      })
     }
 
     // 10. Store AI response
