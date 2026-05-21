@@ -19,6 +19,9 @@ export const CORS_ORIGINS = process.env.CORS_ORIGINS ?? 'http://localhost:5173,h
 export const UPDATE_BASE_URL = process.env.UPDATE_BASE_URL ?? 'https://zenda.bot/updates'
 export const NODE_ENV = process.env.NODE_ENV ?? 'development'
 
+// Local Whisper STT server (faster-whisper)
+export const WHISPER_LOCAL_URL = process.env.WHISPER_LOCAL_URL ?? 'http://192.168.68.131:8001'
+
 // Composio Integration
 export const COMPOSIO_API_KEY = process.env.COMPOSIO_API_KEY ?? ''
 export const COMPOSIO_BASE_URL = process.env.COMPOSIO_BASE_URL ?? 'https://api.composio.dev'

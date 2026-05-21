@@ -38,7 +38,7 @@ const TASK_ROUTING: Record<AITaskType, ProviderConfig[]> = {
     { provider: 'zai', model: 'glm-5-turbo', maxTokens: 300 },
   ],
   transcription: [
-    { provider: 'zai', model: 'glm-4.7', maxTokens: 0 },
+    { provider: 'zai', model: 'local-whisper', maxTokens: 0 },
   ],
 }
 
