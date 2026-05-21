@@ -285,7 +285,7 @@ function mapCategory(response: string): 'beauty' | 'wellness' | 'health' | 'coac
   const lower = response.toLowerCase()
   if (/dental|dentist|teeth/i.test(lower)) return 'health'
   if (/beauty|salon|hair|nail|esthet|peluquer/i.test(lower)) return 'beauty'
-  if (/fitness|gym|gymnasio|deporte|sport/i.test(lower)) return 'fitness'
+  if (/fitness|gym|gimnasio|deporte|sport/i.test(lower)) return 'fitness'
   if (/wellness|spa|massage|masaje|relaj/i.test(lower)) return 'wellness'
   if (/coach|consult|mentor/i.test(lower)) return 'coaching'
   if (/clinic|clínica|medic|doctor|health|salud|doctor/i.test(lower)) return 'health'
@@ -406,7 +406,7 @@ function parseReceptionistConfig(input: string): { name: string; tone: 'professi
   // Extract name — try multiple patterns in order of specificity
   const namePatterns = [
     // "call her/him/it X", "llámalo/se X", "name it X", "nómbrala X"
-    /(?:call\s+(?:her|him|it|the\s+receptionist)\s+|ll[aá]m(?:alo|ala|ar\s+(?:la\s+)?)?\s*|n[oó]mbr(?:alo|ala)\s+|name\s+(?:her|him|it|the\s+receptionist)\s+)(['"]?\w+['"]?)/i,
+    /(?:call\s+(?:her|him|it|the\s+receptionist)\s+|ll[aá]m(?:alo|ala|ar\s+(?:la\s+)?)\s+|n[oó]mbr(?:alo|ala)\s+|name\s+(?:her|him|it|the\s+receptionist)\s+)(['"]?\w+['"]?)/i,
     // "name is X", "nombre es X", "called X", "se llama X"
     /(?:name(?:'s| is)?\s+|nombre\s+(?:es\s+)?|llama\s+(?:se\s+)?|called\s+|sea\s+)(['"]?\w+['"]?)/i,
     // "her/his name is X"
