@@ -4,6 +4,7 @@ import type {
   WhatsAppConnectionStatus,
   SubscriptionStatus,
   PlanTier,
+  SetupType,
   BillingPeriod,
   SenderType,
   MessageContentType,
@@ -63,11 +64,10 @@ export interface Plan {
   tier: PlanTier
   name: string
   monthlyPriceCents: number
-  annualPriceCents: number
-  conversationsLimit: number
-  appointmentsLimit: number
-  voiceMinutesLimit: number
-  staffLimit: number
+  activeContactsLimit: number
+  calendarsStaffLimit: number
+  locationsLimit: number
+  setupType: SetupType
   retentionDays: number
 }
 

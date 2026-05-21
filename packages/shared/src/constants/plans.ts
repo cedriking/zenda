@@ -1,61 +1,62 @@
-import type { PlanTier } from '../types/enums.js'
+import type { PlanTier, SetupType } from '../types/enums.js'
 
 interface PlanConfig {
   name: string
   tier: PlanTier
   monthlyPriceCents: number
-  annualPriceCents: number
-  conversationsLimit: number
-  appointmentsLimit: number
-  voiceMinutesLimit: number
-  staffLimit: number
+  activeContactsLimit: number
+  calendarsStaffLimit: number
+  locationsLimit: number
+  setupType: SetupType
   retentionDays: number
   description: string
 }
 
 export const PLANS: Record<PlanTier, PlanConfig> = {
-  starter: {
-    name: 'Starter',
-    tier: 'starter',
-    monthlyPriceCents: 2900, // $29/month
-    annualPriceCents: 28800, // $24/month = $288/year
-    conversationsLimit: 300,
-    appointmentsLimit: 150,
-    voiceMinutesLimit: 120,
-    staffLimit: 1,
+  local_solo: {
+    name: 'Solo',
+    tier: 'local_solo',
+    monthlyPriceCents: 2900,
+    activeContactsLimit: 50,
+    calendarsStaffLimit: 1,
+    locationsLimit: 1,
+    setupType: 'self_serve',
     retentionDays: 30,
     description: 'Solo Receptionist — Perfect for independent professionals',
   },
-  pro: {
+  local_starter: {
+    name: 'Starter',
+    tier: 'local_starter',
+    monthlyPriceCents: 4900,
+    activeContactsLimit: 150,
+    calendarsStaffLimit: 3,
+    locationsLimit: 1,
+    setupType: 'self_serve',
+    retentionDays: 60,
+    description: 'Starter — For small practices getting started',
+  },
+  local_pro: {
     name: 'Pro',
-    tier: 'pro',
-    monthlyPriceCents: 6900, // $69/month
-    annualPriceCents: 70800, // $59/month = $708/year
-    conversationsLimit: 1000,
-    appointmentsLimit: 500,
-    voiceMinutesLimit: 300,
-    staffLimit: 5,
+    tier: 'local_pro',
+    monthlyPriceCents: 8900,
+    activeContactsLimit: 500,
+    calendarsStaffLimit: 10,
+    locationsLimit: 3,
+    setupType: 'assisted',
     retentionDays: 90,
-    description: 'Team Receptionist — For small teams and growing businesses',
+    description: 'Pro — For growing teams with higher volume',
   },
-  business: {
+  local_business: {
     name: 'Business',
-    tier: 'business',
-    monthlyPriceCents: 14900, // $149/month
-    annualPriceCents: 142800, // $119/month = $1,428/year
-    conversationsLimit: 3000,
-    appointmentsLimit: 1500,
-    voiceMinutesLimit: 800,
-    staffLimit: 15,
+    tier: 'local_business',
+    monthlyPriceCents: 14900,
+    activeContactsLimit: 1500,
+    calendarsStaffLimit: 25,
+    locationsLimit: 10,
+    setupType: 'priority',
     retentionDays: 180,
-    description: 'Advanced Receptionist — For busy teams with higher volume',
+    description: 'Business — For busy multi-location businesses',
   },
-}
-
-export const FOUNDING_PLANS: Record<PlanTier, { monthlyPriceCents: number; annualPriceCents: number }> = {
-  starter: { monthlyPriceCents: 1900, annualPriceCents: 19000 },
-  pro: { monthlyPriceCents: 4900, annualPriceCents: 49000 },
-  business: { monthlyPriceCents: 9900, annualPriceCents: 99000 },
 }
 
 export const RECEPTIONIST_NAMES = [
@@ -65,7 +66,5 @@ export const RECEPTIONIST_NAMES = [
 
 export const USAGE_WARNING_THRESHOLDS = {
   warn: 0.8,
-  critical: 0.95,
   limit: 1.0,
-  gracePeriodDays: 7,
 } as const
