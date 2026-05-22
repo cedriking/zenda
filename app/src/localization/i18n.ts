@@ -19,7 +19,10 @@ function detectLanguage(): string {
 }
 
 const detected = detectLanguage();
-localStorage.setItem(LOCAL_STORAGE_KEYS.LANGUAGE, detected);
+// Only persist when no stored preference existed (first run / browser detection fallback)
+if (!localStorage.getItem(LOCAL_STORAGE_KEYS.LANGUAGE)) {
+  localStorage.setItem(LOCAL_STORAGE_KEYS.LANGUAGE, detected);
+}
 
 i18n.use(initReactI18next).init({
   lng: detected,
