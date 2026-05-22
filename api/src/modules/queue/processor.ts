@@ -211,6 +211,7 @@ async function processOne(): Promise<boolean> {
       type: "response.send",
       data: {
         conversationId: msg.conversationId,
+        phoneNumber: customer.phoneNumber,
         message: {
           body: msg.content,
           senderType: "system",

@@ -279,6 +279,7 @@ export async function processIncomingMessage(
         type: "response.send",
         data: {
           conversationId: conversation.id,
+          phoneNumber: msg.phoneNumber,
           threadId:
             msg.threadId ||
             ((conversation as Record<string, unknown>).threadId as
@@ -345,6 +346,7 @@ export async function processIncomingMessage(
         type: "response.send",
         data: {
           conversationId: conversation.id,
+          phoneNumber: msg.phoneNumber,
           threadId:
             msg.threadId ||
             ((conversation as Record<string, unknown>).threadId as
@@ -402,6 +404,7 @@ export async function processIncomingMessage(
         type: "response.send",
         data: {
           conversationId: conversation.id,
+          phoneNumber: msg.phoneNumber,
           threadId:
             msg.threadId ||
             ((conversation as Record<string, unknown>).threadId as
@@ -454,6 +457,7 @@ export async function processIncomingMessage(
         type: "response.send",
         data: {
           conversationId: conversation.id,
+          phoneNumber: msg.phoneNumber,
           threadId:
             msg.threadId ||
             ((conversation as Record<string, unknown>).threadId as
@@ -564,6 +568,7 @@ export async function processIncomingMessage(
       type: "response.send",
       data: {
         conversationId: conversation.id,
+        phoneNumber: msg.phoneNumber,
         threadId:
           msg.threadId ||
           ((conversation as Record<string, unknown>).threadId as
@@ -723,6 +728,7 @@ async function handleOnboardingMessage(
       type: "response.send",
       data: {
         conversationId,
+        phoneNumber: msg.phoneNumber,
         threadId: msg.threadId,
         message: {
           id: responseMessage.id,
@@ -770,6 +776,7 @@ async function handleOnboardingMessage(
     type: "response.send",
     data: {
       conversationId,
+      phoneNumber: msg.phoneNumber,
       threadId: msg.threadId,
       message: {
         id: responseMessage.id,
