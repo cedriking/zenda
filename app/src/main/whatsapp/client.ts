@@ -262,7 +262,7 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
           ...(mediaUrl ? { mediaUrl } : {}),
         })
         if (!sent) {
-          log('WARNING: Bridge not connected — message from', phoneNumber, 'dropped. Ensure API bridge is running.')
+          log('Message from', phoneNumber, 'queued (bridge not connected)')
         }
       }
     })

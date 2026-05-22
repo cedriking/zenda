@@ -12,6 +12,10 @@ let authFailures = 0
 const MAX_RECONNECT_ATTEMPTS = 10
 const MAX_AUTH_FAILURES = 2
 
+// Incoming message queue — buffers messages when WS is down, flushed on connect
+const pendingQueue: unknown[] = []
+const MAX_PENDING = 50
+
 const WS_URL = process.env.ZENDA_API_WS_URL ?? 'wss://api.zenda.bot/ws'
 
 export function connectBridge(
@@ -31,6 +35,15 @@ export function connectBridge(
     authFailures = 0
     log('Connected to API at', WS_URL)
     mainWindow.webContents.send('bridge:status', { connected: true })
+
+    // Flush any messages that arrived while WS was disconnected
+    if (pendingQueue.length > 0) {
+      log(`Flushing ${pendingQueue.length} queued messages`)
+      while (pendingQueue.length > 0 && ws?.readyState === WebSocket.OPEN) {
+        const data = pendingQueue.shift()
+        if (data !== undefined) ws.send(JSON.stringify(data))
+      }
+    }
   })
 
   ws.on('message', (data: Buffer) => {
@@ -126,7 +139,16 @@ export function connectBridge(
 }
 
 export function sendToBackend(data: unknown): boolean {
-  if (!ws || ws.readyState !== WebSocket.OPEN) return false
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    // Queue for later delivery when bridge reconnects
+    if (pendingQueue.length < MAX_PENDING) {
+      pendingQueue.push(data)
+      log(`Queued message (queue: ${pendingQueue.length}/${MAX_PENDING})`)
+    } else {
+      log('Queue full — dropping message')
+    }
+    return false
+  }
   ws.send(JSON.stringify(data))
   return true
 }
