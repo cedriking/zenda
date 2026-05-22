@@ -109,7 +109,13 @@ export function connectBridge(
     }
   });
 
-  ws.on("close", (code: number, _reason: Buffer) => {
+  ws.on("close", (code: number, reason: Buffer) => {
+    log(
+      "WebSocket closed — code:",
+      code,
+      "reason:",
+      reason.toString() || "(empty)"
+    );
     mainWindow.webContents.send("bridge:status", { connected: false });
 
     // 4001 is a custom close code for authentication failure
@@ -151,6 +157,7 @@ export function connectBridge(
   });
 
   ws.on("error", (err: Error) => {
+    log("WebSocket error:", err.message);
     mainWindow.webContents.send("bridge:status", {
       connected: false,
       error: err.message,

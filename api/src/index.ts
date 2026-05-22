@@ -38,7 +38,13 @@ const corsOrigins = CORS_ORIGINS.split(",")
   .filter(Boolean);
 const jwtSecret = new TextEncoder().encode(JWT_SECRET);
 
-const PUBLIC_PATHS = ["/auth", "/health", "/billing/webhook", "/billing/plans"];
+const PUBLIC_PATHS = [
+  "/auth",
+  "/health",
+  "/billing/webhook",
+  "/billing/plans",
+  "/ws",
+];
 
 function isPublicPath(path: string): boolean {
   return PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
