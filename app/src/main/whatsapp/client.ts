@@ -77,24 +77,41 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
       version,
       auth: state,
       printQRInTerminal: false,
+      connectTimeoutMs: 30_000,
+      defaultQueryTimeoutMs: 60_000,
       logger: {
         level: 'warn',
         info: () => {},
         debug: () => {},
         trace: () => {},
         warn: (...args: unknown[]) => log('WARN:', ...args),
-        error: (...args: unknown[]) => log('ERROR:', ...args),
+        error: (...args: unknown[]) => {
+          // Suppress non-fatal Baileys init query timeouts — connection stays open
+          const msg = args.map(a => typeof a === 'string' ? a : '').join(' ')
+          if (msg.includes('init queries')) {
+            log('WARN (non-fatal): Baileys init queries timed out — connection is still active')
+            return
+          }
+          log('ERROR:', ...args)
+        },
         fatal: (...args: unknown[]) => log('FATAL:', ...args),
         child: () => ({
-          level: 'warn',
+          level: 'warn' as const,
           info: () => {},
           debug: () => {},
           trace: () => {},
           warn: (...args: unknown[]) => log('WARN:', ...args),
-          error: (...args: unknown[]) => log('ERROR:', ...args),
+          error: (...args: unknown[]) => {
+            const msg = args.map(a => typeof a === 'string' ? a : '').join(' ')
+            if (msg.includes('init queries')) {
+              log('WARN (non-fatal): Baileys init queries timed out — connection is still active')
+              return
+            }
+            log('ERROR:', ...args)
+          },
           fatal: (...args: unknown[]) => log('FATAL:', ...args),
           child: () => ({} as any),
-        } as any),
+        }) as any,
       } as any,
     })
 
@@ -167,7 +184,9 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
     log('Baileys socket created, waiting for connection...')
 
     // Incoming messages
-    sock.ev.on('messages.upsert', async ({ messages }) => {
+    sock.ev.on('messages.upsert', async ({ messages, type }) => {
+      if (type !== 'notify') return
+
       for (const msg of messages) {
         const jid = msg.key.remoteJid ?? ''
         // Skip: own messages, status broadcasts, and group messages (groups cause Bad MAC decryption errors)
@@ -205,6 +224,8 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
 
         if (!body && contentType === 'text') continue
 
+        log('Incoming message from', phoneNumber, ':', contentType, body?.slice(0, 80))
+
         const ts = msg.messageTimestamp
         const timestamp = typeof ts === 'number'
           ? new Date(ts * 1000).toISOString()
@@ -231,7 +252,7 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
           }
         }
 
-        sendToBackend({
+        const sent = sendToBackend({
           type: 'whatsapp.message',
           phoneNumber,
           body,
@@ -240,6 +261,9 @@ export async function initWhatsAppClient(_mainWindow?: BrowserWindow): Promise<v
           externalMessageId: msg.key.id ?? undefined,
           ...(mediaUrl ? { mediaUrl } : {}),
         })
+        if (!sent) {
+          log('WARNING: Bridge not connected — message from', phoneNumber, 'dropped. Ensure API bridge is running.')
+        }
       }
     })
   } catch (error) {

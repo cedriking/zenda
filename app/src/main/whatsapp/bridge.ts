@@ -2,6 +2,8 @@ import { BrowserWindow } from 'electron'
 import { WebSocket } from 'ws'
 import { getClient } from './client.js'
 
+const log = (...args: unknown[]) => console.log('[bridge]', ...args)
+
 let ws: WebSocket | null = null
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 let reconnectAttempts = 0
@@ -27,6 +29,7 @@ export function connectBridge(
     // Reset counters on successful connection
     reconnectAttempts = 0
     authFailures = 0
+    log('Connected to API at', WS_URL)
     mainWindow.webContents.send('bridge:status', { connected: true })
   })
 
@@ -36,28 +39,30 @@ export function connectBridge(
 
       // Forward responses and notifications to renderer
       if (payload.type === 'response.send') {
+        const phoneNumber = payload.data?.phoneNumber
+        const messageBody = payload.data?.message?.body
+        log('Received response.send for', phoneNumber, ':', String(messageBody).slice(0, 80))
+
         // Forward to renderer for UI updates
         mainWindow.webContents.send('whatsapp:send-response', payload.data)
 
         // Send via Baileys to the WhatsApp contact
-        const phoneNumber = payload.data?.phoneNumber
-        const messageBody = payload.data?.message?.body
         if (phoneNumber && messageBody) {
           const sock = getClient()
           if (sock) {
             const jid = `${phoneNumber}@s.whatsapp.net`
             sock.sendMessage(jid, { text: messageBody })
               .then(() => {
-                console.log('[baileys] Outgoing message sent to', jid)
+                log('Reply sent to', jid)
               })
               .catch((err: unknown) => {
-                console.error('[baileys] Failed to send outgoing message to', jid, err)
+                log('Failed to send reply to', jid, err)
               })
           } else {
-            console.warn('[baileys] Cannot send outgoing message: socket not connected')
+            log('Cannot send reply: Baileys socket not connected')
           }
         } else {
-          console.warn('[bridge] response.send missing phoneNumber or message.body — skipping WhatsApp delivery')
+          log('response.send missing phoneNumber or message.body — skipping WhatsApp delivery')
         }
       } else if (payload.type === 'notification') {
         mainWindow.webContents.send('notification:new', payload.data)
@@ -87,7 +92,7 @@ export function connectBridge(
 
     // Stop reconnecting if too many auth failures (token likely expired)
     if (authFailures >= MAX_AUTH_FAILURES) {
-      console.error('[bridge] Too many auth failures, stopping reconnect. Please re-login.')
+      log('Too many auth failures, stopping reconnect. Please re-login.')
       mainWindow.webContents.send('bridge:status', {
         connected: false,
         error: 'Session expired. Please log in again.',
@@ -99,7 +104,7 @@ export function connectBridge(
     // Stop reconnecting after max attempts
     reconnectAttempts++
     if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
-      console.error('[bridge] Max reconnect attempts reached, stopping.')
+      log('Max reconnect attempts reached, stopping.')
       mainWindow.webContents.send('bridge:status', {
         connected: false,
         error: `Connection lost after ${MAX_RECONNECT_ATTEMPTS} attempts. Please check your connection and re-login.`,
@@ -109,7 +114,7 @@ export function connectBridge(
 
     // Auto-reconnect with backoff (5s base, doubling each attempt, max 60s)
     const backoff = Math.min(5000 * Math.pow(2, reconnectAttempts - 1), 60000)
-    console.log(`[bridge] Reconnecting in ${backoff}ms (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`)
+    log(`Reconnecting in ${backoff}ms (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`)
     reconnectTimer = setTimeout(() => {
       connectBridge(mainWindow, workspaceId, accessToken)
     }, backoff)
