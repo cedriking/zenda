@@ -49,9 +49,9 @@ export function connectBridge(
   ws = new WebSocket(url);
 
   ws.on("open", () => {
-    // Reset counters on successful connection
+    // Only reset reconnect counter — authFailures persists across opens
+    // so we detect repeated auth rejects (expired token)
     reconnectAttempts = 0;
-    authFailures = 0;
     log("Connected to API at", WS_URL);
     mainWindow.webContents.send("bridge:status", { connected: true });
 
@@ -116,10 +116,9 @@ export function connectBridge(
         ws?.send(JSON.stringify({ type: "pong" }));
       } else if (payload.type === "error" && payload.code === "auth_failed") {
         authFailures++;
-        console.error(
-          "[bridge] Auth failure from server, count:",
-          authFailures
-        );
+        log("Auth failure from server, count:", authFailures);
+        // Close the socket — the close handler will stop retrying if threshold reached
+        ws?.close(4003, "Server reported auth_failed");
       }
     } catch {
       // ignore parse errors
@@ -135,8 +134,8 @@ export function connectBridge(
     );
     mainWindow.webContents.send("bridge:status", { connected: false });
 
-    // 4001 is a custom close code for authentication failure
-    const isAuthError = code === 4001 || code === 1008;
+    // Auth-related close codes: 4001 (custom), 4003 (invalid/expired token), 1008 (policy violation)
+    const isAuthError = code === 4001 || code === 4003 || code === 1008;
     if (isAuthError) {
       authFailures++;
     }
