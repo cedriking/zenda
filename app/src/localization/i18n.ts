@@ -1,11 +1,29 @@
-import i18n from 'i18next'
-import { initReactI18next } from 'react-i18next'
-import LanguageDetector from 'i18next-browser-languagedetector'
-import { en, es, ar, fr, de, ru, zh, ja, ko } from '@zenda/shared/i18n'
-import { LOCAL_STORAGE_KEYS } from '@/constants'
+import { ar, de, en, es, fr, ja, ko, ru, zh } from "@zenda/shared/i18n";
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import { LOCAL_STORAGE_KEYS } from "@/constants";
 
-i18n.use(LanguageDetector).use(initReactI18next).init({
-  fallbackLng: 'en',
+function detectLanguage(): string {
+  const stored = localStorage.getItem(LOCAL_STORAGE_KEYS.LANGUAGE);
+  if (stored) {
+    return stored;
+  }
+  const navLangs = navigator.languages ?? [navigator.language];
+  for (const lang of navLangs) {
+    const code = lang.split("-")[0];
+    if (["en", "es", "ar", "fr", "de", "ru", "zh", "ja", "ko"].includes(code)) {
+      return code;
+    }
+  }
+  return "en";
+}
+
+const detected = detectLanguage();
+localStorage.setItem(LOCAL_STORAGE_KEYS.LANGUAGE, detected);
+
+i18n.use(initReactI18next).init({
+  lng: detected,
+  fallbackLng: "en",
   resources: {
     en: { translation: en },
     es: { translation: es },
@@ -17,9 +35,4 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
     ja: { translation: ja },
     ko: { translation: ko },
   },
-  detection: {
-    order: ['localStorage', 'navigator'],
-    lookupLocalStorage: LOCAL_STORAGE_KEYS.LANGUAGE,
-    caches: ['localStorage'],
-  },
-})
+});
