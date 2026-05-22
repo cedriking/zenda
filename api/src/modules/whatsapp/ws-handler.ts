@@ -107,21 +107,9 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
   },
 
   message(ws, rawMessage) {
-    const url = new URL(
-      ((ws.data as Record<string, unknown>).url as string) ?? "",
-      "http://localhost"
-    );
-    const token = url.searchParams.get("token");
-
-    // Re-derive workspaceId from token (stored at connection time)
-    // Fall back to parsing from data for backward compat
-    let workspaceId: string | undefined;
-
-    if (token) {
-      // Use cached value from open handler — store on ws
-      // biome-ignore lint/suspicious/noExplicitAny: Elysia WS context doesn't expose custom props
-      workspaceId = (ws as any).__workspaceId;
-    }
+    // Use cached workspaceId from open handler — always available after successful auth
+    // biome-ignore lint/suspicious/noExplicitAny: Elysia WS context doesn't expose custom props
+    const workspaceId: string | undefined = (ws as any).__workspaceId;
 
     if (!workspaceId) {
       logger.warn("WS message without workspace context");
