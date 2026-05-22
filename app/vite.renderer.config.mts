@@ -22,4 +22,7 @@ export default defineConfig({
       "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ["i18next-browser-languagedetector"],
+  },
 });
