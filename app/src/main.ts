@@ -8,10 +8,10 @@ import {
 import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS, inDevelopment } from "./constants";
-import { getBasePath } from "./utils/path";
-import { createTray, updateTrayStatus } from "./main/tray";
 import { setAutoStart } from "./main/auto-start";
-import { startHealthMonitor, updateWhatsAppHealth } from "./main/health-monitor";
+import { startHealthMonitor } from "./main/health-monitor";
+import { createTray } from "./main/tray";
+import { getBasePath } from "./utils/path";
 
 function createWindow() {
   const basePath = getBasePath();
@@ -37,14 +37,14 @@ function createWindow() {
 
   // Minimize to tray instead of closing
   mainWindow.on("close", (event) => {
-    if (!(app as any).isQuitting) {
+    if (!(app as { isQuitting?: boolean }).isQuitting) {
       event.preventDefault();
       mainWindow.hide();
     }
   });
 
   app.on("before-quit", async () => {
-    (app as any).isQuitting = true;
+    (app as { isQuitting: boolean }).isQuitting = true;
     try {
       const { shutdownWhatsApp } = await import("./main/whatsapp/client.js");
       const { disconnectBridge } = await import("./main/whatsapp/bridge.js");
@@ -76,7 +76,8 @@ async function installExtensions() {
 }
 
 function checkForUpdates() {
-  const baseUrl = import.meta.env.VITE_UPDATE_BASE_URL ?? 'https://zenda.bot/updates';
+  const baseUrl =
+    import.meta.env.VITE_UPDATE_BASE_URL ?? "https://zenda.bot/updates";
   updateElectronApp({
     updateSource: {
       type: UpdateSourceType.StaticStorage,
@@ -111,12 +112,20 @@ app.whenReady().then(async () => {
       // Auto-init WhatsApp if session exists (user already connected before)
       const { hasSession } = await import("./main/whatsapp/session.js");
       if (hasSession()) {
-        console.log('[main] Existing WhatsApp session found, auto-initializing...');
-        const { initWhatsAppClient } = await import("./main/whatsapp/client.js");
+        console.log(
+          "[main] Existing WhatsApp session found, auto-initializing..."
+        );
+        const { initWhatsAppClient } = await import(
+          "./main/whatsapp/client.js"
+        );
         initWhatsAppClient(ipcContext.mainWindow).catch((err) => {
-          console.error('[main] Auto-init WhatsApp error:', err);
+          console.error("[main] Auto-init WhatsApp error:", err);
         });
       }
+
+      // Auto-connect bridge using saved credentials (independent of renderer)
+      const { autoConnectBridge } = await import("./main/whatsapp/bridge.js");
+      autoConnectBridge(ipcContext.mainWindow);
 
       // System tray
       createTray(ipcContext.mainWindow);
@@ -125,7 +134,7 @@ app.whenReady().then(async () => {
       setAutoStart(true);
 
       // Health monitor
-      const apiBase = import.meta.env.VITE_API_URL ?? 'https://api.zenda.bot';
+      const apiBase = import.meta.env.VITE_API_URL ?? "https://api.zenda.bot";
       startHealthMonitor(ipcContext.mainWindow, apiBase);
     }
   } catch (error) {

@@ -1,5 +1,11 @@
 import type { BrowserWindow } from "electron";
 import { WebSocket } from "ws";
+import {
+  type BridgeCredentials,
+  clearCredentials,
+  loadCredentials,
+  saveCredentials,
+} from "./bridge-credentials.js";
 import { getClient } from "./client.js";
 
 const log = (...args: unknown[]) => console.log("[bridge]", ...args);
@@ -8,6 +14,7 @@ let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let reconnectAttempts = 0;
 let authFailures = 0;
+let currentCreds: BridgeCredentials | null = null;
 
 const MAX_RECONNECT_ATTEMPTS = 10;
 const MAX_AUTH_FAILURES = 2;
@@ -23,9 +30,19 @@ export function connectBridge(
   workspaceId: string,
   accessToken: string
 ): void {
-  if (ws?.readyState === WebSocket.OPEN) {
+  if (
+    ws?.readyState === WebSocket.OPEN ||
+    ws?.readyState === WebSocket.CONNECTING
+  ) {
+    log("Bridge already connecting or connected, ignoring duplicate call");
     return;
   }
+
+  // Persist credentials for auto-reconnect on restart
+  const creds = { workspaceId, accessToken };
+  saveCredentials(creds);
+  currentCreds = creds;
+  log("Connecting to API at", WS_URL, "workspace:", workspaceId);
 
   const url = `${WS_URL}?workspaceId=${workspaceId}&token=${accessToken}`;
 
@@ -126,7 +143,9 @@ export function connectBridge(
 
     // Stop reconnecting if too many auth failures (token likely expired)
     if (authFailures >= MAX_AUTH_FAILURES) {
-      log("Too many auth failures, stopping reconnect. Please re-login.");
+      log("Too many auth failures, clearing saved credentials.");
+      clearCredentials();
+      currentCreds = null;
       mainWindow.webContents.send("bridge:status", {
         connected: false,
         error: "Session expired. Please log in again.",
@@ -148,11 +167,18 @@ export function connectBridge(
 
     // Auto-reconnect with backoff (5s base, doubling each attempt, max 60s)
     const backoff = Math.min(5000 * 2 ** (reconnectAttempts - 1), 60_000);
+    const savedCreds = currentCreds;
     log(
       `Reconnecting in ${backoff}ms (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`
     );
     reconnectTimer = setTimeout(() => {
-      connectBridge(mainWindow, workspaceId, accessToken);
+      if (savedCreds) {
+        connectBridge(
+          mainWindow,
+          savedCreds.workspaceId,
+          savedCreds.accessToken
+        );
+      }
     }, backoff);
   });
 
@@ -188,4 +214,20 @@ export function disconnectBridge(): void {
     ws.close();
     ws = null;
   }
+}
+
+/**
+ * Auto-connect bridge using saved credentials (called at startup).
+ * Falls through silently if no credentials exist — the renderer will
+ * trigger bridge:connect via useBridgeSync once it loads.
+ */
+export function autoConnectBridge(mainWindow: BrowserWindow): boolean {
+  const creds = loadCredentials();
+  if (!creds) {
+    log("No saved bridge credentials — waiting for renderer to connect");
+    return false;
+  }
+  log("Found saved bridge credentials, auto-connecting...");
+  connectBridge(mainWindow, creds.workspaceId, creds.accessToken);
+  return true;
 }
