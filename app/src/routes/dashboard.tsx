@@ -319,14 +319,39 @@ function getPageTitle(pathname: string, t: (key: string) => string): string {
 }
 
 export const Route = createFileRoute('/dashboard')({
-  beforeLoad: () => {
+  beforeLoad: async () => {
     const raw = localStorage.getItem('workspace')
     if (raw) {
       try {
         const workspace = JSON.parse(raw)
-        if (workspace.onboardingStep !== 'ready') {
-          throw redirect({ to: getPostAuthRoute() })
+        if (workspace.onboardingStep === 'ready') return
+
+        // localStorage may be stale — check server state
+        const token = localStorage.getItem('accessToken')
+        if (token) {
+          try {
+            const res = await fetch('/api/onboarding/status', {
+              headers: { Authorization: `Bearer ${token}` },
+            })
+            if (res.ok) {
+              const status = await res.json()
+              if (status.currentStep === 'ready') {
+                // Sync localStorage and allow access
+                workspace.onboardingStep = 'ready'
+                localStorage.setItem('workspace', JSON.stringify(workspace))
+                return
+              }
+              // Server confirms not ready — redirect
+              throw redirect({ to: getPostAuthRoute() })
+            }
+          } catch (fetchErr) {
+            // Re-throw redirect errors; other fetch failures fall through to redirect below
+            if (fetchErr && typeof fetchErr === 'object' && 'to' in fetchErr) throw fetchErr
+          }
         }
+
+        // localStorage says not ready and server check didn't confirm ready
+        throw redirect({ to: getPostAuthRoute() })
       } catch (e) {
         if (e && typeof e === 'object' && 'to' in e) throw e
       }

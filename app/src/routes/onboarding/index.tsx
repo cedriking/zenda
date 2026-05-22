@@ -78,6 +78,7 @@ function OnboardingPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuthStore()
+  const { updateWorkspace } = useAuthStore()
   const [progress, setProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -150,6 +151,7 @@ function OnboardingPage() {
       setCurrentStep(status.currentStep)
 
       if (status.currentStep === 'ready') {
+        updateWorkspace({ onboardingStep: 'ready' })
         navigate({ to: '/dashboard' })
         return
       }
@@ -185,6 +187,7 @@ function OnboardingPage() {
       setProgress(status.progress)
 
       if (result.nextStep === 'ready') {
+        updateWorkspace({ onboardingStep: 'ready' })
         typeMessage(result.acknowledged, () => {
           setTimeout(() => navigate({ to: '/dashboard' }), 1500)
         })
@@ -238,6 +241,7 @@ function OnboardingPage() {
 
       typeMessage(result.acknowledged, () => {
         if (result.nextStep === 'ready') {
+          updateWorkspace({ onboardingStep: 'ready' })
           setTimeout(() => navigate({ to: '/dashboard' }), 1500)
         }
       })
@@ -264,6 +268,7 @@ function OnboardingPage() {
 
       typeMessage(result.acknowledged, () => {
         if (result.nextStep === 'ready') {
+          updateWorkspace({ onboardingStep: 'ready' })
           setTimeout(() => navigate({ to: '/dashboard' }), 1500)
         }
       })

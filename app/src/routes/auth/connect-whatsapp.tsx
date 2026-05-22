@@ -12,10 +12,13 @@ export const Route = createFileRoute('/auth/connect-whatsapp')({
 
 function ConnectWhatsAppPage() {
   const { status, initWhatsApp, connectBridge, isConnected, needsQR } = useWhatsApp()
-  const { workspace, accessToken } = useAuthStore()
+  const { workspace, accessToken, updateWorkspace } = useAuthStore()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const initCalled = useRef(false)
+
+  // Detect reconnection mode (workspace already onboarded, just reconnecting WhatsApp)
+  const isReconnect = workspace?.onboardingStep === 'ready'
 
   useEffect(() => {
     // Prevent double-init in React StrictMode
@@ -28,22 +31,27 @@ function ConnectWhatsAppPage() {
   useEffect(() => {
     if (isConnected && workspace?.id && accessToken) {
       connectBridge(workspace.id, accessToken)
-      // Advance onboarding step from 'not_started' to 'whatsapp_connected'
-      apiFetch('/onboarding/advance', {
-        method: 'POST',
-        body: { completedStep: 'not_started' },
-      }).catch(() => {
-        // Non-critical — onboarding page handles step transitions too
-      })
+      if (!isReconnect) {
+        // Advance onboarding step from 'not_started' to 'whatsapp_connected'
+        apiFetch('/onboarding/advance', {
+          method: 'POST',
+          body: { completedStep: 'not_started' },
+        }).then(() => {
+          updateWorkspace({ onboardingStep: 'whatsapp_connected' })
+        }).catch(() => {
+          // Non-critical — onboarding page handles step transitions too
+        })
+      }
     }
-  }, [isConnected, workspace?.id, accessToken, connectBridge])
+  }, [isConnected, workspace?.id, accessToken, connectBridge, isReconnect])
 
   useEffect(() => {
     if (isConnected) {
-      const timer = setTimeout(() => navigate({ to: '/onboarding' }), 1500)
+      const dest = isReconnect ? '/dashboard' : '/onboarding'
+      const timer = setTimeout(() => navigate({ to: dest }), 1500)
       return () => clearTimeout(timer)
     }
-  }, [isConnected, navigate])
+  }, [isConnected, navigate, isReconnect])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted">

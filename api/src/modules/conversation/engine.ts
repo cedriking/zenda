@@ -98,12 +98,29 @@ interface IncomingMessage {
   timestamp: string;
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: core pipeline — refactoring tracked separately
 export async function processIncomingMessage(
   workspaceId: string,
   msg: IncomingMessage,
   sender: MessageSender = wsMessageSender
 ) {
   try {
+    // 0. Dedup: skip if we already processed this exact message
+    if (msg.externalMessageId) {
+      const [existing] = await db
+        .select({ id: messages.id })
+        .from(messages)
+        .where(eq(messages.externalMessageId, msg.externalMessageId))
+        .limit(1);
+      if (existing) {
+        logger.info("Skipping duplicate message", {
+          workspaceId,
+          externalMessageId: msg.externalMessageId,
+        });
+        return;
+      }
+    }
+
     // 1. Resolve language: prefer persisted customer language, then workspace default, then detect
     const detectedLanguage = (detectLanguage(msg.body) || "en") as "en" | "es";
 
@@ -176,7 +193,7 @@ export async function processIncomingMessage(
       const transcription = await handleAudioMessage({
         messageId: storedMessage.id,
         workspaceId,
-        mediaUrl: msg.mediaUrl!,
+        mediaUrl: msg.mediaUrl as string,
         mimeType: "audio/ogg",
       });
 
@@ -503,9 +520,51 @@ export async function processIncomingMessage(
     );
 
     if (!aiResponse) {
-      logger.warn("AI agent returned no response", {
+      logger.warn("AI agent returned no response — sending fallback", {
         workspaceId,
         conversationId: conversation.id,
+      });
+      // Send a fallback message so the customer isn't left hanging
+      const fallbackText =
+        agentLanguage === "es"
+          ? "Gracias por tu mensaje. En este momento no puedo procesarlo automáticamente, pero lo he registrado y un miembro del equipo te responderá pronto."
+          : "Thank you for your message. I'm unable to process it automatically right now, but I've logged it and a team member will respond soon.";
+      const fallbackMessage = await storeMessage(conversation.id, workspaceId, {
+        senderType: "ai",
+        contentType: "text",
+        body: fallbackText,
+        language: agentLanguage,
+      });
+      sender.send(workspaceId, {
+        type: "response.send",
+        data: {
+          conversationId: conversation.id,
+          phoneNumber: msg.phoneNumber,
+          threadId:
+            msg.threadId ||
+            ((conversation as Record<string, unknown>).threadId as
+              | string
+              | undefined),
+          message: {
+            id: fallbackMessage.id,
+            body: fallbackText,
+            senderType: "ai",
+            contentType: "text",
+            status: "sent",
+            createdAt: fallbackMessage.createdAt,
+          },
+        },
+      });
+      // Escalate to owner so they know the AI failed
+      sender.send(workspaceId, {
+        type: "notification",
+        data: {
+          id: crypto.randomUUID(),
+          type: "needs_attention",
+          title: "AI response failed",
+          body: `Message from ${msg.phoneNumber} could not be processed automatically: "${messageBody.slice(0, 100)}"`,
+          createdAt: new Date().toISOString(),
+        },
       });
       return;
     }

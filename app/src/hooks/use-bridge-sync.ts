@@ -2,8 +2,11 @@ import { useEffect, useRef } from 'react'
 
 /**
  * Auto-connects the WhatsApp-to-API bridge when the app loads
- * and the user is authenticated with onboarding complete.
- * Runs once per session.
+ * and the user is authenticated. Runs once per session.
+ *
+ * The bridge connects regardless of onboarding status — the API-side
+ * conversation engine routes messages based on server-side onboardingStep,
+ * so even during onboarding, WhatsApp messages flow correctly.
  */
 export function useBridgeSync() {
   const connected = useRef(false)
@@ -19,8 +22,6 @@ export function useBridgeSync() {
     try {
       const workspace = JSON.parse(workspaceRaw)
       if (!workspace?.id) return
-      // Only connect bridge if onboarding is done
-      if (workspace.onboardingStep && workspace.onboardingStep !== 'ready') return
 
       connected.current = true
       window.electron?.invoke?.('bridge:connect', {

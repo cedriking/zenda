@@ -306,13 +306,15 @@ export async function runAgent(
     logger.error("Agent error", {
       workspaceId,
       conversationId,
+      customerId,
       error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      phase: "agent_loop",
     });
     return null;
   }
 }
 
-// biome-ignore lint/suspicious/useAwait: pre-existing; tool calls may become async
 async function executeTool(
   name: string,
   workspaceId: string,
@@ -322,15 +324,19 @@ async function executeTool(
   language: Language
 ): Promise<unknown> {
   // Sending policy gate — check before executing outbound-triggering tools
-  const policyDenial = await checkToolSendingPolicy(name, workspaceId, customerId)
+  const policyDenial = await checkToolSendingPolicy(
+    name,
+    workspaceId,
+    customerId
+  );
   if (policyDenial) {
     return {
       error: `Sending policy prevents this action: ${policyDenial.reason}`,
       policyDenied: true,
       toolName: policyDenial.toolName,
       purpose: policyDenial.purpose,
-      hint: 'Inform the customer honestly. Do not retry or bypass.',
-    }
+      hint: "Inform the customer honestly. Do not retry or bypass.",
+    };
   }
 
   switch (name) {

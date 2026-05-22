@@ -29,6 +29,7 @@ interface AuthState {
     accessToken: string
     refreshToken: string
   }) => void
+  updateWorkspace: (partial: Partial<WorkspaceInfo>) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   logout: () => void
@@ -77,6 +78,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     })
   },
   setLoading: (isLoading) => set({ isLoading }),
+  updateWorkspace: (partial) => {
+    const current = loadFromStorage<WorkspaceInfo>('workspace')
+    if (!current) return
+    const updated = { ...current, ...partial }
+    localStorage.setItem('workspace', JSON.stringify(updated))
+    set({ workspace: updated })
+  },
   setError: (error) => set({ error, isLoading: false }),
   logout: () => {
     // Disconnect WhatsApp and clear session files so auto-init
