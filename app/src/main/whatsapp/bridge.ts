@@ -217,6 +217,7 @@ export function sendToBackend(data: unknown): boolean {
     return false;
   }
   ws.send(JSON.stringify(data));
+  log("Sent to API:", JSON.stringify(data).slice(0, 120));
   return true;
 }
 

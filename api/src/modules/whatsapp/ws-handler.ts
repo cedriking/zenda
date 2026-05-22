@@ -117,6 +117,12 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
     const raw = (ws as { raw: object }).raw;
     const meta = wsMeta.get(raw);
 
+    logger.debug("WS message received", {
+      hasMeta: !!meta,
+      workspaceId: meta?.workspaceId,
+      rawType: typeof rawMessage,
+    });
+
     if (!meta) {
       logger.warn("WS message without workspace context");
       return;
