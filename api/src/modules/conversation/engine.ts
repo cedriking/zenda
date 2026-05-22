@@ -446,10 +446,26 @@ export async function processIncomingMessage(
     }
 
     // 8d. Plan enforcement — check conversation limit before routing to AI
-    const conversationEnforcement = await enforceLimit(
-      workspaceId,
-      "conversations"
-    );
+    // Gracefully degrade if usage query fails (e.g. fresh DB, connection issue)
+    let conversationEnforcement: Awaited<ReturnType<typeof enforceLimit>> = {
+      allowed: true,
+      currentUsage: 0,
+      limit: Number.POSITIVE_INFINITY,
+      metric: "conversations",
+      percentage: 0,
+      warningLevel: "none",
+    };
+    try {
+      conversationEnforcement = await enforceLimit(
+        workspaceId,
+        "conversations"
+      );
+    } catch (err) {
+      logger.warn("Usage enforcement check failed — allowing message", {
+        workspaceId,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
     if (!conversationEnforcement.allowed) {
       logger.warn("Conversation limit reached — notifying owner", {
         workspaceId,
@@ -738,7 +754,7 @@ async function storeMessage(
     .values({
       conversationId,
       workspaceId,
-      senderType: data.senderType as any,
+      senderType: data.senderType as "customer" | "ai" | "system",
       contentType: data.contentType,
       body: data.body,
       language: data.language,
