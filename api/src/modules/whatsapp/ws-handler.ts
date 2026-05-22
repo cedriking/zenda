@@ -81,18 +81,31 @@ async function verifyWsToken(
 
 export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
   async open(ws) {
-    // Extract token from query params for authentication
-    const token = (ws.data as Record<string, unknown>).query
-      ? (ws.data.query as Record<string, string>).token
-      : undefined;
+    // Extract token from URL query params for authentication
+    // Use ws.data.url (reliable) instead of ws.data.query (may be empty in some Elysia versions)
+    const rawUrl = ((ws.data as Record<string, unknown>).url as string) ?? "";
+    const url = new URL(rawUrl, "http://localhost");
+    const token =
+      url.searchParams.get("token") ??
+      ((ws.data as Record<string, unknown>).query
+        ? (ws.data.query as Record<string, string>).token
+        : undefined);
 
     if (!token) {
+      logger.warn("WS open: no token found", {
+        rawUrl: rawUrl || "(empty)",
+        hasQuery: !!(ws.data as Record<string, unknown>).query,
+      });
       ws.close(4003, "Missing authentication token");
       return;
     }
 
     const payload = await verifyWsToken(token);
     if (!(payload?.sub && payload?.workspaceId)) {
+      logger.warn("WS open: token verification failed", {
+        sub: payload?.sub ?? "(missing)",
+        workspaceId: payload?.workspaceId ?? "(missing)",
+      });
       ws.close(4003, "Invalid or expired token");
       return;
     }
@@ -101,14 +114,19 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
     const userId = payload.sub;
 
     logger.info("WebSocket connected", { workspaceId, userId });
+    // biome-ignore lint/suspicious/noExplicitAny: Elysia WS types don't expose internal fields
     addConnection(workspaceId, ws as any);
 
     // Cache workspaceId on ws for use in message/close handlers
+    // biome-ignore lint/suspicious/noExplicitAny: Elysia WS context doesn't allow arbitrary props
     (ws as any).__workspaceId = workspaceId;
+    // biome-ignore lint/suspicious/noExplicitAny: same
     (ws as any).__userId = userId;
 
+    // biome-ignore lint/suspicious/noExplicitAny: same
     const heartbeat = startHeartbeat(workspaceId, ws as any);
     // Store heartbeat stopper on ws for cleanup
+    // biome-ignore lint/suspicious/noExplicitAny: same
     (ws as any).__heartbeat = heartbeat;
   },
 
@@ -125,6 +143,7 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
 
     if (token) {
       // Use cached value from open handler — store on ws
+      // biome-ignore lint/suspicious/noExplicitAny: Elysia WS context doesn't expose custom props
       workspaceId = (ws as any).__workspaceId;
     }
 
@@ -144,6 +163,7 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
 
     // Handle pong (heartbeat response)
     if (payload.type === "pong") {
+      // biome-ignore lint/suspicious/noExplicitAny: Elysia WS context custom prop
       (ws as any).__heartbeat?.pong();
       return;
     }
@@ -178,6 +198,8 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
       import("../conversation/engine.js")
         .then(async ({ processIncomingMessage }) => {
           try {
+            // biome-ignore lint/style/noNonNullAssertion: guarded by earlier null check
+            // biome-ignore lint/suspicious/noExplicitAny: Elysia payload shape
             await processIncomingMessage(workspaceId!, msgData as any);
             logger.info("Message processed", {
               workspaceId,
@@ -225,26 +247,37 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
             import("@zenda/db/schema").then(({ whatsappConnections }) => {
               db.update(whatsappConnections)
                 .set({
+                  // biome-ignore lint/suspicious/noExplicitAny: status enum mismatch
                   status: statusData.status as any,
                   updatedAt: new Date(),
                 })
+                // biome-ignore lint/style/noNonNullAssertion: workspaceId verified in open handler
                 .where(eq(whatsappConnections.workspaceId, workspaceId!));
             });
           });
         })
-        .catch(() => {});
+        .catch(() => {
+          // intentionally ignored — import errors are non-critical
+        });
       return;
     }
 
     logger.warn("Unknown WS message type", {
+      // biome-ignore lint/suspicious/noExplicitAny: payload shape unknown for unknown types
       type: (payload as any).type,
       workspaceId,
     });
   },
 
-  close(ws) {
+  close(ws, code, reason) {
+    // biome-ignore lint/suspicious/noExplicitAny: Elysia WS context custom prop
     const workspaceId = (ws as any).__workspaceId;
-    logger.info("WebSocket disconnected", { workspaceId });
+    logger.info("WebSocket disconnected", {
+      workspaceId: workspaceId ?? "(never authed)",
+      code,
+      reason: reason ?? "(none)",
+    });
+    // biome-ignore lint/suspicious/noExplicitAny: Elysia WS context custom prop
     (ws as any).__heartbeat?.stop();
     if (workspaceId) {
       removeConnection(workspaceId);
