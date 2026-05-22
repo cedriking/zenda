@@ -23,6 +23,11 @@ const MAX_AUTH_FAILURES = 2;
 const pendingQueue: unknown[] = [];
 const MAX_PENDING = 50;
 
+// Pending WhatsApp replies — buffers when Baileys is reconnecting
+interface PendingReply { jid: string; text: string; retries: number }
+const pendingReplies: PendingReply[] = [];
+const MAX_REPLY_RETRIES = 3;
+
 const WS_URL = process.env.ZENDA_API_WS_URL ?? "wss://api.zenda.bot/ws";
 
 export function connectBridge(
@@ -101,22 +106,12 @@ export function connectBridge(
         // Forward to renderer for UI updates
         mainWindow.webContents.send("whatsapp:send-response", payload.data);
 
-        // Send via Baileys to the WhatsApp contact
+        // Send via Baileys to the WhatsApp contact (with retry on failure)
         if (phoneNumber && messageBody) {
-          const sock = getClient();
-          if (sock) {
-            const jid = `${phoneNumber}@s.whatsapp.net`;
-            sock
-              .sendMessage(jid, { text: messageBody })
-              .then(() => {
-                log("Reply sent to", jid);
-              })
-              .catch((err: unknown) => {
-                log("Failed to send reply to", jid, err);
-              });
-          } else {
-            log("Cannot send reply: Baileys socket not connected");
-          }
+          // Strip Baileys LID suffix if present (@lid) — not a valid WhatsApp JID component
+          const cleanPhone = phoneNumber.replace(/@lid$/, "");
+          const jid = `${cleanPhone}@s.whatsapp.net`;
+          sendWhatsAppReply(jid, messageBody);
         } else {
           log(
             "response.send missing phoneNumber or message.body — skipping WhatsApp delivery"
@@ -219,6 +214,43 @@ export function sendToBackend(data: unknown): boolean {
   ws.send(JSON.stringify(data));
   log("Sent to API:", JSON.stringify(data).slice(0, 120));
   return true;
+}
+
+/** Send a WhatsApp reply with automatic retry on Baileys failure */
+function sendWhatsAppReply(jid: string, text: string): void {
+  const sock = getClient();
+  if (!sock) {
+    log("Cannot send reply: Baileys socket not connected — queuing");
+    pendingReplies.push({ jid, text, retries: 0 });
+    return;
+  }
+  sock
+    .sendMessage(jid, { text })
+    .then(() => {
+      log("Reply sent to", jid);
+    })
+    .catch((err: unknown) => {
+      log("Failed to send reply to", jid, err);
+      // Queue for retry after Baileys reconnects
+      if (pendingReplies.length < MAX_PENDING) {
+        pendingReplies.push({ jid, text, retries: 0 });
+      }
+    });
+}
+
+/** Flush pending WhatsApp replies — called when Baileys reconnects */
+export function flushPendingReplies(): void {
+  if (pendingReplies.length === 0) return;
+  log(`Flushing ${pendingReplies.length} pending WhatsApp replies`);
+  const toFlush = [...pendingReplies];
+  pendingReplies.length = 0;
+  for (const reply of toFlush) {
+    if (reply.retries < MAX_REPLY_RETRIES) {
+      sendWhatsAppReply(reply.jid, reply.text);
+    } else {
+      log("Dropping reply after max retries:", reply.jid);
+    }
+  }
 }
 
 export function disconnectBridge(): void {

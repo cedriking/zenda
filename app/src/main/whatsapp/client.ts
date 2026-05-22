@@ -10,7 +10,7 @@ import {
 } from "@whiskeysockets/baileys";
 import type { BrowserWindow } from "electron";
 import QRCode from "qrcode";
-import { sendToBackend } from "./bridge.js";
+import { sendToBackend, flushPendingReplies } from "./bridge.js";
 import { clearSession, getSessionPath } from "./session.js";
 
 const log = (...args: unknown[]) => console.log("[baileys]", ...args);
@@ -211,6 +211,8 @@ export async function initWhatsAppClient(
         const phoneNumber = sock?.user?.id?.split(":")[0];
         log("Connected! Phone:", phoneNumber);
         emitStatus({ status: "connected", phoneNumber });
+        // Flush any pending WhatsApp replies that were queued during disconnect
+        flushPendingReplies();
         sendToBackend({
           type: "whatsapp.status",
           status: "connected",
@@ -245,7 +247,8 @@ export async function initWhatsAppClient(
 
         const phoneNumber = jid
           .replace("@s.whatsapp.net", "")
-          .replace("@c.us", "");
+          .replace("@c.us", "")
+          .replace(/@lid$/, "");
 
         let body = "";
         let contentType = "text";
