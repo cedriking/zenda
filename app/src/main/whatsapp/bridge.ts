@@ -1,5 +1,6 @@
 import { BrowserWindow } from 'electron'
 import { WebSocket } from 'ws'
+import { getClient } from './client.js'
 
 let ws: WebSocket | null = null
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null
@@ -35,7 +36,29 @@ export function connectBridge(
 
       // Forward responses and notifications to renderer
       if (payload.type === 'response.send') {
+        // Forward to renderer for UI updates
         mainWindow.webContents.send('whatsapp:send-response', payload.data)
+
+        // Send via Baileys to the WhatsApp contact
+        const phoneNumber = payload.data?.phoneNumber
+        const messageBody = payload.data?.message?.body
+        if (phoneNumber && messageBody) {
+          const sock = getClient()
+          if (sock) {
+            const jid = `${phoneNumber}@s.whatsapp.net`
+            sock.sendMessage(jid, { text: messageBody })
+              .then(() => {
+                console.log('[baileys] Outgoing message sent to', jid)
+              })
+              .catch((err: unknown) => {
+                console.error('[baileys] Failed to send outgoing message to', jid, err)
+              })
+          } else {
+            console.warn('[baileys] Cannot send outgoing message: socket not connected')
+          }
+        } else {
+          console.warn('[bridge] response.send missing phoneNumber or message.body — skipping WhatsApp delivery')
+        }
       } else if (payload.type === 'notification') {
         mainWindow.webContents.send('notification:new', payload.data)
       } else if (payload.type === 'conversation.update') {
