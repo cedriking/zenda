@@ -122,10 +122,29 @@ export const wsModule = new Elysia({ prefix: '/ws' })
 
       // Route to conversation engine
       if (payload.type === 'whatsapp.message') {
-        const msgPayload = payload as WhatsAppMessagePayload
+        // The desktop client sends fields flat ({ type, phoneNumber, body, ... })
+        // but the TypeScript interface expects them nested under .data.
+        // Normalize: if no .data field, treat the top-level object as data.
+        const raw = payload as unknown as Record<string, unknown>
+        const msgData = (raw.data && typeof raw.data === 'object')
+          ? raw.data as WhatsAppMessagePayload['data']
+          : {
+              phoneNumber: raw.phoneNumber as string | undefined,
+              body: raw.body as string | undefined,
+              contentType: (raw.contentType as string) ?? 'text',
+              mediaUrl: raw.mediaUrl as string | undefined,
+              timestamp: (raw.timestamp as string) ?? new Date().toISOString(),
+              externalMessageId: raw.externalMessageId as string | undefined,
+            }
+
+        if (!msgData.phoneNumber || !msgData.body) {
+          logger.warn('whatsapp.message missing phoneNumber or body', { workspaceId, keys: Object.keys(raw) })
+          return
+        }
+
         // Import dynamically to avoid circular deps
         import('../conversation/engine.js').then(({ processIncomingMessage }) => {
-          processIncomingMessage(workspaceId!, msgPayload.data)
+          processIncomingMessage(workspaceId!, msgData as any)
         }).catch((err) => {
           logger.error('Failed to process message', { error: err.message, workspaceId })
         })
@@ -134,15 +153,20 @@ export const wsModule = new Elysia({ prefix: '/ws' })
 
       // Handle WhatsApp status updates
       if (payload.type === 'whatsapp.status') {
-        const statusPayload = payload as WhatsAppStatusPayload
-        logger.info('WhatsApp status update', { workspaceId, status: statusPayload.data.status })
+        // Same flat-vs-nested normalization as whatsapp.message
+        const raw = payload as unknown as Record<string, unknown>
+        const statusData = (raw.data && typeof raw.data === 'object')
+          ? raw.data as WhatsAppStatusPayload['data']
+          : { status: raw.status as string, phoneNumber: raw.phoneNumber as string | undefined }
+
+        logger.info('WhatsApp status update', { workspaceId, status: statusData.status })
 
         // Update connection status in DB
         import('drizzle-orm').then(({ eq }) => {
           import('@zenda/db/client').then(({ db }) => {
             import('@zenda/db/schema').then(({ whatsappConnections }) => {
               db.update(whatsappConnections)
-                .set({ status: statusPayload.data.status as any, updatedAt: new Date() })
+                .set({ status: statusData.status as any, updatedAt: new Date() })
                 .where(eq(whatsappConnections.workspaceId, workspaceId!))
             })
           })

@@ -225,9 +225,12 @@ export async function initWhatsAppClient(
 
     // Incoming messages
     sock.ev.on("messages.upsert", async ({ messages, type }) => {
-      if (type !== "notify") {
+      // "notify" = new live message, "append" = historical/offline message from server
+      if (type !== "notify" && type !== "append") {
         return;
       }
+
+      const isOfflineCatchup = type === "append";
 
       for (const msg of messages) {
         const jid = msg.key.remoteJid ?? "";
@@ -321,6 +324,7 @@ export async function initWhatsAppClient(
           timestamp,
           externalMessageId: msg.key.id ?? undefined,
           ...(mediaUrl ? { mediaUrl } : {}),
+          ...(isOfflineCatchup ? { isOfflineCatchup: true } : {}),
         });
         if (!sent) {
           log("Message from", phoneNumber, "queued (bridge not connected)");
