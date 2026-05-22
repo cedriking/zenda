@@ -25,3 +25,6 @@ export const WHISPER_LOCAL_URL = process.env.WHISPER_LOCAL_URL ?? 'http://192.16
 // Composio Integration
 export const COMPOSIO_API_KEY = process.env.COMPOSIO_API_KEY ?? ''
 export const COMPOSIO_BASE_URL = process.env.COMPOSIO_BASE_URL ?? 'https://api.composio.dev'
+
+// Queue limits
+export const MAX_QUEUE_DEPTH_PER_WORKSPACE = parseInt(process.env.MAX_QUEUE_DEPTH_PER_WORKSPACE ?? '1000', 10)

@@ -4,6 +4,7 @@ import { db } from '@zenda/db/client'
 import { auditLogs } from '@zenda/db/schema'
 import { eq, and, desc, sql, count, gte, lte } from 'drizzle-orm'
 import { logger } from '../../infra/logger.js'
+import { redactPII } from './logger.js'
 
 export const auditModule = new Elysia({ prefix: '/audit' })
   .use(typedContext)
@@ -59,7 +60,7 @@ export const auditModule = new Elysia({ prefix: '/audit' })
         r.action,
         r.entityType,
         r.entityId ?? '',
-        JSON.stringify(r.metadata ?? {}),
+        redactPII(JSON.stringify(r.metadata ?? {})),
       ].join(','),
     ).join('\n')
 

@@ -3,7 +3,6 @@ import { db } from '@zenda/db/client'
 import { sql } from 'drizzle-orm'
 import { logger } from '../../infra/logger.js'
 import { getCircuitStatus } from '../ai/circuit-breaker/index.js'
-import { getQueueStats } from '../queue/retry-queue.js'
 import { serverError } from '../../utils/errors.js'
 
 export const monitoringModule = new Elysia({ prefix: '/monitoring' })
@@ -25,11 +24,14 @@ export const monitoringModule = new Elysia({ prefix: '/monitoring' })
       // AI providers circuit breaker
       checks.circuitBreaker = { status: 'ok', details: JSON.stringify(getCircuitStatus()) }
 
-      // Queue status
-      const queueStats = getQueueStats()
+      // Queue status — count pending messages in persistent queue
+      const queueResult = await db.execute(sql`
+        SELECT count(*) as pending FROM outbound_queue WHERE status = 'pending'
+      `)
+      const pendingCount = Number(queueResult.rows[0]?.pending ?? 0)
       checks.queues = {
-        status: queueStats.pending > 100 ? 'warn' : 'ok',
-        details: `${queueStats.pending} pending retries`,
+        status: pendingCount > 100 ? 'warn' : 'ok',
+        details: `${pendingCount} pending messages`,
       }
 
       const allOk = Object.values(checks).every(c => c.status === 'ok')

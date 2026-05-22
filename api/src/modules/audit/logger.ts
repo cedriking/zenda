@@ -14,6 +14,18 @@ interface AuditLogInput {
   details?: Record<string, unknown>
 }
 
+// --- PII Redaction ---
+
+const PHONE_PATTERN = /(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g
+const EMAIL_PATTERN = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g
+
+/** Redact phone numbers and email addresses from a string. */
+export function redactPII(text: string): string {
+  return text
+    .replace(EMAIL_PATTERN, '[EMAIL]')
+    .replace(PHONE_PATTERN, '[PHONE]')
+}
+
 export async function logAudit(input: AuditLogInput) {
   await db.insert(auditLogs).values({
     workspaceId: input.workspaceId,
@@ -97,7 +109,7 @@ export async function logInputSanitized(
     entityId: conversationId,
     details: {
       flags,
-      originalSnippet: originalMessage?.slice(0, 200),
+      originalSnippet: originalMessage ? redactPII(originalMessage.slice(0, 200)) : undefined,
     },
   })
 }
