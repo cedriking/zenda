@@ -14,6 +14,7 @@ import { getConsent } from "../messaging/consent-service.js";
 import { getOutboundCount } from "../messaging/outbound-tracker.js";
 import { canSendOutboundMessage } from "../messaging/sending-policy.js";
 import { shouldRestrictProactive } from "../usage/tracker.js";
+import { logMessageSent } from "../audit/logger.js";
 import { dequeueNext, markFailed, markSent } from "./persistent-queue.js";
 
 let processingInterval: ReturnType<typeof setInterval> | null = null;
@@ -223,6 +224,7 @@ async function processOne(): Promise<boolean> {
 
     await markSent(msg.id);
     recordWorkspaceSend(msg.workspaceId);
+    await logMessageSent(msg.workspaceId, msg.conversationId, msg.contentType, 'queue_send');
     logger.info("Queued message sent", {
       queueId: msg.id,
       workspaceId: msg.workspaceId,

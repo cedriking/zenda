@@ -133,10 +133,6 @@ function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="w-full max-w-sm space-y-6 p-8">
-        <div className="flex justify-end">
-          <LangToggle />
-        </div>
-
         <div className="text-center">
           <h1 className="text-2xl font-bold">{t('auth.loginHeading')}</h1>
           <p className="text-muted-foreground">{t('auth.aiReceptionist')}</p>
@@ -197,6 +193,10 @@ function LoginPage() {
             {t('auth.createOne')}
           </Link>
         </p>
+
+        <div className="flex justify-center">
+          <LangToggle />
+        </div>
       </div>
     </div>
   )

@@ -5,10 +5,11 @@
  * Uses PostgreSQL FOR UPDATE SKIP LOCKED for safe concurrent dequeuing.
  */
 import { db } from '@zenda/db/client'
-import { outboundQueue } from '@zenda/db/schema'
-import { eq, and, lte, isNull, sql, desc } from 'drizzle-orm'
+import { outboundQueue, appointments } from '@zenda/db/schema'
+import { eq, and, lte, isNull, sql, desc, count } from 'drizzle-orm'
 import type { MessagePurpose } from '@zenda/shared'
 import { logger } from '../../infra/logger.js'
+import { MAX_QUEUE_DEPTH_PER_WORKSPACE } from '../../config/env.js'
 
 export type QueuePriority = 'emergency' | 'reminder' | 'notification' | 'low'
 
@@ -54,9 +55,73 @@ function calculateNextRetry(attempts: number): Date {
 }
 
 /**
+ * Appointment statuses that should block queueing.
+ * Messages for appointments in these states are rejected at enqueue time.
+ */
+const BLOCKED_APPOINTMENT_STATUSES = new Set([
+  'cancelled',
+  'completed',
+  'no_show',
+])
+
+/**
  * Insert a new message into the outbound queue.
+ *
+ * Validates:
+ * 1. Per-workspace queue depth does not exceed configurable limit
+ * 2. If an appointmentId is provided, the appointment is still active
  */
 export async function enqueueMessage(input: EnqueueInput): Promise<QueuedMessage> {
+  // --- Per-workspace queue depth check ---
+  const [depthRow] = await db
+    .select({ count: count() })
+    .from(outboundQueue)
+    .where(
+      and(
+        eq(outboundQueue.workspaceId, input.workspaceId),
+        eq(outboundQueue.status, 'pending'),
+      ),
+    )
+
+  const currentDepth = depthRow?.count ?? 0
+  if (currentDepth >= MAX_QUEUE_DEPTH_PER_WORKSPACE) {
+    throw new Error(
+      `Queue depth limit exceeded for workspace ${input.workspaceId}: ` +
+      `${currentDepth} pending messages (max ${MAX_QUEUE_DEPTH_PER_WORKSPACE})`,
+    )
+  }
+
+  // --- Appointment validity check ---
+  if (input.appointmentId) {
+    const [appt] = await db
+      .select({
+        status: appointments.status,
+        startAt: appointments.startAt,
+      })
+      .from(appointments)
+      .where(eq(appointments.id, input.appointmentId))
+      .limit(1)
+
+    if (!appt) {
+      throw new Error(`Appointment ${input.appointmentId} not found`)
+    }
+
+    if (BLOCKED_APPOINTMENT_STATUSES.has(appt.status)) {
+      throw new Error(
+        `Cannot enqueue message for appointment ${input.appointmentId}: ` +
+        `status is '${appt.status}'`,
+      )
+    }
+
+    // Reject messages for appointments that are already in the past
+    if (appt.startAt < new Date()) {
+      throw new Error(
+        `Cannot enqueue message for appointment ${input.appointmentId}: ` +
+        `start time ${appt.startAt.toISOString()} is in the past`,
+      )
+    }
+  }
+
   const [row] = await db
     .insert(outboundQueue)
     .values({

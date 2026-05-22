@@ -9,6 +9,7 @@ import { isEmergencyMessage, sanitizeCustomerMessage } from "./input-guard.js";
 import { classifyIntent } from "./intent-classifier.js";
 import { getProviderClient, selectModel } from "./provider-router.js";
 import { buildSystemPrompt } from "./system-prompts.js";
+import { checkToolSendingPolicy } from "./tool-sending-guard.js";
 import {
   bookAppointment,
   bookAppointmentToolDef,
@@ -320,6 +321,18 @@ async function executeTool(
   args: Record<string, unknown>,
   language: Language
 ): Promise<unknown> {
+  // Sending policy gate — check before executing outbound-triggering tools
+  const policyDenial = await checkToolSendingPolicy(name, workspaceId, customerId)
+  if (policyDenial) {
+    return {
+      error: `Sending policy prevents this action: ${policyDenial.reason}`,
+      policyDenied: true,
+      toolName: policyDenial.toolName,
+      purpose: policyDenial.purpose,
+      hint: 'Inform the customer honestly. Do not retry or bypass.',
+    }
+  }
+
   switch (name) {
     case "check_availability":
       // biome-ignore lint/suspicious/noExplicitAny: pre-existing type mismatch

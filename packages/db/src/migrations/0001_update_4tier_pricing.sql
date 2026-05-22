@@ -42,8 +42,8 @@ INSERT INTO "plans" ("tier", "name", "monthly_price_cents", "active_contacts_lim
   ('local_business', 'Business', 14900, 1500, 25, 10, 'assisted', 180);
 --> statement-breakpoint
 
--- Update subscriptions: map old tier values to new ones, then change column type
-ALTER TABLE "subscriptions" ALTER COLUMN "plan_tier" SET DEFAULT 'local_solo';
+-- Update subscriptions: drop old default, map old tier values to new ones, then change column type
+ALTER TABLE "subscriptions" ALTER COLUMN "plan_tier" DROP DEFAULT;
 --> statement-breakpoint
 ALTER TABLE "subscriptions" ALTER COLUMN "plan_tier" TYPE "public"."plan_tier" USING (
   CASE "plan_tier"::text
@@ -53,6 +53,8 @@ ALTER TABLE "subscriptions" ALTER COLUMN "plan_tier" TYPE "public"."plan_tier" U
     ELSE 'local_solo'
   END
 )::"public"."plan_tier";
+--> statement-breakpoint
+ALTER TABLE "subscriptions" ALTER COLUMN "plan_tier" SET DEFAULT 'local_solo';
 --> statement-breakpoint
 
 -- Create active_contact_dedup table with composite PK
