@@ -44,13 +44,14 @@ export function connectBridge(
     return;
   }
 
-  // Reset auth failure counter when called with new credentials
+  // Reset reconnect attempts when called with new credentials.
+  // Do NOT reset authFailures here — it tracks consecutive auth failures
+  // across credential refreshes. It resets only on successful WS open.
   const credsChanged =
     !currentCreds ||
     currentCreds.workspaceId !== workspaceId ||
     currentCreds.accessToken !== accessToken;
   if (credsChanged) {
-    authFailures = 0;
     reconnectAttempts = 0;
   }
 

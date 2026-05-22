@@ -61,6 +61,8 @@ function refreshBridgeToken(attempted: React.MutableRefObject<boolean>): void {
 
 export function useBridgeSync() {
   const attempted = useRef(false);
+  const refreshCycles = useRef(0);
+  const MAX_REFRESH_CYCLES = 3;
 
   useEffect(() => {
     if (attempted.current) {
@@ -128,11 +130,20 @@ export function useBridgeSync() {
       };
 
       if (s?.requiresReLogin) {
+        refreshCycles.current++;
+        if (refreshCycles.current > MAX_REFRESH_CYCLES) {
+          console.error(
+            "[useBridgeSync] Max refresh cycles reached — stopping reconnect attempts"
+          );
+          return;
+        }
         console.log(
-          "[useBridgeSync] Bridge reports auth failure, attempting token refresh..."
+          `[useBridgeSync] Bridge reports auth failure (cycle ${refreshCycles.current}/${MAX_REFRESH_CYCLES}), attempting token refresh...`
         );
         attempted.current = false;
         refreshBridgeToken(attempted);
+      } else if (s?.connected) {
+        refreshCycles.current = 0;
       }
     });
 

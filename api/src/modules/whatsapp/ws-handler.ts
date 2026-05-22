@@ -1,4 +1,5 @@
 import { Elysia } from "elysia";
+import { jwtVerify } from "jose";
 import { JWT_SECRET } from "../../config/env.js";
 import { logger } from "../../infra/logger.js";
 import {
@@ -34,47 +35,22 @@ type IncomingPayload =
   | WhatsAppStatusPayload
   | { type: "pong" };
 
+const jwtSecret = new TextEncoder().encode(JWT_SECRET);
+
 async function verifyWsToken(
   token: string
 ): Promise<{ sub?: string; workspaceId?: string } | null> {
   try {
-    // Use Web Crypto API for JWT verification (no dependency on Elysia jwt plugin)
-    const secret = new TextEncoder().encode(JWT_SECRET);
-    const parts = token.split(".");
-    if (parts.length !== 3) {
-      return null;
-    }
-
-    const [headerB64, payloadB64, signatureB64] = parts;
-    const header = JSON.parse(atob(headerB64));
-    if (header.alg !== "HS256") {
-      return null;
-    }
-
-    const key = await crypto.subtle.importKey(
-      "raw",
-      secret,
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["verify"]
-    );
-    const signature = Uint8Array.from(atob(signatureB64), (c) =>
-      c.charCodeAt(0)
-    );
-    const data = new TextEncoder().encode(`${headerB64}.${payloadB64}`);
-    const valid = await crypto.subtle.verify("HMAC", key, signature, data);
-    if (!valid) {
-      return null;
-    }
-
-    const payload = JSON.parse(atob(payloadB64));
-    // Check expiry
-    if (payload.exp && payload.exp * 1000 < Date.now()) {
-      return null;
-    }
-
-    return { sub: payload.sub, workspaceId: payload.workspaceId };
-  } catch {
+    // Use jose (same library as @elysiajs/jwt) to verify — eliminates any
+    // manual-crypto vs jose mismatch that could cause false negatives.
+    const { payload } = await jwtVerify(token, jwtSecret);
+    return {
+      sub: payload.sub as string | undefined,
+      workspaceId: payload.workspaceId as string | undefined,
+    };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.debug("WS token verify error", { error: msg });
     return null;
   }
 }
