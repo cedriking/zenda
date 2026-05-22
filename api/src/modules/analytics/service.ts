@@ -158,6 +158,11 @@ async function getMessageStats(workspaceId: string, period: AnalyticsPeriod) {
 
   // Calculate avg response time: time between first customer message and first AI response
   // per conversation, then average across all conversations in the period.
+  // Use ISO strings for date params in raw SQL — Drizzle's sql tag serializes Date objects
+  // via .toString() which produces "Wed Apr 22 2026..." that PostgreSQL cannot parse.
+  const startIso = period.start.toISOString();
+  const endIso = period.end.toISOString();
+
   const responseTimeResult = await db
     .select({
       avgMs: sql<number>`COALESCE(
@@ -176,8 +181,8 @@ async function getMessageStats(workspaceId: string, period: AnalyticsPeriod) {
            FROM messages m1
            WHERE m1.sender_type = 'customer'
              AND m1.workspace_id = ${workspaceId}
-             AND m1.created_at >= ${period.start}
-             AND m1.created_at <= ${period.end}
+             AND m1.created_at >= ${startIso}::timestamptz
+             AND m1.created_at <= ${endIso}::timestamptz
            ORDER BY m1.conversation_id, m1.created_at ASC
           ) AS first_customer`
     )
@@ -188,8 +193,8 @@ async function getMessageStats(workspaceId: string, period: AnalyticsPeriod) {
            FROM messages m2
            WHERE m2.sender_type = 'ai'
              AND m2.workspace_id = ${workspaceId}
-             AND m2.created_at >= ${period.start}
-             AND m2.created_at <= ${period.end}
+             AND m2.created_at >= ${startIso}::timestamptz
+             AND m2.created_at <= ${endIso}::timestamptz
            ORDER BY m2.conversation_id, m2.created_at ASC
           ) AS first_reply`,
       sql`first_customer.conversation_id = first_reply.conversation_id`

@@ -30,12 +30,28 @@ export function connectBridge(
   workspaceId: string,
   accessToken: string
 ): void {
+  // Clear any pending reconnect timer from a previous connection attempt
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+
   if (
     ws?.readyState === WebSocket.OPEN ||
     ws?.readyState === WebSocket.CONNECTING
   ) {
     log("Bridge already connecting or connected, ignoring duplicate call");
     return;
+  }
+
+  // Reset auth failure counter when called with new credentials
+  const credsChanged =
+    !currentCreds ||
+    currentCreds.workspaceId !== workspaceId ||
+    currentCreds.accessToken !== accessToken;
+  if (credsChanged) {
+    authFailures = 0;
+    reconnectAttempts = 0;
   }
 
   // Persist credentials for auto-reconnect on restart
