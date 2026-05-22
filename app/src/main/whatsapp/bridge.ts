@@ -49,9 +49,8 @@ export function connectBridge(
   ws = new WebSocket(url);
 
   ws.on("open", () => {
-    // Only reset reconnect counter — authFailures persists across opens
-    // so we detect repeated auth rejects (expired token)
     reconnectAttempts = 0;
+    authFailures = 0;
     log("Connected to API at", WS_URL);
     mainWindow.webContents.send("bridge:status", { connected: true });
 
@@ -115,9 +114,8 @@ export function connectBridge(
       } else if (payload.type === "ping") {
         ws?.send(JSON.stringify({ type: "pong" }));
       } else if (payload.type === "error" && payload.code === "auth_failed") {
-        authFailures++;
-        log("Auth failure from server, count:", authFailures);
-        // Close the socket — the close handler will stop retrying if threshold reached
+        log("Auth failure from server, closing socket");
+        // Close the socket — the close handler increments authFailures and handles retry logic
         ws?.close(4003, "Server reported auth_failed");
       }
     } catch {
