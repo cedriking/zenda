@@ -1,6 +1,5 @@
 import { Elysia } from 'elysia'
 import { getQueuedItems, clearQueue } from './offline-queue.js'
-import { getQueueStats as getRetryQueueStats } from './retry-queue.js'
 import { getQueueStats, getDeadLetters, retryDeadLetter } from './persistent-queue.js'
 import { pauseOutbound, resumeOutbound, isOutboundPaused } from './processor.js'
 import { logger } from '../../infra/logger.js'
@@ -10,15 +9,14 @@ export const queueModule = new Elysia({ prefix: '/queue' })
 
   .get('/', async ({ set }) => {
     try {
-      const stats = getRetryQueueStats()
       const items = getQueuedItems()
       return {
-        retryQueue: stats,
         offlineQueue: {
           total: items.length,
           safe: items.filter(i => i.type === 'safe').length,
           unsafe: items.filter(i => i.type === 'unsafe').length,
         },
+        note: 'Per-workspace stats available at /queue/stats?workspaceId=...',
       }
     } catch (err) {
       logger.error('Failed to get queue overview', { error: (err as Error).message })
