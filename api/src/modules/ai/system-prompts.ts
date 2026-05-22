@@ -63,6 +63,12 @@ export async function buildSystemPrompt(
   // 1. Identity
   sections.push(buildIdentitySection(ctx, lang))
 
+  // Always inject current date/time so the AI knows today's date
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' })
+  sections.push(`## Current Date & Time\nToday is ${dateStr}. Current time is ${timeStr}.\nWhen a customer says "today", "tomorrow", "next Monday", etc., calculate the date relative to today.`)
+
   // 2. Personality & Tone
   sections.push(buildPersonalitySection(ctx, preset))
 
