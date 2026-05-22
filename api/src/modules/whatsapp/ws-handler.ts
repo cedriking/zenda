@@ -37,6 +37,16 @@ type IncomingPayload =
 
 const jwtSecret = new TextEncoder().encode(JWT_SECRET);
 
+// Store WS metadata in a WeakMap instead of on the ws object directly.
+// Elysia may recreate the ws context between lifecycle events, which would
+// lose any properties set via (ws as any).__prop = value.
+interface WsMeta {
+  heartbeat: { pong: () => void; stop: () => void };
+  userId: string;
+  workspaceId: string;
+}
+const wsMeta = new WeakMap<object, WsMeta>();
+
 async function verifyWsToken(
   token: string
 ): Promise<{ sub?: string; workspaceId?: string } | null> {
@@ -93,28 +103,21 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
     // biome-ignore lint/suspicious/noExplicitAny: Elysia WS types don't expose internal fields
     addConnection(workspaceId, ws as any);
 
-    // Cache workspaceId on ws for use in message/close handlers
-    // biome-ignore lint/suspicious/noExplicitAny: Elysia WS context doesn't allow arbitrary props
-    (ws as any).__workspaceId = workspaceId;
-    // biome-ignore lint/suspicious/noExplicitAny: same
-    (ws as any).__userId = userId;
-
     // biome-ignore lint/suspicious/noExplicitAny: same
     const heartbeat = startHeartbeat(workspaceId, ws as any);
-    // Store heartbeat stopper on ws for cleanup
-    // biome-ignore lint/suspicious/noExplicitAny: same
-    (ws as any).__heartbeat = heartbeat;
+
+    // Store metadata in WeakMap (survives Elysia recreating ws context between events)
+    wsMeta.set(ws as object, { workspaceId, userId, heartbeat });
   },
 
   message(ws, rawMessage) {
-    // Use cached workspaceId from open handler — always available after successful auth
-    // biome-ignore lint/suspicious/noExplicitAny: Elysia WS context doesn't expose custom props
-    const workspaceId: string | undefined = (ws as any).__workspaceId;
+    const meta = wsMeta.get(ws as object);
 
-    if (!workspaceId) {
+    if (!meta) {
       logger.warn("WS message without workspace context");
       return;
     }
+    const { workspaceId } = meta;
 
     let payload: IncomingPayload;
     try {
@@ -127,8 +130,7 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
 
     // Handle pong (heartbeat response)
     if (payload.type === "pong") {
-      // biome-ignore lint/suspicious/noExplicitAny: Elysia WS context custom prop
-      (ws as any).__heartbeat?.pong();
+      meta.heartbeat.pong();
       return;
     }
 
@@ -234,17 +236,17 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
   },
 
   close(ws, code, reason) {
-    // biome-ignore lint/suspicious/noExplicitAny: Elysia WS context custom prop
-    const workspaceId = (ws as any).__workspaceId;
+    const meta = wsMeta.get(ws as object);
+    const workspaceId = meta?.workspaceId;
     logger.info("WebSocket disconnected", {
       workspaceId: workspaceId ?? "(never authed)",
       code,
       reason: reason ?? "(none)",
     });
-    // biome-ignore lint/suspicious/noExplicitAny: Elysia WS context custom prop
-    (ws as any).__heartbeat?.stop();
+    meta?.heartbeat.stop();
     if (workspaceId) {
       removeConnection(workspaceId);
     }
+    wsMeta.delete(ws as object);
   },
 });
