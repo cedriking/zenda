@@ -245,10 +245,10 @@ export async function initWhatsAppClient(
           continue;
         }
 
+        // Keep the full JID (e.g. "92784228884706@lid") — it's routable for replies.
+        // Strip legacy formats only.
         const phoneNumber = jid
-          .replace("@s.whatsapp.net", "")
-          .replace("@c.us", "")
-          .replace(/@lid$/, "");
+          .replace("@c.us", "");
 
         let body = "";
         let contentType = "text";

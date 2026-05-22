@@ -107,10 +107,11 @@ export function connectBridge(
         mainWindow.webContents.send("whatsapp:send-response", payload.data);
 
         // Send via Baileys to the WhatsApp contact (with retry on failure)
+        // The phoneNumber from incoming messages is already a valid JID
+        // (e.g. "92784228884706@lid" or "5219992204767@s.whatsapp.net").
+        // Both are routable — use as-is. Only append @s.whatsapp.net for bare numbers.
         if (phoneNumber && messageBody) {
-          // Strip Baileys LID suffix if present (@lid) — not a valid WhatsApp JID component
-          const cleanPhone = phoneNumber.replace(/@lid$/, "");
-          const jid = `${cleanPhone}@s.whatsapp.net`;
+          const jid = phoneNumber.includes("@") ? phoneNumber : `${phoneNumber}@s.whatsapp.net`;
           sendWhatsAppReply(jid, messageBody);
         } else {
           log(
