@@ -20,11 +20,11 @@ import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/s
 import { Route as DashboardConversationsIndexRouteImport } from './routes/dashboard/conversations/index'
 import { Route as DashboardAppointmentsIndexRouteImport } from './routes/dashboard/appointments/index'
 import { Route as DashboardAnalyticsIndexRouteImport } from './routes/dashboard/analytics/index'
-import { Route as DashboardSettingsKnowledgeBaseRouteImport } from './routes/dashboard/settings/knowledge-base'
+import { Route as DashboardSettingsSafetyRouteImport } from './routes/dashboard/settings/safety'
 import { Route as DashboardSettingsReceptionistRouteImport } from './routes/dashboard/settings/receptionist'
 import { Route as DashboardSettingsMessagingRouteImport } from './routes/dashboard/settings/messaging'
+import { Route as DashboardSettingsKnowledgeBaseRouteImport } from './routes/dashboard/settings/knowledge-base'
 import { Route as DashboardSettingsAppointmentsRouteImport } from './routes/dashboard/settings/appointments'
-import { Route as DashboardSettingsSafetyRouteImport } from './routes/dashboard/settings/safety'
 import { Route as DashboardCustomersIdRouteImport } from './routes/dashboard/customers/$id'
 import { Route as DashboardConversationsIdRouteImport } from './routes/dashboard/conversations/$id'
 
@@ -85,12 +85,11 @@ const DashboardAnalyticsIndexRoute = DashboardAnalyticsIndexRouteImport.update({
   path: '/analytics/',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardSettingsKnowledgeBaseRoute =
-  DashboardSettingsKnowledgeBaseRouteImport.update({
-    id: '/settings/knowledge-base',
-    path: '/settings/knowledge-base',
-    getParentRoute: () => DashboardRoute,
-  } as any)
+const DashboardSettingsSafetyRoute = DashboardSettingsSafetyRouteImport.update({
+  id: '/settings/safety',
+  path: '/settings/safety',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardSettingsReceptionistRoute =
   DashboardSettingsReceptionistRouteImport.update({
     id: '/settings/receptionist',
@@ -103,16 +102,16 @@ const DashboardSettingsMessagingRoute =
     path: '/settings/messaging',
     getParentRoute: () => DashboardRoute,
   } as any)
+const DashboardSettingsKnowledgeBaseRoute =
+  DashboardSettingsKnowledgeBaseRouteImport.update({
+    id: '/settings/knowledge-base',
+    path: '/settings/knowledge-base',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 const DashboardSettingsAppointmentsRoute =
   DashboardSettingsAppointmentsRouteImport.update({
     id: '/settings/appointments',
     path: '/settings/appointments',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardSettingsSafetyRoute =
-  DashboardSettingsSafetyRouteImport.update({
-    id: '/settings/safety',
-    path: '/settings/safety',
     getParentRoute: () => DashboardRoute,
   } as any)
 const DashboardCustomersIdRoute = DashboardCustomersIdRouteImport.update({
@@ -137,10 +136,10 @@ export interface FileRoutesByFullPath {
   '/onboarding/': typeof OnboardingIndexRoute
   '/dashboard/conversations/$id': typeof DashboardConversationsIdRoute
   '/dashboard/customers/$id': typeof DashboardCustomersIdRoute
-  '/dashboard/settings/knowledge-base': typeof DashboardSettingsKnowledgeBaseRoute
-  '/dashboard/settings/receptionist': typeof DashboardSettingsReceptionistRoute
-  '/dashboard/settings/messaging': typeof DashboardSettingsMessagingRoute
   '/dashboard/settings/appointments': typeof DashboardSettingsAppointmentsRoute
+  '/dashboard/settings/knowledge-base': typeof DashboardSettingsKnowledgeBaseRoute
+  '/dashboard/settings/messaging': typeof DashboardSettingsMessagingRoute
+  '/dashboard/settings/receptionist': typeof DashboardSettingsReceptionistRoute
   '/dashboard/settings/safety': typeof DashboardSettingsSafetyRoute
   '/dashboard/analytics/': typeof DashboardAnalyticsIndexRoute
   '/dashboard/appointments/': typeof DashboardAppointmentsIndexRoute
@@ -156,10 +155,10 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingIndexRoute
   '/dashboard/conversations/$id': typeof DashboardConversationsIdRoute
   '/dashboard/customers/$id': typeof DashboardCustomersIdRoute
-  '/dashboard/settings/knowledge-base': typeof DashboardSettingsKnowledgeBaseRoute
-  '/dashboard/settings/receptionist': typeof DashboardSettingsReceptionistRoute
-  '/dashboard/settings/messaging': typeof DashboardSettingsMessagingRoute
   '/dashboard/settings/appointments': typeof DashboardSettingsAppointmentsRoute
+  '/dashboard/settings/knowledge-base': typeof DashboardSettingsKnowledgeBaseRoute
+  '/dashboard/settings/messaging': typeof DashboardSettingsMessagingRoute
+  '/dashboard/settings/receptionist': typeof DashboardSettingsReceptionistRoute
   '/dashboard/settings/safety': typeof DashboardSettingsSafetyRoute
   '/dashboard/analytics': typeof DashboardAnalyticsIndexRoute
   '/dashboard/appointments': typeof DashboardAppointmentsIndexRoute
@@ -177,10 +176,10 @@ export interface FileRoutesById {
   '/onboarding/': typeof OnboardingIndexRoute
   '/dashboard/conversations/$id': typeof DashboardConversationsIdRoute
   '/dashboard/customers/$id': typeof DashboardCustomersIdRoute
-  '/dashboard/settings/knowledge-base': typeof DashboardSettingsKnowledgeBaseRoute
-  '/dashboard/settings/receptionist': typeof DashboardSettingsReceptionistRoute
-  '/dashboard/settings/messaging': typeof DashboardSettingsMessagingRoute
   '/dashboard/settings/appointments': typeof DashboardSettingsAppointmentsRoute
+  '/dashboard/settings/knowledge-base': typeof DashboardSettingsKnowledgeBaseRoute
+  '/dashboard/settings/messaging': typeof DashboardSettingsMessagingRoute
+  '/dashboard/settings/receptionist': typeof DashboardSettingsReceptionistRoute
   '/dashboard/settings/safety': typeof DashboardSettingsSafetyRoute
   '/dashboard/analytics/': typeof DashboardAnalyticsIndexRoute
   '/dashboard/appointments/': typeof DashboardAppointmentsIndexRoute
@@ -199,10 +198,10 @@ export interface FileRouteTypes {
     | '/onboarding/'
     | '/dashboard/conversations/$id'
     | '/dashboard/customers/$id'
-    | '/dashboard/settings/knowledge-base'
-    | '/dashboard/settings/receptionist'
-    | '/dashboard/settings/messaging'
     | '/dashboard/settings/appointments'
+    | '/dashboard/settings/knowledge-base'
+    | '/dashboard/settings/messaging'
+    | '/dashboard/settings/receptionist'
     | '/dashboard/settings/safety'
     | '/dashboard/analytics/'
     | '/dashboard/appointments/'
@@ -218,10 +217,10 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/dashboard/conversations/$id'
     | '/dashboard/customers/$id'
-    | '/dashboard/settings/knowledge-base'
-    | '/dashboard/settings/receptionist'
-    | '/dashboard/settings/messaging'
     | '/dashboard/settings/appointments'
+    | '/dashboard/settings/knowledge-base'
+    | '/dashboard/settings/messaging'
+    | '/dashboard/settings/receptionist'
     | '/dashboard/settings/safety'
     | '/dashboard/analytics'
     | '/dashboard/appointments'
@@ -238,10 +237,10 @@ export interface FileRouteTypes {
     | '/onboarding/'
     | '/dashboard/conversations/$id'
     | '/dashboard/customers/$id'
-    | '/dashboard/settings/knowledge-base'
-    | '/dashboard/settings/receptionist'
-    | '/dashboard/settings/messaging'
     | '/dashboard/settings/appointments'
+    | '/dashboard/settings/knowledge-base'
+    | '/dashboard/settings/messaging'
+    | '/dashboard/settings/receptionist'
     | '/dashboard/settings/safety'
     | '/dashboard/analytics/'
     | '/dashboard/appointments/'
@@ -337,11 +336,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAnalyticsIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/settings/knowledge-base': {
-      id: '/dashboard/settings/knowledge-base'
-      path: '/settings/knowledge-base'
-      fullPath: '/dashboard/settings/knowledge-base'
-      preLoaderRoute: typeof DashboardSettingsKnowledgeBaseRouteImport
+    '/dashboard/settings/safety': {
+      id: '/dashboard/settings/safety'
+      path: '/settings/safety'
+      fullPath: '/dashboard/settings/safety'
+      preLoaderRoute: typeof DashboardSettingsSafetyRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/settings/receptionist': {
@@ -358,18 +357,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSettingsMessagingRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/settings/knowledge-base': {
+      id: '/dashboard/settings/knowledge-base'
+      path: '/settings/knowledge-base'
+      fullPath: '/dashboard/settings/knowledge-base'
+      preLoaderRoute: typeof DashboardSettingsKnowledgeBaseRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/settings/appointments': {
       id: '/dashboard/settings/appointments'
       path: '/settings/appointments'
       fullPath: '/dashboard/settings/appointments'
       preLoaderRoute: typeof DashboardSettingsAppointmentsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/settings/safety': {
-      id: '/dashboard/settings/safety'
-      path: '/settings/safety'
-      fullPath: '/dashboard/settings/safety'
-      preLoaderRoute: typeof DashboardSettingsSafetyRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/customers/$id': {
@@ -393,10 +392,10 @@ interface DashboardRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardConversationsIdRoute: typeof DashboardConversationsIdRoute
   DashboardCustomersIdRoute: typeof DashboardCustomersIdRoute
-  DashboardSettingsKnowledgeBaseRoute: typeof DashboardSettingsKnowledgeBaseRoute
-  DashboardSettingsReceptionistRoute: typeof DashboardSettingsReceptionistRoute
-  DashboardSettingsMessagingRoute: typeof DashboardSettingsMessagingRoute
   DashboardSettingsAppointmentsRoute: typeof DashboardSettingsAppointmentsRoute
+  DashboardSettingsKnowledgeBaseRoute: typeof DashboardSettingsKnowledgeBaseRoute
+  DashboardSettingsMessagingRoute: typeof DashboardSettingsMessagingRoute
+  DashboardSettingsReceptionistRoute: typeof DashboardSettingsReceptionistRoute
   DashboardSettingsSafetyRoute: typeof DashboardSettingsSafetyRoute
   DashboardAnalyticsIndexRoute: typeof DashboardAnalyticsIndexRoute
   DashboardAppointmentsIndexRoute: typeof DashboardAppointmentsIndexRoute
@@ -408,10 +407,10 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardConversationsIdRoute: DashboardConversationsIdRoute,
   DashboardCustomersIdRoute: DashboardCustomersIdRoute,
-  DashboardSettingsKnowledgeBaseRoute: DashboardSettingsKnowledgeBaseRoute,
-  DashboardSettingsReceptionistRoute: DashboardSettingsReceptionistRoute,
-  DashboardSettingsMessagingRoute: DashboardSettingsMessagingRoute,
   DashboardSettingsAppointmentsRoute: DashboardSettingsAppointmentsRoute,
+  DashboardSettingsKnowledgeBaseRoute: DashboardSettingsKnowledgeBaseRoute,
+  DashboardSettingsMessagingRoute: DashboardSettingsMessagingRoute,
+  DashboardSettingsReceptionistRoute: DashboardSettingsReceptionistRoute,
   DashboardSettingsSafetyRoute: DashboardSettingsSafetyRoute,
   DashboardAnalyticsIndexRoute: DashboardAnalyticsIndexRoute,
   DashboardAppointmentsIndexRoute: DashboardAppointmentsIndexRoute,
