@@ -106,12 +106,16 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
     // biome-ignore lint/suspicious/noExplicitAny: same
     const heartbeat = startHeartbeat(workspaceId, ws as any);
 
-    // Store metadata in WeakMap (survives Elysia recreating ws context between events)
-    wsMeta.set(ws as object, { workspaceId, userId, heartbeat });
+    // Elysia creates a new ElysiaWS wrapper for each lifecycle event (open/message/close).
+    // The underlying Bun socket (ws.raw) is the same object across all events.
+    // Key metadata by ws.raw so it survives wrapper recreation.
+    const raw = (ws as { raw: object }).raw;
+    wsMeta.set(raw, { workspaceId, userId, heartbeat });
   },
 
   message(ws, rawMessage) {
-    const meta = wsMeta.get(ws as object);
+    const raw = (ws as { raw: object }).raw;
+    const meta = wsMeta.get(raw);
 
     if (!meta) {
       logger.warn("WS message without workspace context");
@@ -236,7 +240,8 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
   },
 
   close(ws, code, reason) {
-    const meta = wsMeta.get(ws as object);
+    const raw = (ws as { raw: object }).raw;
+    const meta = wsMeta.get(raw);
     const workspaceId = meta?.workspaceId;
     logger.info("WebSocket disconnected", {
       workspaceId: workspaceId ?? "(never authed)",
@@ -247,6 +252,6 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
     if (workspaceId) {
       removeConnection(workspaceId);
     }
-    wsMeta.delete(ws as object);
+    wsMeta.delete(raw);
   },
 });
