@@ -53,6 +53,8 @@ export async function buildSystemPrompt(
   language: Language,
   customerId?: string,
   conversationId?: string,
+  localTime?: string,
+  localTimezone?: string,
 ): Promise<string> {
   const ctx = await loadBusinessContext(workspaceId)
   const lang = language === 'es' ? 'Spanish' : 'English'
@@ -61,7 +63,7 @@ export async function buildSystemPrompt(
   const sections: string[] = []
 
   // 0. Current Date & Time — CRITICAL for appointment scheduling
-  sections.push(buildCurrentDateTimeSection(ctx))
+  sections.push(buildCurrentDateTimeSection(localTime, localTimezone))
 
   // 1. Identity
   sections.push(buildIdentitySection(ctx, lang))
@@ -109,11 +111,13 @@ export async function buildSystemPrompt(
 // Section builders
 // ---------------------------------------------------------------------------
 
-function buildCurrentDateTimeSection(_ctx: BusinessContext): string {
-  const now = new Date()
-  const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+function buildCurrentDateTimeSection(localTime?: string, localTimezone?: string): string {
+  // Use the app's local time if provided (accurate for the user's timezone)
+  // otherwise fall back to server time
+  const now = localTime ? new Date(localTime) : new Date()
+  const tz = localTimezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone
+  const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: tz })
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: tz })
 
   return `## Current Date & Time
 

@@ -82,7 +82,9 @@ export async function runAgent(
   conversationId: string,
   customerId: string,
   userMessage: string,
-  language: Language
+  language: Language,
+  localTime?: string,
+  localTimezone?: string,
 ): Promise<AgentResponse | null> {
   try {
     // 0. Per-customer rate limit check
@@ -104,7 +106,9 @@ export async function runAgent(
       workspaceId,
       language,
       customerId,
-      conversationId
+      conversationId,
+      localTime,
+      localTimezone
     );
 
     // 2. Sanitize customer input

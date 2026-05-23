@@ -160,6 +160,8 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
               mediaUrl: raw.mediaUrl as string | undefined,
               timestamp: (raw.timestamp as string) ?? new Date().toISOString(),
               externalMessageId: raw.externalMessageId as string | undefined,
+              localTime: raw.localTime as string | undefined,
+              localTimezone: raw.localTimezone as string | undefined,
             };
 
       if (!(msgData.phoneNumber && msgData.body)) {

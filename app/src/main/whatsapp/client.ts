@@ -326,6 +326,9 @@ export async function initWhatsAppClient(
           contentType,
           timestamp,
           externalMessageId: msg.key.id ?? undefined,
+          // App's local time so the AI knows the real current date/time
+          localTime: new Date().toISOString(),
+          localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           ...(mediaUrl ? { mediaUrl } : {}),
           ...(isOfflineCatchup ? { isOfflineCatchup: true } : {}),
         });

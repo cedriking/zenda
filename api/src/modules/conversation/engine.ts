@@ -91,6 +91,8 @@ interface IncomingMessage {
   body: string;
   contentType: "text" | "audio" | "image" | "file" | "system";
   externalMessageId?: string;
+  localTime?: string;
+  localTimezone?: string;
   mediaUrl?: string;
   phoneNumber: string;
   platform?: string; // 'whatsapp', 'instagram', 'telegram', etc.
@@ -532,7 +534,9 @@ export async function processIncomingMessage(
       conversation.id,
       customer.id,
       messageBody,
-      agentLanguage
+      agentLanguage,
+      msg.localTime as string | undefined,
+      msg.localTimezone as string | undefined,
     );
 
     if (!aiResponse) {
