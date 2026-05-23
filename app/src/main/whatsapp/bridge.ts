@@ -35,6 +35,90 @@ const MAX_REPLY_RETRIES = 3;
 
 const WS_URL = process.env.ZENDA_API_WS_URL ?? "wss://api.zenda.bot/ws";
 
+/**
+ * Convert markdown formatting to WhatsApp formatting.
+ * WhatsApp uses *bold*, _italic_, ~strikethrough~ and ```monospace```.
+ */
+function markdownToWhatsApp(text: string): string {
+  return (
+    text
+      // **bold** → *bold* (must run before italic)
+      .replace(/\*\*(.+?)\*\*/g, "*$1*")
+      // *italic* → _italic_ (single asterisks not part of bullets)
+      .replace(/(?<!\w)\*(?!\s)(.+?)(?<!\s)\*(?!\w)/g, "_$1_")
+      // ~~strikethrough~~ → ~strikethrough~
+      .replace(/~~(.+?)~~/g, "~$1~")
+      // `inline code` → ```inline code```
+      .replace(/`([^`]+)`/g, "```$1```")
+      // ### header → *header*
+      .replace(/^#{1,6}\s+(.+)$/gm, "*$1*")
+      // - bullets → • bullets
+      .replace(/^-\s+/gm, "• ")
+  );
+}
+
+function handleServerMessage(
+  ws: WebSocket,
+  mainWindow: BrowserWindow,
+  data: Buffer
+): void {
+  try {
+    const payload = JSON.parse(data.toString());
+
+    if (payload.type === "response.send") {
+      handleResponseSend(ws, mainWindow, payload);
+    } else if (payload.type === "notification") {
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("notification:new", payload.data);
+      }
+    } else if (payload.type === "conversation.update") {
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("conversation:update", payload.data);
+      }
+    } else if (payload.type === "appointment.update") {
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("appointment:update", payload.data);
+      }
+    } else if (payload.type === "ping") {
+      ws?.send(JSON.stringify({ type: "pong" }));
+    } else if (payload.type === "error" && payload.code === "auth_failed") {
+      log("Auth failure from server, closing socket");
+      ws?.close(4003, "Server reported auth_failed");
+    }
+  } catch {
+    // ignore parse errors
+  }
+}
+
+function handleResponseSend(
+  mainWindow: BrowserWindow,
+  payload: { data?: { phoneNumber?: string; message?: { body?: string } } }
+): void {
+  const phoneNumber = payload.data?.phoneNumber;
+  const messageBody = payload.data?.message?.body;
+  log(
+    "Received response.send for",
+    phoneNumber,
+    ":",
+    String(messageBody).slice(0, 80)
+  );
+
+  if (!mainWindow.isDestroyed()) {
+    mainWindow.webContents.send("whatsapp:send-response", payload.data);
+  }
+
+  if (phoneNumber && messageBody) {
+    const jid = phoneNumber.includes("@")
+      ? phoneNumber
+      : `${phoneNumber}@s.whatsapp.net`;
+    sendWhatsAppReply(jid, markdownToWhatsApp(messageBody));
+  } else {
+    log(
+      "response.send missing phoneNumber or message.body — skipping WhatsApp delivery"
+    );
+  }
+}
+
 export function connectBridge(
   mainWindow: BrowserWindow,
   workspaceId: string,
@@ -109,61 +193,7 @@ export function connectBridge(
   });
 
   ws.on("message", (data: Buffer) => {
-    try {
-      const payload = JSON.parse(data.toString());
-
-      // Forward responses and notifications to renderer
-      if (payload.type === "response.send") {
-        const phoneNumber = payload.data?.phoneNumber;
-        const messageBody = payload.data?.message?.body;
-        log(
-          "Received response.send for",
-          phoneNumber,
-          ":",
-          String(messageBody).slice(0, 80)
-        );
-
-        // Forward to renderer for UI updates
-        if (!mainWindow.isDestroyed()) {
-          mainWindow.webContents.send("whatsapp:send-response", payload.data);
-        }
-
-        // Send via Baileys to the WhatsApp contact (with retry on failure)
-        // The phoneNumber from incoming messages is already a valid JID
-        // (e.g. "92784228884706@lid" or "5219992204767@s.whatsapp.net").
-        // Both are routable — use as-is. Only append @s.whatsapp.net for bare numbers.
-        if (phoneNumber && messageBody) {
-          const jid = phoneNumber.includes("@")
-            ? phoneNumber
-            : `${phoneNumber}@s.whatsapp.net`;
-          sendWhatsAppReply(jid, messageBody);
-        } else {
-          log(
-            "response.send missing phoneNumber or message.body — skipping WhatsApp delivery"
-          );
-        }
-      } else if (payload.type === "notification") {
-        if (!mainWindow.isDestroyed()) {
-          mainWindow.webContents.send("notification:new", payload.data);
-        }
-      } else if (payload.type === "conversation.update") {
-        if (!mainWindow.isDestroyed()) {
-          mainWindow.webContents.send("conversation:update", payload.data);
-        }
-      } else if (payload.type === "appointment.update") {
-        if (!mainWindow.isDestroyed()) {
-          mainWindow.webContents.send("appointment:update", payload.data);
-        }
-      } else if (payload.type === "ping") {
-        ws?.send(JSON.stringify({ type: "pong" }));
-      } else if (payload.type === "error" && payload.code === "auth_failed") {
-        log("Auth failure from server, closing socket");
-        // Close the socket — the close handler increments authFailures and handles retry logic
-        ws?.close(4003, "Server reported auth_failed");
-      }
-    } catch {
-      // ignore parse errors
-    }
+    handleServerMessage(ws, mainWindow, data);
   });
 
   ws.on("close", (code: number, reason: Buffer) => {
