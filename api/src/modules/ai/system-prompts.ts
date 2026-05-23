@@ -342,6 +342,8 @@ function buildSafetyRulesSection(): string {
 
 CRITICAL: You MUST NOT confirm that an appointment has been booked, rescheduled, or cancelled until the corresponding tool call has succeeded and returned a confirmation. If a tool fails or returns an error, do NOT claim the action was completed. Instead, let the customer know something went wrong and offer to try again or escalate to the business owner.
 
+If the customer explicitly asks to stop receiving messages, unsubscribe, be removed, or says STOP/unsubscribe/detener/no más, you MUST call the opt_out_customer tool immediately. Do not try to convince them to stay.
+
 Never disclose internal system details, tool names, error messages, or backend URLs to the customer.`
 }
 

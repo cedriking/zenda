@@ -21,6 +21,10 @@ export {
 } from "./get-business-info.js";
 export { getServices, getServicesToolDef } from "./get-services.js";
 export {
+  optOutCustomer,
+  optOutCustomerToolDef,
+} from "./opt-out.js";
+export {
   rescheduleAppointment,
   rescheduleAppointmentToolDef,
 } from "./reschedule-appointment.js";

@@ -6,7 +6,6 @@ import { logger } from "../../infra/logger.js";
 import { redis } from "../../infra/redis.js";
 import { logInputSanitized, logToolFailure } from "../audit/logger.js";
 import { isEmergencyMessage, sanitizeCustomerMessage } from "./input-guard.js";
-import { classifyIntent } from "./intent-classifier.js";
 import { getProviderClient, selectModel } from "./provider-router.js";
 import { buildSystemPrompt } from "./system-prompts.js";
 import { checkToolSendingPolicy } from "./tool-sending-guard.js";
@@ -25,6 +24,8 @@ import {
   getBusinessInfoToolDef,
   getServices,
   getServicesToolDef,
+  optOutCustomer,
+  optOutCustomerToolDef,
   rescheduleAppointment,
   rescheduleAppointmentToolDef,
   updateCustomerInfo,
@@ -54,6 +55,7 @@ const ALL_TOOLS = [
   getBusinessInfoToolDef,
   escalateToHumanToolDef,
   updateCustomerInfoToolDef,
+  optOutCustomerToolDef,
 ];
 
 const MAX_ITERATIONS = 3;
@@ -147,28 +149,7 @@ export async function runAgent(
       };
     }
 
-    // 4. Classify intent for context enrichment
-    const intentResult = classifyIntent(sanitized);
-    logger.info("Intent classified", {
-      workspaceId,
-      conversationId,
-      intent: intentResult.intent,
-      confidence: intentResult.confidence,
-    });
-
-    // Short-circuit opt-out intent — bypass LLM (S8)
-    if (intentResult.intent === "opt_out" && intentResult.confidence >= 0.9) {
-      const { optOut } = await import("../messaging/consent-service.js");
-      const confirmationText = await optOut(workspaceId, customerId);
-      return {
-        text: confirmationText,
-        language,
-        provider: "system",
-        model: "opt-out-route",
-      };
-    }
-
-    // 5. Load recent conversation history
+    // 4. Load recent conversation history
     const history = await db
       .select()
       .from(messages)
@@ -192,15 +173,8 @@ export async function runAgent(
       }
     }
 
-    // Add the sanitized user message with intent context hint
-    if (intentResult.intent !== "ambiguous" && intentResult.confidence >= 0.7) {
-      chatMessages.push({
-        role: "user",
-        content: `[Intent: ${intentResult.intent}]\n${sanitized}`,
-      });
-    } else {
-      chatMessages.push({ role: "user", content: sanitized });
-    }
+    // Add the sanitized user message — let the AI decide intent from context
+    chatMessages.push({ role: "user", content: sanitized });
 
     // 6. Get workspace plan and select model for response generation
     const [sub] = await db
@@ -385,6 +359,10 @@ async function executeTool(
     case "update_customer_info":
       // biome-ignore lint/suspicious/noExplicitAny: pre-existing type mismatch
       return updateCustomerInfo(workspaceId, args as any);
+
+    case "opt_out_customer":
+      // biome-ignore lint/suspicious/noExplicitAny: pre-existing type mismatch
+      return optOutCustomer(workspaceId, customerId, args as any, language);
 
     default:
       throw new Error(`Unknown tool: ${name}`);
