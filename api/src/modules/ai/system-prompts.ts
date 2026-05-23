@@ -328,9 +328,10 @@ function buildNaturalLanguageRules(ctx: BusinessContext): string {
   lines.push('4. Keep responses short and suitable for WhatsApp messaging.')
   lines.push('5. If unsure about any request, escalate to the business owner rather than guessing.')
   lines.push('6. Always respond in the language the customer is using.')
+  lines.push('7. If the customer context shows name as UNKNOWN, ask for their name early in the conversation. Once they provide it, call update_customer_info to save it. Always address them by name afterward.')
 
   if (!ctx.useEmoji) {
-    lines.push('7. Do not use emoji.')
+    lines.push('8. Do not use emoji.')
   }
 
   return lines.join('\n')
@@ -459,6 +460,14 @@ async function loadBusinessContext(workspaceId: string): Promise<BusinessContext
   }
 }
 
+function buildCustomerNameInstruction(name: string | null): string[] {
+  if (name) return [`- Customer name: ${name}`]
+  return [
+    '- Customer name: UNKNOWN',
+    '  IMPORTANT: This customer\'s name is not on file. Early in the conversation, politely ask for their name (e.g. "May I have your name?" or "¿Cómo te llamas?"). When they provide it, immediately call the update_customer_info tool with their name to save it.',
+  ]
+}
+
 async function buildCustomerContextSection(
   workspaceId: string,
   customerId: string,
@@ -476,7 +485,7 @@ async function buildCustomerContextSection(
     const lines: string[] = ['## Customer Context', '']
 
     lines.push(`- Customer phone: ${profile.phoneNumber}`)
-    if (profile.name) lines.push(`- Customer name: ${profile.name}`)
+    lines.push(...buildCustomerNameInstruction(profile.name))
     lines.push(`- Preferred language: ${profile.language}`)
     lines.push(`- Total past appointments: ${profile.totalAppointments}`)
     if (profile.lastVisit) lines.push(`- Last visit: ${new Date(profile.lastVisit).toLocaleDateString()}`)
@@ -519,7 +528,7 @@ async function buildCustomerContextSection(
     }
 
     return lines.join('\n')
-  } catch (err) {
+  } catch {
     // Non-critical: if customer context fails, continue without it
     return null
   }

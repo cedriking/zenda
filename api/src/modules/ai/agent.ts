@@ -27,6 +27,8 @@ import {
   getServicesToolDef,
   rescheduleAppointment,
   rescheduleAppointmentToolDef,
+  updateCustomerInfo,
+  updateCustomerInfoToolDef,
 } from "./tools/index.js";
 
 interface AgentResponse {
@@ -51,6 +53,7 @@ const ALL_TOOLS = [
   getServicesToolDef,
   getBusinessInfoToolDef,
   escalateToHumanToolDef,
+  updateCustomerInfoToolDef,
 ];
 
 const MAX_ITERATIONS = 3;
@@ -378,6 +381,10 @@ async function executeTool(
     case "escalate_to_human":
       // biome-ignore lint/suspicious/noExplicitAny: pre-existing type mismatch
       return escalateToHuman(workspaceId, conversationId, args as any);
+
+    case "update_customer_info":
+      // biome-ignore lint/suspicious/noExplicitAny: pre-existing type mismatch
+      return updateCustomerInfo(workspaceId, args as any);
 
     default:
       throw new Error(`Unknown tool: ${name}`);
