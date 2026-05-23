@@ -286,13 +286,25 @@ function sendWhatsAppReply(jid: string, text: string): void {
     return;
   }
 
-  // Show "typing..." indicator, wait a human-like delay, then send
   const delay = typingDelay(text);
+
+  // Send initial "typing..." and keep refreshing every 4s (WhatsApp expires it after ~5s)
   sock
     .sendPresenceUpdate("composing", jid)
     .catch((e: unknown) => log("sendPresenceUpdate failed", e));
 
+  const composingInterval = setInterval(() => {
+    const currentSock = getClient();
+    if (currentSock) {
+      currentSock
+        .sendPresenceUpdate("composing", jid)
+        .catch((e: unknown) => log("sendPresenceUpdate refresh failed", e));
+    }
+  }, 4000);
+
   setTimeout(() => {
+    clearInterval(composingInterval);
+
     // Re-check socket after delay — it may have disconnected
     const currentSock = getClient();
     if (!currentSock) {
