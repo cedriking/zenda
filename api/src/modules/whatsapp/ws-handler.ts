@@ -39,6 +39,51 @@ type IncomingPayload =
 
 const jwtSecret = new TextEncoder().encode(JWT_SECRET);
 
+// Rate limit WS auth failures per IP to prevent reconnect storms
+const wsAuthFailures = new Map<string, { count: number; resetAt: number }>();
+const WS_AUTH_MAX_FAILURES = 5;
+const WS_AUTH_WINDOW_MS = 60_000; // 1 minute
+
+function getWsClientIp(ws: { data: Record<string, unknown> }): string {
+  const req = (ws.data as { request?: Headers & { headers?: Headers } })
+    .request;
+  const headers = req?.headers ?? req;
+  if (headers && typeof (headers as Headers).get === "function") {
+    const h = headers as Headers;
+    const forwarded = h.get("x-forwarded-for")?.split(",")[0]?.trim();
+    if (forwarded) {
+      return forwarded;
+    }
+    const realIp = h.get("x-real-ip");
+    if (realIp) {
+      return realIp;
+    }
+  }
+  return "unknown";
+}
+
+function isWsAuthBlocked(ip: string): boolean {
+  const entry = wsAuthFailures.get(ip);
+  if (!entry) {
+    return false;
+  }
+  if (Date.now() > entry.resetAt) {
+    wsAuthFailures.delete(ip);
+    return false;
+  }
+  return entry.count >= WS_AUTH_MAX_FAILURES;
+}
+
+function recordWsAuthFailure(ip: string): void {
+  const now = Date.now();
+  const entry = wsAuthFailures.get(ip);
+  if (!entry || now > entry.resetAt) {
+    wsAuthFailures.set(ip, { count: 1, resetAt: now + WS_AUTH_WINDOW_MS });
+  } else {
+    entry.count++;
+  }
+}
+
 // Store WS metadata in a WeakMap instead of on the ws object directly.
 // Elysia may recreate the ws context between lifecycle events, which would
 // lose any properties set via (ws as any).__prop = value.
@@ -69,6 +114,15 @@ async function verifyWsToken(
 
 export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
   async open(ws) {
+    const ip = getWsClientIp(ws);
+
+    // Block IPs with too many recent auth failures
+    if (isWsAuthBlocked(ip)) {
+      logger.warn("WS open: blocked for too many auth failures", { ip });
+      ws.close(4003, "Too many auth failures");
+      return;
+    }
+
     // Extract token from URL query params for authentication
     // Use ws.data.url (reliable) instead of ws.data.query (may be empty in some Elysia versions)
     const rawUrl = ((ws.data as Record<string, unknown>).url as string) ?? "";
@@ -80,7 +134,9 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
         : undefined);
 
     if (!token) {
+      recordWsAuthFailure(ip);
       logger.warn("WS open: no token found", {
+        ip,
         rawUrl: rawUrl || "(empty)",
         hasQuery: !!(ws.data as Record<string, unknown>).query,
       });
@@ -90,7 +146,9 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
 
     const payload = await verifyWsToken(token);
     if (!(payload?.sub && payload?.workspaceId)) {
+      recordWsAuthFailure(ip);
       logger.warn("WS open: token verification failed", {
+        ip,
         sub: payload?.sub ?? "(missing)",
         workspaceId: payload?.workspaceId ?? "(missing)",
       });
