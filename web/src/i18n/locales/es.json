@@ -193,7 +193,13 @@
     "faq5Q": "¿Puedo cancelar en cualquier momento?",
     "faq5A": "Sí, sin contratos. Cancela desde el panel o el portal de facturación en cualquier momento. Tus datos son tuyos para exportar.",
     "faq6Q": "¿Qué pasa si la IA comete un error?",
-    "faq6A": "Puedes tomar el control de cualquier conversación en cualquier momento. La IA está diseñada para derivarte los casos cuando no esté segura. También puedes cancelar o reprogramar cualquier cita desde el calendario."
+    "faq6A": "Puedes tomar el control de cualquier conversación en cualquier momento. La IA está diseñada para derivarte los casos cuando no esté segura. También puedes cancelar o reprogramar cualquier cita desde el calendario.",
+    "heroValue247": "24/7",
+    "heroValue247Label": "Siempre disponible",
+    "heroValueBilingual": "EN + ES",
+    "heroValueBilingualLabel": "IA bilingüe",
+    "heroValueSetup": "5 min",
+    "heroValueSetupLabel": "Para comenzar"
   },
   "pricing": {
     "badge": "Precios WhatsApp Local",

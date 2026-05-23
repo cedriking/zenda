@@ -193,7 +193,13 @@
     "faq5Q": "Kann ich jederzeit kündigen?",
     "faq5A": "Ja, keine Verträge. Kündigen Sie über das Dashboard oder das Abrechnungsportal jederzeit. Ihre Daten gehören Ihnen zum Export.",
     "faq6Q": "Was passiert, wenn die KI einen Fehler macht?",
-    "faq6A": "Sie können jedes Gespräch jederzeit übernehmen. Die KI ist darauf ausgelegt, unsichere Fälle an Sie zu eskalieren. Sie können auch jeden Termin im Kalender stornieren oder verschieben."
+    "faq6A": "Sie können jedes Gespräch jederzeit übernehmen. Die KI ist darauf ausgelegt, unsichere Fälle an Sie zu eskalieren. Sie können auch jeden Termin im Kalender stornieren oder verschieben.",
+    "heroValue247": "24/7",
+    "heroValue247Label": "Immer verfügbar",
+    "heroValueBilingual": "EN + ES",
+    "heroValueBilingualLabel": "Zweisprachige KI",
+    "heroValueSetup": "5 Min",
+    "heroValueSetupLabel": "Um loszulegen"
   },
   "pricing": {
     "badge": "WhatsApp-Lokale Preise",

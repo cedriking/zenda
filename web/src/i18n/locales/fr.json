@@ -193,7 +193,13 @@
     "faq5Q": "Puis-je annuler à tout moment ?",
     "faq5A": "Oui, sans engagement. Annulez depuis le tableau de bord ou le portail de facturation à tout moment. Vos données restent les vôtres à exporter.",
     "faq6Q": "Que se passe-t-il si l'IA fait une erreur ?",
-    "faq6A": "Vous pouvez reprendre n'importe quelle conversation à tout moment. L'IA est conçue pour vous transférer lorsqu'elle n'est pas sûre. Vous pouvez également annuler ou replanifier tout rendez-vous depuis le calendrier."
+    "faq6A": "Vous pouvez reprendre n'importe quelle conversation à tout moment. L'IA est conçue pour vous transférer lorsqu'elle n'est pas sûre. Vous pouvez également annuler ou replanifier tout rendez-vous depuis le calendrier.",
+    "heroValue247": "24/7",
+    "heroValue247Label": "Toujours disponible",
+    "heroValueBilingual": "EN + ES",
+    "heroValueBilingualLabel": "IA bilingue",
+    "heroValueSetup": "5 min",
+    "heroValueSetupLabel": "Pour commencer"
   },
   "pricing": {
     "badge": "Tarifs WhatsApp Local",

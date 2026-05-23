@@ -592,27 +592,27 @@ function PlanSelectionView({
 
   const planFeatures: Record<string, string[]> = {
     local_solo: [
-      t("onboarding.plans.local_solo.features.contacts", { count: 50 }),
+      t("onboarding.plans.local_solo.features.contacts", { count: 75 }),
       t("onboarding.plans.local_solo.features.whatsapp"),
       t("onboarding.plans.local_solo.features.reminders"),
       t("onboarding.plans.local_solo.features.languages"),
     ],
     local_starter: [
-      t("onboarding.plans.local_starter.features.contacts", { count: 150 }),
+      t("onboarding.plans.local_starter.features.contacts", { count: 200 }),
       t("onboarding.plans.local_starter.features.whatsapp"),
       t("onboarding.plans.local_starter.features.reminders"),
       t("onboarding.plans.local_starter.features.staff"),
       t("onboarding.plans.local_starter.features.languages"),
     ],
     local_pro: [
-      t("onboarding.plans.local_pro.features.contacts", { count: 500 }),
+      t("onboarding.plans.local_pro.features.contacts", { count: 600 }),
       t("onboarding.plans.local_pro.features.everythingStarter"),
       t("onboarding.plans.local_pro.features.staff"),
       t("onboarding.plans.local_pro.features.voice"),
       t("onboarding.plans.local_pro.features.support"),
     ],
     local_business: [
-      t("onboarding.plans.local_business.features.contacts", { count: 1500 }),
+      t("onboarding.plans.local_business.features.contacts", { count: 1200 }),
       t("onboarding.plans.local_business.features.everythingPro"),
       t("onboarding.plans.local_business.features.staff"),
       t("onboarding.plans.local_business.features.api"),

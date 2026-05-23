@@ -195,7 +195,13 @@
     "faq5Q": "可以随时取消订阅吗？",
     "faq5A": "可以，我们没有任何长期合同。您可随时在仪表盘或账单管理页面取消，数据支持导出带走。",
     "faq6Q": "如果AI出现误操作怎么办？",
-    "faq6A": "您可以随时接管任何对话。AI在遇到不确定的情况时会自动向您请求协助。您也可以随时在日历中取消或更改任何预约。"
+    "faq6A": "您可以随时接管任何对话。AI在遇到不确定的情况时会自动向您请求协助。您也可以随时在日历中取消或更改任何预约。",
+    "heroValue247": "24/7",
+    "heroValue247Label": "全天候在线",
+    "heroValueBilingual": "EN + ES",
+    "heroValueBilingualLabel": "双语AI",
+    "heroValueSetup": "5分钟",
+    "heroValueSetupLabel": "即可上线"
   },
   "pricing": {
     "badge": "WhatsApp本地定价",
