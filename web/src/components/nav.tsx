@@ -50,11 +50,11 @@ export function Nav({ variant = 'home' }: { variant?: 'home' | 'simple' }) {
   const [scrolled, setScrolled] = useState(false)
 
   const NAV_LINKS = [
-    { href: '#features', label: t('features') },
-    { href: '/pricing', label: t('pricing') },
-    { href: '#how-it-works', label: t('howItWorks') },
-    { href: '#faq', label: t('faq') },
-  ]
+    { href: '#features', label: t('features'), hash: true },
+    { href: '/pricing', label: t('pricing'), hash: false },
+    { href: '#how-it-works', label: t('howItWorks'), hash: true },
+    { href: '#faq', label: t('faq'), hash: true },
+  ] as const
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -89,13 +89,23 @@ export function Nav({ variant = 'home' }: { variant?: 'home' | 'simple' }) {
 
         <div className="hidden md:flex items-center gap-6">
           {NAV_LINKS.map(l => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="text-sm text-slate-600 hover:text-slate-900 transition-colors font-medium"
-            >
-              {l.label}
-            </Link>
+            l.hash ? (
+              <a
+                key={l.href}
+                href={l.href}
+                className="text-sm text-slate-600 hover:text-slate-900 transition-colors font-medium"
+              >
+                {l.label}
+              </a>
+            ) : (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="text-sm text-slate-600 hover:text-slate-900 transition-colors font-medium"
+              >
+                {l.label}
+              </Link>
+            )
           ))}
         </div>
 
@@ -119,14 +129,25 @@ export function Nav({ variant = 'home' }: { variant?: 'home' | 'simple' }) {
         <div className="md:hidden bg-white border-b border-slate-200 px-6 pb-4">
           <div className="flex flex-col gap-3">
             {NAV_LINKS.map(l => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="text-sm text-slate-600 hover:text-slate-900 py-2 font-medium"
-                onClick={() => setMobileOpen(false)}
-              >
-                {l.label}
-              </Link>
+              l.hash ? (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  className="text-sm text-slate-600 hover:text-slate-900 py-2 font-medium"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {l.label}
+                </a>
+              ) : (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="text-sm text-slate-600 hover:text-slate-900 py-2 font-medium"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {l.label}
+                </Link>
+              )
             ))}
             <div className="flex flex-col gap-2 pt-2">
               <LanguageSwitcher />

@@ -10,7 +10,7 @@ CREATE INDEX IF NOT EXISTS idx_messages_conversation_created ON messages (conver
 CREATE INDEX IF NOT EXISTS idx_messages_workspace_created ON messages (workspace_id, created_at DESC);
 
 -- Appointments
-CREATE INDEX IF NOT EXISTS idx_appointments_workspace_date ON appointments (workspace_id, date);
+CREATE INDEX IF NOT EXISTS idx_appointments_workspace_date ON appointments (workspace_id, start_at);
 CREATE INDEX IF NOT EXISTS idx_appointments_workspace_status ON appointments (workspace_id, status);
 
 -- Customers

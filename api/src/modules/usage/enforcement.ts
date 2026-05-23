@@ -53,21 +53,29 @@ export async function enforceLimit(
   const planConfig = PLANS[tier];
   const limit = planConfig.activeContactsLimit;
 
-  // Get current usage
-  const [record] = await db
-    .select()
-    .from(usageRecords)
-    .where(
-      and(
-        eq(usageRecords.workspaceId, workspaceId),
-        eq(usageRecords.metric, "active_appointment_contacts"),
-        gte(usageRecords.periodStart, periodStart),
-        lte(usageRecords.periodEnd, periodEnd)
+  // Get current usage — graceful fallback if table doesn't exist yet
+  let currentUsage = 0;
+  try {
+    const [record] = await db
+      .select()
+      .from(usageRecords)
+      .where(
+        and(
+          eq(usageRecords.workspaceId, workspaceId),
+          eq(usageRecords.metric, "active_appointment_contacts"),
+          gte(usageRecords.periodStart, periodStart),
+          lte(usageRecords.periodEnd, periodEnd)
+        )
       )
-    )
-    .limit(1);
+      .limit(1);
 
-  const currentUsage = record?.value ?? 0;
+    currentUsage = record?.value ?? 0;
+  } catch (err) {
+    logger.warn("Failed to query usage_records, treating as zero usage", {
+      workspaceId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
   const percentage = limit > 0 ? currentUsage / limit : 0;
 
   let warningLevel: EnforcementResult["warningLevel"] = "none";

@@ -46,10 +46,27 @@ export const authModule = new Elysia({ prefix: "/auth" })
           .values({ email, name, passwordHash })
           .returning();
 
-        const slug = businessName
+        const baseSlug = businessName
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
-          .slice(0, 100);
+          .slice(0, 100)
+          .replace(/^-|-$/g, "");
+
+        // Ensure slug uniqueness by checking for collisions
+        let slug = baseSlug;
+        let suffix = 1;
+        // eslint-disable-next-line no-constant-binary-expression
+        while (true) {
+          const [existing] = await tx
+            .select({ id: workspaces.id })
+            .from(workspaces)
+            .where(eq(workspaces.slug, slug))
+            .limit(1);
+          if (!existing) break;
+          suffix++;
+          slug = `${baseSlug}-${suffix}`;
+        }
+
         const [workspace] = await tx
           .insert(workspaces)
           .values({
@@ -243,6 +260,15 @@ export const authModule = new Elysia({ prefix: "/auth" })
         workspaceId: (payload as Record<string, unknown>).workspaceId as string,
         jti: crypto.randomUUID(),
       });
+
+      // Revoke the old refresh token to prevent reuse
+      if (refreshJti) {
+        const oldUserId = payload.sub as string;
+        await db
+          .insert(revokedTokens)
+          .values({ tokenJti: refreshJti, userId: oldUserId })
+          .onConflictDoNothing();
+      }
 
       return { accessToken, refreshToken: newRefreshToken };
     } catch (err: any) {

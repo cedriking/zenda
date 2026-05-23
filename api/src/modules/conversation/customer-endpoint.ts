@@ -33,9 +33,12 @@ export const customerModule = new Elysia({ prefix: '/customers' })
   .patch('/:id', async ({ workspaceId, params, body, set }) => {
     try {
       const data = body as Record<string, unknown>
+      const updateData: Record<string, unknown> = { updatedAt: new Date() }
+      if ('name' in data) updateData.name = data.name
+      if ('language' in data) updateData.language = data.language
       const [updated] = await db
         .update(customers)
-        .set({ ...data, updatedAt: new Date() })
+        .set(updateData)
         .where(and(eq(customers.id, params.id), eq(customers.workspaceId, workspaceId!)))
         .returning()
       if (!updated) return notFound(set, 'Customer not found')

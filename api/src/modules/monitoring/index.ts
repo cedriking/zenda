@@ -7,8 +7,35 @@ import { serverError } from '../../utils/errors.js'
 
 export const monitoringModule = new Elysia({ prefix: '/monitoring' })
 
-  // Extended health check
-  .get('/health', async ({ set }) => {
+  // Readiness probe (for load balancers) — intentionally unauthenticated
+  .get('/ready', async ({ set }) => {
+    try {
+      await db.execute(sql`SELECT 1`)
+      return { ready: true }
+    } catch (err) {
+      logger.error('Readiness check failed', { error: (err as Error).message })
+      set.status = 503
+      return { ready: false }
+    }
+  })
+
+  // Error reporting endpoint (for Sentry-style client reports) — intentionally unauthenticated
+  .post('/errors', async ({ body }) => {
+    const data = body as Record<string, unknown>
+    logger.error('Client error report', data)
+    return { received: true }
+  })
+
+  // Extended health check — protected by shared secret
+  .get('/health', async ({ set, headers }) => {
+    const monitorSecret = process.env.MONITOR_SECRET
+    if (monitorSecret) {
+      const auth = headers.authorization
+      if (!auth || auth !== `Bearer ${monitorSecret}`) {
+        set.status = 401
+        return { error: 'Unauthorized' }
+      }
+    }
     try {
       const checks: Record<string, { status: string; latency?: number; details?: string }> = {}
 
@@ -51,21 +78,3 @@ export const monitoringModule = new Elysia({ prefix: '/monitoring' })
     }
   })
 
-  // Readiness probe (for load balancers)
-  .get('/ready', async ({ set }) => {
-    try {
-      await db.execute(sql`SELECT 1`)
-      return { ready: true }
-    } catch (err) {
-      logger.error('Readiness check failed', { error: (err as Error).message })
-      set.status = 503
-      return { ready: false }
-    }
-  })
-
-  // Error reporting endpoint (for Sentry-style client reports)
-  .post('/errors', async ({ body }) => {
-    const data = body as Record<string, unknown>
-    logger.error('Client error report', data)
-    return { received: true }
-  })

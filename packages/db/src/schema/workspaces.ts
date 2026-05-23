@@ -13,7 +13,7 @@ export const onboardingStepEnum = pgEnum('onboarding_step', [
   'ready',
 ])
 
-export const languageEnum = pgEnum('language', ['en', 'es'])
+export const languageEnum = pgEnum('language', ['en', 'es', 'ar', 'fr', 'de', 'ru', 'zh', 'ja', 'ko'])
 
 export const workspaces = pgTable('workspaces', {
   id: uuid('id').defaultRandom().primaryKey(),

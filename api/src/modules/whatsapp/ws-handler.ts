@@ -17,6 +17,8 @@ interface WhatsAppMessagePayload {
     mediaUrl?: string;
     timestamp: string;
     externalMessageId?: string;
+    localTime?: string;
+    localTimezone?: string;
   };
   type: "whatsapp.message";
 }

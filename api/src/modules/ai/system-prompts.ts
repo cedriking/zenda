@@ -22,7 +22,7 @@ interface BusinessContext {
   receptionistName: string
   tone: string
   greetingTemplate: string | null
-  services: { name: string; duration: number; price: number | null }[]
+  services: { id: string; name: string; duration: number; price: number | null }[]
   staff: { name: string }[]
 
   // Personality fields
@@ -208,7 +208,7 @@ function buildServicesSection(ctx: BusinessContext): string {
       s.price !== null && ctx.priceDisplay === 'show'
         ? ` ($${(s.price / 100).toFixed(2)})`
         : ''
-    lines.push(`- ${s.name}: ${s.duration} min${price}`)
+    lines.push(`- ${s.name} (ID: ${s.id}): ${s.duration} min${price}`)
   }
 
   if (ctx.staff.length > 0) {
@@ -410,6 +410,7 @@ async function loadBusinessContext(workspaceId: string): Promise<BusinessContext
 
   const serviceRows = await db
     .select({
+      id: services.id,
       name: services.name,
       duration: services.durationMinutes,
       price: services.priceCents,

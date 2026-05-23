@@ -31,11 +31,13 @@ export async function generateMetadata({ params }: Props) {
       siteName: 'Zenda',
       locale,
       type: 'website',
+      images: [{ url: 'https://zenda.ai/og-image.png', width: 1200, height: 630, alt: 'Zenda AI Receptionist' }],
     },
     twitter: {
       card: 'summary_large_image',
       title: t('twitter.title'),
       description: t('twitter.description'),
+      images: ['https://zenda.ai/og-image.png'],
     },
     robots: {
       index: true,

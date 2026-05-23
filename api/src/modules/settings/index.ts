@@ -55,9 +55,19 @@ export const settingsModule = new Elysia({ prefix: '/settings' })
   .patch('/receptionist', async ({ workspaceId, body, set }) => {
     try {
       const data = body as Record<string, unknown>
+      // Explicitly pick only allowed fields to prevent mass assignment
+      const updateData: Record<string, unknown> = { updatedAt: new Date() }
+      const allowedFields = [
+        'personalityPreset', 'formalityLevel', 'concisenessLevel', 'warmthLevel',
+        'useEmoji', 'speaksAsBusiness', 'proactivelySuggestTimes',
+        'confirmsBeforeBooking', 'greetingStyle',
+      ] as const
+      for (const field of allowedFields) {
+        if (field in data) updateData[field] = data[field]
+      }
       const [updated] = await db
         .update(receptionistProfiles)
-        .set({ ...data, updatedAt: new Date() })
+        .set(updateData)
         .where(eq(receptionistProfiles.workspaceId, workspaceId!))
         .returning()
       if (!updated) return notFound(set, 'Receptionist profile not found')
@@ -201,7 +211,11 @@ export const settingsModule = new Elysia({ prefix: '/settings' })
 
       const [updated] = await db
         .update(businessProfiles)
-        .set({ ...data, updatedAt: new Date() })
+        .set({
+          sensitiveTopics: data.sensitiveTopics as string[] | undefined,
+          emergencyEscalationInstructions: data.emergencyEscalationInstructions as string | undefined,
+          updatedAt: new Date(),
+        })
         .where(eq(businessProfiles.workspaceId, workspaceId!))
         .returning({
           sensitiveTopics: businessProfiles.sensitiveTopics,

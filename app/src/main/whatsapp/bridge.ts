@@ -74,7 +74,7 @@ export function connectBridge(
     reconnectAttempts = 0;
     authFailures = 0;
     log("Connected to API at", WS_URL);
-    mainWindow.webContents.send("bridge:status", { connected: true });
+    if (!mainWindow.isDestroyed()) mainWindow.webContents.send("bridge:status", { connected: true });
 
     // Flush any messages that arrived while WS was disconnected
     if (pendingQueue.length > 0) {
@@ -104,7 +104,7 @@ export function connectBridge(
         );
 
         // Forward to renderer for UI updates
-        mainWindow.webContents.send("whatsapp:send-response", payload.data);
+        if (!mainWindow.isDestroyed()) mainWindow.webContents.send("whatsapp:send-response", payload.data);
 
         // Send via Baileys to the WhatsApp contact (with retry on failure)
         // The phoneNumber from incoming messages is already a valid JID
@@ -119,11 +119,11 @@ export function connectBridge(
           );
         }
       } else if (payload.type === "notification") {
-        mainWindow.webContents.send("notification:new", payload.data);
+        if (!mainWindow.isDestroyed()) mainWindow.webContents.send("notification:new", payload.data);
       } else if (payload.type === "conversation.update") {
-        mainWindow.webContents.send("conversation:update", payload.data);
+        if (!mainWindow.isDestroyed()) mainWindow.webContents.send("conversation:update", payload.data);
       } else if (payload.type === "appointment.update") {
-        mainWindow.webContents.send("appointment:update", payload.data);
+        if (!mainWindow.isDestroyed()) mainWindow.webContents.send("appointment:update", payload.data);
       } else if (payload.type === "ping") {
         ws?.send(JSON.stringify({ type: "pong" }));
       } else if (payload.type === "error" && payload.code === "auth_failed") {
@@ -143,7 +143,7 @@ export function connectBridge(
       "reason:",
       reason.toString() || "(empty)"
     );
-    mainWindow.webContents.send("bridge:status", { connected: false });
+    if (!mainWindow.isDestroyed()) mainWindow.webContents.send("bridge:status", { connected: false });
 
     // Auth-related close codes: 4001 (custom), 4003 (invalid/expired token), 1008 (policy violation)
     const isAuthError = code === 4001 || code === 4003 || code === 1008;
@@ -156,7 +156,7 @@ export function connectBridge(
       log("Too many auth failures, clearing saved credentials.");
       clearCredentials();
       currentCreds = null;
-      mainWindow.webContents.send("bridge:status", {
+      if (!mainWindow.isDestroyed()) mainWindow.webContents.send("bridge:status", {
         connected: false,
         error: "Session expired. Please log in again.",
         requiresReLogin: true,
@@ -168,7 +168,7 @@ export function connectBridge(
     reconnectAttempts++;
     if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
       log("Max reconnect attempts reached, stopping.");
-      mainWindow.webContents.send("bridge:status", {
+      if (!mainWindow.isDestroyed()) mainWindow.webContents.send("bridge:status", {
         connected: false,
         error: `Connection lost after ${MAX_RECONNECT_ATTEMPTS} attempts. Please check your connection and re-login.`,
       });
@@ -194,7 +194,7 @@ export function connectBridge(
 
   ws.on("error", (err: Error) => {
     log("WebSocket error:", err.message);
-    mainWindow.webContents.send("bridge:status", {
+    if (!mainWindow.isDestroyed()) mainWindow.webContents.send("bridge:status", {
       connected: false,
       error: err.message,
     });
@@ -222,7 +222,11 @@ function sendWhatsAppReply(jid: string, text: string): void {
   const sock = getClient();
   if (!sock) {
     log("Cannot send reply: Baileys socket not connected — queuing");
-    pendingReplies.push({ jid, text, retries: 0 });
+    // Dedup: only queue if not already pending for this jid+text combo
+    const alreadyQueued = pendingReplies.some(r => r.jid === jid && r.text === text);
+    if (!alreadyQueued) {
+      pendingReplies.push({ jid, text, retries: 0 });
+    }
     return;
   }
   sock
@@ -232,8 +236,9 @@ function sendWhatsAppReply(jid: string, text: string): void {
     })
     .catch((err: unknown) => {
       log("Failed to send reply to", jid, err);
-      // Queue for retry after Baileys reconnects
-      if (pendingReplies.length < MAX_PENDING) {
+      // Queue for retry after Baileys reconnects — dedup
+      const alreadyQueued = pendingReplies.some(r => r.jid === jid && r.text === text);
+      if (!alreadyQueued && pendingReplies.length < MAX_PENDING) {
         pendingReplies.push({ jid, text, retries: 0 });
       }
     });
@@ -247,6 +252,8 @@ export function flushPendingReplies(): void {
   pendingReplies.length = 0;
   for (const reply of toFlush) {
     if (reply.retries < MAX_REPLY_RETRIES) {
+      // Increment retries before sending so the next failure won't infinite-loop
+      reply.retries++;
       sendWhatsAppReply(reply.jid, reply.text);
     } else {
       log("Dropping reply after max retries:", reply.jid);

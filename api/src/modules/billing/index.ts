@@ -29,7 +29,8 @@ export const billingModule = new Elysia({ prefix: "/billing" })
       return { received: true };
     } catch (err) {
       logger.error("Webhook error", { error: (err as Error).message });
-      return serverError(set, "Webhook processing failed");
+      // Return 200 to prevent Stripe from retrying, but log the error
+      return { received: true, error: "Webhook processing failed" };
     }
   })
 
