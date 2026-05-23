@@ -212,9 +212,17 @@ export function DocsAnimations() {
         <FadeUp>
           <p className="text-muted-foreground mb-4">{t('billingTrial')}</p>
         </FadeUp>
-        <StaggerContainer className="grid md:grid-cols-3 gap-4 mb-4" stagger={0.1}>
+        <StaggerContainer className="grid md:grid-cols-4 gap-4 mb-4" stagger={0.1}>
           <StaggerChild>
             <Card>
+              <CardContent>
+                <h4 className="font-semibold">{t('billingSolo')}</h4>
+                <p className="text-sm text-muted-foreground mt-1">{t('billingSoloDesc')}</p>
+              </CardContent>
+            </Card>
+          </StaggerChild>
+          <StaggerChild>
+            <Card className="ring-2 ring-primary">
               <CardContent>
                 <h4 className="font-semibold">{t('billingStarter')}</h4>
                 <p className="text-sm text-muted-foreground mt-1">{t('billingStarterDesc')}</p>
@@ -222,7 +230,7 @@ export function DocsAnimations() {
             </Card>
           </StaggerChild>
           <StaggerChild>
-            <Card className="ring-2 ring-primary">
+            <Card>
               <CardContent>
                 <h4 className="font-semibold">{t('billingPro')}</h4>
                 <p className="text-sm text-muted-foreground mt-1">{t('billingProDesc')}</p>

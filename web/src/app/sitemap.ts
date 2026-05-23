@@ -9,7 +9,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/signup',
     '/download',
     '/docs',
-    '/early-access',
     '/beauty',
     '/wellness',
     '/clinics',

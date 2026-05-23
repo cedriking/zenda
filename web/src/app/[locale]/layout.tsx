@@ -73,10 +73,10 @@ export default async function LocaleLayout({ children, params }: Props) {
       'AI receptionist for appointment-based businesses. Handles customer conversations, scheduling, and reminders via WhatsApp.',
     offers: {
       '@type': 'AggregateOffer',
-      lowPrice: '19',
-      highPrice: '99',
+      lowPrice: '29',
+      highPrice: '149',
       priceCurrency: 'USD',
-      offerCount: '3',
+      offerCount: '4',
     },
   }
 

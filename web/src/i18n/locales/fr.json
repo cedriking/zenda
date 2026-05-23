@@ -5,7 +5,16 @@
       "template": "{page} — Zenda"
     },
     "description": "Réceptionniste IA multilingue qui gère les rendez-vous, les rappels et les conversations clients via WhatsApp. Conçu pour les entreprises d'Amérique latine.",
-    "keywords": ["réceptionniste IA", "WhatsApp", "prise de rendez-vous", "réservation", "Amérique latine", "service client", "rappels automatiques", "planification"],
+    "keywords": [
+      "réceptionniste IA",
+      "WhatsApp",
+      "prise de rendez-vous",
+      "réservation",
+      "Amérique latine",
+      "service client",
+      "rappels automatiques",
+      "planification"
+    ],
     "openGraph": {
       "title": "Zenda — Réceptionniste IA pour votre entreprise",
       "description": "Votre réceptionniste IA ne manque jamais un message. Il gère les conversations clients, les rendez-vous et les rappels via WhatsApp."
@@ -276,12 +285,6 @@
     "customKbP2": "Plus vous ajoutez d'informations, plus votre IA devient performante pour répondre aux questions des clients.",
     "billing": "Facturation & Offres",
     "billingTrial": "Toutes les offres incluent un essai gratuit de 14 jours. Aucune carte bancaire requise pour commencer.",
-    "billingStarter": "Starter — $19/mois",
-    "billingStarterDesc": "500 conversations, 100 rendez-vous, 1 membre du personnel",
-    "billingPro": "Pro — $49/mois",
-    "billingProDesc": "2 000 conversations, 500 rendez-vous, 5 membres du personnel",
-    "billingBusiness": "Business — $99/mois",
-    "billingBusinessDesc": "Illimité, 20 membres, accès API, support dédié",
     "billingCancel": "Annulez à tout moment depuis les Réglages. Sans engagement, sans frais cachés. {link}.",
     "billingPricingLink": "Voir les tarifs complets",
     "commonQuestions": "Questions courantes",
@@ -292,7 +295,15 @@
     "faq3Q": "Puis-je continuer à utiliser WhatsApp normalement ?",
     "faq3A": "Oui. Quand vous reprenez une conversation, vous écrivez directement via Zenda. Le WhatsApp de votre téléphone continue de fonctionner normalement pour vos conversations personnelles.",
     "faq4Q": "Que se passe-t-il si l'IA fait une erreur ?",
-    "faq4A": "Vous pouvez reprendre n'importe quelle conversation à tout moment. L'IA est conçue pour vous transférer lorsqu'elle n'est pas sûre. Vous pouvez également annuler ou replanifier tout rendez-vous depuis le calendrier."
+    "faq4A": "Vous pouvez reprendre n'importe quelle conversation à tout moment. L'IA est conçue pour vous transférer lorsqu'elle n'est pas sûre. Vous pouvez également annuler ou replanifier tout rendez-vous depuis le calendrier.",
+    "billingSolo": "Solo — $29/mois",
+    "billingSoloDesc": "75 contacts actifs, 1 calendrier, réservations et rappels",
+    "billingStarter": "Starter — $49/mois",
+    "billingStarterDesc": "200 contacts actifs, 2 agendas, rappels veille et jour même",
+    "billingPro": "Pro — $89/mois",
+    "billingProDesc": "600 contacts actifs, 5 employés, 2 emplacements, support prioritaire",
+    "billingBusiness": "Business — $149/mois",
+    "billingBusinessDesc": "1 200 contacts actifs, 10 employés, 3 emplacements, installation assistée"
   },
   "verticals": {
     "badge": "Réceptionniste IA WhatsApp",

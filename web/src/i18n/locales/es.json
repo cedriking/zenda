@@ -5,7 +5,16 @@
       "template": "{page} — Zenda"
     },
     "description": "Recepcionista multilingüe con IA que gestiona citas, recordatorios y conversaciones con clientes a través de WhatsApp. Diseñado para negocios en América Latina.",
-    "keywords": ["recepcionista IA", "WhatsApp Business", "citas", "reservas", "América Latina", "atención al cliente", "recordatorios", "agenda"],
+    "keywords": [
+      "recepcionista IA",
+      "WhatsApp Business",
+      "citas",
+      "reservas",
+      "América Latina",
+      "atención al cliente",
+      "recordatorios",
+      "agenda"
+    ],
     "openGraph": {
       "title": "Zenda — Recepcionista con IA para tu negocio",
       "description": "Tu recepcionista con IA que nunca pierde un mensaje. Gestiona conversaciones, citas y recordatorios a través de WhatsApp."
@@ -276,12 +285,6 @@
     "customKbP2": "Mientras más agregues, más inteligente se vuelve tu IA al manejar las preguntas de los clientes.",
     "billing": "Facturación y planes",
     "billingTrial": "Todos los planes incluyen una prueba gratis de 14 días. No se necesita tarjeta de crédito para comenzar.",
-    "billingStarter": "Starter — $19/mes",
-    "billingStarterDesc": "500 conversaciones, 100 citas, 1 miembro de personal",
-    "billingPro": "Pro — $49/mes",
-    "billingProDesc": "2,000 conversaciones, 500 citas, 5 miembros de personal",
-    "billingBusiness": "Business — $99/mes",
-    "billingBusinessDesc": "Ilimitado, 20 miembros, acceso a la API, soporte dedicado",
     "billingCancel": "Cancela en cualquier momento desde Configuración. Sin contratos, sin cargos ocultos. {link}.",
     "billingPricingLink": "Ver precios completos",
     "commonQuestions": "Preguntas comunes",
@@ -292,7 +295,15 @@
     "faq3Q": "¿Puedo seguir usando WhatsApp normalmente?",
     "faq3A": "Sí. Cuando tomas el control de una conversación, escribes directamente a través de Zenda. El WhatsApp de tu teléfono sigue funcionando normalmente para chats personales.",
     "faq4Q": "¿Qué pasa si la IA comete un error?",
-    "faq4A": "Puedes tomar el control de cualquier conversación en cualquier momento. La IA está diseñada para derivarte los casos cuando no esté segura. También puedes cancelar o reprogramar cualquier cita desde el Calendario."
+    "faq4A": "Puedes tomar el control de cualquier conversación en cualquier momento. La IA está diseñada para derivarte los casos cuando no esté segura. También puedes cancelar o reprogramar cualquier cita desde el Calendario.",
+    "billingSolo": "Solo — $29/mes",
+    "billingSoloDesc": "75 contactos activos, 1 calendario, reservas y recordatorios",
+    "billingStarter": "Starter — $49/mes",
+    "billingStarterDesc": "200 contactos activos, 2 horarios, recordatorios día antes y mismo día",
+    "billingPro": "Pro — $89/mes",
+    "billingProDesc": "600 contactos activos, 5 empleados, 2 ubicaciones, soporte prioritario",
+    "billingBusiness": "Business — $149/mes",
+    "billingBusinessDesc": "1,200 contactos activos, 10 empleados, 3 ubicaciones, configuración asistida"
   },
   "verticals": {
     "badge": "Recepcionista con IA en WhatsApp",

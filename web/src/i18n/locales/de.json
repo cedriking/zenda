@@ -5,7 +5,16 @@
       "template": "{page} — Zenda"
     },
     "description": "Mehrsprachiger KI-Empfangsassistent, der Termine, Erinnerungen und Kundengespräche über WhatsApp verwaltet. Entwickelt für Unternehmen in Lateinamerika.",
-    "keywords": ["KI-Empfangsassistent", "WhatsApp", "Terminbuchung", "Termine", "Lateinamerika", "Kundenservice", "Erinnerungen", "Terminplanung"],
+    "keywords": [
+      "KI-Empfangsassistent",
+      "WhatsApp",
+      "Terminbuchung",
+      "Termine",
+      "Lateinamerika",
+      "Kundenservice",
+      "Erinnerungen",
+      "Terminplanung"
+    ],
     "openGraph": {
       "title": "Zenda — KI-Empfangsassistent für Ihr Unternehmen",
       "description": "Ihr KI-Empfangsassistent, der keine Nachricht verpasst. Verwaltet Kundengespräche, Termine und Erinnerungen über WhatsApp."
@@ -276,12 +285,6 @@
     "customKbP2": "Je mehr Sie hinzufügen, desto besser wird Ihre KI bei Kundenfragen.",
     "billing": "Abrechnung & Pläne",
     "billingTrial": "Alle Pläne beinhalten eine 14-tägige kostenlose Testversion. Keine Kreditkarte erforderlich.",
-    "billingStarter": "Starter — $19/Monat",
-    "billingStarterDesc": "500 Gespräche, 100 Termine, 1 Mitarbeiter",
-    "billingPro": "Pro — $49/Monat",
-    "billingProDesc": "2.000 Gespräche, 500 Termine, 5 Mitarbeiter",
-    "billingBusiness": "Business — $99/Monat",
-    "billingBusinessDesc": "Unbegrenzt, 20 Mitarbeiter, API-Zugang, dedizierter Support",
     "billingCancel": "Jederzeit aus den Einstellungen kündigen. Keine Verträge, keine versteckten Gebühren. {link}.",
     "billingPricingLink": "Vollständige Preise ansehen",
     "commonQuestions": "Häufige Fragen",
@@ -292,7 +295,15 @@
     "faq3Q": "Kann ich WhatsApp weiterhin normal nutzen?",
     "faq3A": "Ja. Wenn Sie ein Gespräch übernehmen, schreiben Sie direkt über Zenda. Das WhatsApp auf Ihrem Telefon funktioniert weiterhin normal für persönliche Chats.",
     "faq4Q": "Was passiert, wenn die KI einen Fehler macht?",
-    "faq4A": "Sie können jedes Gespräch jederzeit übernehmen. Die KI ist darauf ausgelegt, unsichere Fälle an Sie zu eskalieren. Sie können auch jeden Termin im Kalender stornieren oder verschieben."
+    "faq4A": "Sie können jedes Gespräch jederzeit übernehmen. Die KI ist darauf ausgelegt, unsichere Fälle an Sie zu eskalieren. Sie können auch jeden Termin im Kalender stornieren oder verschieben.",
+    "billingSolo": "Solo — $29/Monat",
+    "billingSoloDesc": "75 aktive Kontakte, 1 Kalender, Buchungen & Erinnerungen",
+    "billingStarter": "Starter — $49/Monat",
+    "billingStarterDesc": "200 aktive Kontakte, 2 Zeitpläne, Tag-davor & gleicher-Tag Erinnerungen",
+    "billingPro": "Pro — $89/Monat",
+    "billingProDesc": "600 aktive Kontakte, 5 Mitarbeiter, 2 Standorte, Prioritäts-Support",
+    "billingBusiness": "Business — $149/Monat",
+    "billingBusinessDesc": "1.200 aktive Kontakte, 10 Mitarbeiter, 3 Standorte, betreutes Setup"
   },
   "verticals": {
     "badge": "WhatsApp KI-Empfangsassistent",

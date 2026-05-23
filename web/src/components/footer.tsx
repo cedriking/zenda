@@ -25,9 +25,8 @@ export async function Footer() {
       { label: t('documentation'), href: '/docs' },
     ],
     [t('company')]: [
-      { label: t('about'), href: '#' },
-      { label: t('blog'), href: '#' },
-      { label: t('contact'), href: '#' },
+      { label: t('about'), href: '/docs' },
+      { label: t('contact'), href: 'mailto:hello@zenda.ai' },
     ],
     [t('legal')]: [
       { label: t('privacyPolicy'), href: '/legal/privacy' },
