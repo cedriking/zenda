@@ -66,7 +66,7 @@ function handleServerMessage(
     const payload = JSON.parse(data.toString());
 
     if (payload.type === "response.send") {
-      handleResponseSend(ws, mainWindow, payload);
+      handleResponseSend(mainWindow, payload);
     } else if (payload.type === "notification") {
       if (!mainWindow.isDestroyed()) {
         mainWindow.webContents.send("notification:new", payload.data);
