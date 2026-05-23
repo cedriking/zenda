@@ -25,7 +25,11 @@ const pendingQueue: unknown[] = [];
 const MAX_PENDING = 50;
 
 // Pending WhatsApp replies — buffers when Baileys is reconnecting
-interface PendingReply { jid: string; text: string; retries: number }
+interface PendingReply {
+  jid: string;
+  retries: number;
+  text: string;
+}
 const pendingReplies: PendingReply[] = [];
 const MAX_REPLY_RETRIES = 3;
 
@@ -77,7 +81,9 @@ export function connectBridge(
 
   ws.on("open", () => {
     log("Connected to API at", WS_URL);
-    if (!mainWindow.isDestroyed()) mainWindow.webContents.send("bridge:status", { connected: true });
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("bridge:status", { connected: true });
+    }
 
     // Defer resetting reconnect/auth counters — the server may reject auth
     // during its open() handler, which causes close() to fire right after
@@ -118,14 +124,18 @@ export function connectBridge(
         );
 
         // Forward to renderer for UI updates
-        if (!mainWindow.isDestroyed()) mainWindow.webContents.send("whatsapp:send-response", payload.data);
+        if (!mainWindow.isDestroyed()) {
+          mainWindow.webContents.send("whatsapp:send-response", payload.data);
+        }
 
         // Send via Baileys to the WhatsApp contact (with retry on failure)
         // The phoneNumber from incoming messages is already a valid JID
         // (e.g. "92784228884706@lid" or "5219992204767@s.whatsapp.net").
         // Both are routable — use as-is. Only append @s.whatsapp.net for bare numbers.
         if (phoneNumber && messageBody) {
-          const jid = phoneNumber.includes("@") ? phoneNumber : `${phoneNumber}@s.whatsapp.net`;
+          const jid = phoneNumber.includes("@")
+            ? phoneNumber
+            : `${phoneNumber}@s.whatsapp.net`;
           sendWhatsAppReply(jid, messageBody);
         } else {
           log(
@@ -133,11 +143,17 @@ export function connectBridge(
           );
         }
       } else if (payload.type === "notification") {
-        if (!mainWindow.isDestroyed()) mainWindow.webContents.send("notification:new", payload.data);
+        if (!mainWindow.isDestroyed()) {
+          mainWindow.webContents.send("notification:new", payload.data);
+        }
       } else if (payload.type === "conversation.update") {
-        if (!mainWindow.isDestroyed()) mainWindow.webContents.send("conversation:update", payload.data);
+        if (!mainWindow.isDestroyed()) {
+          mainWindow.webContents.send("conversation:update", payload.data);
+        }
       } else if (payload.type === "appointment.update") {
-        if (!mainWindow.isDestroyed()) mainWindow.webContents.send("appointment:update", payload.data);
+        if (!mainWindow.isDestroyed()) {
+          mainWindow.webContents.send("appointment:update", payload.data);
+        }
       } else if (payload.type === "ping") {
         ws?.send(JSON.stringify({ type: "pong" }));
       } else if (payload.type === "error" && payload.code === "auth_failed") {
@@ -163,7 +179,9 @@ export function connectBridge(
       "reason:",
       reason.toString() || "(empty)"
     );
-    if (!mainWindow.isDestroyed()) mainWindow.webContents.send("bridge:status", { connected: false });
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("bridge:status", { connected: false });
+    }
 
     // Auth-related close codes: 4001 (custom), 4003 (invalid/expired token), 1008 (policy violation)
     const isAuthError = code === 4001 || code === 4003 || code === 1008;
@@ -176,11 +194,13 @@ export function connectBridge(
       log("Too many auth failures, clearing saved credentials.");
       clearCredentials();
       currentCreds = null;
-      if (!mainWindow.isDestroyed()) mainWindow.webContents.send("bridge:status", {
-        connected: false,
-        error: "Session expired. Please log in again.",
-        requiresReLogin: true,
-      });
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("bridge:status", {
+          connected: false,
+          error: "Session expired. Please log in again.",
+          requiresReLogin: true,
+        });
+      }
       return;
     }
 
@@ -188,10 +208,12 @@ export function connectBridge(
     reconnectAttempts++;
     if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
       log("Max reconnect attempts reached, stopping.");
-      if (!mainWindow.isDestroyed()) mainWindow.webContents.send("bridge:status", {
-        connected: false,
-        error: `Connection lost after ${MAX_RECONNECT_ATTEMPTS} attempts. Please check your connection and re-login.`,
-      });
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("bridge:status", {
+          connected: false,
+          error: `Connection lost after ${MAX_RECONNECT_ATTEMPTS} attempts. Please check your connection and re-login.`,
+        });
+      }
       return;
     }
 
@@ -214,10 +236,12 @@ export function connectBridge(
 
   ws.on("error", (err: Error) => {
     log("WebSocket error:", err.message);
-    if (!mainWindow.isDestroyed()) mainWindow.webContents.send("bridge:status", {
-      connected: false,
-      error: err.message,
-    });
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("bridge:status", {
+        connected: false,
+        error: err.message,
+      });
+    }
   });
 }
 
@@ -237,36 +261,73 @@ export function sendToBackend(data: unknown): boolean {
   return true;
 }
 
-/** Send a WhatsApp reply with automatic retry on Baileys failure */
+/**
+ * Compute a human-like typing delay based on message length.
+ * ~30ms per char (roughly 40 WPM), capped at 6s, with a 500ms floor.
+ */
+function typingDelay(text: string): number {
+  const perChar = 30;
+  const minDelay = 500;
+  const maxDelay = 6000;
+  return Math.min(minDelay + text.length * perChar, maxDelay);
+}
+
+/** Send a WhatsApp reply with typing indicator and natural delay */
 function sendWhatsAppReply(jid: string, text: string): void {
   const sock = getClient();
   if (!sock) {
     log("Cannot send reply: Baileys socket not connected — queuing");
-    // Dedup: only queue if not already pending for this jid+text combo
-    const alreadyQueued = pendingReplies.some(r => r.jid === jid && r.text === text);
+    const alreadyQueued = pendingReplies.some(
+      (r) => r.jid === jid && r.text === text
+    );
     if (!alreadyQueued) {
       pendingReplies.push({ jid, text, retries: 0 });
     }
     return;
   }
+
+  // Show "typing..." indicator, wait a human-like delay, then send
+  const delay = typingDelay(text);
   sock
-    .sendMessage(jid, { text })
-    .then(() => {
-      log("Reply sent to", jid);
-    })
-    .catch((err: unknown) => {
-      log("Failed to send reply to", jid, err);
-      // Queue for retry after Baileys reconnects — dedup
-      const alreadyQueued = pendingReplies.some(r => r.jid === jid && r.text === text);
-      if (!alreadyQueued && pendingReplies.length < MAX_PENDING) {
+    .sendPresenceUpdate("composing", jid)
+    .catch((e: unknown) => log("sendPresenceUpdate failed", e));
+
+  setTimeout(() => {
+    // Re-check socket after delay — it may have disconnected
+    const currentSock = getClient();
+    if (!currentSock) {
+      log("Socket disconnected during typing delay — queuing reply");
+      const alreadyQueued = pendingReplies.some(
+        (r) => r.jid === jid && r.text === text
+      );
+      if (!alreadyQueued) {
         pendingReplies.push({ jid, text, retries: 0 });
       }
-    });
+      return;
+    }
+
+    currentSock
+      .sendMessage(jid, { text })
+      .then(() => {
+        log("Reply sent to", jid, `(${text.length} chars, ${delay}ms delay)`);
+      })
+      .catch((err: unknown) => {
+        log("Failed to send reply to", jid, err);
+        const alreadyQueued = pendingReplies.some(
+          (r) => r.jid === jid && r.text === text
+        );
+        if (!alreadyQueued && pendingReplies.length < MAX_PENDING) {
+          pendingReplies.push({ jid, text, retries: 0 });
+        }
+      });
+  }, delay);
 }
 
 /** Flush pending WhatsApp replies — called when Baileys reconnects */
 export function flushPendingReplies(): void {
-  if (pendingReplies.length === 0) return;
+  if (pendingReplies.length === 0) {
+    return;
+  }
   log(`Flushing ${pendingReplies.length} pending WhatsApp replies`);
   const toFlush = [...pendingReplies];
   pendingReplies.length = 0;

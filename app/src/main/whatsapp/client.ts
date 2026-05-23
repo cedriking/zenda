@@ -10,7 +10,7 @@ import {
 } from "@whiskeysockets/baileys";
 import type { BrowserWindow } from "electron";
 import QRCode from "qrcode";
-import { sendToBackend, flushPendingReplies } from "./bridge.js";
+import { flushPendingReplies, sendToBackend } from "./bridge.js";
 import { clearSession, getSessionPath } from "./session.js";
 
 const log = (...args: unknown[]) => console.log("[baileys]", ...args);
@@ -247,8 +247,7 @@ export async function initWhatsAppClient(
 
         // Keep the full JID (e.g. "92784228884706@lid") — it's routable for replies.
         // Strip legacy formats only.
-        const phoneNumber = jid
-          .replace("@c.us", "");
+        const phoneNumber = jid.replace("@c.us", "");
 
         let body = "";
         let contentType = "text";
@@ -317,6 +316,13 @@ export async function initWhatsAppClient(
               downloadErr instanceof Error ? downloadErr.message : downloadErr
             );
           }
+        }
+
+        // Mark incoming message as read (human-like behavior)
+        if (sock && msg.key.id && !isOfflineCatchup) {
+          sock
+            .readMessages([msg.key])
+            .catch((e: unknown) => log("readMessages failed", e));
         }
 
         const sent = sendToBackend({
