@@ -15,6 +15,7 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let reconnectAttempts = 0;
 let authFailures = 0;
 let currentCreds: BridgeCredentials | null = null;
+let stabilizeTimer: ReturnType<typeof setTimeout> | null = null;
 
 const MAX_RECONNECT_ATTEMPTS = 10;
 const MAX_AUTH_FAILURES = 2;
@@ -35,10 +36,14 @@ export function connectBridge(
   workspaceId: string,
   accessToken: string
 ): void {
-  // Clear any pending reconnect timer from a previous connection attempt
+  // Clear any pending timers from a previous connection attempt
   if (reconnectTimer) {
     clearTimeout(reconnectTimer);
     reconnectTimer = null;
+  }
+  if (stabilizeTimer) {
+    clearTimeout(stabilizeTimer);
+    stabilizeTimer = null;
   }
 
   if (
@@ -50,14 +55,14 @@ export function connectBridge(
   }
 
   // Reset reconnect attempts when called with new credentials.
-  // Do NOT reset authFailures here — it tracks consecutive auth failures
-  // across credential refreshes. It resets only on successful WS open.
+  // Also reset authFailures — new credentials mean a fresh attempt.
   const credsChanged =
     !currentCreds ||
     currentCreds.workspaceId !== workspaceId ||
     currentCreds.accessToken !== accessToken;
   if (credsChanged) {
     reconnectAttempts = 0;
+    authFailures = 0;
   }
 
   // Persist credentials for auto-reconnect on restart
@@ -71,10 +76,19 @@ export function connectBridge(
   ws = new WebSocket(url);
 
   ws.on("open", () => {
-    reconnectAttempts = 0;
-    authFailures = 0;
     log("Connected to API at", WS_URL);
     if (!mainWindow.isDestroyed()) mainWindow.webContents.send("bridge:status", { connected: true });
+
+    // Defer resetting reconnect/auth counters — the server may reject auth
+    // during its open() handler, which causes close() to fire right after
+    // open(). If we reset counters immediately, an expired token loops forever.
+    // Only consider the connection "stable" after 2s without a close.
+    stabilizeTimer = setTimeout(() => {
+      stabilizeTimer = null;
+      reconnectAttempts = 0;
+      authFailures = 0;
+      log("Connection stabilized — counters reset");
+    }, 2000);
 
     // Flush any messages that arrived while WS was disconnected
     if (pendingQueue.length > 0) {
@@ -137,6 +151,12 @@ export function connectBridge(
   });
 
   ws.on("close", (code: number, reason: Buffer) => {
+    // Cancel stabilize timer — connection wasn't stable
+    if (stabilizeTimer) {
+      clearTimeout(stabilizeTimer);
+      stabilizeTimer = null;
+    }
+
     log(
       "WebSocket closed — code:",
       code,
@@ -264,6 +284,10 @@ export function flushPendingReplies(): void {
 export function disconnectBridge(): void {
   if (reconnectTimer) {
     clearTimeout(reconnectTimer);
+  }
+  if (stabilizeTimer) {
+    clearTimeout(stabilizeTimer);
+    stabilizeTimer = null;
   }
   if (ws) {
     ws.close();
