@@ -105,8 +105,8 @@ function OnboardingPage() {
   }));
 
   useEffect(() => {
-    const t = setTimeout(() => setSidebarVisible(true), 200);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setSidebarVisible(true), 200);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -378,8 +378,11 @@ function OnboardingPage() {
             const isComplete = idx < currentStepIndex;
             const isCurrent = step.id === currentStep;
             let stepClass = "text-muted-foreground";
-            if (isComplete) stepClass = "bg-emerald-50/50 text-emerald-600";
-            else if (isCurrent) stepClass = "bg-primary/10 font-medium text-primary shadow-sm";
+            if (isComplete) {
+              stepClass = "bg-emerald-50/50 text-emerald-600";
+            } else if (isCurrent) {
+              stepClass = "bg-primary/10 font-medium text-primary shadow-sm";
+            }
             return (
               <div
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-500 ${stepClass}`}
@@ -700,7 +703,6 @@ function PlanSelectionView({
                 ))}
               </ul>
               <button
-                type="button"
                 className={`flex w-full items-center justify-center gap-2 rounded-xl py-2.5 font-semibold text-sm transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${
                   plan.highlight
                     ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-emerald-500/20 shadow-lg hover:from-emerald-600 hover:to-emerald-700"
@@ -708,6 +710,7 @@ function PlanSelectionView({
                 }`}
                 disabled={checkoutLoading !== null}
                 onClick={() => onSelect(plan.id)}
+                type="button"
               >
                 {isCheckingOut ? (
                   <span className="flex items-center gap-2">
@@ -732,10 +735,10 @@ function PlanSelectionView({
         style={{ animation: "fadeSlideIn 0.6s ease-out 0.7s both" }}
       >
         <button
-          type="button"
           className="flex items-center gap-1.5 text-muted-foreground text-sm transition-colors duration-200 hover:text-foreground disabled:opacity-40"
           disabled={checkoutLoading !== null}
           onClick={onSkip}
+          type="button"
         >
           {checkoutLoading === "skip" ? (
             <span className="flex items-center gap-2">
