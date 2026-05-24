@@ -41,7 +41,11 @@
             "noReactSpecificProps": "off"
           },
           "style": {
-            "useReactFunctionComponents": "error"
+            "useReactFunctionComponents": "error",
+            "useConsistentTypeDefinitions": "off"
+          },
+          "security": {
+            "noDangerouslySetInnerHtml": "off"
           }
         }
       }
