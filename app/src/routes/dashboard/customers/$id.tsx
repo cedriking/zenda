@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
-import { ArrowLeft, User, Phone, Globe, Brain, Calendar } from 'lucide-react'
+import { ArrowLeft, User, Phone, Globe, Brain, Calendar, AlertCircle } from 'lucide-react'
 
 export const Route = createFileRoute('/dashboard/customers/$id')({
   component: CustomerProfilePage,
@@ -23,6 +23,7 @@ function CustomerProfilePage() {
   const { id } = Route.useParams()
   const [customer, setCustomer] = useState<CustomerProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     loadCustomer()
@@ -30,15 +31,36 @@ function CustomerProfilePage() {
 
   async function loadCustomer() {
     setLoading(true)
+    setError(false)
     try {
       const data = await apiFetch<CustomerProfile>(`/customers/${id}`)
       setCustomer(data as any)
-    } catch { /* silent */ }
+    } catch {
+      setError(true)
+    }
     setLoading(false)
   }
 
   if (loading) {
     return <div className="p-6 text-muted-foreground">{t('common.loading')}</div>
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="max-w-md mx-auto mt-12 text-center">
+          <AlertCircle className="mx-auto mb-4 text-destructive" size={40} />
+          <h2 className="text-lg font-semibold mb-2">{t('customer.errorTitle')}</h2>
+          <p className="text-muted-foreground mb-4">{t('customer.errorDescription')}</p>
+          <button
+            onClick={loadCustomer}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+          >
+            {t('common.retry')}
+          </button>
+        </div>
+      </div>
+    )
   }
 
   if (!customer) {

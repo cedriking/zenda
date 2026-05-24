@@ -94,6 +94,12 @@ interface WsMeta {
 }
 const wsMeta = new WeakMap<object, WsMeta>();
 
+// Track connections that haven't authenticated yet (token sent via first message, not URL).
+// Keyed by the raw socket so it survives Elysia WS wrapper recreation.
+const pendingAuth = new WeakMap<object, { authenticated: false }>();
+
+const AUTH_TIMEOUT_MS = 5_000;
+
 async function verifyWsToken(
   token: string
 ): Promise<{ sub?: string; workspaceId?: string } | null> {
@@ -123,58 +129,107 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
       return;
     }
 
-    // Extract token from URL query params for authentication
-    // Use ws.data.url (reliable) instead of ws.data.query (may be empty in some Elysia versions)
-    const rawUrl = ((ws.data as Record<string, unknown>).url as string) ?? "";
-    const url = new URL(rawUrl, "http://localhost");
-    const token =
-      url.searchParams.get("token") ??
-      ((ws.data as Record<string, unknown>).query
-        ? (ws.data.query as Record<string, string>).token
-        : undefined);
-
-    if (!token) {
-      recordWsAuthFailure(ip);
-      logger.warn("WS open: no token found", {
-        ip,
-        rawUrl: rawUrl || "(empty)",
-        hasQuery: !!(ws.data as Record<string, unknown>).query,
-      });
-      ws.close(4003, "Missing authentication token");
-      return;
-    }
-
-    const payload = await verifyWsToken(token);
-    if (!(payload?.sub && payload?.workspaceId)) {
-      recordWsAuthFailure(ip);
-      logger.warn("WS open: token verification failed", {
-        ip,
-        sub: payload?.sub ?? "(missing)",
-        workspaceId: payload?.workspaceId ?? "(missing)",
-      });
-      ws.close(4003, "Invalid or expired token");
-      return;
-    }
-
-    const workspaceId = payload.workspaceId;
-    const userId = payload.sub;
-
-    logger.info("WebSocket connected", { workspaceId, userId });
-    // biome-ignore lint/suspicious/noExplicitAny: Elysia WS types don't expose internal fields
-    addConnection(workspaceId, ws as any);
-
-    // biome-ignore lint/suspicious/noExplicitAny: same
-    const heartbeat = startHeartbeat(workspaceId, ws as any);
-
-    // Elysia creates a new ElysiaWS wrapper for each lifecycle event (open/message/close).
-    // The underlying Bun socket (ws.raw) is the same object across all events.
-    // Key metadata by ws.raw so it survives wrapper recreation.
+    // Mark socket as pending auth — the client must send an { type: "auth", token } message.
+    // This avoids leaking the token in URL query params (server logs, proxy logs, browser history).
     const raw = (ws as { raw: object }).raw;
-    wsMeta.set(raw, { workspaceId, userId, heartbeat });
+    pendingAuth.set(raw, { authenticated: false });
+
+    // Close the socket if it doesn't authenticate within the timeout
+    const timer = setTimeout(() => {
+      if (pendingAuth.has(raw)) {
+        logger.warn("WS open: auth timeout", { ip });
+        recordWsAuthFailure(ip);
+        pendingAuth.delete(raw);
+        ws.close(4003, "Authentication timeout");
+      }
+    }, AUTH_TIMEOUT_MS);
+
+    // Store timer so we can clear it on early auth
+    (raw as Record<string, unknown>).__authTimer = timer;
   },
 
   message(ws, rawMessage) {
     const raw = (ws as { raw: object }).raw;
+
+    // Handle auth message — client sends token as first message instead of URL query param
+    if (pendingAuth.has(raw)) {
+      const authTimer = (raw as Record<string, unknown>).__authTimer as
+        | ReturnType<typeof setTimeout>
+        | undefined;
+      let payload: Record<string, unknown>;
+      try {
+        payload =
+          typeof rawMessage === "string"
+            ? JSON.parse(rawMessage)
+            : (rawMessage as Record<string, unknown>);
+      } catch {
+        const ip = getWsClientIp(ws);
+        recordWsAuthFailure(ip);
+        logger.warn("WS auth: invalid JSON in first message", { ip });
+        pendingAuth.delete(raw);
+        if (authTimer) clearTimeout(authTimer);
+        ws.close(4003, "Invalid auth message");
+        return;
+      }
+
+      if (payload.type !== "auth" || typeof payload.token !== "string") {
+        const ip = getWsClientIp(ws);
+        recordWsAuthFailure(ip);
+        logger.warn("WS auth: first message is not an auth message", {
+          ip,
+          type: payload.type,
+        });
+        pendingAuth.delete(raw);
+        if (authTimer) clearTimeout(authTimer);
+        ws.close(4003, "Expected auth message as first message");
+        return;
+      }
+
+      const ip = getWsClientIp(ws);
+      const decoded = verifyWsToken(payload.token);
+      decoded
+        .then((result) => {
+          if (!result?.sub || !result?.workspaceId) {
+            recordWsAuthFailure(ip);
+            logger.warn("WS auth: token verification failed", {
+              ip,
+              sub: result?.sub ?? "(missing)",
+              workspaceId: result?.workspaceId ?? "(missing)",
+            });
+            pendingAuth.delete(raw);
+            ws.close(4003, "Invalid or expired token");
+            return;
+          }
+
+          const workspaceId = result.workspaceId;
+          const userId = result.sub;
+
+          logger.info("WebSocket authenticated", { workspaceId, userId });
+          pendingAuth.delete(raw);
+          if (authTimer) clearTimeout(authTimer);
+
+          // biome-ignore lint/suspicious/noExplicitAny: Elysia WS types don't expose internal fields
+          addConnection(workspaceId, ws as any);
+
+          // biome-ignore lint/suspicious/noExplicitAny: same
+          const heartbeat = startHeartbeat(workspaceId, ws as any);
+
+          wsMeta.set(raw, {
+            workspaceId,
+            userId,
+            heartbeat,
+          });
+        })
+        .catch(() => {
+          recordWsAuthFailure(ip);
+          pendingAuth.delete(raw);
+          if (authTimer) clearTimeout(authTimer);
+          ws.close(4003, "Token verification error");
+        });
+
+      return; // Don't process further until auth resolves
+    }
+
     const meta = wsMeta.get(raw);
 
     logger.debug("WS message received", {
@@ -309,6 +364,16 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
 
   close(ws, code, reason) {
     const raw = (ws as { raw: object }).raw;
+
+    // Clean up pending auth state if socket closes before authenticating
+    if (pendingAuth.has(raw)) {
+      const authTimer = (raw as Record<string, unknown>).__authTimer as
+        | ReturnType<typeof setTimeout>
+        | undefined;
+      if (authTimer) clearTimeout(authTimer);
+      pendingAuth.delete(raw);
+    }
+
     const meta = wsMeta.get(raw);
     const workspaceId = meta?.workspaceId;
     logger.info("WebSocket disconnected", {

@@ -349,6 +349,8 @@ export const zh: TranslationStrings = {
   },
   customer: {
     notFound: "客户未找到",
+    errorTitle: "加载客户失败",
+    errorDescription: "加载此客户资料时出现问题。请重试。",
     backToConversations: "返回对话",
     unknownName: "未知客户",
     langSpanish: "西班牙语",
@@ -476,6 +478,8 @@ export const zh: TranslationStrings = {
     sending: "发送中...",
     sendAll: "全部发送",
     clear: "清除",
+    flushFailed: "发送排队消息失败，请重试。",
+    clearFailed: "清除草稿失败，请重试。",
   },
   common: {
     loading: "加载中...",

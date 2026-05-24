@@ -9,15 +9,18 @@ export function ConnectivityBanner() {
   const [isRetrying, setIsRetrying] = useState(false)
 
   useEffect(() => {
-    // Check API reachability periodically
-    const interval = setInterval(async () => {
+    // Check API reachability immediately on mount, then periodically
+    const check = async () => {
       try {
         await apiFetch('/health', { method: 'GET' })
         setIsOffline(false)
       } catch {
         setIsOffline(true)
       }
-    }, 15_000)
+    }
+
+    check()
+    const interval = setInterval(check, 15_000)
 
     // Also listen for browser offline/online events
     const handleOffline = () => setIsOffline(true)

@@ -4,7 +4,7 @@ import {
   createAppointmentSchema,
   updateAppointmentStatusSchema,
 } from "@zenda/shared";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -27,6 +27,8 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
         status,
         limit = "50",
         offset = "0",
+        from,
+        to,
       } = query as Record<string, string>;
       const parsedLimit = Math.max(1, Math.min(200, Number(limit) || 50));
       const parsedOffset = Math.max(0, Number(offset) || 0);
@@ -34,6 +36,18 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
       const conditions = [eq(appointments.workspaceId, workspaceId!)];
       if (status) {
         conditions.push(eq(appointments.status, status as any));
+      }
+      if (from) {
+        const fromDate = new Date(from);
+        if (!isNaN(fromDate.getTime())) {
+          conditions.push(gte(appointments.startAt, fromDate));
+        }
+      }
+      if (to) {
+        const toDate = new Date(to);
+        if (!isNaN(toDate.getTime())) {
+          conditions.push(lte(appointments.startAt, toDate));
+        }
       }
 
       const rows = await db

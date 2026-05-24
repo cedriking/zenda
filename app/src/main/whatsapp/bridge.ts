@@ -159,12 +159,17 @@ export function connectBridge(
   currentCreds = creds;
   log("Connecting to API at", WS_URL, "workspace:", workspaceId);
 
-  const url = `${WS_URL}?workspaceId=${workspaceId}&token=${accessToken}`;
-
-  ws = new WebSocket(url);
+  ws = new WebSocket(WS_URL);
 
   ws.on("open", () => {
     log("Connected to API at", WS_URL);
+
+    // Send auth as first message instead of URL query param to avoid
+    // leaking the token in server access logs, proxy logs, and browser history.
+    ws?.send(
+      JSON.stringify({ type: "auth", token: accessToken }),
+    );
+
     if (!mainWindow.isDestroyed()) {
       mainWindow.webContents.send("bridge:status", { connected: true });
     }

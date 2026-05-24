@@ -354,6 +354,8 @@ export const ar: TranslationStrings = {
   },
   customer: {
     notFound: "العميل غير موجود",
+    errorTitle: "فشل تحميل العميل",
+    errorDescription: "حدث خطأ أثناء تحميل ملف هذا العميل. يرجى المحاولة مرة أخرى.",
     backToConversations: "العودة للمحادثات",
     unknownName: "عميل غير معروف",
     langSpanish: "الإسبانية",
@@ -482,6 +484,8 @@ export const ar: TranslationStrings = {
     sending: "جارٍ الإرسال...",
     sendAll: "إرسال الكل",
     clear: "مسح",
+    flushFailed: "فشل إرسال الرسائل في الانتظار. يرجى المحاولة مرة أخرى.",
+    clearFailed: "فشل مسح المسودات. يرجى المحاولة مرة أخرى.",
   },
   common: {
     loading: "جارٍ التحميل...",

@@ -21,30 +21,49 @@ export function useAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
+  const [page, setPage] = useState(0)
   const PAGE_SIZE = 30
 
-  const loadAppointments = useCallback(async (status?: string, page = 0) => {
-    if (page === 0) setIsLoading(true)
+  const loadAppointments = useCallback(async (status?: string, pageNum = 0) => {
+    if (pageNum === 0) {
+      setIsLoading(true)
+      setPage(0)
+    } else {
+      setIsLoadingMore(true)
+    }
     setError(null)
     try {
-      const params = new URLSearchParams({ include: 'customer,service', limit: String(PAGE_SIZE), offset: String(page * PAGE_SIZE) })
+      const params = new URLSearchParams({
+        include: 'customer,service',
+        limit: String(PAGE_SIZE),
+        offset: String(pageNum * PAGE_SIZE),
+        from: new Date().toISOString(),
+      })
       if (status) params.set('status', status)
       const data = await apiFetch<Appointment[]>(`/appointments?${params}`)
       const result = data as Appointment[]
-      if (page === 0) {
+      if (pageNum === 0) {
         setAppointments(result)
       } else {
         setAppointments(prev => [...prev, ...result])
       }
       setHasMore(result.length === PAGE_SIZE)
+      setPage(pageNum)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load appointments')
     } finally {
       setIsLoading(false)
+      setIsLoadingMore(false)
     }
   }, [])
+
+  const loadMore = useCallback(async (status?: string) => {
+    const nextPage = page + 1
+    await loadAppointments(status, nextPage)
+  }, [page, loadAppointments])
 
   const updateStatus = useCallback(async (id: string, status: string) => {
     const updated = await apiFetch<Appointment>(`/appointments/${id}/status`, {
@@ -69,10 +88,12 @@ export function useAppointments() {
     appointments,
     selectedDate,
     isLoading,
+    isLoadingMore,
     error,
     hasMore,
     setSelectedDate,
     loadAppointments,
+    loadMore,
     updateStatus,
   }
 }

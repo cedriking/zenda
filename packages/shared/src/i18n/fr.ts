@@ -361,6 +361,8 @@ export const fr: TranslationStrings = {
   },
   customer: {
     notFound: "Client non trouvé",
+    errorTitle: "Échec du chargement du client",
+    errorDescription: "Une erreur s'est produite lors du chargement du profil de ce client. Veuillez réessayer.",
     backToConversations: "Retour aux conversations",
     unknownName: "Client inconnu",
     langSpanish: "Espagnol",
@@ -492,6 +494,8 @@ export const fr: TranslationStrings = {
     sending: "Envoi en cours...",
     sendAll: "Tout envoyer",
     clear: "Effacer",
+    flushFailed: "Échec de l'envoi des messages en attente. Veuillez réessayer.",
+    clearFailed: "Échec de l'effacement des brouillons. Veuillez réessayer.",
   },
   common: {
     loading: "Chargement...",

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../services/api-client'
-import { WifiOff, Send, Eye, Trash2, RefreshCw } from 'lucide-react'
+import { WifiOff, Send, Trash2, RefreshCw, AlertCircle } from 'lucide-react'
 
 interface QueueStats {
   retryQueue: { pending: number; oldest: number }
@@ -13,6 +13,7 @@ export function OfflineQueueBanner() {
   const [stats, setStats] = useState<QueueStats | null>(null)
   const [showPanel, setShowPanel] = useState(false)
   const [sending, setSending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const check = async () => {
@@ -33,19 +34,25 @@ export function OfflineQueueBanner() {
 
   const flushQueue = async () => {
     setSending(true)
+    setError(null)
     try {
       await apiFetch('/queue/flush', { method: 'POST' })
       setStats(null)
       setShowPanel(false)
-    } catch { /* */ }
+    } catch {
+      setError(t('offlineQueue.flushFailed'))
+    }
     setSending(false)
   }
 
   const clearQueue = async () => {
+    setError(null)
     try {
       await apiFetch('/queue?type=unsafe', { method: 'DELETE' })
       setStats({ ...stats, offlineQueue: { total: stats.offlineQueue.safe, safe: stats.offlineQueue.safe, unsafe: 0 } })
-    } catch { /* */ }
+    } catch {
+      setError(t('offlineQueue.clearFailed'))
+    }
   }
 
   return (
@@ -84,6 +91,13 @@ export function OfflineQueueBanner() {
               )}
             </div>
           </div>
+
+          {error && (
+            <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2">
+              <AlertCircle size={14} className="shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
           <div className="flex gap-2">
             <button

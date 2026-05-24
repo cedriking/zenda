@@ -353,6 +353,8 @@ export const ja: TranslationStrings = {
   },
   customer: {
     notFound: "お客様が見つかりません",
+    errorTitle: "お客様の読み込みに失敗しました",
+    errorDescription: "このお客様のプロフィールの読み込み中にエラーが発生しました。もう一度お試しください。",
     backToConversations: "会話に戻る",
     unknownName: "不明なお客様",
     langSpanish: "スペイン語",
@@ -480,6 +482,8 @@ export const ja: TranslationStrings = {
     sending: "送信中...",
     sendAll: "すべて送信",
     clear: "クリア",
+    flushFailed: "保留メッセージの送信に失敗しました。もう一度お試しください。",
+    clearFailed: "下書きのクリアに失敗しました。もう一度お試しください。",
   },
   common: {
     loading: "読み込み中...",

@@ -1,5 +1,37 @@
 import { create } from 'zustand'
 
+/**
+ * Decode JWT payload without a library.
+ * Returns null if the token is malformed.
+ */
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(''),
+    )
+    return JSON.parse(json)
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Check whether a JWT access token is present and not expired.
+ * Returns true only if the token exists and `exp` is still in the future.
+ */
+function isTokenValid(token: string | null): boolean {
+  if (!token) return false
+  const payload = decodeJwtPayload(token)
+  if (!payload || typeof payload.exp !== 'number') return false
+  return Date.now() < payload.exp * 1000
+}
+
 interface User {
   id: string
   email: string
@@ -58,7 +90,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   workspace: loadFromStorage<WorkspaceInfo>('workspace'),
   accessToken: localStorage.getItem('accessToken'),
   refreshToken: localStorage.getItem('refreshToken'),
-  isAuthenticated: !!localStorage.getItem('accessToken'),
+  isAuthenticated: isTokenValid(localStorage.getItem('accessToken')),
   isLoading: false,
   error: null,
 
@@ -72,7 +104,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       workspace: data.workspace,
       accessToken: data.accessToken,
       refreshToken: data.refreshToken,
-      isAuthenticated: true,
+      isAuthenticated: isTokenValid(data.accessToken),
       isLoading: false,
       error: null,
     })

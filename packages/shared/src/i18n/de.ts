@@ -360,6 +360,8 @@ export const de: TranslationStrings = {
   },
   customer: {
     notFound: "Kunde nicht gefunden",
+    errorTitle: "Kunde konnte nicht geladen werden",
+    errorDescription: "Beim Laden dieses Kundenprofils ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
     backToConversations: "Zurück zu Gesprächen",
     unknownName: "Unbekannter Kunde",
     langSpanish: "Spanisch",
@@ -491,6 +493,8 @@ export const de: TranslationStrings = {
     sending: "Senden...",
     sendAll: "Alle senden",
     clear: "Leeren",
+    flushFailed: "Fehler beim Senden der Nachrichten. Bitte versuchen Sie es erneut.",
+    clearFailed: "Fehler beim Leeren der Entwürfe. Bitte versuchen Sie es erneut.",
   },
   common: {
     loading: "Laden...",

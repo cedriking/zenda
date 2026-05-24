@@ -19,6 +19,14 @@ export default class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error }
   }
 
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    console.error('[ErrorBoundary] Uncaught error:', error, errorInfo)
+  }
+
+  handleReset = (): void => {
+    this.setState({ hasError: false, error: null })
+  }
+
   render() {
     if (this.state.hasError) {
       return (
@@ -28,12 +36,20 @@ export default class ErrorBoundary extends Component<Props, State> {
             <p className="text-sm text-muted-foreground mb-4">
               {this.state.error?.message || 'An unexpected error occurred.'}
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="rounded-md bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90"
-            >
-              Reload App
-            </button>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={this.handleReset}
+                className="rounded-md bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90"
+              >
+                Try Again
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="rounded-md border px-4 py-2 text-sm hover:bg-muted"
+              >
+                Reload App
+              </button>
+            </div>
           </div>
         </div>
       )

@@ -352,6 +352,8 @@ export const ru: TranslationStrings = {
   },
   customer: {
     notFound: "Клиент не найден",
+    errorTitle: "Не удалось загрузить клиента",
+    errorDescription: "Произошла ошибка при загрузке профиля клиента. Пожалуйста, попробуйте снова.",
     backToConversations: "Назад к диалогам",
     unknownName: "Неизвестный клиент",
     langSpanish: "Испанский",
@@ -482,6 +484,8 @@ export const ru: TranslationStrings = {
     sending: "Отправка...",
     sendAll: "Отправить все",
     clear: "Очистить",
+    flushFailed: "Не удалось отправить сообщения из очереди. Попробуйте снова.",
+    clearFailed: "Не удалось очистить черновики. Попробуйте снова.",
   },
   common: {
     loading: "Загрузка...",

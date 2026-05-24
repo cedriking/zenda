@@ -359,6 +359,8 @@ export const es: TranslationStrings = {
   },
   customer: {
     notFound: "Cliente no encontrado",
+    errorTitle: "Error al cargar el cliente",
+    errorDescription: "Ocurrió un error al cargar el perfil de este cliente. Por favor, inténtelo de nuevo.",
     backToConversations: "Volver a conversaciones",
     unknownName: "Cliente Desconocido",
     langSpanish: "Español",
@@ -489,6 +491,8 @@ export const es: TranslationStrings = {
     sending: "Enviando...",
     sendAll: "Enviar todo",
     clear: "Limpiar",
+    flushFailed: "Error al enviar los mensajes en cola. Inténtelo de nuevo.",
+    clearFailed: "Error al limpiar los borradores. Inténtelo de nuevo.",
   },
   common: {
     loading: "Cargando...",

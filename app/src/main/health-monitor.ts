@@ -7,6 +7,7 @@ interface HealthStatus {
 }
 
 let monitorInterval: ReturnType<typeof setInterval> | null = null
+let initialTimeout: ReturnType<typeof setTimeout> | null = null
 let currentStatus: HealthStatus = {
   whatsapp: false,
   api: false,
@@ -20,18 +21,16 @@ export function startHealthMonitor(mainWindow: BrowserWindow, apiBaseUrl: string
 
   const check = async () => {
     let apiHealthy = false
-    let whatsappHealthy = false
 
     try {
       const res = await fetch(`${apiBaseUrl}/health`)
       apiHealthy = res.ok
     } catch { apiHealthy = false }
 
-    // Check WhatsApp status from renderer
-    mainWindow.webContents.send('health-check')
-
+    // WhatsApp status is updated via updateWhatsAppHealth() from the WhatsApp
+    // IPC onStatus callback — no renderer roundtrip needed.
     currentStatus = {
-      whatsapp: whatsappHealthy,
+      whatsapp: currentStatus.whatsapp,
       api: apiHealthy,
       lastCheck: Date.now(),
     }
@@ -45,11 +44,15 @@ export function startHealthMonitor(mainWindow: BrowserWindow, apiBaseUrl: string
   }
 
   // Initial check after 10s
-  setTimeout(check, 10_000)
+  initialTimeout = setTimeout(check, 10_000)
   monitorInterval = setInterval(check, CHECK_INTERVAL)
 }
 
 export function stopHealthMonitor() {
+  if (initialTimeout) {
+    clearTimeout(initialTimeout)
+    initialTimeout = null
+  }
   if (monitorInterval) {
     clearInterval(monitorInterval)
     monitorInterval = null

@@ -351,6 +351,8 @@ export const ko: TranslationStrings = {
   },
   customer: {
     notFound: "고객을 찾을 수 없습니다",
+    errorTitle: "고객 로드 실패",
+    errorDescription: "이 고객의 프로필을 로드하는 중 오류가 발생했습니다. 다시 시도해 주세요.",
     backToConversations: "대화로 돌아가기",
     unknownName: "알 수 없는 고객",
     langSpanish: "스페인어",
@@ -479,6 +481,8 @@ export const ko: TranslationStrings = {
     sending: "전송 중...",
     sendAll: "모두 전송",
     clear: "지우기",
+    flushFailed: "대기 중인 메시지 전송에 실패했습니다. 다시 시도해 주세요.",
+    clearFailed: "임시 보관 메시지 삭제에 실패했습니다. 다시 시도해 주세요.",
   },
   common: {
     loading: "로딩 중...",

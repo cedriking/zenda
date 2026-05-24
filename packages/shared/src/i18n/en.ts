@@ -374,6 +374,8 @@ export const en = {
   // Customer Profile
   customer: {
     notFound: "Customer not found",
+    errorTitle: "Failed to load customer",
+    errorDescription: "Something went wrong loading this customer's profile. Please try again.",
     backToConversations: "Back to conversations",
     unknownName: "Unknown Customer",
     langSpanish: "Spanish",
@@ -509,6 +511,8 @@ export const en = {
     sending: "Sending...",
     sendAll: "Send All",
     clear: "Clear",
+    flushFailed: "Failed to send queued messages. Please try again.",
+    clearFailed: "Failed to clear drafts. Please try again.",
   },
   // Common
   common: {

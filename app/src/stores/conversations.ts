@@ -1,6 +1,13 @@
 import { create } from 'zustand'
 import type { Conversation, Message, ConversationMode } from '@zenda/shared'
 
+const MAX_MESSAGES_PER_CONVERSATION = 200
+
+function trimMessages(messages: Message[]): Message[] {
+  if (messages.length <= MAX_MESSAGES_PER_CONVERSATION) return messages
+  return messages.slice(messages.length - MAX_MESSAGES_PER_CONVERSATION)
+}
+
 interface ConversationsState {
   conversations: Conversation[]
   activeConversationId: string | null
@@ -38,15 +45,18 @@ export const useConversationsStore = create<ConversationsState>((set) => ({
   setActiveConversation: (activeConversationId) => set({ activeConversationId }),
   setMessages: (conversationId, messages) =>
     set((state) => ({
-      messages: { ...state.messages, [conversationId]: messages },
+      messages: { ...state.messages, [conversationId]: trimMessages(messages) },
     })),
   addMessage: (conversationId, message) =>
-    set((state) => ({
-      messages: {
-        ...state.messages,
-        [conversationId]: [...(state.messages[conversationId] ?? []), message],
-      },
-    })),
+    set((state) => {
+      const updated = [...(state.messages[conversationId] ?? []), message]
+      return {
+        messages: {
+          ...state.messages,
+          [conversationId]: trimMessages(updated),
+        },
+      }
+    }),
   incrementUnread: (conversationId) =>
     set((state) => ({
       unreadCounts: {
