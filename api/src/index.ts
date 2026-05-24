@@ -4,8 +4,16 @@ import { revokedTokens, workspaceMembers, workspaces } from "@zenda/db/schema";
 import { and, eq, lt, sql } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { jwtVerify } from "jose";
-import { API_PORT, CORS_ORIGINS, JWT_SECRET, NODE_ENV } from "./config/env.js";
+import {
+  API_PORT,
+  CORS_ORIGINS,
+  isStripeLiveMode,
+  JWT_SECRET,
+  NODE_ENV,
+  validateProductionEnv,
+} from "./config/env.js";
 import { logger } from "./infra/logger.js";
+import { redis } from "./infra/redis.js";
 import { rateLimit } from "./middleware/rate-limit.js";
 import { adminModule } from "./modules/admin/index.js";
 import { translationModule } from "./modules/ai/translation.js";
@@ -15,6 +23,8 @@ import { processDueReminders } from "./modules/appointment/reminder-service.js";
 import { authModule } from "./modules/auth/index.js";
 import { availabilityModule } from "./modules/availability/index.js";
 import { billingModule } from "./modules/billing/index.js";
+import { ensureStripeProducts } from "./modules/billing/products.js";
+import { stripe } from "./modules/billing/stripe.js";
 import { businessModule } from "./modules/business/index.js";
 import { customerModule } from "./modules/conversation/customer-endpoint.js";
 import { conversationModule } from "./modules/conversation/index.js";
@@ -32,6 +42,16 @@ import { supportModule } from "./modules/support/index.js";
 import { usageModule } from "./modules/usage/index.js";
 import { wsModule } from "./modules/whatsapp/ws-handler.js";
 import { workspaceModule } from "./modules/workspace/index.js";
+
+// ── Startup validation ─────────────────────────────────────────────
+validateProductionEnv();
+
+if (stripe) {
+  const mode = isStripeLiveMode() ? "LIVE" : "TEST";
+  logger.info(`Stripe initialized in ${mode} mode`);
+} else {
+  logger.warn("Stripe not configured — billing features disabled");
+}
 
 const corsOrigins = CORS_ORIGINS.split(",")
   .map((o) => o.trim())
@@ -156,16 +176,41 @@ const _app = new Elysia()
 
   // ── Health (public) ─────────────────────────────────────────────
   .get("/health", async () => {
-    let dbOk = false;
+    const checks: { db: boolean; redis: boolean; stripe: boolean } = {
+      db: false,
+      redis: false,
+      stripe: false,
+    };
+
     try {
       await db.execute(sql`SELECT 1`);
-      dbOk = true;
+      checks.db = true;
     } catch {
-      dbOk = false;
+      // db unreachable — health check reports degraded
     }
+
+    try {
+      await redis.ping();
+      checks.redis = true;
+    } catch {
+      // redis unreachable — health check reports degraded
+    }
+
+    if (stripe) {
+      try {
+        await stripe.products.list({ limit: 1 });
+        checks.stripe = true;
+      } catch {
+        // stripe unreachable — health check reports degraded
+      }
+    } else {
+      checks.stripe = true;
+    }
+
+    const allOk = checks.db && checks.redis && checks.stripe;
     return {
-      status: dbOk ? "ok" : "degraded",
-      db: dbOk,
+      status: allOk ? "ok" : "degraded",
+      ...checks,
       timestamp: new Date().toISOString(),
     };
   })
@@ -223,6 +268,15 @@ const _app = new Elysia()
   .listen(Number(API_PORT));
 
 logger.info(`Zenda API running on port ${API_PORT}`);
+
+// ── Seed Stripe products on startup ───────────────────────────────
+ensureStripeProducts()
+  .then(() => logger.info("Stripe products ensured"))
+  .catch((err) =>
+    logger.error("Failed to seed Stripe products", {
+      error: (err as Error).message,
+    })
+  );
 
 // ── Periodic cleanup of expired revoked tokens ─────────────────────
 // Revoked tokens older than 7 days (max refresh token lifetime) are safe to remove
