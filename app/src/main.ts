@@ -67,6 +67,10 @@ function createWindow() {
 }
 
 async function installExtensions() {
+  // Only install dev extensions in development mode
+  if (!inDevelopment) {
+    return;
+  }
   try {
     const result = await installExtension(REACT_DEVELOPER_TOOLS);
     console.log(`Extensions installed successfully: ${result.name}`);

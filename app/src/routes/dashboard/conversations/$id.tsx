@@ -1,135 +1,230 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useState, useRef, useCallback } from 'react'
-import { useConversations } from '../../../hooks/use-conversations'
-import { ArrowLeft, Bot, User, Send, AlertCircle, Info, Phone, Globe, CalendarDays } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Bot,
+  CalendarDays,
+  Globe,
+  Info,
+  Phone,
+  Send,
+  User,
+} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useConversations } from "../../../hooks/use-conversations";
 
-export const Route = createFileRoute('/dashboard/conversations/$id')({
+export const Route = createFileRoute("/dashboard/conversations/$id")({
   component: ConversationDetailPage,
-})
+});
 
 function ConversationDetailPage() {
-  const { t } = useTranslation()
-  const { id } = Route.useParams()
-  const { conversations, messages, error, loadMessages, updateMode, sendMessage } = useConversations()
-  const [input, setInput] = useState('')
-  const [modeError, setModeError] = useState<string | null>(null)
-  const [confirmTakeOver, setConfirmTakeOver] = useState(false)
-  const [showCustomerInfo, setShowCustomerInfo] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const conv = conversations.find(c => c.id === id)
+  const { t } = useTranslation();
+  const { id } = Route.useParams();
+  const {
+    conversations,
+    messages,
+    error,
+    loadConversation,
+    loadMessages,
+    updateMode,
+    sendMessage,
+  } = useConversations();
+  const [input, setInput] = useState("");
+  const [modeError, setModeError] = useState<string | null>(null);
+  const [confirmTakeOver, setConfirmTakeOver] = useState(false);
+  const [showCustomerInfo, setShowCustomerInfo] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const initialLoadRef = useRef(true);
+  const isNearBottomRef = useRef(true);
+  const conv = conversations.find((c) => c.id === id);
 
   useEffect(() => {
-    loadMessages(id)
-  }, [id, loadMessages])
+    initialLoadRef.current = true;
+    loadConversation(id);
+    loadMessages(id);
+  }, [id, loadConversation, loadMessages]);
 
+  // Track whether user is near the bottom of the scroll container
+  const handleScroll = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) {
+      return;
+    }
+    // Consider "near bottom" if within 100px of the bottom
+    const threshold = 100;
+    isNearBottomRef.current =
+      el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+  }, []);
+
+  // Smart auto-scroll: instant on initial load, smooth only when near bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages[id]])
+    const convMessages = messages[id] ?? [];
+    if (convMessages.length === 0) {
+      return;
+    }
 
-  const clearModeError = useCallback(() => setModeError(null), [])
+    if (initialLoadRef.current) {
+      // Initial load: always scroll to bottom instantly
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
+      });
+      initialLoadRef.current = false;
+    } else if (isNearBottomRef.current) {
+      // New message and user is near bottom: smooth scroll
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+    // If user scrolled up, don't auto-scroll — let them read history
+  }, [messages[id], id]);
+
+  const clearModeError = useCallback(() => setModeError(null), []);
 
   const handleSend = async () => {
-    if (!input.trim()) return
-    await sendMessage(id, input.trim())
-    setInput('')
-  }
+    if (!input.trim()) {
+      return;
+    }
+    await sendMessage(id, input.trim());
+    setInput("");
+  };
 
   useEffect(() => {
-    if (!confirmTakeOver) return
-    const timer = setTimeout(() => setConfirmTakeOver(false), 3000)
-    return () => clearTimeout(timer)
-  }, [confirmTakeOver])
+    if (!confirmTakeOver) {
+      return;
+    }
+    const timer = setTimeout(() => setConfirmTakeOver(false), 3000);
+    return () => clearTimeout(timer);
+  }, [confirmTakeOver]);
 
   const handleTakeOverClick = () => {
     if (confirmTakeOver) {
-      handleTakeOver()
+      handleTakeOver();
     } else {
-      setConfirmTakeOver(true)
+      setConfirmTakeOver(true);
     }
-  }
+  };
 
   const handleTakeOver = async () => {
-    setConfirmTakeOver(false)
-    setModeError(null)
-    const previousMode = conv?.mode
+    setConfirmTakeOver(false);
+    setModeError(null);
+    const previousMode = conv?.mode;
     try {
-      await updateMode(id, 'human_takeover')
+      await updateMode(id, "human_takeover");
     } catch (err) {
-      setModeError(err instanceof Error ? err.message : 'Failed to take over conversation')
+      setModeError(
+        err instanceof Error ? err.message : "Failed to take over conversation"
+      );
       if (previousMode) {
-        updateMode(id, previousMode).catch(() => {})
+        updateMode(id, previousMode).catch(() => {});
       }
     }
-  }
+  };
 
   const handleReturnToAuto = async () => {
-    setModeError(null)
-    const previousMode = conv?.mode
+    setModeError(null);
+    const previousMode = conv?.mode;
     try {
-      await updateMode(id, 'auto')
+      await updateMode(id, "auto");
     } catch (err) {
-      setModeError(err instanceof Error ? err.message : 'Failed to return to auto mode')
+      setModeError(
+        err instanceof Error ? err.message : "Failed to return to auto mode"
+      );
       if (previousMode) {
-        updateMode(id, previousMode).catch(() => {})
+        updateMode(id, previousMode).catch(() => {});
       }
     }
-  }
+  };
 
-  const convMessages = messages[id] ?? []
+  const convMessages = messages[id] ?? [];
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border bg-card">
+      <div className="flex items-center justify-between border-border border-b bg-card p-4">
         <div className="flex items-center gap-3">
-          <Link to="/dashboard/conversations" className="text-muted-foreground hover:text-foreground" aria-label={t('conversation.backToConversations')}>
+          <Link
+            aria-label={t("conversation.backToConversations")}
+            className="text-muted-foreground hover:text-foreground"
+            to="/dashboard/conversations"
+          >
             <ArrowLeft size={20} />
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-medium text-foreground">{conv?.customerName ?? conv?.customerId ?? t('conversation.defaultCustomer')}</h3>
+              <h3 className="font-medium text-foreground">
+                {conv?.customerName ??
+                  conv?.customerPhone ??
+                  t("conversation.defaultCustomer")}
+              </h3>
               <button
-                onClick={() => setShowCustomerInfo(prev => !prev)}
-                className="p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                aria-label="Toggle customer information"
                 aria-expanded={showCustomerInfo}
+                aria-label="Toggle customer information"
+                className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                onClick={() => setShowCustomerInfo((prev) => !prev)}
               >
                 <Info size={16} />
               </button>
             </div>
-            <span className={`text-xs px-2 py-0.5 rounded-full ${
-              conv?.mode === 'auto' ? 'bg-emerald-500/10 text-emerald-600' :
-              conv?.mode === 'human_takeover' ? 'bg-destructive/10 text-destructive' :
-              'bg-amber-500/10 text-amber-600'
-            }`}>
-              {conv?.mode === 'auto' ? t('conversation.modeAi') :
-               conv?.mode === 'human_takeover' ? t('conversation.modeYou') :
-               conv?.mode ?? t('conversation.modeUnknown')}
+            <span
+              className={`rounded-full px-2 py-0.5 text-xs ${
+                conv?.mode === "auto"
+                  ? "bg-emerald-500/10 text-emerald-600"
+                  : conv?.mode === "human_takeover"
+                    ? "bg-destructive/10 text-destructive"
+                    : conv?.mode === "needs_attention"
+                      ? "bg-amber-500/10 text-amber-600"
+                      : conv?.mode === "paused"
+                        ? "bg-gray-500/10 text-gray-600"
+                        : conv?.mode === "queued_offline"
+                          ? "bg-blue-500/10 text-blue-600"
+                          : conv?.mode === "closed"
+                            ? "bg-gray-500/10 text-gray-500"
+                            : "bg-gray-500/10 text-gray-600"
+              }`}
+            >
+              {conv?.mode === "auto"
+                ? t("conversation.modeAi")
+                : conv?.mode === "human_takeover"
+                  ? t("conversation.modeYou")
+                  : conv?.mode === "needs_attention"
+                    ? t("conversation.modeAttention")
+                    : conv?.mode === "paused"
+                      ? t("conversation.modePaused")
+                      : conv?.mode === "queued_offline"
+                        ? t("conversation.modeQueued")
+                        : conv?.mode === "closed"
+                          ? t("conversation.modeClosed")
+                          : (conv?.mode ?? t("conversation.modeUnknown"))}
             </span>
           </div>
         </div>
         <div className="flex gap-2">
-          {conv?.mode === 'auto' && (
+          {(conv?.mode === "auto" || conv?.mode === "needs_attention") && (
             <button
-              onClick={handleTakeOverClick}
-              className={`px-3 py-1.5 text-sm rounded-lg ${
+              aria-label={
                 confirmTakeOver
-                  ? 'bg-destructive text-white hover:bg-destructive/90'
-                  : 'bg-amber-500 text-white hover:bg-amber-600'
+                  ? t("conversation.takeOver")
+                  : t("conversation.takeOverAria")
+              }
+              className={`rounded-lg px-3 py-1.5 text-sm ${
+                confirmTakeOver
+                  ? "bg-destructive text-white hover:bg-destructive/90"
+                  : "bg-amber-500 text-white hover:bg-amber-600"
               }`}
-              aria-label={confirmTakeOver ? t('conversation.takeOver') : t('conversation.takeOverAria')}
+              onClick={handleTakeOverClick}
             >
-              {confirmTakeOver ? `${t('conversation.takeOver')}?` : t('conversation.takeOver')}
+              {confirmTakeOver
+                ? `${t("conversation.takeOver")}?`
+                : t("conversation.takeOver")}
             </button>
           )}
-          {conv?.mode === 'human_takeover' && (
+          {conv?.mode === "human_takeover" && (
             <button
+              aria-label={t("conversation.returnToAutoAria")}
+              className="rounded-lg bg-emerald-500 px-3 py-1.5 text-sm text-white hover:bg-emerald-600"
               onClick={handleReturnToAuto}
-              className="px-3 py-1.5 text-sm bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
-              aria-label={t('conversation.returnToAutoAria')}
             >
-              {t('conversation.returnToAuto')}
+              {t("conversation.returnToAuto")}
             </button>
           )}
         </div>
@@ -137,44 +232,75 @@ function ConversationDetailPage() {
 
       {/* Collapsible customer info panel */}
       {showCustomerInfo && (
-        <div className="border-b border-border bg-muted p-4">
-          <div className="grid grid-cols-3 gap-4 max-w-lg">
+        <div className="border-border border-b bg-muted p-4">
+          <div className="grid max-w-lg grid-cols-3 gap-4">
             <div className="flex items-center gap-2">
-              <Phone size={14} className="text-muted-foreground" />
+              <Phone className="text-muted-foreground" size={14} />
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t('conversation.phone')}</p>
-                <p className="text-sm text-foreground">{conv?.customerId ?? 'N/A'}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                  {t("conversation.phone")}
+                </p>
+                <p className="text-foreground text-sm">
+                  {conv?.customerPhone ?? "N/A"}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Globe size={14} className="text-muted-foreground" />
+              <Globe className="text-muted-foreground" size={14} />
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t('conversation.language')}</p>
-                <p className="text-sm text-foreground">{conv?.language === 'es' ? t('conversations.langSpanish') : conv?.language === 'en' ? t('conversations.langEnglish') : conv?.language ?? 'Unknown'}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                  {t("conversation.language")}
+                </p>
+                <p className="text-foreground text-sm">
+                  {(conv?.customerLanguage ?? conv?.language) === "es"
+                    ? t("conversations.langSpanish")
+                    : (conv?.customerLanguage ?? conv?.language) === "en"
+                      ? t("conversations.langEnglish")
+                      : (conv?.customerLanguage ?? conv?.language ?? "Unknown")}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <CalendarDays size={14} className="text-muted-foreground" />
+              <CalendarDays className="text-muted-foreground" size={14} />
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t('conversation.mode')}</p>
-                <p className="text-sm text-foreground">{conv?.mode === 'auto' ? t('conversation.modeAi') : conv?.mode === 'human_takeover' ? t('conversation.modeYou') : conv?.mode ?? t('conversation.modeUnknown')}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                  {t("conversation.mode")}
+                </p>
+                <p className="text-foreground text-sm">
+                  {conv?.mode === "auto"
+                    ? t("conversation.modeAi")
+                    : conv?.mode === "human_takeover"
+                      ? t("conversation.modeYou")
+                      : conv?.mode === "needs_attention"
+                        ? t("conversation.modeAttention")
+                        : conv?.mode === "paused"
+                          ? t("conversation.modePaused")
+                          : conv?.mode === "queued_offline"
+                            ? t("conversation.modeQueued")
+                            : conv?.mode === "closed"
+                              ? t("conversation.modeClosed")
+                              : (conv?.mode ?? t("conversation.modeUnknown"))}
+                </p>
               </div>
             </div>
           </div>
           <a
+            className="mt-3 inline-flex items-center gap-1 text-primary text-xs hover:text-primary/80 hover:underline"
             href="/dashboard/appointments"
-            className="inline-flex items-center gap-1 mt-3 text-xs text-primary hover:text-primary/80 hover:underline"
           >
             <CalendarDays size={12} />
-            {t('conversation.viewAppointments')}
+            {t("conversation.viewAppointments")}
           </a>
         </div>
       )}
 
       {/* Error */}
       {error && (
-        <div className="p-3 bg-destructive/10 border-b border-border text-sm text-destructive flex items-center gap-2" role="alert">
-          <AlertCircle size={16} aria-hidden="true" />
+        <div
+          className="flex items-center gap-2 border-border border-b bg-destructive/10 p-3 text-destructive text-sm"
+          role="alert"
+        >
+          <AlertCircle aria-hidden="true" size={16} />
           {error}
         </div>
       )}
@@ -182,40 +308,60 @@ function ConversationDetailPage() {
       {/* Mode switch error */}
       {modeError && (
         <div
-          className="p-3 bg-destructive/10 border-b border-border text-sm text-destructive flex items-center justify-between"
+          className="flex items-center justify-between border-border border-b bg-destructive/10 p-3 text-destructive text-sm"
           role="alert"
         >
           <span className="flex items-center gap-2">
-            <AlertCircle size={16} aria-hidden="true" />
+            <AlertCircle aria-hidden="true" size={16} />
             {modeError}
           </span>
-          <button onClick={clearModeError} className="text-destructive hover:text-destructive/80 text-xs underline">{t('common.close')}</button>
+          <button
+            className="text-destructive text-xs underline hover:text-destructive/80"
+            onClick={clearModeError}
+          >
+            {t("common.close")}
+          </button>
         </div>
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-auto p-4 space-y-3" role="log" aria-label={t('conversation.messagesAria')} aria-live="polite">
+      <div
+        aria-label={t("conversation.messagesAria")}
+        aria-live="polite"
+        className="flex-1 space-y-3 overflow-auto p-4"
+        onScroll={handleScroll}
+        ref={scrollContainerRef}
+        role="log"
+      >
         {convMessages.length === 0 && !error && (
-          <div className="text-center py-8 text-muted-foreground text-sm">{t('conversation.noMessages')}</div>
+          <div className="py-8 text-center text-muted-foreground text-sm">
+            {t("conversation.noMessages")}
+          </div>
         )}
         {convMessages.map((msg) => (
           <div
+            className={`flex ${msg.senderType === "customer" ? "justify-start" : "justify-end"}`}
             key={msg.id}
-            className={`flex ${msg.senderType === 'customer' ? 'justify-start' : 'justify-end'}`}
           >
-            <div className={`max-w-[70%] rounded-lg px-4 py-2 ${
-              msg.senderType === 'customer'
-                ? 'bg-muted text-foreground'
-                : msg.senderType === 'ai'
-                ? 'bg-primary text-white'
-                : 'bg-emerald-500 text-white'
-            }`}>
-              <div className="flex items-center gap-1 mb-1">
-                {msg.senderType === 'ai' ? <Bot size={12} aria-label="AI" /> : <User size={12} aria-label="Human" />}
+            <div
+              className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                msg.senderType === "customer"
+                  ? "bg-muted text-foreground"
+                  : msg.senderType === "ai"
+                    ? "bg-primary text-white"
+                    : "bg-emerald-500 text-white"
+              }`}
+            >
+              <div className="mb-1 flex items-center gap-1">
+                {msg.senderType === "ai" ? (
+                  <Bot aria-label="AI" size={12} />
+                ) : (
+                  <User aria-label="Human" size={12} />
+                )}
                 <span className="text-xs opacity-75">{msg.senderType}</span>
               </div>
               <p className="text-sm">{msg.body}</p>
-              <span className="text-xs opacity-50 mt-1 block">
+              <span className="mt-1 block text-xs opacity-50">
                 {new Date(msg.createdAt).toLocaleTimeString()}
               </span>
             </div>
@@ -224,23 +370,31 @@ function ConversationDetailPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      {(conv?.mode === 'human_takeover' || conv?.mode === 'needs_attention') && (
-        <div className="p-4 border-t border-border bg-card">
+      {/* Input — always show when in human_takeover or needs_attention */}
+      {(conv?.mode === "human_takeover" ||
+        conv?.mode === "needs_attention") && (
+        <div className="border-border border-t bg-card p-4">
           <div className="flex gap-2">
             <input
+              aria-label={t("conversation.inputAria")}
+              autoFocus
+              className="flex-1 rounded-lg border border-border bg-card px-4 py-2 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              placeholder={t("conversation.inputPlaceholder")}
               type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder={t('conversation.inputPlaceholder')}
-              className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-primary bg-card text-foreground placeholder-muted-foreground"
-              aria-label={t('conversation.inputAria')}
             />
             <button
+              aria-label={t("conversation.sendAria")}
+              className="rounded-lg bg-primary px-4 py-2 text-white transition-opacity hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={!input.trim()}
               onClick={handleSend}
-              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
-              aria-label={t('conversation.sendAria')}
             >
               <Send size={16} />
             </button>
@@ -248,5 +402,5 @@ function ConversationDetailPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

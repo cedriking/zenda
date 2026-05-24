@@ -7,7 +7,7 @@ export default function BaseLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background">
+    <div className="flex h-screen flex-col overflow-hidden bg-background">
       <DragWindowRegion title="Zenda" />
       {children}
     </div>

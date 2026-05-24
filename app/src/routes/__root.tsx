@@ -1,7 +1,7 @@
 import { createRootRoute, Outlet, redirect } from "@tanstack/react-router";
+import { useBridgeSync } from "@/hooks/use-bridge-sync";
 import BaseLayout from "@/layouts/base-layout";
 import { getPostAuthRoute } from "@/stores/auth";
-import { useBridgeSync } from "@/hooks/use-bridge-sync";
 
 function Root() {
   useBridgeSync();
@@ -20,7 +20,7 @@ export const Route = createRootRoute({
     const isAuthRoute = location.pathname.startsWith("/auth");
     const isConnectWhatsApp = location.pathname === "/auth/connect-whatsapp";
 
-    if (!token && !isAuthRoute) {
+    if (!(token || isAuthRoute)) {
       throw redirect({ to: "/auth/login" });
     }
     if (token && isAuthRoute && !isConnectWhatsApp) {
