@@ -5,6 +5,7 @@ interface Appointment {
   id: string
   customerId: string
   customerName: string | null
+  customerPhone: string | null
   serviceId: string
   serviceName: string | null
   staffMemberId: string | null
