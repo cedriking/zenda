@@ -40,6 +40,7 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
         .select({
           appointment: appointments,
           customerName: customers.name,
+          customerPhone: customers.phoneNumber,
           serviceName: services.name,
         })
         .from(appointments)
@@ -53,6 +54,7 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
       return rows.map((row) => ({
         ...row.appointment,
         customerName: row.customerName,
+        customerPhone: row.customerPhone,
         serviceName: row.serviceName,
       }));
     } catch (err) {
