@@ -82,10 +82,30 @@ function formatHour(hour: number): string {
   return `${hour - 12} PM`;
 }
 
+function getStatusColorClass(status: string): string {
+  if (status === "confirmed" || status === "completed") {
+    return "border-emerald-500 border-l-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
+  }
+  if (status === "pending_confirmation") {
+    return "border-amber-400 border-l-2 bg-amber-100 text-amber-700";
+  }
+  if (status === "cancelled") {
+    return "border-destructive/50 border-l-2 bg-destructive/10 text-destructive line-through";
+  }
+  return "border-primary/50 border-l-2 bg-primary/10 text-primary";
+}
+
 function AppointmentsPage() {
   const { t } = useTranslation();
-  const { appointments, isLoading, error, loadAppointments } =
-    useAppointments();
+  const {
+    appointments,
+    isLoading,
+    isLoadingMore,
+    error,
+    hasMore,
+    loadAppointments,
+    loadMore,
+  } = useAppointments();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [view, setView] = useState<"calendar" | "list">("calendar");
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -155,14 +175,14 @@ function AppointmentsPage() {
   // Group appointments by date and hour for calendar view
   const appointmentsByDateHour = useMemo(() => {
     const map = new Map<string, typeof appointments>();
-    filteredAppointments.forEach((apt) => {
+    for (const apt of filteredAppointments) {
       const date = new Date(apt.startAt).toISOString().split("T")[0];
       const key = `${date}`;
       if (!map.has(key)) {
         map.set(key, []);
       }
-      map.get(key)!.push(apt);
-    });
+      map.get(key)?.push(apt);
+    }
     return map;
   }, [filteredAppointments]);
 
@@ -188,6 +208,7 @@ function AppointmentsPage() {
               aria-label="Calendar view"
               className={`px-3 py-1.5 text-sm ${view === "calendar" ? "bg-primary text-white" : "bg-card text-foreground"}`}
               onClick={() => setView("calendar")}
+              type="button"
             >
               {t("calendar.viewWeek")}
             </button>
@@ -195,6 +216,7 @@ function AppointmentsPage() {
               aria-label="List view"
               className={`px-3 py-1.5 text-sm ${view === "list" ? "bg-primary text-white" : "bg-card text-foreground"}`}
               onClick={() => setView("list")}
+              type="button"
             >
               {t("calendar.viewList")}
             </button>
@@ -203,6 +225,7 @@ function AppointmentsPage() {
             aria-label="Create new appointment"
             className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm text-white hover:bg-primary/90"
             onClick={() => setShowCreateForm(true)}
+            type="button"
           >
             <Plus size={16} />
             {t("calendar.newButton")}
@@ -217,7 +240,11 @@ function AppointmentsPage() {
         >
           <AlertCircle size={16} />
           {error}
-          <button className="ml-2 underline" onClick={() => loadAppointments()}>
+          <button
+            className="ml-2 underline"
+            onClick={() => loadAppointments()}
+            type="button"
+          >
             {t("common.retry")}
           </button>
         </div>
@@ -230,12 +257,14 @@ function AppointmentsPage() {
             aria-label="Previous week"
             className="rounded p-1 hover:bg-muted"
             onClick={prevWeek}
+            type="button"
           >
             <ChevronLeft size={20} />
           </button>
           <button
             className="rounded-lg border border-border px-3 py-1 text-sm hover:bg-muted"
             onClick={goToday}
+            type="button"
           >
             {t("calendar.today")}
           </button>
@@ -243,6 +272,7 @@ function AppointmentsPage() {
             aria-label="Next week"
             className="rounded p-1 hover:bg-muted"
             onClick={nextWeek}
+            type="button"
           >
             <ChevronRight size={20} />
           </button>
@@ -286,6 +316,7 @@ function AppointmentsPage() {
               }`}
               key={f.id}
               onClick={() => setStatusFilter(f.id)}
+              type="button"
             >
               {f.label}
             </button>
@@ -293,12 +324,12 @@ function AppointmentsPage() {
         </div>
       </div>
 
-      {isLoading ? (
+      {isLoading && (
         <div className="space-y-2">
-          {Array.from({ length: 4 }).map((_, i) => (
+          {Array.from({ length: 4 }, (_, i) => `skeleton-${i}`).map((key) => (
             <div
               className="flex animate-pulse items-center justify-between rounded-lg border border-border bg-card p-4"
-              key={i}
+              key={key}
             >
               <div className="flex items-center gap-4">
                 <div className="h-4 w-16 rounded bg-muted" />
@@ -311,14 +342,42 @@ function AppointmentsPage() {
             </div>
           ))}
         </div>
-      ) : view === "calendar" ? (
+      )}
+      {!isLoading && view === "list" && (
+        <>
+          <ListView
+            appointments={listAppointments}
+            selectedDate={selectedDate}
+          />
+          {hasMore && (
+            <div className="mt-4 flex justify-center">
+              <button
+                className="rounded-lg border border-border px-4 py-2 text-muted-foreground text-sm hover:bg-accent disabled:opacity-50"
+                disabled={isLoadingMore}
+                onClick={() =>
+                  loadMore(statusFilter === "all" ? undefined : statusFilter)
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    loadMore(statusFilter === "all" ? undefined : statusFilter);
+                  }
+                }}
+                type="button"
+              >
+                {isLoadingMore
+                  ? t("common.loading", "Loading...")
+                  : t("common.loadMore", "Load more")}
+              </button>
+            </div>
+          )}
+        </>
+      )}
+      {!isLoading && view !== "list" && (
         <CalendarWeekView
           appointmentsByDate={appointmentsByDateHour}
           today={today}
           weekDays={weekDays}
         />
-      ) : (
-        <ListView appointments={listAppointments} selectedDate={selectedDate} />
       )}
 
       {/* Create appointment modal */}
@@ -341,7 +400,20 @@ function CalendarWeekView({
   today,
 }: {
   weekDays: Date[];
-  appointmentsByDate: Map<string, any[]>;
+  appointmentsByDate: Map<
+    string,
+    {
+      id: string;
+      status: string;
+      startAt: string;
+      endAt: string;
+      customerName: string | null;
+      serviceName: string | null;
+      staffMemberId: string | null;
+      notes: string | null;
+      timezone: string;
+    }[]
+  >;
   today: string;
 }) {
   const { t } = useTranslation();
@@ -350,11 +422,7 @@ function CalendarWeekView({
 
   return (
     <div className="overflow-auto rounded-lg border border-border bg-card">
-      <table
-        aria-label="Weekly calendar"
-        className="w-full min-w-[700px]"
-        role="grid"
-      >
+      <table aria-label="Weekly calendar" className="w-full min-w-[700px]">
         <thead>
           <tr className="border-border border-b">
             <th
@@ -412,24 +480,18 @@ function CalendarWeekView({
 
                       return (
                         <div
-                          className={`mb-0.5 cursor-default rounded px-1.5 py-1 text-[10px] leading-tight ${
-                            apt.status === "confirmed"
-                              ? "border-emerald-500 border-l-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                              : apt.status === "pending_confirmation"
-                                ? "border-amber-400 border-l-2 bg-amber-100 text-amber-700"
-                                : apt.status === "cancelled"
-                                  ? "border-destructive/50 border-l-2 bg-destructive/10 text-destructive line-through"
-                                  : "border-primary/50 border-l-2 bg-primary/10 text-primary"
-                          }`}
+                          className={`mb-0.5 cursor-default rounded px-1.5 py-1 text-[10px] leading-tight ${getStatusColorClass(apt.status)}`}
                           key={apt.id}
-                          title={`${apt.customerName ?? apt.customerPhone ?? "Unknown"} — ${apt.serviceName ?? ""}${apt.notes ? "\n" + apt.notes : ""}\n${statusLabels[apt.status] ?? apt.status}`}
+                          title={`${apt.customerName ?? apt.customerPhone ?? "Unknown"} — ${apt.serviceName ?? ""}${apt.notes ? `\n${apt.notes}` : ""}\n${statusLabels[apt.status] ?? apt.status}`}
                         >
                           <div className="truncate font-semibold">
                             {timeStr}
                             {endTimeStr}
                           </div>
                           <div className="truncate font-medium">
-                            {apt.customerName ?? apt.customerPhone ?? t("calendar.customer")}
+                            {apt.customerName ??
+                              apt.customerPhone ??
+                              t("calendar.customer")}
                           </div>
                           <div className="truncate opacity-75">
                             {apt.serviceName ?? ""}
@@ -452,7 +514,17 @@ function ListView({
   appointments,
   selectedDate,
 }: {
-  appointments: any[];
+  appointments: {
+    id: string;
+    status: string;
+    startAt: string;
+    endAt: string;
+    customerName: string | null;
+    customerPhone: string | null;
+    serviceName: string | null;
+    notes: string | null;
+    timezone: string;
+  }[];
   selectedDate: Date;
 }) {
   const { t } = useTranslation();
@@ -524,14 +596,20 @@ function CreateAppointmentModal({
     startTime: "09:00",
     notes: "",
   });
-  const [services, setServices] = useState<any[]>([]);
+  const [services, setServices] = useState<
+    { id: string; name: string; durationMinutes: number }[]
+  >([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    apiFetch<any[]>("/services")
+    apiFetch<{ id: string; name: string; durationMinutes: number }[]>(
+      "/services"
+    )
       .then(setServices)
-      .catch(() => {});
+      .catch(() => {
+        /* services list is optional */
+      });
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -561,13 +639,26 @@ function CreateAppointmentModal({
   }
 
   return (
+    // biome-ignore lint/a11y/noNoninteractiveElementInteractions: modal backdrop
+    // biome-ignore lint/a11y/noStaticElementInteractions: modal backdrop with escape
     <div
+      aria-modal="true"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={onClose}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") {
+          onClose();
+        }
+      }}
+      role="dialog"
     >
       <div
         className="w-full max-w-md rounded-xl bg-card p-6 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
+        role="document"
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-semibold text-foreground text-lg">
@@ -577,6 +668,7 @@ function CreateAppointmentModal({
             aria-label={t("common.close")}
             className="text-muted-foreground hover:text-foreground"
             onClick={onClose}
+            type="button"
           >
             <X size={20} />
           </button>
@@ -593,11 +685,15 @@ function CreateAppointmentModal({
 
         <form className="space-y-3" onSubmit={handleSubmit}>
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
+            <label
+              className="mb-1 block font-medium text-foreground text-sm"
+              htmlFor="apt-customer-name"
+            >
               {t("calendar.customerName")}
             </label>
             <input
               className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              id="apt-customer-name"
               onChange={(e) =>
                 setForm({ ...form, customerName: e.target.value })
               }
@@ -608,11 +704,15 @@ function CreateAppointmentModal({
             />
           </div>
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
+            <label
+              className="mb-1 block font-medium text-foreground text-sm"
+              htmlFor="apt-customer-phone"
+            >
               {t("calendar.phone")}
             </label>
             <input
               className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              id="apt-customer-phone"
               onChange={(e) =>
                 setForm({ ...form, customerPhone: e.target.value })
               }
@@ -623,11 +723,15 @@ function CreateAppointmentModal({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block font-medium text-foreground text-sm">
+              <label
+                className="mb-1 block font-medium text-foreground text-sm"
+                htmlFor="apt-date"
+              >
                 {t("calendar.date")}
               </label>
               <input
                 className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                id="apt-date"
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
                 required
                 type="date"
@@ -635,11 +739,15 @@ function CreateAppointmentModal({
               />
             </div>
             <div>
-              <label className="mb-1 block font-medium text-foreground text-sm">
+              <label
+                className="mb-1 block font-medium text-foreground text-sm"
+                htmlFor="apt-time"
+              >
                 {t("calendar.timeField")}
               </label>
               <input
                 className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                id="apt-time"
                 onChange={(e) =>
                   setForm({ ...form, startTime: e.target.value })
                 }
@@ -650,11 +758,15 @@ function CreateAppointmentModal({
             </div>
           </div>
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
+            <label
+              className="mb-1 block font-medium text-foreground text-sm"
+              htmlFor="apt-service"
+            >
               {t("calendar.service")}
             </label>
             <select
               className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              id="apt-service"
               onChange={(e) => setForm({ ...form, serviceId: e.target.value })}
               value={form.serviceId}
             >
@@ -667,11 +779,15 @@ function CreateAppointmentModal({
             </select>
           </div>
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
+            <label
+              className="mb-1 block font-medium text-foreground text-sm"
+              htmlFor="apt-notes"
+            >
               {t("calendar.notes")}
             </label>
             <textarea
               className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              id="apt-notes"
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
               placeholder={t("calendar.notesPlaceholder")}
               rows={2}
