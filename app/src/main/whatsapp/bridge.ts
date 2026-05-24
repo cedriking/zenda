@@ -396,6 +396,7 @@ export function disconnectBridge(): void {
     ws.close();
     ws = null;
   }
+  pendingReplies.length = 0;
 }
 
 /**
