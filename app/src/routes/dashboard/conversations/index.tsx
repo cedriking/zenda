@@ -35,7 +35,7 @@ function ConversationsPage() {
 
   const filtered = searchQuery.trim()
     ? conversations.filter(c =>
-        (c.customerName ?? c.customerId).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.customerName ?? c.customerPhone ?? c.customerId).toLowerCase().includes(searchQuery.toLowerCase()) ||
         (c.lastMessagePreview ?? '').toLowerCase().includes(searchQuery.toLowerCase())
       )
     : conversations
