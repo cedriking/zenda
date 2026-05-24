@@ -78,7 +78,7 @@ export function useDashboardShortcuts() {
       meta: true,
       action: () => {
         const searchInput = document.querySelector<HTMLInputElement>(
-          'input[type="text"][placeholder*="Search"]'
+          'input[data-testid="global-search"]'
         )
         searchInput?.focus()
       },
