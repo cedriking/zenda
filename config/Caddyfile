@@ -5,10 +5,7 @@
 # It proxies to the docker-compose services running on localhost.
 
 zenda.bot {
-	# Marketing site (Next.js)
-	handle /* {
-		reverse_proxy localhost:3000
-	}
+	# Specific routes FIRST (Caddy evaluates handle directives top-to-bottom)
 
 	# API endpoints
 	handle /api/* {
@@ -42,6 +39,11 @@ zenda.bot {
 	# Electron app update feed
 	handle /updates* {
 		reverse_proxy localhost:3001
+	}
+
+	# Marketing site (Next.js) — catch-all MUST be last
+	handle {
+		reverse_proxy localhost:3000
 	}
 
 	# Static assets with long cache
