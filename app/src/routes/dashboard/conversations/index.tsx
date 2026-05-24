@@ -118,20 +118,20 @@ function ConversationsPage() {
                 {(conv.mode === 'needs_attention' || conv.mode === 'human_takeover') && (
                   <AlertTriangle size={20} className="text-amber-500" />
                 )}
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0 ${avatarColors[(conv.customerName ?? conv.customerId).charCodeAt(0) % avatarColors.length]}`}>
-                  {(conv.customerName ?? '?').charAt(0).toUpperCase()}
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0 ${avatarColors[(conv.customerName ?? conv.customerPhone ?? conv.customerId).charCodeAt(0) % avatarColors.length]}`}>
+                  {(conv.customerName ?? conv.customerPhone ?? '?').charAt(0).toUpperCase()}
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
                     <p className={`text-foreground ${(conv.unreadCount ?? 0) > 0 ? 'font-bold' : 'font-medium'}`}>
-                      {conv.customerName ?? conv.customerId}
+                      {conv.customerName ?? conv.customerPhone ?? conv.customerId}
                     </p>
                     {(conv.unreadCount ?? 0) > 0 && (
                       <span className="w-2 h-2 rounded-full bg-primary shrink-0" aria-label="Unread messages" />
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground truncate max-w-[200px]">{conv.lastMessagePreview ?? t('conversation.noMessages')}</p>
-                  <p className="text-sm text-muted-foreground">{conv.language === 'es' ? t('conversations.langSpanish') : t('conversations.langEnglish')}</p>
+                  <p className="text-sm text-muted-foreground">{(conv.customerLanguage ?? conv.language) === 'es' ? t('conversations.langSpanish') : t('conversations.langEnglish')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
