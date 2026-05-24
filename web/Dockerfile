@@ -26,6 +26,10 @@ COPY package.json ./package.json
 COPY packages/shared/ ./packages/shared/
 COPY web/ ./web/
 
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001
+ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run --workspace @zenda/web build
 # Ensure public directory exists
