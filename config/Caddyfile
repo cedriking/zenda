@@ -1,0 +1,72 @@
+# Zenda Production Reverse Proxy — Caddy
+# Place at /etc/caddy/Caddyfile on the VPS
+#
+# Caddy handles automatic HTTPS via Let's Encrypt for zenda.bot
+# It proxies to the docker-compose services running on localhost.
+
+zenda.bot {
+	# Marketing site (Next.js)
+	handle /* {
+		reverse_proxy localhost:3000
+	}
+
+	# API endpoints
+	handle /api/* {
+		strip_prefix /api
+		reverse_proxy localhost:3001
+	}
+
+	# Health / monitoring (direct to API)
+	handle /health {
+		reverse_proxy localhost:3001
+	}
+	handle /monitoring* {
+		reverse_proxy localhost:3001
+	}
+
+	# WebSocket connections (WhatsApp bridge)
+	handle /ws* {
+		reverse_proxy localhost:3001
+	}
+
+	# Billing webhooks (direct to API)
+	handle /billing* {
+		reverse_proxy localhost:3001
+	}
+
+	# Auth endpoints
+	handle /auth* {
+		reverse_proxy localhost:3001
+	}
+
+	# Electron app update feed
+	handle /updates* {
+		reverse_proxy localhost:3001
+	}
+
+	# Static assets with long cache
+	@static path *.js *.css *.woff2 *.png *.jpg *.svg *.ico
+	header @static Cache-Control "public, max-age=31536000, immutable"
+
+	# Security headers
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+	}
+
+	# Compress responses
+	encode gzip zstd
+}
+
+# www redirect
+www.zenda.bot {
+	redir https://zenda.bot{uri} permanent
+}
+
+# API subdomain (optional — if you want api.zenda.bot)
+# api.zenda.bot {
+# 	reverse_proxy localhost:3001
+# 	encode gzip zstd
+# }
