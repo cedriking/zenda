@@ -2,10 +2,11 @@ import { db } from "@zenda/db/client";
 import {
   conversationSummaries,
   conversations,
+  customers,
   messages,
 } from "@zenda/db/schema";
 import { sendMessageSchema, updateConversationModeSchema } from "@zenda/shared";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -38,6 +39,39 @@ export const conversationModule = new Elysia({ prefix: "/conversations" })
         conditions.push(eq(conversations.mode, mode as ConversationMode));
       }
 
+      const include = (query as Record<string, string>).include;
+      if (include?.includes("customer")) {
+        return db
+          .select({
+            id: conversations.id,
+            workspaceId: conversations.workspaceId,
+            customerId: conversations.customerId,
+            channel: conversations.channel,
+            mode: conversations.mode,
+            lastMessageAt: conversations.lastMessageAt,
+            language: conversations.language,
+            assignedToOwner: conversations.assignedToOwner,
+            needsAttentionReason: conversations.needsAttentionReason,
+            summary: conversations.summary,
+            createdAt: conversations.createdAt,
+            updatedAt: conversations.updatedAt,
+            customerName: customers.name,
+            customerPhone: customers.phoneNumber,
+            customerLanguage: customers.language,
+            lastMessagePreview: sql<string | null>`(
+              SELECT body FROM ${messages}
+              WHERE ${messages.conversationId} = ${conversations.id}
+              ORDER BY ${messages.createdAt} DESC LIMIT 1
+            )`,
+          })
+          .from(conversations)
+          .leftJoin(customers, eq(conversations.customerId, customers.id))
+          .where(and(...conditions))
+          .orderBy(desc(conversations.lastMessageAt))
+          .limit(parsedLimit)
+          .offset(parsedOffset);
+      }
+
       return db
         .select()
         .from(conversations)
@@ -57,8 +91,25 @@ export const conversationModule = new Elysia({ prefix: "/conversations" })
   .get("/:id", async ({ workspaceId, params, set }) => {
     try {
       const [conv] = await db
-        .select()
+        .select({
+          id: conversations.id,
+          workspaceId: conversations.workspaceId,
+          customerId: conversations.customerId,
+          channel: conversations.channel,
+          mode: conversations.mode,
+          lastMessageAt: conversations.lastMessageAt,
+          language: conversations.language,
+          assignedToOwner: conversations.assignedToOwner,
+          needsAttentionReason: conversations.needsAttentionReason,
+          summary: conversations.summary,
+          createdAt: conversations.createdAt,
+          updatedAt: conversations.updatedAt,
+          customerName: customers.name,
+          customerPhone: customers.phoneNumber,
+          customerLanguage: customers.language,
+        })
         .from(conversations)
+        .leftJoin(customers, eq(conversations.customerId, customers.id))
         .where(
           and(
             eq(conversations.id, params.id),

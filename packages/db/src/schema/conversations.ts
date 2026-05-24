@@ -36,7 +36,7 @@ export const conversations = pgTable(
     lastMessageAt: timestamp("last_message_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
-    language: languageEnum("language").notNull().default("es"),
+    language: languageEnum("language").notNull().default("en"),
     assignedToOwner: timestamp("assigned_to_owner", { withTimezone: true }),
     needsAttentionReason: varchar("needs_attention_reason", { length: 200 }),
     summary: text("summary"),
