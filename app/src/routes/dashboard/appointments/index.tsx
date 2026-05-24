@@ -422,14 +422,14 @@ function CalendarWeekView({
                                   : "border-primary/50 border-l-2 bg-primary/10 text-primary"
                           }`}
                           key={apt.id}
-                          title={`${apt.customerName ?? apt.customerId ?? "Unknown"} — ${apt.serviceName ?? ""}${apt.notes ? "\n" + apt.notes : ""}\n${statusLabels[apt.status] ?? apt.status}`}
+                          title={`${apt.customerName ?? apt.customerPhone ?? "Unknown"} — ${apt.serviceName ?? ""}${apt.notes ? "\n" + apt.notes : ""}\n${statusLabels[apt.status] ?? apt.status}`}
                         >
                           <div className="truncate font-semibold">
                             {timeStr}
                             {endTimeStr}
                           </div>
                           <div className="truncate font-medium">
-                            {apt.customerName ?? t("calendar.customer")}
+                            {apt.customerName ?? apt.customerPhone ?? t("calendar.customer")}
                           </div>
                           <div className="truncate opacity-75">
                             {apt.serviceName ?? ""}
@@ -489,7 +489,7 @@ function ListView({
               <div>
                 <p className="font-medium text-foreground">
                   <User className="mr-1 inline" size={14} />
-                  {apt.customerName ?? apt.customerId}
+                  {apt.customerName ?? apt.customerPhone ?? apt.customerId}
                 </p>
                 <p className="text-muted-foreground text-sm">
                   {apt.serviceName ?? apt.serviceId}
