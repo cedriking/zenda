@@ -10,5 +10,8 @@ playwright-report
 test-results
 .DS_Store
 
+# Paperclip local config
+.paperclip/
+
 # TypeScript incremental build cache
 *tsconfig*.tsbuildinfo
