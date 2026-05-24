@@ -1,7 +1,4 @@
 import { createRootRoute, Outlet, redirect } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { Activity } from "react";
-import { inDevelopment } from "@/constants";
 import BaseLayout from "@/layouts/base-layout";
 import { getPostAuthRoute } from "@/stores/auth";
 import { useBridgeSync } from "@/hooks/use-bridge-sync";
@@ -12,9 +9,6 @@ function Root() {
   return (
     <BaseLayout>
       <Outlet />
-      <Activity mode={inDevelopment ? "visible" : "hidden"}>
-        <TanStackRouterDevtools />
-      </Activity>
     </BaseLayout>
   );
 }

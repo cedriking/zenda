@@ -11,19 +11,13 @@ export default function DragWindowRegion({ title }: DragWindowRegionProps) {
 
   useEffect(() => {
     let active = true;
-
     getPlatform()
       .then((value) => {
-        if (!active) {
-          return;
-        }
-
-        setPlatform(value);
+        if (active) setPlatform(value);
       })
       .catch((error) => {
         console.error("Failed to detect platform", error);
       });
-
     return () => {
       active = false;
     };
@@ -32,86 +26,65 @@ export default function DragWindowRegion({ title }: DragWindowRegionProps) {
   const isMacOS = platform === "darwin";
 
   return (
-    <div className="flex w-full items-stretch justify-between">
-      <div className="draglayer w-full">
-        {title && !isMacOS && (
-          <div className="flex flex-1 select-none whitespace-nowrap p-2 text-gray-400 text-xs">
-            {title}
-          </div>
-        )}
-        {isMacOS && (
-          <div className="flex flex-1 p-2">
-            {/* Maintain the same height but do not display content */}
-          </div>
-        )}
-      </div>
-      {!isMacOS && <WindowButtons />}
+    <div className="draglayer flex w-full h-9 items-center justify-between select-none shrink-0 bg-card border-b border-border/50">
+      {isMacOS ? (
+        <div className="flex-1 pl-20" />
+      ) : (
+        <div className="flex-1 flex items-center pl-3 min-w-0">
+          {title && (
+            <span className="text-xs font-semibold text-foreground/70 tracking-wide">
+              {title}
+            </span>
+          )}
+        </div>
+      )}
+      {!isMacOS && <WindowControls />}
     </div>
   );
 }
 
-function WindowButtons() {
+function WindowControls() {
   return (
-    <div className="flex">
-      <button
-        className="p-2 hover:bg-slate-300"
-        onClick={minimizeWindow}
-        title="Minimize"
-        type="button"
-      >
-        <svg
-          aria-hidden="true"
-          height="12"
-          role="img"
-          viewBox="0 0 12 12"
-          width="12"
-        >
-          <rect fill="currentColor" height="1" width="10" x="1" y="6" />
+    <div className="flex h-full">
+      <WindowButton onClick={minimizeWindow} title="Minimize" hoverClass="hover:bg-muted/80">
+        <svg width="10" height="1" viewBox="0 0 10 1" fill="none">
+          <rect width="10" height="1" fill="currentColor" className="text-foreground/50" />
         </svg>
-      </button>
-      <button
-        className="p-2 hover:bg-slate-300"
-        onClick={maximizeWindow}
-        title="Maximize"
-        type="button"
-      >
-        <svg
-          aria-hidden="true"
-          height="12"
-          role="img"
-          viewBox="0 0 12 12"
-          width="12"
-        >
-          <rect
-            fill="none"
-            height="9"
-            stroke="currentColor"
-            width="9"
-            x="1.5"
-            y="1.5"
-          />
+      </WindowButton>
+      <WindowButton onClick={maximizeWindow} title="Maximize" hoverClass="hover:bg-muted/80">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <rect x="0.5" y="0.5" width="9" height="9" rx="1" stroke="currentColor" strokeWidth="1" className="text-foreground/50" fill="none" />
         </svg>
-      </button>
-      <button
-        className="p-2 hover:bg-red-300"
-        onClick={closeWindow}
-        title="Close"
-        type="button"
-      >
-        <svg
-          aria-hidden="true"
-          height="12"
-          role="img"
-          viewBox="0 0 12 12"
-          width="12"
-        >
-          <polygon
-            fill="currentColor"
-            fillRule="evenodd"
-            points="11 1.576 6.583 6 11 10.424 10.424 11 6 6.583 1.576 11 1 10.424 5.417 6 1 1.576 1.576 1 6 5.417 10.424 1"
-          />
+      </WindowButton>
+      <WindowButton onClick={closeWindow} title="Close" hoverClass="hover:bg-red-500 hover:text-white">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" className="text-foreground/50 group-hover:text-white" />
         </svg>
-      </button>
+      </WindowButton>
     </div>
+  );
+}
+
+function WindowButton({
+  onClick,
+  title,
+  hoverClass,
+  children,
+}: {
+  onClick: () => void;
+  title: string;
+  hoverClass: string;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      className={`flex items-center justify-center w-11 h-full transition-colors duration-150 ${hoverClass}`}
+      onClick={onClick}
+      title={title}
+      type="button"
+      aria-label={title}
+    >
+      {children}
+    </button>
   );
 }

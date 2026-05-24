@@ -109,14 +109,14 @@ function DashboardLayout() {
   }, [t])
 
   return (
-    <div className="flex h-screen bg-muted">
+    <div className="flex flex-1 bg-muted overflow-hidden">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:text-sm focus:font-medium">
         {t('layout.skipToContent')}
       </a>
       {/* Sidebar */}
-      <aside className="w-64 bg-card border-r border-border flex flex-col">
+      <aside className="w-64 bg-card border-r border-border flex flex-col shrink-0">
         <div className="p-4 border-b border-border">
-          <h1 className="text-xl font-bold text-foreground">{t('layout.brandName')}</h1>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">{t('layout.brandName')}</h1>
           <p className="text-sm text-muted-foreground">{workspace?.name ?? t('layout.defaultWorkspaceName')}</p>
         </div>
 
@@ -205,7 +205,7 @@ function DashboardLayout() {
       <div className="flex-1 flex flex-col overflow-hidden" id="main-content">
         <ConnectivityBanner />
         {/* Top bar */}
-        <header className="h-12 bg-card border-b border-border flex items-center justify-between px-4">
+        <header className="h-11 bg-card/80 backdrop-blur-sm border-b border-border flex items-center justify-between px-4">
           <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
             {getPageTitle(location.pathname, t)}
           </nav>
@@ -267,7 +267,9 @@ function DashboardLayout() {
           </div>
         </header>
         <main className="flex-1 overflow-auto">
-          <Outlet />
+          <div key={location.pathname} className="page-transition">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
@@ -290,9 +292,9 @@ function NavLink({ to, icon, label, exact = false }: { to: string; icon: React.R
   return (
     <Link
       to={to}
-      className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:bg-muted hover:text-foreground"
+      className="flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all duration-150 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
       activeProps={{
-        className: 'bg-primary/10 text-primary font-medium',
+        className: 'bg-accent text-accent-foreground font-medium',
       }}
       activeOptions={{ exact }}
     >

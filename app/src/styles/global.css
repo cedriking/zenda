@@ -134,16 +134,41 @@
   }
 }
 
-/* Onboarding animations */
-@keyframes fadeSlideIn {
+/* Page transition animation */
+@keyframes pageEnter {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(2px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.page-transition {
+  animation: pageEnter 100ms ease-out both;
+}
+
+/* Smooth content area for faster perceived transitions */
+main {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Scrollbar styling for chat-like views */
+.overflow-auto::-webkit-scrollbar {
+  width: 6px;
+}
+.overflow-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+.overflow-auto::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+.overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
 }
 
 /* Visible focus indicators */
