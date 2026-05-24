@@ -5,7 +5,16 @@
       "template": "{page} — Zenda"
     },
     "description": "Multilingual AI receptionist that handles appointments, reminders, and customer conversations via WhatsApp. Built for businesses in Latin America.",
-    "keywords": ["AI receptionist", "WhatsApp", "appointments", "booking", "Latin America", "customer service", "reminders", "scheduling"],
+    "keywords": [
+      "AI receptionist",
+      "WhatsApp",
+      "appointments",
+      "booking",
+      "Latin America",
+      "customer service",
+      "reminders",
+      "scheduling"
+    ],
     "openGraph": {
       "title": "Zenda — AI Receptionist for Your Business",
       "description": "Your AI receptionist that never misses a message. Handles customer conversations, appointments, and reminders via WhatsApp."
@@ -417,7 +426,42 @@
     "windows": "Windows",
     "downloadExe": "Download .exe",
     "alreadyHave": "Already have the app?",
-    "signin": "Sign in"
+    "signin": "Sign in",
+    "quickStartTitle": "You'll be live in under 10 minutes",
+    "quickStartDesc": "Here's what happens after you download:",
+    "step1Title": "Install & Sign In",
+    "step1Desc": "Open the installer and log in with the account you just created.",
+    "step2Title": "Connect WhatsApp",
+    "step2Desc": "Scan the QR code with your phone to link your business number.",
+    "step3Title": "Set Up Your Business",
+    "step3Desc": "The chat wizard walks you through services, hours, and policies in 5 minutes.",
+    "step4Title": "Go Live",
+    "step4Desc": "Your AI receptionist starts handling customer messages immediately.",
+    "needHelp": "Need help? Check out the {link}.",
+    "docsLink": "Getting Started Guide"
+  },
+  "gettingStarted": {
+    "title": "Quick Start Guide",
+    "desc": "From download to your first AI conversation in under 15 minutes.",
+    "timeLabel": "~10 minutes",
+    "step1Title": "Download & Install",
+    "step1Desc": "Get the desktop app for your platform. Available for macOS (.dmg) and Windows (.exe).",
+    "step1Cta": "Go to Download Page",
+    "step2Title": "Connect WhatsApp",
+    "step2Desc": "Scan the QR code with your phone to link your business number. Takes 30 seconds.",
+    "step3Title": "Configure Your Business",
+    "step3Desc": "The chat wizard walks you through your business name, services, hours, and policies in about 5 minutes.",
+    "step4Title": "Set Up Your AI Receptionist",
+    "step4Desc": "Give your receptionist a name, choose a tone, and set a greeting. The AI starts learning your business immediately.",
+    "step5Title": "Start Handling Messages",
+    "step5Desc": "Your AI receptionist is live! Send a test message to your own number to see it in action.",
+    "tipTitle": "Pro Tips",
+    "tip1": "Add common Q&A to your Knowledge Base to make the AI smarter about your business.",
+    "tip2": "You can switch between AI and manual mode on any conversation with one click.",
+    "tip3": "The AI detects language automatically — your Spanish-speaking customers get Spanish responses.",
+    "helpTitle": "Need More Help?",
+    "helpDesc": "Check out our full documentation for detailed guides, FAQs, and troubleshooting.",
+    "helpCta": "View Documentation"
   },
   "earlyAccess": {
     "badge": "Founding Member Early Access",
