@@ -158,7 +158,7 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
           // Two ranges [A_start, A_end) and [B_start, B_end) overlap when:
           //   A_start < B_end AND B_start < A_end
           const overlapConditions = [
-            eq(appointments.workspaceId, workspaceId!),
+            eq(appointments.workspaceId, workspaceId!), // biome-ignore lint/style/noNonNullAssertion: validated by middleware
             lt(appointments.startAt, endAtDate),
             gt(appointments.endAt, startAtDate),
             ...TERMINAL_STATUSES.map((s) => ne(appointments.status, s)),
@@ -184,7 +184,7 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
           const [inserted] = await tx
             .insert(appointments)
             .values({
-              workspaceId: workspaceId!,
+              workspaceId: workspaceId!, // biome-ignore lint/style/noNonNullAssertion: validated by middleware
               customerId,
               serviceId,
               staffMemberId: staffMemberId ?? null,
