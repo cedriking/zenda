@@ -55,7 +55,7 @@ export const monitoringModule = new Elysia({ prefix: '/monitoring' })
       const queueResult = await db.execute(sql`
         SELECT count(*) as pending FROM outbound_queue WHERE status = 'pending'
       `)
-      const pendingCount = Number(queueResult.rows[0]?.pending ?? 0)
+      const pendingCount = Number((queueResult as any).rows?.[0]?.pending ?? 0)
       checks.queues = {
         status: pendingCount > 100 ? 'warn' : 'ok',
         details: `${pendingCount} pending messages`,

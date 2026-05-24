@@ -4,7 +4,7 @@ import { describe, expect, test, mock, beforeEach } from 'bun:test'
 // Mock the policy-gate module before importing the system under test
 // ---------------------------------------------------------------------------
 
-const mockCheckSendingPolicy = mock(async () => ({
+const mockCheckSendingPolicy = mock(async (): Promise<{ allowed: boolean; reason?: string; details: Record<string, unknown> }> => ({
   allowed: true,
   reason: undefined,
   details: {},

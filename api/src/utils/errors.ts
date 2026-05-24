@@ -35,6 +35,15 @@ export function conflict(set: { status?: any }, message = 'Conflict') {
 }
 
 /**
+ * Returns a 401 response with proper status code.
+ * Usage: return unauthorized(set, 'Authentication required')
+ */
+export function unauthorized(set: { status?: any }, message = 'Authentication required') {
+  set.status = 401
+  return { error: message }
+}
+
+/**
  * Returns a 500 response with proper status code.
  * Usage: return serverError(set, 'Failed to process')
  */
