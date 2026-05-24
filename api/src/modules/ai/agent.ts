@@ -358,7 +358,7 @@ async function executeTool(
 
     case "update_customer_info":
       // biome-ignore lint/suspicious/noExplicitAny: pre-existing type mismatch
-      return updateCustomerInfo(workspaceId, args as any);
+      return updateCustomerInfo(workspaceId, { ...args, customerId } as any);
 
     case "opt_out_customer":
       // biome-ignore lint/suspicious/noExplicitAny: pre-existing type mismatch

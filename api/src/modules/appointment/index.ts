@@ -4,7 +4,7 @@ import {
   createAppointmentSchema,
   updateAppointmentStatusSchema,
 } from "@zenda/shared";
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lte } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -35,7 +35,12 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
 
       const conditions = [eq(appointments.workspaceId, workspaceId!)];
       if (status) {
-        conditions.push(eq(appointments.status, status as any));
+        const statuses = status.split(",").map((s) => s.trim()).filter(Boolean);
+        if (statuses.length === 1) {
+          conditions.push(eq(appointments.status, statuses[0] as any));
+        } else if (statuses.length > 1) {
+          conditions.push(inArray(appointments.status, statuses as any));
+        }
       }
       if (from) {
         const fromDate = new Date(from);

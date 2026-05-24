@@ -171,6 +171,8 @@ export function generateConsentConfirmation(language: "en" | "es"): string {
 
 /**
  * Update the lastInboundMessageAt timestamp for consent tracking.
+ * Also re-consents customers who previously opted out — an inbound message
+ * is a clear signal they want to communicate again.
  */
 export async function touchInboundTimestamp(
   workspaceId: string,
@@ -181,9 +183,24 @@ export async function touchInboundTimestamp(
     return;
   }
 
+  const updates: Record<string, unknown> = { lastInboundMessageAt: new Date(), updatedAt: new Date() };
+
+  // An inbound message from an opted-out customer means they want to re-engage.
+  // Reset consent to 'unknown' so reactive purposes (booking replies, etc.) work.
+  if (existing.status === "opted_out") {
+    updates.status = "unknown";
+    updates.source = "customer_inbound_message";
+    updates.notes = "Re-consented by inbound message";
+    logger.info("Customer re-consented via inbound message", {
+      workspaceId,
+      customerId,
+      previousStatus: "opted_out",
+    });
+  }
+
   await db
     .update(messagingConsent)
-    .set({ lastInboundMessageAt: new Date(), updatedAt: new Date() })
+    .set(updates)
     .where(
       and(
         eq(messagingConsent.workspaceId, workspaceId),
