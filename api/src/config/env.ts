@@ -61,8 +61,11 @@ export function validateProductionEnv(): void {
     );
   }
 
+  // Billing is critical for paying customers — require Stripe in production
   if (!STRIPE_SECRET_KEY) {
-    console.warn("[env] STRIPE_SECRET_KEY not set — billing features disabled");
+    throw new Error(
+      "STRIPE_SECRET_KEY is required in production — billing depends on it"
+    );
   }
 
   if (!STRIPE_WEBHOOK_SECRET) {

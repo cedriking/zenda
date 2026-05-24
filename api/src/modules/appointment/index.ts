@@ -4,7 +4,7 @@ import {
   createAppointmentSchema,
   updateAppointmentStatusSchema,
 } from "@zenda/shared";
-import { and, desc, eq, gte, inArray, lte } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lte, lt, gt, sql, ne } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -16,6 +16,7 @@ import {
 } from "../../utils/errors.js";
 import { getAvailableSlots } from "./availability-engine.js";
 import { validateTransition } from "./state-machine.js";
+import { TERMINAL_STATUSES } from "@zenda/shared";
 
 export const appointmentModule = new Elysia({ prefix: "/appointments" })
   .use(typedContext)
@@ -146,26 +147,63 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
 
         const durationMinutes =
           ((body as Record<string, unknown>).durationMinutes as number) ?? 60;
-        const endAt = new Date(
-          new Date(startAt).getTime() + durationMinutes * 60_000
-        );
+        const startAtDate = new Date(startAt);
+        const endAtDate = new Date(startAtDate.getTime() + durationMinutes * 60_000);
 
-        const [apt] = await db
-          .insert(appointments)
-          .values({
-            workspaceId: workspaceId!,
-            customerId,
-            serviceId,
-            staffMemberId: staffMemberId ?? null,
-            status: "pending_confirmation",
-            startAt: new Date(startAt),
-            endAt,
-            timezone,
-            sourceConversationId: sourceConversationId ?? null,
-            createdBy: createdBy ?? "owner",
-            notes: ((body as Record<string, unknown>).notes as string) ?? null,
-          })
-          .returning();
+        // Use a transaction with pessimistic lock to prevent double-booking.
+        // SELECT FOR UPDATE acquires a lock on overlapping rows so concurrent
+        // writers cannot both see "no overlap" and proceed.
+        const apt = await db.transaction(async (tx) => {
+          // Overlap: same workspace, same staff, overlapping time range, non-terminal status.
+          // Two ranges [A_start, A_end) and [B_start, B_end) overlap when:
+          //   A_start < B_end AND B_start < A_end
+          const overlapConditions = [
+            eq(appointments.workspaceId, workspaceId!),
+            lt(appointments.startAt, endAtDate),
+            gt(appointments.endAt, startAtDate),
+            ...TERMINAL_STATUSES.map((s) => ne(appointments.status, s)),
+          ];
+
+          if (staffMemberId) {
+            overlapConditions.push(eq(appointments.staffMemberId, staffMemberId));
+          } else {
+            overlapConditions.push(sql`${appointments.staffMemberId} IS NULL`);
+          }
+
+          const overlapping = await tx
+            .select({ id: appointments.id })
+            .from(appointments)
+            .where(and(...overlapConditions))
+            .limit(1)
+            .for("update");
+
+          if (overlapping.length > 0) {
+            return null;
+          }
+
+          const [inserted] = await tx
+            .insert(appointments)
+            .values({
+              workspaceId: workspaceId!,
+              customerId,
+              serviceId,
+              staffMemberId: staffMemberId ?? null,
+              status: "pending_confirmation",
+              startAt: startAtDate,
+              endAt: endAtDate,
+              timezone,
+              sourceConversationId: sourceConversationId ?? null,
+              createdBy: createdBy ?? "owner",
+              notes: ((body as Record<string, unknown>).notes as string) ?? null,
+            })
+            .returning();
+
+          return inserted;
+        });
+
+        if (!apt) {
+          return conflict(set, "Time slot is no longer available");
+        }
 
         logger.info("Appointment created", {
           workspaceId,

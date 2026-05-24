@@ -1,5 +1,6 @@
 import type { PlanTier } from "@zenda/shared";
 import { PLANS } from "@zenda/shared";
+import { logger } from "../../infra/logger.js";
 import { stripe } from "./stripe.js";
 
 // Stripe price IDs per tier (monthly only — no annual billing in WhatsApp-local model)
@@ -44,8 +45,12 @@ export async function ensureStripeProducts(): Promise<void> {
           metadata: { tier, period: "monthly" },
         });
       }
-    } catch {
-      // Products might already exist — skip
+    } catch (err) {
+      // Log the error — don't silently swallow Stripe failures at startup
+      logger.error("Failed to ensure Stripe product", {
+        tier,
+        error: (err as Error).message,
+      });
     }
   }
 }
