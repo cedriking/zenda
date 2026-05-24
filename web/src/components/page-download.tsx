@@ -3,7 +3,6 @@
 import { MessageSquare, Monitor, Rocket, Smartphone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { Link } from "@/i18n/navigation";
 
@@ -152,8 +151,6 @@ export function DownloadPageClient() {
           </p>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

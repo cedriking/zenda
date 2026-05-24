@@ -1,14 +1,21 @@
-import { SignupPageClient } from '@/components/page-signup'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations } from "next-intl/server";
+import { Footer } from "@/components/footer";
+import { SignupPageClient } from "@/components/page-signup";
 
 export async function generateMetadata() {
-  const t = await getTranslations('auth')
+  const t = await getTranslations("auth");
   return {
-    title: t('signupTitle'),
-    description: t('signupDesc'),
-  }
+    title: t("signupTitle"),
+    description: t("signupDesc"),
+  };
 }
 
+// biome-ignore lint/suspicious/useAwait: Next.js server component renders async Footer
 export default async function SignupPage() {
-  return <SignupPageClient />
+  return (
+    <>
+      <SignupPageClient />
+      <Footer />
+    </>
+  );
 }

@@ -2,7 +2,7 @@
   "metadata": {
     "title": {
       "default": "Zenda — 비즈니스를 위한 AI 리셉셔니스트",
-      "template": "{page} — Zenda"
+      "template": "%s — Zenda"
     },
     "description": "WhatsApp를 통해 예약, 알림, 고객 대화를 처리하는 다국어 AI 리셉셔니스트입니다.",
     "keywords": [

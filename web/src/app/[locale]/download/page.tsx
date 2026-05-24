@@ -1,14 +1,21 @@
-import { DownloadPageClient } from '@/components/page-download'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations } from "next-intl/server";
+import { Footer } from "@/components/footer";
+import { DownloadPageClient } from "@/components/page-download";
 
 export async function generateMetadata() {
-  const t = await getTranslations('download')
+  const t = await getTranslations("download");
   return {
-    title: t('title'),
-    description: t('desc'),
-  }
+    title: t("title"),
+    description: t("desc"),
+  };
 }
 
+// biome-ignore lint/suspicious/useAwait: Next.js server component renders async Footer
 export default async function DownloadPage() {
-  return <DownloadPageClient />
+  return (
+    <>
+      <DownloadPageClient />
+      <Footer />
+    </>
+  );
 }

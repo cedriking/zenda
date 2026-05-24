@@ -2,7 +2,7 @@
   "metadata": {
     "title": {
       "default": "Zenda — AI Receptionist for Your Business",
-      "template": "{page} — Zenda"
+      "template": "%s — Zenda"
     },
     "description": "Multilingual AI receptionist that handles appointments, reminders, and customer conversations via WhatsApp. Built for businesses in Latin America.",
     "keywords": [

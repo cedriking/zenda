@@ -2,7 +2,7 @@
   "metadata": {
     "title": {
       "default": "Zenda — Réceptionniste IA pour votre entreprise",
-      "template": "{page} — Zenda"
+      "template": "%s — Zenda"
     },
     "description": "Réceptionniste IA multilingue qui gère les rendez-vous, les rappels et les conversations clients via WhatsApp. Conçu pour les entreprises d'Amérique latine.",
     "keywords": [

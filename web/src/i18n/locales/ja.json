@@ -2,7 +2,7 @@
   "metadata": {
     "title": {
       "default": "Zenda — ビジネスを支えるAI受付",
-      "template": "{page} — Zenda"
+      "template": "%s — Zenda"
     },
     "description": "WhatsApp経由で予約・リマインダー・顧客対応を自動化する多言語AI受付。美容室、クリニック、スパなど予約制ビジネスに最適な24時間自動応答システム。",
     "keywords": [

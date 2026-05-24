@@ -2,7 +2,7 @@
   "metadata": {
     "title": {
       "default": "Zenda — KI-Empfangsassistent für Ihr Unternehmen",
-      "template": "{page} — Zenda"
+      "template": "%s — Zenda"
     },
     "description": "Mehrsprachiger KI-Empfangsassistent, der Termine, Erinnerungen und Kundengespräche über WhatsApp verwaltet. Entwickelt für Unternehmen in Lateinamerika.",
     "keywords": [

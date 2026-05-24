@@ -2,7 +2,7 @@
   "metadata": {
     "title": {
       "default": "Zenda — 您企业的智能AI前台",
-      "template": "{page} — Zenda"
+      "template": "%s — Zenda"
     },
     "description": "多语言AI智能前台，通过WhatsApp自动处理预约、提醒和客户对话。专为拉丁美洲预约类企业打造，7×24小时在线服务。",
     "keywords": [

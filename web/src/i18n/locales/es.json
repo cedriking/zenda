@@ -2,7 +2,7 @@
   "metadata": {
     "title": {
       "default": "Zenda — Recepcionista con IA para tu negocio",
-      "template": "{page} — Zenda"
+      "template": "%s — Zenda"
     },
     "description": "Recepcionista multilingüe con IA que gestiona citas, recordatorios y conversaciones con clientes a través de WhatsApp. Diseñado para negocios en América Latina.",
     "keywords": [
