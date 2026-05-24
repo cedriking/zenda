@@ -163,12 +163,9 @@ export async function handleWebhook(
     throw new Error("Invalid signature");
   }
 
-  // Idempotency: skip if this event was already processed
-  const isNew = await markEventProcessed(event.id, event.type);
-  if (!isNew) {
-    return;
-  }
-
+  // Idempotency: process the event first, THEN mark as processed.
+  // This ensures that if the handler crashes, the event is NOT marked
+  // as processed and Stripe will retry it.
   switch (event.type) {
     case "checkout.session.completed":
       await handleCheckoutCompleted(event);
@@ -226,6 +223,9 @@ export async function handleWebhook(
     default:
       logger.debug("Unhandled webhook event", { type: event.type });
   }
+
+  // Only mark processed AFTER the handler succeeds
+  await markEventProcessed(event.id, event.type);
 }
 
 const TIER_RANK: Record<string, number> = {

@@ -1,6 +1,6 @@
 import { db } from '@zenda/db/client'
 import { workspaces } from '@zenda/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import type { OnboardingStep } from '@zenda/shared'
 
 const STEP_ORDER: OnboardingStep[] = [
@@ -27,6 +27,16 @@ export function getProgress(current: OnboardingStep): number {
   return Math.round((idx / (STEP_ORDER.length - 1)) * 100)
 }
 
+export class OnboardingStepMismatchError extends Error {
+  constructor(
+    public readonly expected: OnboardingStep,
+    public readonly actual: OnboardingStep,
+  ) {
+    super(`Onboarding step mismatch: expected ${expected}, but workspace is at ${actual}`)
+    this.name = 'OnboardingStepMismatchError'
+  }
+}
+
 export async function advanceOnboarding(
   workspaceId: string,
   completedStep: OnboardingStep,
@@ -34,10 +44,28 @@ export async function advanceOnboarding(
   const next = getNextStep(completedStep)
   if (!next) return 'ready'
 
-  await db
+  const result = await db
     .update(workspaces)
     .set({ onboardingStep: next, updatedAt: new Date() })
-    .where(eq(workspaces.id, workspaceId))
+    .where(
+      and(
+        eq(workspaces.id, workspaceId),
+        eq(workspaces.onboardingStep, completedStep),
+      ),
+    )
+    .returning({ onboardingStep: workspaces.onboardingStep })
+
+  if (result.length === 0) {
+    // Step didn't match — fetch current to report the mismatch
+    const [ws] = await db
+      .select({ onboardingStep: workspaces.onboardingStep })
+      .from(workspaces)
+      .where(eq(workspaces.id, workspaceId))
+      .limit(1)
+
+    const currentStep = (ws?.onboardingStep as OnboardingStep) ?? 'not_started'
+    throw new OnboardingStepMismatchError(completedStep, currentStep)
+  }
 
   return next
 }

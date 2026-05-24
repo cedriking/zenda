@@ -28,9 +28,17 @@ export const billingModule = new Elysia({ prefix: "/billing" })
       await handleWebhook(rawBody, signature);
       return { received: true };
     } catch (err) {
-      logger.error("Webhook error", { error: (err as Error).message });
-      // Return 200 to prevent Stripe from retrying, but log the error
-      return { received: true, error: "Webhook processing failed" };
+      const message = (err as Error).message;
+      // Signature verification failures are permanent — no point retrying
+      if (message === "Invalid signature") {
+        return badRequest(set, "Invalid signature");
+      }
+      // Transient errors (DB down, network) — return non-200 so Stripe retries
+      logger.error("Webhook processing error — returning 500 for Stripe retry", {
+        error: message,
+      });
+      set.status = 500;
+      return { error: "Webhook processing failed" };
     }
   })
 
