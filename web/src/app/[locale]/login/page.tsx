@@ -7,6 +7,15 @@ export async function generateMetadata() {
   return {
     title: t("loginTitle"),
     description: t("loginDesc"),
+    alternates: {
+      canonical: "https://zenda.bot/login",
+    },
+    openGraph: {
+      title: t("loginTitle"),
+      description: t("loginDesc"),
+      url: "https://zenda.bot/login",
+      type: "website",
+    },
   };
 }
 

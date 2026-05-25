@@ -7,6 +7,15 @@ export async function generateMetadata() {
   return {
     title: t("signupTitle"),
     description: t("signupDesc"),
+    alternates: {
+      canonical: "https://zenda.bot/signup",
+    },
+    openGraph: {
+      title: t("signupTitle"),
+      description: t("signupDesc"),
+      url: "https://zenda.bot/signup",
+      type: "website",
+    },
   };
 }
 
