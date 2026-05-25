@@ -8,6 +8,15 @@ import {
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("verticals.dental");
   return {
+    alternates: {
+      canonical: "https://zenda.bot/dental",
+    },
+    openGraph: {
+      title: t("metaTitle"),
+      description: t("metaDesc"),
+      url: "https://zenda.bot/dental",
+      type: "website",
+    },
     title: t("metaTitle"),
     description: t("metaDesc"),
   };
