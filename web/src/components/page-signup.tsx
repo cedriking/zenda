@@ -126,6 +126,12 @@ export function SignupPageClient() {
       <main className="flex flex-1 items-center justify-center px-6">
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
+            {isFounding && (
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 font-medium text-primary text-sm">
+                <span>&#127881;</span>
+                <span>Founding Member — 50% off + 14 d&#237;as gratis</span>
+              </div>
+            )}
             <h1 className="mt-6 mb-2 font-bold text-2xl">{t("signupTitle")}</h1>
             <p className="text-muted-foreground">{t("signupDesc")}</p>
           </div>
