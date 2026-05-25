@@ -1,37 +1,43 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const R2_PUBLIC_URL =
-  process.env.R2_UPDATES_PUBLIC_URL ?? "https://pub-xxx.r2.dev";
+const GITHUB_REPO = "cedriking/zenda";
 
 export async function GET(_request: NextRequest) {
-  // The S3 publisher uploads Squirrel artifacts to updates/win32/x64/
-  // MakerSquirrel produces: ZendaSetup.exe, RELEASES file
-  // We redirect to the stable Squirrel installer name
   try {
-    // For Squirrel/Windows, the installer is always named ZendaSetup.exe
-    // but the S3 publisher may version it. Try to fetch RELEASES first.
-    const releasesUrl = `${R2_PUBLIC_URL}/updates/win32/x64/RELEASES`;
-    const res = await fetch(releasesUrl, { cache: "no-store" });
+    // Fetch the latest release from GitHub API
+    const res = await fetch(
+      `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`,
+      {
+        headers: { Accept: "application/vnd.github+json" },
+        next: { revalidate: 300 }, // cache for 5 minutes
+      }
+    );
+
     if (!res.ok) {
-      // Fallback to direct link
       return NextResponse.redirect(
-        `${R2_PUBLIC_URL}/updates/win32/x64/ZendaSetup.exe`,
+        new URL("/download?error=no-release", _request.url)
       );
     }
-    // RELEASES file is NuGet-style, contains entry like:
-    // <hash> <filename> <size>
-    // We just redirect to the latest installer
-    const text = await res.text();
-    const lines = text.trim().split("\n");
-    const lastLine = lines[lines.length - 1];
-    const parts = lastLine.trim().split(/\s+/);
-    const filename = parts.length >= 2 ? parts[1] : "ZendaSetup.exe";
-    return NextResponse.redirect(
-      `${R2_PUBLIC_URL}/updates/win32/x64/${filename}`,
+
+    const release = await res.json();
+    const assets: Array<{ name: string; browser_download_url: string }> =
+      release.assets ?? [];
+
+    // Find the Windows installer (ZendaSetup.exe from Squirrel or .exe)
+    const installer = assets.find(
+      (a) => a.name.endsWith(".exe") || a.name === "ZendaSetup.exe"
     );
+
+    if (!installer) {
+      return NextResponse.redirect(
+        new URL("/download?error=no-windows-artifact", _request.url)
+      );
+    }
+
+    return NextResponse.redirect(installer.browser_download_url);
   } catch {
     return NextResponse.redirect(
-      `${R2_PUBLIC_URL}/updates/win32/x64/ZendaSetup.exe`,
+      new URL("/download?error=fetch-failed", _request.url)
     );
   }
 }

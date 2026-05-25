@@ -18,14 +18,14 @@ const config: ForgeConfig = {
   ],
   publishers: [
     {
-      name: "@electron-forge/publisher-s3",
+      name: "@electron-forge/publisher-github",
       config: {
-        endpoint: process.env.S3_ENDPOINT ?? "https://zenda-updates.r2.cloudflarestorage.com",
-        bucket: process.env.S3_BUCKET ?? "zenda-updates",
-        accessKeyId: process.env.S3_ACCESS_KEY_ID ?? "",
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? "",
-        folder: "updates",
-        public: true,
+        repository: {
+          owner: "cedriking",
+          name: "zenda",
+        },
+        prerelease: false,
+        draft: false,
       },
     },
   ],
