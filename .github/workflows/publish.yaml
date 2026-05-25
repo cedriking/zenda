@@ -35,7 +35,7 @@ jobs:
           cache: npm
 
       - name: Install all dependencies
-        run: npm ci --ignore-scripts
+        run: npm ci
 
       - name: Build workspace packages
         run: npx turbo build --filter=@zenda/shared --filter=@zenda/db

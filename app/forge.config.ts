@@ -14,7 +14,12 @@ const config: ForgeConfig = {
   makers: [
     new MakerDMG({}, ["darwin"]),
     new MakerZIP({}, ["darwin"]),
-    new MakerSquirrel({}, ["win32"]),
+    new MakerSquirrel(
+      {
+        name: "Zenda",
+      },
+      ["win32"]
+    ),
   ],
   publishers: [
     {
