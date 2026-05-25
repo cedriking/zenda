@@ -5,6 +5,15 @@ import { DownloadPageClient } from "@/components/page-download";
 export async function generateMetadata() {
   const t = await getTranslations("download");
   return {
+    alternates: {
+      canonical: "https://zenda.bot/download",
+    },
+    openGraph: {
+      title: t("title"),
+      description: t("desc"),
+      url: "https://zenda.bot/download",
+      type: "website",
+    },
     title: t("title"),
     description: t("desc"),
   };

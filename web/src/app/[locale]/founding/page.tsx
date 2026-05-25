@@ -14,6 +14,15 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("metaTitle"),
     description: t("metaDesc"),
+    alternates: {
+      canonical: "https://zenda.bot/founding",
+    },
+    openGraph: {
+      title: t("metaTitle"),
+      description: t("metaDesc"),
+      url: "https://zenda.bot/founding",
+      type: "website",
+    },
   };
 }
 

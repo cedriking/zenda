@@ -7,6 +7,15 @@ import { GettingStartedPageClient } from "@/components/page-getting-started";
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("gettingStarted");
   return {
+    alternates: {
+      canonical: "https://zenda.bot/getting-started",
+    },
+    openGraph: {
+      title: t("title"),
+      description: t("desc"),
+      url: "https://zenda.bot/getting-started",
+      type: "website",
+    },
     title: t("title"),
     description: t("desc"),
   };
