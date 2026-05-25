@@ -32,10 +32,8 @@ export function DownloadPageClient() {
   const t = useTranslations("download");
   const platform = usePlatform();
 
-  const macOSUrl =
-    "https://github.com/ruvnet/zenda/releases/latest/download/Zenda-macOS.dmg";
-  const windowsUrl =
-    "https://github.com/ruvnet/zenda/releases/latest/download/Zenda-Windows.exe";
+  const macOSUrl = "/api/download/macos";
+  const windowsUrl = "/api/download/windows";
 
   return (
     <div className="flex min-h-screen flex-col pt-16">

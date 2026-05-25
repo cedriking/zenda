@@ -23,7 +23,8 @@ import {
   workspaces,
 } from "@zenda/db/schema";
 import type { Language } from "@zenda/shared";
-import { and, eq } from "drizzle-orm";
+import { TERMINAL_STATUSES } from "@zenda/shared";
+import { and, eq, gt, lt, ne, sql } from "drizzle-orm";
 import { logAppointmentAudit } from "../../audit/logger.js";
 import { enforceLimit } from "../../usage/enforcement.js";
 import { trackActiveContact } from "../../usage/tracker.js";
@@ -209,22 +210,67 @@ export async function bookAppointment(
     timezone = ws.timezone;
   }
 
-  const [appointment] = await db
-    .insert(appointments)
-    .values({
-      workspaceId,
-      customerId: input.customerId,
-      serviceId: input.serviceId!,
-      staffMemberId: input.staffMemberId ?? null,
-      status: "pending_confirmation",
-      startAt,
-      endAt,
-      timezone,
-      sourceConversationId: conversationId,
-      createdBy: "ai",
-      notes: input.notes ?? null,
-    })
-    .returning();
+  // Use a transaction with pessimistic lock to prevent double-booking.
+  // SELECT FOR UPDATE acquires a lock on overlapping rows so concurrent
+  // writers cannot both see "no overlap" and proceed.
+  const appointment = await db.transaction(async (tx) => {
+    const overlapConditions = [
+      eq(appointments.workspaceId, workspaceId),
+      lt(appointments.startAt, endAt),
+      gt(appointments.endAt, startAt),
+      ...TERMINAL_STATUSES.map((s) => ne(appointments.status, s)),
+    ];
+
+    if (input.staffMemberId) {
+      overlapConditions.push(
+        eq(appointments.staffMemberId, input.staffMemberId)
+      );
+    } else {
+      overlapConditions.push(sql`${appointments.staffMemberId} IS NULL`);
+    }
+
+    const overlapping = await tx
+      .select({ id: appointments.id })
+      .from(appointments)
+      .where(and(...overlapConditions))
+      .limit(1)
+      .for("update");
+
+    if (overlapping.length > 0) {
+      return null;
+    }
+
+    const [inserted] = await tx
+      .insert(appointments)
+      .values({
+        workspaceId,
+        customerId: input.customerId,
+        serviceId: input.serviceId!,
+        staffMemberId: input.staffMemberId ?? null,
+        status: "pending_confirmation",
+        startAt,
+        endAt,
+        timezone,
+        sourceConversationId: conversationId,
+        createdBy: "ai",
+        notes: input.notes ?? null,
+      })
+      .returning();
+
+    return inserted;
+  });
+
+  if (!appointment) {
+    return {
+      error: true,
+      message:
+        _language === "es"
+          ? "Lo siento, ese horario ya no está disponible. ¿Te gustaría probar otra hora?"
+          : "I'm sorry, that time slot is no longer available. Would you like to try a different time?",
+      reason: "time_slot_conflict",
+      usage: { current: 0, limit: 0 },
+    };
+  }
 
   logAppointmentAudit(workspaceId, appointment.id, "appointment_booked", {
     channel: "whatsapp",

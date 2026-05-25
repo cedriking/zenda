@@ -1,4 +1,4 @@
-name: Publish Release
+name: Publish Desktop App
 
 on:
   workflow_dispatch:
@@ -9,8 +9,9 @@ on:
         type: string
 
 jobs:
-  publish-release:
+  publish:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-latest
@@ -24,18 +25,27 @@ jobs:
       - name: Checkout git repo
         uses: actions/checkout@v6
 
-      - name: Install Node and NPM
+      - name: Install Node
         uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
 
-      - name: Install and build
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build workspace packages
+        run: npx turbo build --filter=@zenda/shared --filter=@zenda/db
+
+      - name: Install app dependencies
         working-directory: app
         run: npm ci
 
       - name: Make and Publish (${{ matrix.maker }})
         working-directory: app
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
+          S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
+          S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+          S3_BUCKET: ${{ secrets.S3_UPDATES_BUCKET }}
         run: npm run publish
