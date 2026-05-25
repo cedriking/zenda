@@ -17,6 +17,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/blog/reducir-ausencias-clinica",
     "/blog/automatizar-whatsapp-negocios",
     "/blog/whatsapp-appointment-reminders",
+    "/blog/whatsapp-dental-clinic",
+    "/blog/whatsapp-beauty-salon",
     "/legal/privacy",
     "/legal/terms",
   ];
