@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 const GITHUB_REPO = "cedriking/zenda";
+const FALLBACK_BASE = "https://zenda.bot";
 
 export async function GET(_request: NextRequest) {
   try {
@@ -15,7 +16,7 @@ export async function GET(_request: NextRequest) {
 
     if (!res.ok) {
       return NextResponse.redirect(
-        new URL("/download?error=no-release", _request.url)
+        `${FALLBACK_BASE}/download?error=no-release`
       );
     }
 
@@ -30,14 +31,14 @@ export async function GET(_request: NextRequest) {
 
     if (!installer) {
       return NextResponse.redirect(
-        new URL("/download?error=no-windows-artifact", _request.url)
+        `${FALLBACK_BASE}/download?error=no-windows-artifact`
       );
     }
 
     return NextResponse.redirect(installer.browser_download_url);
   } catch {
     return NextResponse.redirect(
-      new URL("/download?error=fetch-failed", _request.url)
+      `${FALLBACK_BASE}/download?error=fetch-failed`
     );
   }
 }
