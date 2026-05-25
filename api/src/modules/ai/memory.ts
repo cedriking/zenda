@@ -18,9 +18,11 @@ const RE_NAME_EN =
   /(?:my name is|i'm|i am|call me)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?)\b/i;
 const RE_NAME_ES =
   /(?:me llamo|me dicen|soy)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?)\b/i;
+const RE_NAME_SHORT =
+  /^(?:es|it's|it is|i'm)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?)$/i;
 const RE_NAME_FR =
   /(?:je m'appelle|j'ai nom)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?)\b/i;
-const NAME_PATTERNS = [RE_NAME_EN, RE_NAME_ES, RE_NAME_FR];
+const NAME_PATTERNS = [RE_NAME_EN, RE_NAME_ES, RE_NAME_SHORT, RE_NAME_FR];
 
 interface MemoryEntry {
   key: string;
@@ -141,10 +143,7 @@ export async function extractMemoryFromConversation(
     if (nameMatch) {
       const extractedName = nameMatch[1].trim();
       // Avoid common false positives (single-word greetings like "I'm good")
-      if (
-        extractedName.length >= 2 &&
-        !RE_NAME_FALSE_POS.test(extractedName)
-      ) {
+      if (extractedName.length >= 2 && !RE_NAME_FALSE_POS.test(extractedName)) {
         // Update customer name directly on the customers table
         try {
           await db

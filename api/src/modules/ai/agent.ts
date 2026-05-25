@@ -58,7 +58,7 @@ const ALL_TOOLS = [
   optOutCustomerToolDef,
 ];
 
-const MAX_ITERATIONS = 3;
+const MAX_ITERATIONS = 6;
 
 // Per-customer rate limiting (max 10 messages per minute) via Redis
 const RATE_LIMIT_WINDOW_S = 60;
@@ -89,7 +89,7 @@ export async function runAgent(
   userMessage: string,
   language: Language,
   localTime?: string,
-  localTimezone?: string,
+  localTimezone?: string
 ): Promise<AgentResponse | null> {
   try {
     // 0. Per-customer rate limit check
