@@ -90,11 +90,23 @@ export function DownloadPageClient() {
             </a>
           </div>
 
-          <p className="mt-8 text-muted-foreground text-sm">
+          <p className="mt-6 text-muted-foreground text-sm">
             {t("alreadyHave")}{" "}
             <Link className="text-primary underline" href="/login">
               {t("signin")}
             </Link>
+          </p>
+
+          <p className="mt-4 text-muted-foreground text-sm">
+            {t("troubleDownloading")}{" "}
+            <a
+              className="text-primary underline"
+              href="https://github.com/cedriking/zenda/releases"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {t("githubReleases")}
+            </a>
           </p>
         </div>
 

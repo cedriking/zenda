@@ -438,7 +438,9 @@
     "step4Title": "Go Live",
     "step4Desc": "Your AI receptionist starts handling customer messages immediately.",
     "needHelp": "Need help? Check out the {link}.",
-    "docsLink": "Getting Started Guide"
+    "docsLink": "Getting Started Guide",
+    "troubleDownloading": "Trouble downloading?",
+    "githubReleases": "Download from GitHub Releases"
   },
   "gettingStarted": {
     "title": "Quick Start Guide",

@@ -435,7 +435,9 @@
     "step4Title": "¡En Marcha!",
     "step4Desc": "Tu recepcionista IA empieza a gestionar mensajes de clientes inmediatamente.",
     "needHelp": "¿Necesitas ayuda? Consulta la {link}.",
-    "docsLink": "Guía de Inicio Rápido"
+    "docsLink": "Guía de Inicio Rápido",
+    "troubleDownloading": "¿Problemas al descargar?",
+    "githubReleases": "Descarga desde GitHub Releases"
   },
   "gettingStarted": {
     "title": "Guía de Inicio Rápido",
