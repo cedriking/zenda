@@ -52,7 +52,7 @@ export const billingModule = new Elysia({ prefix: "/billing" })
   .post(
     "/checkout",
     async ({ workspaceId, body, set }) => {
-      const data = body as Record<string, string>;
+      const data = body as Record<string, string | undefined>;
       try {
         const session = await createCheckoutSession(
           workspaceId as string,
@@ -73,7 +73,7 @@ export const billingModule = new Elysia({ prefix: "/billing" })
     {
       body: t.Object({
         tier: t.String(),
-        email: t.String(),
+        email: t.Optional(t.String()),
         founding: t.Optional(t.String()),
       }),
     }

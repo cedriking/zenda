@@ -428,6 +428,7 @@
     "loginDesc": "Zenda 계정에 로그인하세요.",
     "loginButton": "로그인",
     "loginLoading": "로그인 중...",
+    "forgotPassword": "비밀번호를 잊으셨나요？",
     "emailLabel": "이메일",
     "passwordLabel": "비밀번호",
     "passwordPlaceholder": "비밀번호를 입력하세요",

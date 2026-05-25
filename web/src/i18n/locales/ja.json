@@ -431,6 +431,7 @@
     "loginDesc": "Zendaアカウントにログインしてください。",
     "loginButton": "ログイン",
     "loginLoading": "ログイン中...",
+    "forgotPassword": "パスワードをお忘れですか？",
     "emailLabel": "メールアドレス",
     "passwordLabel": "パスワード",
     "passwordPlaceholder": "パスワードを入力",

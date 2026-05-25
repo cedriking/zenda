@@ -428,6 +428,7 @@
     "loginDesc": "Log in to your Zenda account.",
     "loginButton": "Log In",
     "loginLoading": "Logging in...",
+    "forgotPassword": "Forgot password?",
     "emailLabel": "Email",
     "passwordLabel": "Password",
     "passwordPlaceholder": "Enter your password",

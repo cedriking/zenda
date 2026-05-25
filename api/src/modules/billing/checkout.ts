@@ -10,7 +10,7 @@ const TRIAL_DAYS = 14;
 
 export async function createCheckoutSession(
   workspaceId: string,
-  customerEmail: string,
+  customerEmail: string | undefined,
   tier: PlanTier,
   founding = false
 ): Promise<{ url: string }> {
@@ -19,10 +19,12 @@ export async function createCheckoutSession(
   }
 
   // Get or create Stripe customer
-  const customers = await stripe.customers.list({
-    email: customerEmail,
-    limit: 1,
-  });
+  const customers = customerEmail
+    ? await stripe.customers.list({
+        email: customerEmail,
+        limit: 1,
+      })
+    : { data: [] };
   let customerId = customers.data[0]?.id;
 
   if (customerId) {
