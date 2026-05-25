@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getMessages, getTranslations } from "next-intl/server";
+import { CookieConsent } from "@/components/cookie-consent";
 import { LocaleProvider } from "@/components/locale-provider";
 import { type Locale, routing, supportedLanguages } from "@/i18n/routing";
 
@@ -100,6 +101,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <LocaleProvider locale={locale} messages={messages}>
           {children}
         </LocaleProvider>
+        <CookieConsent />
       </body>
     </html>
   );

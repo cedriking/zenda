@@ -37,14 +37,14 @@ function createWindow() {
 
   // Minimize to tray instead of closing
   mainWindow.on("close", (event) => {
-    if (!(app as { isQuitting?: boolean }).isQuitting) {
+    if (!(app as unknown as { isQuitting?: boolean }).isQuitting) {
       event.preventDefault();
       mainWindow.hide();
     }
   });
 
   app.on("before-quit", async () => {
-    (app as { isQuitting: boolean }).isQuitting = true;
+    (app as unknown as { isQuitting: boolean }).isQuitting = true;
     try {
       const { shutdownWhatsApp } = await import("./main/whatsapp/client.js");
       const { disconnectBridge } = await import("./main/whatsapp/bridge.js");

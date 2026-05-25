@@ -408,6 +408,7 @@ function CalendarWeekView({
       startAt: string;
       endAt: string;
       customerName: string | null;
+      customerPhone: string | null;
       serviceName: string | null;
       staffMemberId: string | null;
       notes: string | null;
@@ -561,10 +562,12 @@ function ListView({
               <div>
                 <p className="font-medium text-foreground">
                   <User className="mr-1 inline" size={14} />
-                  {apt.customerName ?? apt.customerPhone ?? apt.customerId}
+                  {apt.customerName ??
+                    apt.customerPhone ??
+                    t("calendar.customer")}
                 </p>
                 <p className="text-muted-foreground text-sm">
-                  {apt.serviceName ?? apt.serviceId}
+                  {apt.serviceName ?? ""}
                 </p>
               </div>
             </div>

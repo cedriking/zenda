@@ -166,9 +166,7 @@ export function connectBridge(
 
     // Send auth as first message instead of URL query param to avoid
     // leaking the token in server access logs, proxy logs, and browser history.
-    ws?.send(
-      JSON.stringify({ type: "auth", token: accessToken }),
-    );
+    ws?.send(JSON.stringify({ type: "auth", token: accessToken }));
 
     if (!mainWindow.isDestroyed()) {
       mainWindow.webContents.send("bridge:status", { connected: true });
@@ -198,7 +196,9 @@ export function connectBridge(
   });
 
   ws.on("message", (data: Buffer) => {
-    handleServerMessage(ws, mainWindow, data);
+    if (ws) {
+      handleServerMessage(ws, mainWindow, data);
+    }
   });
 
   ws.on("close", (code: number, reason: Buffer) => {

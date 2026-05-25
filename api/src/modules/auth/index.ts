@@ -1,6 +1,7 @@
 import { db } from "@zenda/db/client";
 import {
   businessProfiles,
+  passwordResetTokens,
   receptionistProfiles,
   revokedTokens,
   users,
@@ -8,8 +9,9 @@ import {
   workspaces,
 } from "@zenda/db/schema";
 import { loginSchema, signupSchema } from "@zenda/shared";
-import { eq } from "drizzle-orm";
+import { and, eq, gt, isNull } from "drizzle-orm";
 import { Elysia } from "elysia";
+import { buildPasswordResetEmailHtml, sendEmail } from "../../infra/email.js";
 import { logger } from "../../infra/logger.js";
 import { authBase } from "../../middleware/auth.js";
 import { serverError } from "../../utils/errors.js";
@@ -339,5 +341,125 @@ export const authModule = new Elysia({ prefix: "/auth" })
     } catch (err: unknown) {
       logger.error("Logout error", { error: (err as Error).message });
       return serverError(set, "Logout failed");
+    }
+  })
+  // --- Password Reset Flow ---
+  .post("/forgot-password", async ({ body, set }) => {
+    const { email } = body as { email?: string };
+    if (!email || typeof email !== "string") {
+      set.status = 400;
+      return { error: "Email is required" };
+    }
+
+    try {
+      const [user] = await db
+        .select({ id: users.id, email: users.email, name: users.name })
+        .from(users)
+        .where(eq(users.email, email.toLowerCase().trim()))
+        .limit(1);
+
+      // Always return success to prevent email enumeration
+      if (!user) {
+        logger.info("Password reset requested for unknown email", { email });
+        return { success: true };
+      }
+
+      // Generate a cryptographically secure token
+      const token = crypto.randomUUID();
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+      // Invalidate any existing unused tokens for this user
+      await db
+        .update(passwordResetTokens)
+        .set({ usedAt: new Date() })
+        .where(
+          and(
+            eq(passwordResetTokens.userId, user.id),
+            isNull(passwordResetTokens.usedAt)
+          )
+        );
+
+      // Insert new token
+      await db.insert(passwordResetTokens).values({
+        userId: user.id,
+        token,
+        expiresAt,
+      });
+
+      // Send reset email
+      const { subject, html } = buildPasswordResetEmailHtml(token);
+      await sendEmail({ to: user.email, subject, html });
+
+      logger.info("Password reset email sent", { userId: user.id });
+      return { success: true };
+    } catch (err: unknown) {
+      logger.error("Forgot password error", {
+        email,
+        error: (err as Error).message,
+      });
+      // Still return success to prevent enumeration
+      return { success: true };
+    }
+  })
+  .post("/reset-password", async ({ body, set }) => {
+    const { token, newPassword } = body as {
+      token?: string;
+      newPassword?: string;
+    };
+
+    if (!token || typeof token !== "string") {
+      set.status = 400;
+      return { error: "Token is required" };
+    }
+    if (
+      !newPassword ||
+      typeof newPassword !== "string" ||
+      newPassword.length < 8
+    ) {
+      set.status = 400;
+      return { error: "Password must be at least 8 characters" };
+    }
+
+    try {
+      // Find valid token
+      const now = new Date();
+      const [resetToken] = await db
+        .select()
+        .from(passwordResetTokens)
+        .where(
+          and(
+            eq(passwordResetTokens.token, token),
+            isNull(passwordResetTokens.usedAt),
+            gt(passwordResetTokens.expiresAt, now)
+          )
+        )
+        .limit(1);
+
+      if (!resetToken) {
+        set.status = 400;
+        return { error: "Invalid or expired reset token" };
+      }
+
+      // Hash new password
+      const passwordHash = await Bun.password.hash(newPassword);
+
+      // Update user password and mark token as used
+      await db.transaction(async (tx) => {
+        await tx
+          .update(users)
+          .set({ passwordHash, updatedAt: new Date() })
+          .where(eq(users.id, resetToken.userId));
+
+        await tx
+          .update(passwordResetTokens)
+          .set({ usedAt: new Date() })
+          .where(eq(passwordResetTokens.id, resetToken.id));
+      });
+
+      logger.info("Password reset successful", { userId: resetToken.userId });
+      return { success: true };
+    } catch (err: unknown) {
+      logger.error("Reset password error", { error: (err as Error).message });
+      return serverError(set, "Password reset failed");
     }
   });

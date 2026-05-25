@@ -75,6 +75,14 @@ export function LoginPageClient() {
                 type="password"
                 value={password}
               />
+              <div className="mt-1.5 text-right">
+                <Link
+                  className="text-primary text-sm hover:underline"
+                  href="/forgot-password"
+                >
+                  {t("forgotPassword")}
+                </Link>
+              </div>
             </div>
 
             <Button

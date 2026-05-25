@@ -79,7 +79,6 @@ export async function initWhatsAppClient(
       version,
       auth: state,
       printQRInTerminal: false,
-      emitOwnPresence: true,
       connectTimeoutMs: 30_000,
       defaultQueryTimeoutMs: 60_000,
       logger: {

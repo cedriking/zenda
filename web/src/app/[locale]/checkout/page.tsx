@@ -1,14 +1,11 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { getAccessToken, apiFetch } from "@/lib/api-client";
-import { getStripe } from "@/lib/stripe";
-import { useRouter, useSearchParams } from "@/i18n/navigation";
 import { Nav } from "@/components/nav";
+import { useRouter, useSearchParams } from "@/i18n/navigation";
+import { apiFetch, getAccessToken } from "@/lib/api-client";
 
 export default function CheckoutPage() {
-  const t = useTranslations("pricing");
   const router = useRouter();
   const searchParams = useSearchParams();
   const tier = searchParams.get("tier") ?? "";
@@ -27,10 +24,6 @@ export default function CheckoutPage() {
       try {
         const data = await apiFetch<{ url: string }>("/billing/checkout", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify({ tier }),
         });
 
@@ -40,7 +33,7 @@ export default function CheckoutPage() {
         }
         setError("No checkout URL returned");
       } catch (err) {
-        setError((err as Error).message || "Checkout failed");
+        setError(err instanceof Error ? err.message : "Checkout failed");
       }
     }
 
@@ -63,9 +56,9 @@ export default function CheckoutPage() {
               </h1>
               <p className="mb-6 text-muted-foreground">{error}</p>
               <button
-                type="button"
-                onClick={() => router.push("/pricing")}
                 className="rounded-lg bg-slate-900 px-6 py-2.5 font-medium text-sm text-white hover:bg-slate-800"
+                onClick={() => router.push("/pricing")}
+                type="button"
               >
                 Back to Pricing
               </button>
@@ -73,7 +66,9 @@ export default function CheckoutPage() {
           ) : (
             <>
               <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" />
-              <p className="text-muted-foreground">Redirecting to checkout...</p>
+              <p className="text-muted-foreground">
+                Redirecting to checkout...
+              </p>
             </>
           )}
         </div>
