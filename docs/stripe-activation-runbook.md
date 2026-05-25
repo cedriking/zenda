@@ -79,7 +79,11 @@ For the **Web** service:
 
 ```
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_XXXXXXXXXXXXXXXXXXXX
+GITHUB_TOKEN=ghp_XXXXXXXXXXXXXXXXXXXX
 ```
+
+`GITHUB_TOKEN` is required for download routes (the GitHub repo is private,
+so the API needs auth to fetch release assets for macOS/Windows downloads).
 
 ## Step 6: Rebuild Web Container (2 min)
 
@@ -87,10 +91,14 @@ The `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is a build-time variable for Next.js.
 You must rebuild the web container for it to take effect:
 
 ```bash
-# In Coolify: trigger a redeploy of the web service
-# Or via docker compose:
-docker compose -f docker-compose.prod.yml up -d --build web
+# In Coolify: trigger a redeploy of BOTH services (API + Web)
+# API needs restart to pick up new env vars
+# Web needs rebuild for NEXT_PUBLIC_* vars + new pages (founding, download fixes)
+docker compose -f docker-compose.prod.yml up -d --build web api
 ```
+
+**Important:** Also rebuild the API service if not already rebuilt — recent commits
+added price ID auto-discovery and founding checkout support.
 
 ## Step 7: Verify (1 min)
 
