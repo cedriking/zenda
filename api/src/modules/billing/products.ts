@@ -4,22 +4,28 @@ import { logger } from "../../infra/logger.js";
 import { stripe } from "./stripe.js";
 
 // Stripe price IDs per tier (monthly only — no annual billing in WhatsApp-local model)
+// Placeholders use "UNCONFIGURED_" prefix so getPriceId() can detect them reliably.
 const STRIPE_PRICES: Record<string, string> = {
   local_solo:
-    process.env.STRIPE_PRICE_LOCAL_SOLO_MONTHLY ?? "price_local_solo_monthly",
+    process.env.STRIPE_PRICE_LOCAL_SOLO_MONTHLY ??
+    "UNCONFIGURED_local_solo_monthly",
   local_starter:
     process.env.STRIPE_PRICE_LOCAL_STARTER_MONTHLY ??
-    "price_local_starter_monthly",
+    "UNCONFIGURED_local_starter_monthly",
   local_pro:
-    process.env.STRIPE_PRICE_LOCAL_PRO_MONTHLY ?? "price_local_pro_monthly",
+    process.env.STRIPE_PRICE_LOCAL_PRO_MONTHLY ??
+    "UNCONFIGURED_local_pro_monthly",
   local_business:
     process.env.STRIPE_PRICE_LOCAL_BUSINESS_MONTHLY ??
-    "price_local_business_monthly",
+    "UNCONFIGURED_local_business_monthly",
 };
+
+// Real Stripe price IDs match: price_ followed by alphanumeric chars (e.g. price_1AbC2dEfGH)
+const STRIPE_PRICE_ID_RE = /^price_[A-Za-z0-9]+$/;
 
 export function getPriceId(tier: PlanTier): string {
   const priceId = STRIPE_PRICES[tier] ?? STRIPE_PRICES.local_solo;
-  if (!priceId.startsWith("price_")) {
+  if (!STRIPE_PRICE_ID_RE.test(priceId)) {
     throw new Error(
       `Stripe price ID for tier "${tier}" is not configured. Set STRIPE_PRICE_${tier.toUpperCase()}_MONTHLY or ensure products are synced at startup.`
     );
