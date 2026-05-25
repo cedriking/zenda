@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/clinics",
     "/founding",
     "/blog/whatsapp-citas-salon",
+    "/blog/reducir-ausencias-clinica",
     "/legal/privacy",
     "/legal/terms",
   ];
