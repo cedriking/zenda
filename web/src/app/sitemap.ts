@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/beauty",
     "/wellness",
     "/clinics",
+    "/founding",
     "/legal/privacy",
     "/legal/terms",
   ];
@@ -41,6 +42,9 @@ function getPriority(route: string): number {
     return 1;
   }
   if (route === "/pricing") {
+    return 0.9;
+  }
+  if (route === "/founding") {
     return 0.9;
   }
   if (route.includes("legal")) {
