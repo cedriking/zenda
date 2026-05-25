@@ -61,3 +61,13 @@ Each signup from `/founding` should include UTM tracking:
 - Trial-to-paid conversion rate
 - Average time to first paid subscription
 - Revenue per customer (ARPU by tier)
+
+## Heartbeat Log
+
+### Heartbeat 19 (2026-05-25)
+- Paperclip API down (connection refused), cannot update issues
+- Pushed commit d544f60: updated founding success message to mention trial + discount
+- Production: API healthy, Stripe live, founding page still 500 (web container not rebuilt)
+- Deployment blockers unchanged: Coolify rebuild + GITHUB_TOKEN + founding coupon
+- ZEN-66 reassigned to CTO — may indicate deployment is being picked up
+- Code-complete: all features for founding customer acquisition are committed
