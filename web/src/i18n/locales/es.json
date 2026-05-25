@@ -590,5 +590,18 @@
     "termsTitle": "Términos de servicio",
     "lastUpdated": "Última actualización: {date}",
     "disclaimer": "Este documento solo está disponible en inglés. Al continuar usando este servicio, aceptas los términos descritos a continuación."
+  },
+  "features": {
+    "badge": "Funciones",
+    "ctaButton": "Comenzar prueba gratis",
+    "ctaDesc": "Únete a los miembros fundadores que obtienen acceso anticipado a Zenda.",
+    "ctaSecondary": "Ver precios",
+    "ctaTitle": "¿Listo para dejar de perder citas?",
+    "coreTitle": "Capacidades principales",
+    "detailsTitle": "Cómo funciona en detalle",
+    "heroDesc": "Todo lo que necesitas para convertir WhatsApp en tu recepcionista 24/7. Agendamiento inteligente, recordatorios automáticos y conversaciones IA — todo en una plataforma.",
+    "heroTitle": "Funciones que llenan tu agenda",
+    "metaDesc": "Explora las funciones de Zenda: recepcionista IA por WhatsApp con agendamiento inteligente, recordatorios automáticos, soporte bilingüe y toma de control humana para negocios basados en citas.",
+    "metaTitle": "Funciones — Recepcionista IA por WhatsApp Zenda"
   }
 }

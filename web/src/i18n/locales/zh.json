@@ -531,5 +531,18 @@
     "termsTitle": "服务条款",
     "lastUpdated": "最后更新：{date}",
     "disclaimer": "本文档仅提供英文版本。继续使用本服务即表示您同意以下所述条款。"
+  },
+  "features": {
+    "badge": "功能",
+    "ctaButton": "开始免费试用",
+    "ctaDesc": "加入创始成员，抢先体验 Zenda。",
+    "ctaSecondary": "查看价格",
+    "ctaTitle": "准备好不再错过预约了吗？",
+    "coreTitle": "核心功能",
+    "detailsTitle": "详细工作原理",
+    "heroDesc": "将 WhatsApp 变成您的 24/7 接待员所需的一切。智能排班、自动提醒和 AI 对话 — 集成于一个平台。",
+    "heroTitle": "填满您日程的功能",
+    "metaDesc": "探索 Zenda 功能：具备智能排班、自动提醒、双语支持和人工接管的 AI WhatsApp 接待员。",
+    "metaTitle": "功能 — Zenda AI WhatsApp 接待员"
   }
 }

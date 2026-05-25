@@ -529,5 +529,18 @@
     "termsTitle": "Conditions d'utilisation",
     "lastUpdated": "Dernière mise à jour : {date}",
     "disclaimer": "Ce document est uniquement disponible en anglais. En continuant à utiliser ce service, vous acceptez les conditions décrites ci-dessous."
+  },
+  "features": {
+    "badge": "Fonctionnalités",
+    "ctaButton": "Essai gratuit",
+    "ctaDesc": "Rejoignez les membres fondateurs avec un accès anticipé à Zenda.",
+    "ctaSecondary": "Voir les tarifs",
+    "ctaTitle": "Prêt à ne plus rater aucun rendez-vous ?",
+    "coreTitle": "Capacités principales",
+    "detailsTitle": "Comment ça marche en détail",
+    "heroDesc": "Tout ce dont vous avez besoin pour transformer WhatsApp en réceptionniste 24/7. Planification intelligente, rappels automatiques et conversations IA — sur une seule plateforme.",
+    "heroTitle": "Des fonctionnalités qui remplissent votre agenda",
+    "metaDesc": "Découvrez les fonctionnalités de Zenda : réceptionniste IA WhatsApp avec planification intelligente, rappels automatiques, support bilingue et prise en charge humaine.",
+    "metaTitle": "Fonctionnalités — Réceptionniste IA WhatsApp Zenda"
   }
 }

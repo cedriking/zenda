@@ -529,5 +529,18 @@
     "termsTitle": "Nutzungsbedingungen",
     "lastUpdated": "Zuletzt aktualisiert: {date}",
     "disclaimer": "Dieses Dokument ist nur auf Englisch verfügbar. Durch die fortgesetzte Nutzung dieses Dienstes stimmen Sie den unten beschriebenen Bedingungen zu."
+  },
+  "features": {
+    "badge": "Funktionen",
+    "ctaButton": "Kostenlos testen",
+    "ctaDesc": "Werden Sie Gründungsmitglied mit frühzeitigem Zugang zu Zenda.",
+    "ctaSecondary": "Preise ansehen",
+    "ctaTitle": "Bereit, keine Termine mehr zu verpassen?",
+    "coreTitle": "Kernfunktionen",
+    "detailsTitle": "So funktioniert es im Detail",
+    "heroDesc": "Alles, was Sie brauchen, um WhatsApp in Ihren 24/7-Rezeptionisten zu verwandeln. Intelligente Terminplanung, automatische Erinnerungen und KI-Gespräche — auf einer Plattform.",
+    "heroTitle": "Funktionen, die Ihren Kalender füllen",
+    "metaDesc": "Entdecken Sie Zenda-Funktionen: KI-WhatsApp-Rezeptionist mit intelligenter Terminplanung, automatischen Erinnerungen, zweisprachigem Support und menschlicher Übernahme.",
+    "metaTitle": "Funktionen — Zenda KI-WhatsApp-Rezeptionist"
   }
 }

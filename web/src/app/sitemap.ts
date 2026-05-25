@@ -6,6 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [
     "",
     "/pricing",
+    "/features",
     "/signup",
     "/download",
     "/docs",
@@ -55,6 +56,9 @@ function getPriority(route: string): number {
     return 1;
   }
   if (route === "/pricing") {
+    return 0.9;
+  }
+  if (route === "/features") {
     return 0.9;
   }
   if (route === "/founding") {

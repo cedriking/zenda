@@ -532,5 +532,18 @@
     "termsTitle": "利用規約",
     "lastUpdated": "最終更新日：{date}",
     "disclaimer": "この文書は英語でのみ提供されています。本サービスの継続利用により、以下に記載される条項に同意したものとみなされます。"
+  },
+  "features": {
+    "badge": "機能",
+    "ctaButton": "無料トライアル開始",
+    "ctaDesc": "Zendaへの早期アクセスができる創設メンバーに参加しましょう。",
+    "ctaSecondary": "料金を見る",
+    "ctaTitle": "もう予約を逃さない準備はできましたか？",
+    "coreTitle": "コア機能",
+    "detailsTitle": "詳細な仕組み",
+    "heroDesc": "WhatsAppを24時間対応の受付に変えるために必要なすべて。スマート予約、自動リマインダー、AI会話 — 1つのプラットフォームで。",
+    "heroTitle": "カレンダーを埋める機能",
+    "metaDesc": "Zendaの機能をご覧ください：スマート予約、自動リマインダー、バイリンガルサポート、人間による引き継ぎを備えたAI WhatsApp受付。",
+    "metaTitle": "機能 — Zenda AI WhatsApp受付"
   }
 }

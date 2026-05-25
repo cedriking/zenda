@@ -593,5 +593,18 @@
     "termsTitle": "Terms of Service",
     "lastUpdated": "Last updated: {date}",
     "disclaimer": "This document is only available in English. By continuing to use this service, you agree to the terms described below."
+  },
+  "features": {
+    "badge": "Features",
+    "ctaButton": "Start free trial",
+    "ctaDesc": "Join the founding members getting early access to Zenda.",
+    "ctaSecondary": "View pricing",
+    "ctaTitle": "Ready to stop missing appointments?",
+    "coreTitle": "Core capabilities",
+    "detailsTitle": "How it works in detail",
+    "heroDesc": "Everything you need to turn WhatsApp into your 24/7 receptionist. Smart scheduling, automated reminders, and AI conversations — all in one platform.",
+    "heroTitle": "Features that fill your calendar",
+    "metaDesc": "Explore Zenda features: AI WhatsApp receptionist with smart scheduling, automated reminders, bilingual support, and human takeover for appointment-based businesses.",
+    "metaTitle": "Features — Zenda AI WhatsApp Receptionist"
   }
 }

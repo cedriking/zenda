@@ -529,5 +529,18 @@
     "termsTitle": "서비스 약관",
     "lastUpdated": "최종 업데이트: {date}",
     "disclaimer": "이 문서는 영어로만 제공됩니다. 본 서비스를 계속 이용하시면 아래에 설명된 약관에 동의하는 것으로 간주됩니다."
+  },
+  "features": {
+    "badge": "기능",
+    "ctaButton": "무료 체험 시작",
+    "ctaDesc": "Zenda에 조기 액세스할 수 있는 창립 멤버에 가입하세요.",
+    "ctaSecondary": "요금제 보기",
+    "ctaTitle": "더 이상 예약을 놓치지 않을 준비가 되셨나요?",
+    "coreTitle": "핵심 기능",
+    "detailsTitle": "상세 작동 방식",
+    "heroDesc": "WhatsApp을 24/7 리셉션으로 만드는 데 필요한 모든 것. 스마트 예약, 자동 알림, AI 대화 — 하나의 플랫폼에서.",
+    "heroTitle": "일정을 채워주는 기능",
+    "metaDesc": "Zenda 기능 살펴보기: 스마트 예약, 자동 알림, 이중 언어 지원 및 인수인계가 포함된 AI WhatsApp 리셉션.",
+    "metaTitle": "기능 — Zenda AI WhatsApp 리셉션"
   }
 }
