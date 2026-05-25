@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import {
   AlertCircle,
   AlertTriangle,
@@ -25,10 +24,6 @@ import {
   YAxis,
 } from "recharts";
 import { apiFetch } from "../../../services/api-client";
-
-export const Route = createFileRoute("/dashboard/analytics/")({
-  component: AnalyticsPage,
-});
 
 interface AnalyticsData {
   ai: { providerBreakdown: Record<string, number>; totalTokens: number };
@@ -77,7 +72,7 @@ function MetricCard({
   );
 }
 
-function AnalyticsPage() {
+export default function AnalyticsPage() {
   const { t } = useTranslation();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);

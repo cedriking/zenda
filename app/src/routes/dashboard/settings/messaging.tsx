@@ -1,12 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
 import { MessageSquare, AlertCircle } from 'lucide-react'
-
-export const Route = createFileRoute('/dashboard/settings/messaging')({
-  component: MessagingSettingsPage,
-})
 
 interface MessagingSettings {
   maxOutboundWithoutReply: number
@@ -26,7 +21,7 @@ const DEFAULT_SETTINGS: MessagingSettings = {
   maxRemindersPerAppointment: 2,
 }
 
-function MessagingSettingsPage() {
+export default function MessagingSettingsPage() {
   const { t } = useTranslation()
   const [settings, setSettings] = useState<MessagingSettings>(DEFAULT_SETTINGS)
   const [consentRecords, setConsentRecords] = useState<ConsentRecord[]>([])

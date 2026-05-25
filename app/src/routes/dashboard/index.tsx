@@ -1,12 +1,8 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link } from '@/utils/router'
 import { useEffect, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../services/api-client'
 import { MessageSquare, Calendar, AlertTriangle, Activity, Clock, UserPlus, CheckCircle, Inbox } from 'lucide-react'
-
-export const Route = createFileRoute('/dashboard/')({
-  component: DashboardPage,
-})
 
 interface DashboardStats {
   todayAppointments: number
@@ -43,7 +39,7 @@ type ActivityItem =
   | { type: 'appointment_booked'; customerName: string | null; date: string; time: string; createdAt: string }
   | { type: 'appointment_completed'; customerName: string | null; createdAt: string }
 
-function DashboardPage() {
+export default function DashboardPage() {
   const { t } = useTranslation()
   const [stats, setStats] = useState<DashboardStats>({
     todayAppointments: 0,

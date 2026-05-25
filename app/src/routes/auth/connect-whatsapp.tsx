@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@/utils/router'
 import { useWhatsApp } from '../../hooks/use-whatsapp'
 import { useAuthStore } from '../../stores/auth'
 import { useEffect, useRef } from 'react'
@@ -6,11 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
 import { apiFetch } from '../../services/api-client'
 
-export const Route = createFileRoute('/auth/connect-whatsapp')({
-  component: ConnectWhatsAppPage,
-})
-
-function ConnectWhatsAppPage() {
+export default function ConnectWhatsAppPage() {
   const { status, initWhatsApp, connectBridge, isConnected, needsQR } = useWhatsApp()
   const { workspace, accessToken, updateWorkspace } = useAuthStore()
   const navigate = useNavigate()
@@ -48,7 +44,7 @@ function ConnectWhatsAppPage() {
   useEffect(() => {
     if (isConnected) {
       const dest = isReconnect ? '/dashboard' : '/onboarding'
-      const timer = setTimeout(() => navigate({ to: dest }), 1500)
+      const timer = setTimeout(() => navigate(dest), 1500)
       return () => clearTimeout(timer)
     }
   }, [isConnected, navigate, isReconnect])

@@ -1,11 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { Puzzle } from "lucide-react";
 
-export const Route = createFileRoute("/dashboard/integrations/")({
-  component: IntegrationsPage,
-});
-
-function IntegrationsPage() {
+export default function IntegrationsPage() {
   return (
     <div className="mx-auto max-w-4xl p-6">
       <div className="mb-6">

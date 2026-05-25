@@ -1,14 +1,10 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link } from '@/utils/router'
 import { useEffect, useState, useMemo } from 'react'
 import { useConversations } from '../../../hooks/use-conversations'
 import { MessageSquare, AlertTriangle, User, Bot, Search, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-export const Route = createFileRoute('/dashboard/conversations/')({
-  component: ConversationsPage,
-})
-
-function ConversationsPage() {
+export default function ConversationsPage() {
   const { t } = useTranslation()
   const { conversations, isLoading, error, loadConversations, setActiveConversationId } = useConversations()
   const [searchQuery, setSearchQuery] = useState('')

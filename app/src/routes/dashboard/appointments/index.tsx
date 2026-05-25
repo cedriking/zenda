@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import {
   AlertCircle,
   Calendar,
@@ -14,10 +13,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppointments } from "../../../hooks/use-appointments";
 import { apiFetch } from "../../../services/api-client";
-
-export const Route = createFileRoute("/dashboard/appointments/")({
-  component: AppointmentsPage,
-});
 
 const STATUS_COLORS: Record<string, string> = {
   pending_confirmation: "bg-amber-100 text-amber-700",
@@ -95,7 +90,7 @@ function getStatusColorClass(status: string): string {
   return "border-primary/50 border-l-2 bg-primary/10 text-primary";
 }
 
-function AppointmentsPage() {
+export default function AppointmentsPage() {
   const { t } = useTranslation();
   const {
     appointments,

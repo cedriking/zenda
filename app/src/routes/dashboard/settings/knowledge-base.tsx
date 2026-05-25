@@ -1,12 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
 import { Plus, Trash2, Search, BookOpen } from 'lucide-react'
-
-export const Route = createFileRoute('/dashboard/settings/knowledge-base')({
-  component: KnowledgeBasePage,
-})
 
 interface KBItem {
   id: string
@@ -17,7 +12,7 @@ interface KBItem {
   createdAt: string
 }
 
-function KnowledgeBasePage() {
+export default function KnowledgeBasePage() {
   const { t } = useTranslation()
   const [items, setItems] = useState<KBItem[]>([])
   const [searchQuery, setSearchQuery] = useState('')

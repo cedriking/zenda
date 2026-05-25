@@ -1,12 +1,8 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, useParams } from '@/utils/router'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
 import { ArrowLeft, User, Phone, Globe, Brain, Calendar, AlertCircle } from 'lucide-react'
-
-export const Route = createFileRoute('/dashboard/customers/$id')({
-  component: CustomerProfilePage,
-})
 
 interface CustomerProfile {
   id: string
@@ -18,9 +14,9 @@ interface CustomerProfile {
   memory: Array<{ key: string; value: string; source: string }>
 }
 
-function CustomerProfilePage() {
+export default function CustomerProfilePage() {
   const { t } = useTranslation()
-  const { id } = Route.useParams()
+  const { id } = useParams()
   const [customer, setCustomer] = useState<CustomerProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)

@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@/utils/router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore, getPostAuthRoute } from '@/stores/auth'
@@ -7,11 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, Mail } from 'lucide-react'
 import LangToggle from '@/components/lang-toggle'
 
-export const Route = createFileRoute('/auth/login')({
-  component: LoginPage,
-})
-
-function LoginPage() {
+export default function LoginPage() {
   const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -39,7 +35,7 @@ function LoginPage() {
         body: { email, password },
       })
       setAuth(data as Parameters<typeof setAuth>[0])
-      navigate({ to: getPostAuthRoute() })
+      navigate(getPostAuthRoute())
     } catch (err) {
       setError(err instanceof Error ? err.message : t('auth.loginFailed'))
       setLoading(false)

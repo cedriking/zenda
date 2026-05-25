@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "@/utils/router";
 import {
   AlertCircle,
   Calendar,
@@ -12,10 +12,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../services/api-client";
 
-export const Route = createFileRoute("/dashboard/customers/")({
-  component: CustomersPage,
-});
-
 interface CustomerSummary {
   id: string;
   language: string;
@@ -25,7 +21,7 @@ interface CustomerSummary {
   totalAppointments: number;
 }
 
-function CustomersPage() {
+export default function CustomersPage() {
   const { t } = useTranslation();
   const [customers, setCustomers] = useState<CustomerSummary[]>([]);
   const [loading, setLoading] = useState(true);

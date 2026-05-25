@@ -1,15 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
 import { Calendar, AlertCircle } from 'lucide-react'
 
-export const Route = createFileRoute('/dashboard/settings/appointments')({
-  component: AppointmentSettingsPage,
-})
-
 type CancellationStrictness = 'flexible' | 'moderate' | 'strict'
-
 interface AppointmentSettings {
   cancellationWindowHours: number
   reschedulingWindowHours: number
@@ -30,7 +24,7 @@ const DEFAULT_SETTINGS: AppointmentSettings = {
   approvedRefundText: '',
 }
 
-function AppointmentSettingsPage() {
+export default function AppointmentSettingsPage() {
   const { t } = useTranslation()
   const [settings, setSettings] = useState<AppointmentSettings>(DEFAULT_SETTINGS)
   const [saving, setSaving] = useState(false)

@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@/utils/router";
 import {
   ArrowRight,
   Building2,
@@ -14,10 +14,6 @@ import { useTranslation } from "react-i18next";
 import { openExternalLink } from "../../actions/shell";
 import { apiFetch } from "../../services/api-client";
 import { useAuthStore } from "../../stores/auth";
-
-export const Route = createFileRoute("/onboarding/")({
-  component: OnboardingPage,
-});
 
 const STEP_IDS = [
   "whatsapp_connected",
@@ -80,7 +76,7 @@ interface ChatMessage {
 
 let msgId = 0;
 
-function OnboardingPage() {
+export default function OnboardingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -171,7 +167,7 @@ function OnboardingPage() {
 
       if (status.currentStep === "ready") {
         updateWorkspace({ onboardingStep: "ready" });
-        navigate({ to: "/dashboard" });
+        navigate("/dashboard");
         return;
       }
 
@@ -221,7 +217,7 @@ function OnboardingPage() {
       if (result.nextStep === "ready") {
         updateWorkspace({ onboardingStep: "ready" });
         typeMessage(result.acknowledged, () => {
-          setTimeout(() => navigate({ to: "/dashboard" }), 1500);
+          setTimeout(() => navigate("/dashboard"), 1500);
         });
         return;
       }
@@ -290,7 +286,7 @@ function OnboardingPage() {
       typeMessage(result.acknowledged, () => {
         if (result.nextStep === "ready") {
           updateWorkspace({ onboardingStep: "ready" });
-          setTimeout(() => navigate({ to: "/dashboard" }), 1500);
+          setTimeout(() => navigate("/dashboard"), 1500);
         }
       });
     } catch {
@@ -328,11 +324,11 @@ function OnboardingPage() {
       typeMessage(result.acknowledged, () => {
         if (result.nextStep === "ready") {
           updateWorkspace({ onboardingStep: "ready" });
-          setTimeout(() => navigate({ to: "/dashboard" }), 1500);
+          setTimeout(() => navigate("/dashboard"), 1500);
         }
       });
     } catch {
-      setTimeout(() => navigate({ to: "/dashboard" }), 2000);
+      setTimeout(() => navigate("/dashboard"), 2000);
     } finally {
       setCheckoutLoading(null);
     }

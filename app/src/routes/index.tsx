@@ -1,8 +1,6 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+// Index route is handled by indexGuard in utils/routes.tsx
+// This component is never rendered — the guard redirects / to /dashboard
 
-export const Route = createFileRoute("/")({
-  beforeLoad: () => {
-    throw redirect({ to: "/dashboard" });
-  },
-  component: () => null,
-});
+export default function IndexRedirect() {
+  return null
+}

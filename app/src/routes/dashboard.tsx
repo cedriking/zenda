@@ -1,11 +1,9 @@
 import {
-  createFileRoute,
   Link,
   Outlet,
-  redirect,
   useLocation,
   useNavigate,
-} from "@tanstack/react-router";
+} from "@/utils/router";
 import {
   BarChart3,
   Bell,
@@ -17,6 +15,7 @@ import {
   Moon,
   Settings,
   Sun,
+  Users,
   Wifi,
   WifiOff,
   X,
@@ -29,7 +28,7 @@ import { useWhatsApp } from "../hooks/use-whatsapp";
 import { apiFetch } from "../services/api-client";
 import { getPostAuthRoute, useAuthStore } from "../stores/auth";
 
-function DashboardLayout() {
+export default function DashboardLayout() {
   const { t } = useTranslation();
   const { workspace, logout } = useAuthStore();
   const { isConnected } = useWhatsApp();
@@ -89,6 +88,22 @@ function DashboardLayout() {
     return () => clearInterval(interval);
   }, []);
 
+  // Onboarding guard — redirect if workspace not ready
+  useEffect(() => {
+    const raw = localStorage.getItem("workspace");
+    if (raw) {
+      try {
+        const workspace = JSON.parse(raw);
+        if (workspace.onboardingStep === "ready") {
+          return;
+        }
+        navigate(getPostAuthRoute());
+      } catch {
+        navigate(getPostAuthRoute());
+      }
+    }
+  }, [navigate]);
+
   async function loadNotifications() {
     try {
       const notifs = await apiFetch<
@@ -109,7 +124,7 @@ function DashboardLayout() {
 
   const handleLogout = () => {
     logout();
-    navigate({ to: "/auth/login" });
+    navigate("/auth/login");
   };
 
   const notifRef = useRef<HTMLDivElement>(null);
@@ -206,6 +221,11 @@ function DashboardLayout() {
             to="/dashboard/appointments"
           />
           <NavLink
+            icon={<Users size={20} />}
+            label={t("nav.customers")}
+            to="/dashboard/customers"
+          />
+          <NavLink
             icon={<Settings size={20} />}
             label={t("nav.settings")}
             to="/dashboard/settings"
@@ -231,7 +251,7 @@ function DashboardLayout() {
             <button
               aria-label="WhatsApp disconnected — click to connect"
               className="mb-1 flex cursor-pointer items-center gap-2 text-destructive text-sm hover:text-destructive/80"
-              onClick={() => navigate({ to: "/auth/connect-whatsapp" })}
+              onClick={() => navigate("/auth/connect-whatsapp")}
               role="status"
             >
               <WifiOff size={16} /> {t("whatsapp.connect")}
@@ -317,7 +337,7 @@ function DashboardLayout() {
             aria-label="Breadcrumb"
             className="text-muted-foreground text-sm"
           >
-            {getPageTitle(location.pathname, t)}
+            {getPageTitle(location, t)}
           </nav>
           <div className="flex items-center gap-4">
             <div className="relative z-50" ref={notifRef}>
@@ -440,13 +460,17 @@ function NavLink({
   label: string;
   exact?: boolean;
 }) {
+  const location = useLocation();
+  const isActive = exact
+    ? location === to
+    : location === to || location.startsWith(`${to}/`);
   return (
     <Link
-      activeOptions={{ exact }}
-      activeProps={{
-        className: "bg-accent text-accent-foreground font-medium",
-      }}
-      className="flex items-center gap-3 rounded-md px-3 py-2 text-muted-foreground text-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground"
+      className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground ${
+        isActive
+          ? "bg-accent text-accent-foreground font-medium"
+          : "text-muted-foreground"
+      }`}
       to={to}
     >
       {icon}
@@ -461,6 +485,7 @@ const PAGE_TITLE_KEYS: Record<string, string> = {
   "/dashboard/appointments": "nav.calendar",
   "/dashboard/settings": "nav.settings",
   "/dashboard/analytics": "nav.analytics",
+  "/dashboard/integrations": "Integrations",
 };
 
 function getPageTitle(pathname: string, t: (key: string) => string): string {
@@ -472,42 +497,3 @@ function getPageTitle(pathname: string, t: (key: string) => string): string {
     .find((p) => pathname.startsWith(`${p}/`));
   return match ? t(PAGE_TITLE_KEYS[match]) : t("nav.dashboard");
 }
-
-export const Route = createFileRoute("/dashboard")({
-  beforeLoad: async () => {
-    const raw = localStorage.getItem("workspace");
-    if (raw) {
-      try {
-        const workspace = JSON.parse(raw);
-        if (workspace.onboardingStep === "ready") {
-          return;
-        }
-
-        // localStorage may be stale — check server state
-        try {
-          const status = await apiFetch<{ currentStep: string }>(
-            "/onboarding/status"
-          );
-          if (status.currentStep === "ready") {
-            workspace.onboardingStep = "ready";
-            localStorage.setItem("workspace", JSON.stringify(workspace));
-            return;
-          }
-          throw redirect({ to: getPostAuthRoute() });
-        } catch (fetchErr) {
-          if (fetchErr && typeof fetchErr === "object" && "to" in fetchErr) {
-            throw fetchErr;
-          }
-        }
-
-        // localStorage says not ready and server check didn't confirm ready
-        throw redirect({ to: getPostAuthRoute() });
-      } catch (e) {
-        if (e && typeof e === "object" && "to" in e) {
-          throw e;
-        }
-      }
-    }
-  },
-  component: DashboardLayout,
-});

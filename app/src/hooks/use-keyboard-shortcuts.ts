@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@/utils/router'
 
 interface ShortcutConfig {
   key: string
@@ -46,31 +46,31 @@ export function useDashboardShortcuts() {
     {
       key: '1',
       meta: true,
-      action: () => navigate({ to: '/dashboard' }),
+      action: () => navigate('/dashboard'),
       description: 'Go to Dashboard',
     },
     {
       key: '2',
       meta: true,
-      action: () => navigate({ to: '/dashboard/conversations' }),
+      action: () => navigate('/dashboard/conversations'),
       description: 'Go to Chats',
     },
     {
       key: '3',
       meta: true,
-      action: () => navigate({ to: '/dashboard/appointments' }),
+      action: () => navigate('/dashboard/appointments'),
       description: 'Go to Calendar',
     },
     {
       key: '4',
       meta: true,
-      action: () => navigate({ to: '/dashboard/settings' }),
+      action: () => navigate('/dashboard/settings'),
       description: 'Go to Settings',
     },
     {
       key: '5',
       meta: true,
-      action: () => navigate({ to: '/dashboard/analytics' }),
+      action: () => navigate('/dashboard/analytics'),
       description: 'Go to Analytics',
     },
     {

@@ -1,12 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
 import { Bot, AlertCircle } from 'lucide-react'
-
-export const Route = createFileRoute('/dashboard/settings/receptionist')({
-  component: ReceptionistSettingsPage,
-})
 
 type PersonalityPreset = 'Professional' | 'Warm' | 'Minimal' | 'Premium' | 'Friendly'
 
@@ -36,7 +31,7 @@ const DEFAULT_SETTINGS: ReceptionistSettings = {
 
 const PERSONALITY_PRESETS: PersonalityPreset[] = ['Professional', 'Warm', 'Minimal', 'Premium', 'Friendly']
 
-function ReceptionistSettingsPage() {
+export default function ReceptionistSettingsPage() {
   const { t } = useTranslation()
   const [settings, setSettings] = useState<ReceptionistSettings>(DEFAULT_SETTINGS)
   const [saving, setSaving] = useState(false)

@@ -1,17 +1,12 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
 import { Settings as SettingsIcon, Building2, Bot, Clock, Wrench, AlertCircle, Eye } from 'lucide-react'
 import LangToggle from '@/components/lang-toggle'
 
-export const Route = createFileRoute('/dashboard/settings/')({
-  component: SettingsPage,
-})
-
 type TabId = 'business' | 'receptionist' | 'services' | 'availability'
 
-function SettingsPage() {
+export default function SettingsPage() {
   const { t } = useTranslation()
   const [tab, setTab] = useState<TabId>('business')
   const [businessProfile, setBusinessProfile] = useState<Record<string, any>>({})

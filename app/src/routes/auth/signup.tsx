@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@/utils/router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore, getPostAuthRoute } from '@/stores/auth'
@@ -7,11 +7,7 @@ import { Button } from '@/components/ui/button'
 import { setAppLanguage, detectSystemLanguage } from '@/actions/language'
 import { supportedLanguages, type UILanguage } from '@zenda/shared/i18n'
 
-export const Route = createFileRoute('/auth/signup')({
-  component: SignupPage,
-})
-
-function SignupPage() {
+export default function SignupPage() {
   const { t, i18n } = useTranslation()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -42,7 +38,7 @@ function SignupPage() {
         body: { name, email, password, businessName, language },
       })
       setAuth(data as Parameters<typeof setAuth>[0])
-      navigate({ to: getPostAuthRoute() })
+      navigate(getPostAuthRoute())
     } catch (err) {
       setError(err instanceof Error ? err.message : t('auth.signupFailed'))
       setLoading(false)

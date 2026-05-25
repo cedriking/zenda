@@ -1,26 +1,96 @@
-import { createMemoryHistory, createRouter } from "@tanstack/react-router";
-import { routeTree } from "@/routeTree.gen";
+import { type RouteDefinition } from './router'
+import { getPostAuthRoute, isTokenValid } from '@/stores/auth'
 
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: typeof router;
-  }
+// ---------------------------------------------------------------------------
+// Route components
+// ---------------------------------------------------------------------------
+
+import RootComponent from '@/routes/__root'
+import IndexComponent from '@/routes/index'
+import AuthLogin from '@/routes/auth/login'
+import AuthSignup from '@/routes/auth/signup'
+import AuthConnectWhatsApp from '@/routes/auth/connect-whatsapp'
+import OnboardingPage from '@/routes/onboarding/index'
+import DashboardLayout from '@/routes/dashboard'
+import DashboardHome from '@/routes/dashboard/index'
+import ConversationsPage from '@/routes/dashboard/conversations/index'
+import ConversationDetailPage from '@/routes/dashboard/conversations/$id'
+import CustomersPage from '@/routes/dashboard/customers/index'
+import CustomerProfilePage from '@/routes/dashboard/customers/$id'
+import AppointmentsPage from '@/routes/dashboard/appointments/index'
+import AnalyticsPage from '@/routes/dashboard/analytics/index'
+import IntegrationsPage from '@/routes/dashboard/integrations/index'
+import SettingsPage from '@/routes/dashboard/settings/index'
+import SettingsAppointments from '@/routes/dashboard/settings/appointments'
+import SettingsKnowledgeBase from '@/routes/dashboard/settings/knowledge-base'
+import SettingsSafety from '@/routes/dashboard/settings/safety'
+import SettingsReceptionist from '@/routes/dashboard/settings/receptionist'
+import SettingsMessaging from '@/routes/dashboard/settings/messaging'
+
+// ---------------------------------------------------------------------------
+// Route tree
+// ---------------------------------------------------------------------------
+
+export const routes: RouteDefinition[] = [
+  {
+    path: '',
+    component: RootComponent,
+    children: [
+      { path: '/', component: IndexComponent },
+      // Auth
+      { path: '/auth/login', component: AuthLogin },
+      { path: '/auth/signup', component: AuthSignup },
+      { path: '/auth/connect-whatsapp', component: AuthConnectWhatsApp },
+      // Onboarding
+      { path: '/onboarding', component: OnboardingPage },
+      // Dashboard
+      {
+        path: '/dashboard',
+        component: DashboardLayout,
+        children: [
+          { path: '', component: DashboardHome },
+          { path: '/conversations', component: ConversationsPage },
+          { path: '/conversations/$id', component: ConversationDetailPage },
+          { path: '/customers', component: CustomersPage },
+          { path: '/customers/$id', component: CustomerProfilePage },
+          { path: '/appointments', component: AppointmentsPage },
+          { path: '/analytics', component: AnalyticsPage },
+          { path: '/integrations', component: IntegrationsPage },
+          {
+            path: '/settings',
+            component: SettingsPage,
+            children: [
+              { path: '/appointments', component: SettingsAppointments },
+              { path: '/knowledge-base', component: SettingsKnowledgeBase },
+              { path: '/safety', component: SettingsSafety },
+              { path: '/receptionist', component: SettingsReceptionist },
+              { path: '/messaging', component: SettingsMessaging },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+]
+
+// ---------------------------------------------------------------------------
+// Guards
+// ---------------------------------------------------------------------------
+
+/** Redirect `/` to `/dashboard`. */
+export function indexGuard(pathname: string): string | null {
+  if (pathname === '/') return '/dashboard'
+  return null
 }
 
-function RoutePending() {
-  return (
-    <div className="flex h-32 items-center justify-center">
-      <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-    </div>
-  );
-}
+/** Auth guard — redirect unauthenticated users to login. */
+export function authGuard(pathname: string): string | null {
+  const token = localStorage.getItem('accessToken')
+  const isAuthRoute = pathname.startsWith('/auth')
+  const isConnectWhatsApp = pathname === '/auth/connect-whatsapp'
+  const hasValidToken = isTokenValid(token)
 
-export const router = createRouter({
-  routeTree,
-  history: createMemoryHistory({
-    initialEntries: ["/"],
-  }),
-  defaultPendingComponent: RoutePending,
-  defaultPreload: "intent",
-  defaultPreloadDelay: 50,
-});
+  if (!(hasValidToken || isAuthRoute)) return '/auth/login'
+  if (hasValidToken && isAuthRoute && !isConnectWhatsApp) return getPostAuthRoute()
+  return null
+}

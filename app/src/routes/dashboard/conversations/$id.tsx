@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link, useParams } from '@/utils/router'
 import {
   AlertCircle,
   ArrowLeft,
@@ -13,10 +13,6 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useConversations } from "../../../hooks/use-conversations";
-
-export const Route = createFileRoute("/dashboard/conversations/$id")({
-  component: ConversationDetailPage,
-});
 
 function MessageBubble({
   msg,
@@ -61,9 +57,9 @@ function MessageBubble({
   );
 }
 
-function ConversationDetailPage() {
+export default function ConversationDetailPage() {
   const { t } = useTranslation();
-  const { id } = Route.useParams();
+  const { id } = useParams();
   const {
     conversations,
     messages,
