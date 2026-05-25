@@ -243,7 +243,9 @@
     "faq2Q": "Y a-t-il un essai gratuit ?",
     "faq2A": "Oui — 14 jours gratuits, sans carte bancaire. Annulez à tout moment pendant la période d'essai.",
     "faq3Q": "Que se passe-t-il si je dépasse mes limites ?",
-    "faq3A": "Nous vous informerons avant d'atteindre vos limites. Vous pouvez passer à une offre supérieure ou attendre le prochain cycle."
+    "faq3A": "Nous vous informerons avant d'atteindre vos limites. Vous pouvez passer à une offre supérieure ou attendre le prochain cycle.",
+    "foundingBanner": "Offre limitée : -50% sur vos 3 premiers mois en tant que membre fondateur.",
+    "foundingCta": "En savoir plus →"
   },
   "docs": {
     "title": "Documentation",

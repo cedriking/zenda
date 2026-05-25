@@ -243,7 +243,9 @@
     "faq2Q": "¿Hay una prueba gratis?",
     "faq2A": "Sí — 14 días gratis, sin necesidad de tarjeta de crédito. Cancela en cualquier momento durante la prueba.",
     "faq3Q": "¿Qué pasa si supero mis límites?",
-    "faq3A": "Te notificaremos antes de alcanzar los límites. Puedes subir de plan o esperar hasta el siguiente ciclo."
+    "faq3A": "Te notificaremos antes de alcanzar los límites. Puedes subir de plan o esperar hasta el siguiente ciclo.",
+    "foundingBanner": "Tiempo limitado: 50% de descuento tus primeros 3 meses como miembro fundador.",
+    "foundingCta": "Más información →"
   },
   "docs": {
     "title": "Documentación",

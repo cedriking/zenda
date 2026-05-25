@@ -4,6 +4,7 @@ import { Footer } from "@/components/footer";
 import { JsonLdScript } from "@/components/json-ld";
 import { Nav } from "@/components/nav";
 import { PricingAnimations } from "@/components/pricing-animations";
+import { Link } from "@/i18n/navigation";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("pricing");
@@ -106,6 +107,19 @@ export default async function PricingPage() {
       <Nav variant="simple" />
 
       <main className="relative overflow-hidden">
+        {/* Founding member banner */}
+        <div className="bg-emerald-500 px-6 py-3 text-center">
+          <p className="text-sm font-medium text-white">
+            {t("foundingBanner")}{" "}
+            <Link
+              className="underline decoration-emerald-200 underline-offset-2 hover:text-emerald-100"
+              href="/founding"
+            >
+              {t("foundingCta")}
+            </Link>
+          </p>
+        </div>
+
         <div className="rounded-b-[2rem] bg-white shadow-2xl">
           <div className="mx-auto max-w-6xl px-6 py-20">
             <PricingAnimations plans={PLANS} />

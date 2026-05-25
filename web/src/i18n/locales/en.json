@@ -246,7 +246,9 @@
     "faq2Q": "Is there a free trial?",
     "faq2A": "Yes — 14 days free, no credit card required. Cancel anytime during the trial.",
     "faq3Q": "What happens if I exceed my limits?",
-    "faq3A": "We'll notify you before you hit limits. You can upgrade or wait until the next cycle."
+    "faq3A": "We'll notify you before you hit limits. You can upgrade or wait until the next cycle.",
+    "foundingBanner": "Limited time: 50% off your first 3 months as a founding member.",
+    "foundingCta": "Learn more →"
   },
   "docs": {
     "title": "Documentation",

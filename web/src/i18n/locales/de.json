@@ -243,7 +243,9 @@
     "faq2Q": "Gibt es eine kostenlose Testversion?",
     "faq2A": "Ja — 14 Tage kostenlos, keine Kreditkarte erforderlich. Jederzeit während der Testphase kündbar.",
     "faq3Q": "Was passiert, wenn ich meine Limits überschreite?",
-    "faq3A": "Wir benachrichtigen Sie, bevor Sie Limits erreichen. Sie können upgraden oder bis zum nächsten Zyklus warten."
+    "faq3A": "Wir benachrichtigen Sie, bevor Sie Limits erreichen. Sie können upgraden oder bis zum nächsten Zyklus warten.",
+    "foundingBanner": "Zeitlich begrenzt: 50% Rabatt auf die ersten 3 Monate als Gründungsmitglied.",
+    "foundingCta": "Mehr erfahren →"
   },
   "docs": {
     "title": "Dokumentation",
