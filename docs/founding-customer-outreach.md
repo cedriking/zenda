@@ -151,9 +151,104 @@ Equipo Zenda
 
 ---
 
-## 6. Quick Links for Outreach
+## 6. Ready-to-Execute Prospect List (First 20)
 
-- **Signup page:** https://zenda.bot/en/signup
-- **Pricing page:** https://zenda.bot/en/pricing
+### How to Find Prospects
+1. Open Google Maps
+2. Search: "salón de belleza [city]" or "barbería [city]" or "spa [city]"
+3. Filter: businesses with WhatsApp in their contact info
+4. Open their WhatsApp and send the template below
+
+### Batch 1: Mexico City (CDMX) — Beauty Salons
+Find via: `Google Maps → "salón de belleza CDMX" → filter by rating 4.0+`
+
+| # | Search Query | Niche | Expected Conversion |
+|---|-------------|-------|-------------------|
+| 1 | "salón de belleza Condesa" | Beauty salon | High |
+| 2 | "salón de belleza Roma Norte" | Beauty salon | High |
+| 3 | "barbería Polanco" | Barbershop | High |
+| 4 | "barbería Del Valle" | Barbershop | Medium |
+| 5 | "spa CDMX" | Spa/massage | Medium |
+| 6 | "uñas CDMX" | Nail studio | High |
+| 7 | "estética CDMX" | Beauty salon | High |
+
+### Batch 2: Bogotá — Beauty Salons
+Find via: `Google Maps → "salón de belleza Bogotá" → filter by rating 4.0+`
+
+| # | Search Query | Niche | Expected Conversion |
+|---|-------------|-------|-------------------|
+| 8 | "salón de belleza Zona Rosa Bogotá" | Beauty salon | High |
+| 9 | "peluquería Chapinero" | Hair salon | High |
+| 10 | "barbería Bogotá" | Barbershop | Medium |
+
+### Batch 3: Buenos Aires — Beauty & Wellness
+Find via: `Google Maps → "peluquería Buenos Aires" → filter by rating 4.0+`
+
+| # | Search Query | Niche | Expected Conversion |
+|---|-------------|-------|-------------------|
+| 11 | "peluquería Palermo" | Hair salon | High |
+| 12 | "centro de estética Buenos Aires" | Beauty center | High |
+| 13 | "barbería Buenos Aires" | Barbershop | Medium |
+
+### Batch 4: Santiago de Chile + Lima
+| # | Search Query | Niche | Expected Conversion |
+|---|-------------|-------|-------------------|
+| 14 | "salón de belleza Santiago" | Beauty salon | Medium |
+| 15 | "centro estético Lima" | Beauty center | Medium |
+| 16 | "barbería Santiago" | Barbershop | Medium |
+| 17 | "spa Lima" | Spa | Low |
+
+### Batch 5: Monterrey + Guadalajara (high-income MX cities)
+| # | Search Query | Niche | Expected Conversion |
+|---|-------------|-------|-------------------|
+| 18 | "salón de belleza Monterrey" | Beauty salon | High |
+| 19 | "barbería Guadalajara" | Barbershop | High |
+| 20 | "spa Monterrey" | Spa | Medium |
+
+### WhatsApp Outreach Template (Copy-Paste Ready)
+```
+Hola! Soy de Zenda.
+
+Vi que toman citas por WhatsApp. Creamos una asistente virtual que contesta automáticamente, agenda citas y manda recordatorios — todo desde tu WhatsApp actual.
+
+Estamos buscando 10 negocios fundadores: 14 días gratis + 50% de descuento 3 meses.
+
+¿Te interesa? En 5 minutos lo configuras: zenda.bot
+```
+
+### What to Do When They Say Yes
+1. Send them: "Genial! Entra a zenda.bot y créa tu cuenta. Es gratis por 14 días."
+2. They sign up at https://zenda.bot/es/signup
+3. They download the desktop app at https://zenda.bot/download
+4. They connect their WhatsApp by scanning the QR code
+5. Zenda starts answering their customers automatically
+6. Follow up in 3 days: "¿Cómo va? ¿Tienes dudas?"
+
+---
+
+## 7. Quick Links for Outreach
+
+- **Signup page (ES):** https://zenda.bot/es/signup
+- **Pricing page (ES):** https://zenda.bot/es/pricing
 - **Download page:** https://zenda.bot/en/download
-- **Support WhatsApp:** [TBD — set up a business WhatsApp for onboarding]
+- **Getting started:** https://zenda.bot/en/getting-started
+- **Industry - Beauty:** https://zenda.bot/es/beauty
+- **Industry - Wellness:** https://zenda.bot/en/wellness
+
+---
+
+## 8. CEO Decision: Outreach Approach
+
+**Decision:** Board executes outreach manually. No CMO agent needed for first 10 customers.
+
+**Rationale:**
+- Outreach requires real WhatsApp messages to real businesses — this must be human-executed
+- For 10 customers, manual outreach (20 contacts/week) is sufficient
+- Agent-driven outreach can be considered after we validate the product with real customers
+- The CEO has prepared all materials: templates, prospect targets, objection handling
+
+**Board action items:**
+1. Use Google Maps to find 20 businesses from the prospect list above
+2. Send the WhatsApp template to each business
+3. Follow up within 48 hours on any that respond
+4. Report back results so CEO can adjust messaging
