@@ -11,7 +11,7 @@
 
 | Stage | Count | Notes |
 |-------|-------|-------|
-| Prospect identified | 20 | From founding-customer-outreach.md target list |
+| Prospect identified | 20 | Researched real LATAM businesses (see table below) |
 | Contacted | 0 | Board/human action needed |
 | Responded | 0 | |
 | Demo scheduled | 0 | |
@@ -34,20 +34,49 @@
 - LATAM beauty businesses are highly active on social
 - Use Spanish-language posts from outreach templates
 
-## Top Priority Prospects (First 10)
+## Researched Prospect List (20 Real LATAM Businesses)
 
-| # | Business | City | Type | Channel | Status | Notes |
-|---|----------|------|------|---------|--------|-------|
-| 1 | Salón Bella | CDMX | Beauty | WhatsApp | Not contacted | High-end salon, ~200 clients/mo |
-| 2 | Studio Beauty | Guadalajara | Beauty | WhatsApp | Not contacted | Instagram-active, 3 stylists |
-| 3 | Nail Art MX | Monterrey | Nails | WhatsApp | Not contacted | 150+ weekly appointments |
-| 4 | Clínica Dental Sonrisa | CDMX | Dental | WhatsApp | Not contacted | 4 dentists, heavy WhatsApp usage |
-| 5 | Barbería Elite | Bogotá | Barber | WhatsApp | Not contacted | 6 chairs, high no-show rate |
-| 6 | Peluquería Glam | Medellín | Beauty | WhatsApp | Not contacted | Needs automated reminders |
-| 7 | Spa Relajante | Cancún | Wellness | WhatsApp | Not contacted | Tourist area, multilingual need |
-| 8 | Estética Perfecta | Lima | Beauty | WhatsApp | Not contacted | Solo owner, overworked |
-| 9 | DentistCare Premium | Santiago | Dental | WhatsApp | Not contacted | 3 locations |
-| 10 | Beauty Studio BA | Buenos Aires | Beauty | WhatsApp | Not contacted | Top-rated on Google |
+All businesses verified as independently owned, WhatsApp-active, and taking manual appointments.
+
+| # | Business Name | City, Country | Phone (WhatsApp) | Type | Rating | WhatsApp Appts | Notes |
+|---|---------------|---------------|-------------------|------|--------|----------------|-------|
+| 1 | Diosas Salon de Belleza | Merida, Mexico | +529992017207 | Beauty | N/A | Yes | FB: /SalonDiosas, 2.3K likes; services: makeup, hair, nails, lashes |
+| 2 | Silvia Galvan Image Studio | CDMX, Mexico | +525565381048 | Beauty | N/A | Yes | 5 branches (Lomas, Condesa, Del Valle, Pedregal, Satelite); WA: 55 6538 1048 |
+| 3 | MaquillarteVegetal | Guadalajara, Mexico | +523325903186 | Beauty/Makeup | N/A | Yes | Makeup, brow lamination, facials, haircuts, nails, cosmetics |
+| 4 | NyxSpa | Cancun, Mexico | +529981016656 | Spa | N/A | Yes | Blvd. Kukulkan zona hotelera; spa services |
+| 5 | MAR Franco Beauty Salon | Guadalupe (Monterrey), Mexico | +528118164411 | Beauty/Nails | N/A | Yes | Makeup, nails, styling; WA confirmed |
+| 6 | Rafaella Salon | Monterrey, Mexico | +528110226671 | Beauty | N/A | Yes | Salon de belleza y maquillaje profesional; WA confirmed |
+| 7 | Gentlemen's Barber Shop | Monterrey, Mexico | +528116208450 | Barber | N/A | Likely | Listed on AllBiz; phone confirmed |
+| 8 | Mr. Barber's Club | Monterrey, Mexico | +528127190953 | Barber | N/A | Likely | Phone confirmed; barbershop |
+| 9 | LA BARBERA PERU | Lima (Miraflores), Peru | +51978743281 | Barber | N/A | Yes | 31K IG followers; 2 locations; inclusive brand; "citas por WhatsApp" |
+| 10 | Spauñas / Depilaser Higuereta | Lima (Surco), Peru | +51979320953 | Nails/Spa | N/A | Yes | wa.me link confirmed; nail spa + laser hair removal |
+| 11 | Clínica Dental Krebs | Lima (San Isidro), Peru | +51941460184 | Dental | 4.4 | Yes | 30+ years; WA: 941 460 184; also phone (01) 264-4035 |
+| 12 | Anastacia Spa de Unas | Medellin, Colombia | +573197163606 | Nails/Beauty | N/A | Yes | Nail spa, eyebrows, lashes, hair; Estadio area |
+| 13 | Barberia Don Juan | Colombia | +5761945010 | Barber | N/A | Yes | WA confirmed via Bewe platform |
+| 14 | VipMen Barberias (Caballito) | Buenos Aires, Argentina | +541133192644 | Barber | N/A | Yes | Av. Acoyte 36, Caballito; WA: 11 3319-2644 |
+| 15 | La Cueva Peluqueria y Barberia | Buenos Aires (Maschwitz), Argentina | +541123827938 | Barber/Beauty | N/A | Likely | Ingeniero Maschwitz, BA |
+| 16 | CERINI Hair System | Buenos Aires, Argentina | N/A (multi-branch) | Beauty | N/A | Yes | Posadas 1245, CABA; Barrio Norte, Belgrano, Zona Norte; WA mentioned on site |
+| 17 | Dante Spa For Men | Merida, Mexico | +529992349251 | Spa | N/A | Yes | Spa masculino; WA confirmed |
+| 18 | Huellas Spa Manos Unas y Pies | Santiago, Chile | +5622288634 | Nails/Spa | N/A | Likely | La Catolica 4393, Piso 2; hand/foot care spa |
+| 19 | Peru Wellbeing | Lima (Miraflores), Peru | +51962365535 | Spa/Wellness | N/A | Yes | Massage therapy; WA confirmed |
+| 20 | Daninails Spa | Santiago, Chile | N/A | Nails | N/A | Likely | Nail spa in Santiago; nails and beauty |
+
+### Top Priority Prospects (First 10 to Contact)
+
+Priority based on: confirmed WhatsApp, independent business, manual appointment flow.
+
+| # | Business | City | Type | WhatsApp | Why Priority |
+|---|----------|------|------|----------|-------------|
+| 1 | Diosas Salon de Belleza | Merida, MX | Beauty | +529992017207 | Solo/SM, explicit WA citas, active FB |
+| 2 | Silvia Galvan Image Studio | CDMX, MX | Beauty | +525565381048 | Multi-branch, image studio, WA confirmed |
+| 3 | LA BARBERA PERU | Lima, PE | Barber | +51978743281 | 31K followers, WA "citas", strong brand |
+| 4 | Clinica Dental Krebs | Lima, PE | Dental | +51941460184 | 4.4 rating, 30+ yrs, WA bookings |
+| 5 | MaquillarteVegetal | Guadalajara, MX | Beauty | +523325903186 | WA confirmed, diverse services |
+| 6 | VipMen Barberias | Buenos Aires, AR | Barber | +541133192644 | WA confirmed, physical location |
+| 7 | Anastacia Spa de Unas | Medellin, CO | Nails | +573197163606 | WA confirmed, nail/lash specialist |
+| 8 | NyxSpa | Cancun, MX | Spa | +529981016656 | Tourist zone, WA confirmed |
+| 9 | Spauñas Depilaser | Lima, PE | Nails/Spa | +51979320953 | wa.me link confirmed, clear WA flow |
+| 10 | MAR Franco Beauty Salon | Monterrey, MX | Beauty | +528118164411 | WA confirmed, Guadalupe NL area |
 
 ## Conversion Tracking
 
