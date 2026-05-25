@@ -39,6 +39,7 @@ Saludos,
 
 ## Tracking
 Use the signup with coupon `aRgf7NZC` to track founding campaign conversions.
+The coupon param flows through: signup → checkout → Stripe (applies 14-day trial + founding discount).
 
 ## Key Metrics to Monitor
 - Email open rate (target: >40%)
