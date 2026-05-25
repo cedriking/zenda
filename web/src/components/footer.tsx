@@ -23,7 +23,7 @@ export async function Footer() {
 
   const FOOTER_LINKS = {
     [t("product")]: [
-      { label: t("features"), href: "/#features" },
+      { label: t("features"), href: "/features" },
       { label: t("pricing"), href: "/pricing" },
       { label: t("documentation"), href: "/docs" },
     ],

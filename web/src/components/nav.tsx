@@ -50,7 +50,7 @@ export function Nav({ variant = 'home' }: { variant?: 'home' | 'simple' }) {
   const [scrolled, setScrolled] = useState(false)
 
   const NAV_LINKS = [
-    { href: '#features', label: t('features'), hash: true },
+    { href: '/features', label: t('features'), hash: false },
     { href: '/pricing', label: t('pricing'), hash: false },
     { href: '#how-it-works', label: t('howItWorks'), hash: true },
     { href: '#faq', label: t('faq'), hash: true },
