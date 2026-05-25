@@ -46,13 +46,25 @@ You can still set them explicitly to override the auto-discovered values.
 6. Click on the new endpoint → "Signing secret" → "Reveal"
 7. Copy the `whsec_...` value
 
-## Step 4: Update Coolify Environment Variables (3 min)
+## Step 4: Create Founding Customer Coupon (1 min)
+
+From the zenda project root, run:
+
+```bash
+STRIPE_SECRET_KEY=sk_live_YOUR_KEY_HERE bun run scripts/create-founding-coupon.ts
+```
+
+This creates a 50% off for 3 months coupon limited to 100 redemptions.
+Copy the coupon ID output (e.g., `STRIPE_FOUNDING_COUPON_ID=abc123`).
+
+## Step 5: Update Coolify Environment Variables (3 min)
 
 Go to your Coolify instance and update these env vars for the **API** service:
 
 ```
 STRIPE_SECRET_KEY=sk_live_XXXXXXXXXXXXXXXXXXXX
 STRIPE_WEBHOOK_SECRET=whsec_XXXXXXXXXXXXXXXXXXXX
+STRIPE_FOUNDING_COUPON_ID=COUPON_ID_FROM_STEP_4
 ```
 
 **Optional** — price ID env vars (auto-discovered from Stripe at startup):
@@ -69,7 +81,7 @@ For the **Web** service:
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_XXXXXXXXXXXXXXXXXXXX
 ```
 
-## Step 5: Rebuild Web Container (2 min)
+## Step 6: Rebuild Web Container (2 min)
 
 The `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is a build-time variable for Next.js.
 You must rebuild the web container for it to take effect:
@@ -80,7 +92,7 @@ You must rebuild the web container for it to take effect:
 docker compose -f docker-compose.prod.yml up -d --build web
 ```
 
-## Step 6: Verify (1 min)
+## Step 7: Verify (1 min)
 
 After the services restart, test the billing:
 
