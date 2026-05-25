@@ -34,18 +34,14 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Install root dependencies
-        run: npm ci
+      - name: Install all dependencies
+        run: npm ci --ignore-scripts
 
       - name: Build workspace packages
         run: npx turbo build --filter=@zenda/shared --filter=@zenda/db
-
-      - name: Install app dependencies
-        working-directory: app
-        run: npm ci
 
       - name: Make and Publish (${{ matrix.maker }})
         working-directory: app
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run publish
+        run: npx electron-forge publish
