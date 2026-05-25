@@ -18,7 +18,13 @@ const STRIPE_PRICES: Record<string, string> = {
 };
 
 export function getPriceId(tier: PlanTier): string {
-  return STRIPE_PRICES[tier] ?? STRIPE_PRICES.local_solo;
+  const priceId = STRIPE_PRICES[tier] ?? STRIPE_PRICES.local_solo;
+  if (!priceId.startsWith("price_")) {
+    throw new Error(
+      `Stripe price ID for tier "${tier}" is not configured. Set STRIPE_PRICE_${tier.toUpperCase()}_MONTHLY or ensure products are synced at startup.`
+    );
+  }
+  return priceId;
 }
 
 export async function ensureStripeProducts(): Promise<void> {
@@ -28,25 +34,48 @@ export async function ensureStripeProducts(): Promise<void> {
   for (const [tier, config] of Object.entries(PLANS)) {
     try {
       const products = await stripe.products.list({ limit: 100 });
-      const existing = products.data.find((p) => p.name === config.name);
+      const existing = products.data.find(
+        (p) => p.name === config.name || p.metadata.tier === tier
+      );
 
-      if (!existing) {
+      let productId: string;
+      if (existing) {
+        productId = existing.id;
+      } else {
         const product = await stripe.products.create({
           name: config.name,
           description: config.description,
           metadata: { tier },
         });
+        productId = product.id;
+        logger.info("Created Stripe product", { tier, productId });
+      }
 
-        await stripe.prices.create({
-          product: product.id,
+      // Find or create the monthly price
+      const prices = await stripe.prices.list({
+        product: productId,
+        limit: 10,
+      });
+      let monthlyPrice = prices.data.find(
+        (p) =>
+          p.recurring?.interval === "month" &&
+          p.unit_amount === config.monthlyPriceCents
+      );
+
+      if (!monthlyPrice) {
+        monthlyPrice = await stripe.prices.create({
+          product: productId,
           unit_amount: config.monthlyPriceCents,
           currency: "usd",
           recurring: { interval: "month" },
           metadata: { tier, period: "monthly" },
         });
+        logger.info("Created Stripe price", { tier, priceId: monthlyPrice.id });
       }
+
+      // Update the runtime price map so getPriceId() returns real IDs
+      STRIPE_PRICES[tier] = monthlyPrice.id;
     } catch (err) {
-      // Log the error — don't silently swallow Stripe failures at startup
       logger.error("Failed to ensure Stripe product", {
         tier,
         error: (err as Error).message,

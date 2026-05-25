@@ -1,3 +1,4 @@
+import type { PlanTier } from "@zenda/shared";
 import { PLANS } from "@zenda/shared";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
@@ -34,9 +35,12 @@ export const billingModule = new Elysia({ prefix: "/billing" })
         return badRequest(set, "Invalid signature");
       }
       // Transient errors (DB down, network) — return non-200 so Stripe retries
-      logger.error("Webhook processing error — returning 500 for Stripe retry", {
-        error: message,
-      });
+      logger.error(
+        "Webhook processing error — returning 500 for Stripe retry",
+        {
+          error: message,
+        }
+      );
       set.status = 500;
       return { error: "Webhook processing failed" };
     }
@@ -51,13 +55,17 @@ export const billingModule = new Elysia({ prefix: "/billing" })
       const data = body as Record<string, string>;
       try {
         const session = await createCheckoutSession(
-          workspaceId!,
+          workspaceId as string,
           data.email,
-          (data.tier ?? "local_solo") as any
+          (data.tier ?? "local_solo") as PlanTier
         );
         return session;
       } catch (err) {
-        logger.error("Checkout error", { error: (err as Error).message });
+        const message = (err as Error).message;
+        logger.error("Checkout error", { error: message });
+        if (message.includes("not configured")) {
+          return badRequest(set, message);
+        }
         return serverError(set, "Failed to create checkout session");
       }
     },
@@ -72,7 +80,7 @@ export const billingModule = new Elysia({ prefix: "/billing" })
   // Create portal session
   .post("/portal", async ({ workspaceId, set }) => {
     try {
-      return await createPortalSession(workspaceId!);
+      return await createPortalSession(workspaceId as string);
     } catch (err) {
       logger.error("Portal error", { error: (err as Error).message });
       return serverError(set, "Failed to create portal session");
@@ -82,7 +90,7 @@ export const billingModule = new Elysia({ prefix: "/billing" })
   // Get current subscription
   .get("/subscription", async ({ workspaceId, set }) => {
     try {
-      return await getSubscription(workspaceId!);
+      return await getSubscription(workspaceId as string);
     } catch (err) {
       logger.error("Subscription error", { error: (err as Error).message });
       return serverError(set, "Failed to get subscription");
