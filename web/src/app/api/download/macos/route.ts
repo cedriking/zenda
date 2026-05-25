@@ -15,7 +15,7 @@ export async function GET(_request: NextRequest) {
 
     const res = await fetch(
       `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`,
-      { headers, next: { revalidate: 300 } },
+      { headers, next: { revalidate: 300 } }
     );
 
     if (!res.ok) {
@@ -25,10 +25,9 @@ export async function GET(_request: NextRequest) {
     }
 
     const release = await res.json();
-    const assets: Array<{ name: string; browser_download_url: string }> =
-      release.assets ?? [];
+    const assets: Array<{ id: number; name: string }> = release.assets ?? [];
 
-    // Find the DMG asset (e.g. Zenda-0.1.0-arm64.dmg or Zenda-0.1.0.dmg)
+    // Find the DMG asset
     const dmg = assets.find((a) => a.name.endsWith(".dmg"));
 
     if (!dmg) {
@@ -37,7 +36,29 @@ export async function GET(_request: NextRequest) {
       );
     }
 
-    return NextResponse.redirect(dmg.browser_download_url);
+    // For private repos, resolve a temporary download URL via the Assets API.
+    // The browser_download_url requires auth; the Assets API with octet-stream
+    // returns a 302 to a time-limited S3 URL that works without auth.
+    if (GITHUB_TOKEN) {
+      const assetRes = await fetch(
+        `https://api.github.com/repos/${GITHUB_REPO}/releases/assets/${dmg.id}`,
+        {
+          headers: {
+            Accept: "application/octet-stream",
+            Authorization: `Bearer ${GITHUB_TOKEN}`,
+          },
+          redirect: "manual",
+        }
+      );
+      const location = assetRes.headers.get("location");
+      if (location) {
+        return NextResponse.redirect(location);
+      }
+    }
+
+    // Public repo fallback — redirect directly
+    const publicUrl = `https://github.com/${GITHUB_REPO}/releases/download/${release.tag_name}/${dmg.name}`;
+    return NextResponse.redirect(publicUrl);
   } catch {
     return NextResponse.redirect(
       `${FALLBACK_BASE}/download?error=fetch-failed`
