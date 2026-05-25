@@ -17,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/fitness",
     "/founding",
     "/recepcionista-virtual-whatsapp",
+    "/automatizar-citas-whatsapp",
     "/blog",
     "/blog/whatsapp-citas-salon",
     "/blog/reducir-ausencias-clinica",
@@ -66,6 +67,9 @@ function getPriority(route: string): number {
     return 0.9;
   }
   if (route === "/recepcionista-virtual-whatsapp") {
+    return 0.9;
+  }
+  if (route === "/automatizar-citas-whatsapp") {
     return 0.9;
   }
   if (route === "/blog") {
