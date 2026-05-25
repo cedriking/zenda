@@ -10,9 +10,9 @@
 
 | # | Negocio | Ciudad | Email | Status |
 |---|---------|--------|-------|--------|
-| 1 | Silvia Galvan Image Studio | CDMX | hola@silviagalvan.com | Email enviado |
-| 2 | MaquillarteVegetal | Guadalajara | hola@maquillartevegetal.com | Email enviado |
-| 3 | Rafaella Salon | Monterrey | contacto@rafaellasalon.com | Email enviado |
+| 1 | Silvia Galvan Image Studio | CDMX | hola@silviagalvan.com | Email 1 + Follow-up enviado |
+| 2 | MaquillarteVegetal | Guadalajara | hola@maquillartevegetal.com | Email 1 + Follow-up enviado |
+| 3 | Rafaella Salon | Monterrey | contacto@rafaellasalon.com | Email 1 + Follow-up enviado |
 
 ---
 
@@ -27,6 +27,10 @@
 | 8 | Nail Bar MX | contacto@nailbar.com.mx | Uñas | Enviado |
 | 9 | Sport Life MX | info@sportlife.com.mx | Fitness | Enviado |
 | 10 | Doctoralia MX | contacto@doctoralia.com.mx | Citas médicas | Enviado |
+| 11 | Dentistica MX | contacto@dentistica.com.mx | Dental | Enviado (reemplazo) |
+| 12 | Massage MX | info@massage.com.mx | Wellness | Enviado (reemplazo) |
+
+**Bounces:** contacto@nailbar.com.mx, info@sportlife.com.mx (dominio no acepta email)
 
 ## Batch 3: Prospects pendientes de envío (emails inferidos)
 
