@@ -2,7 +2,7 @@ import { db } from "@zenda/db/client";
 import { subscriptions } from "@zenda/db/schema";
 import type { PlanTier } from "@zenda/shared";
 import { eq } from "drizzle-orm";
-import { getPriceId } from "./products.js";
+import { getPriceId, type BillingPeriod } from "./products.js";
 import { stripe } from "./stripe.js";
 
 const FOUNDING_COUPON_ID = process.env.STRIPE_FOUNDING_COUPON_ID ?? "aRgf7NZC";
@@ -12,7 +12,8 @@ export async function createCheckoutSession(
   workspaceId: string,
   customerEmail: string | undefined,
   tier: PlanTier,
-  founding = false
+  founding = false,
+  billingPeriod: BillingPeriod = "monthly"
 ): Promise<{ url: string }> {
   if (!stripe) {
     throw new Error("Stripe is not configured");
@@ -39,7 +40,7 @@ export async function createCheckoutSession(
     customerId = customer.id;
   }
 
-  const priceId = getPriceId(tier);
+  const priceId = getPriceId(tier, billingPeriod);
 
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
@@ -48,13 +49,13 @@ export async function createCheckoutSession(
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${process.env.APP_URL ?? "http://localhost:5173"}/dashboard?billing=success`,
     cancel_url: `${process.env.APP_URL ?? "http://localhost:5173"}/dashboard/settings?billing=cancel`,
-    metadata: { workspaceId, tier, founding: founding ? "true" : "false" },
+    metadata: { workspaceId, tier, founding: founding ? "true" : "false", billingPeriod },
     discounts:
       founding && FOUNDING_COUPON_ID
         ? [{ coupon: FOUNDING_COUPON_ID }]
         : undefined,
     subscription_data: {
-      metadata: { workspaceId, tier },
+      metadata: { workspaceId, tier, billingPeriod },
       trial_period_days: founding ? TRIAL_DAYS : undefined,
     },
   });

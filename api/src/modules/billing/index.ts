@@ -58,7 +58,8 @@ export const billingModule = new Elysia({ prefix: "/billing" })
           workspaceId as string,
           data.email,
           (data.tier ?? "local_solo") as PlanTier,
-          data.founding === "true"
+          data.founding === "true",
+          (data.billingPeriod === "annual" ? "annual" : "monthly") as "monthly" | "annual"
         );
         return session;
       } catch (err) {
@@ -75,6 +76,7 @@ export const billingModule = new Elysia({ prefix: "/billing" })
         tier: t.String(),
         email: t.Optional(t.String()),
         founding: t.Optional(t.String()),
+        billingPeriod: t.Optional(t.String()),
       }),
     }
   )

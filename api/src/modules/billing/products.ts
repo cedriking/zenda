@@ -3,31 +3,55 @@ import { PLANS } from "@zenda/shared";
 import { logger } from "../../infra/logger.js";
 import { stripe } from "./stripe.js";
 
-// Stripe price IDs per tier (monthly only — no annual billing in WhatsApp-local model)
-// Placeholders use "UNCONFIGURED_" prefix so getPriceId() can detect them reliably.
-const STRIPE_PRICES: Record<string, string> = {
-  local_solo:
-    process.env.STRIPE_PRICE_LOCAL_SOLO_MONTHLY ??
-    "UNCONFIGURED_local_solo_monthly",
-  local_starter:
-    process.env.STRIPE_PRICE_LOCAL_STARTER_MONTHLY ??
-    "UNCONFIGURED_local_starter_monthly",
-  local_pro:
-    process.env.STRIPE_PRICE_LOCAL_PRO_MONTHLY ??
-    "UNCONFIGURED_local_pro_monthly",
-  local_business:
-    process.env.STRIPE_PRICE_LOCAL_BUSINESS_MONTHLY ??
-    "UNCONFIGURED_local_business_monthly",
+export type BillingPeriod = "monthly" | "annual";
+
+// Annual discount: 20% off equivalent monthly price
+const ANNUAL_DISCOUNT = 0.8;
+
+// Stripe price IDs per tier and billing period
+const STRIPE_PRICES: Record<string, Record<BillingPeriod, string>> = {
+  local_solo: {
+    monthly:
+      process.env.STRIPE_PRICE_LOCAL_SOLO_MONTHLY ??
+      "UNCONFIGURED_local_solo_monthly",
+    annual:
+      process.env.STRIPE_PRICE_LOCAL_SOLO_ANNUALLY ??
+      "UNCONFIGURED_local_solo_annually",
+  },
+  local_starter: {
+    monthly:
+      process.env.STRIPE_PRICE_LOCAL_STARTER_MONTHLY ??
+      "UNCONFIGURED_local_starter_monthly",
+    annual:
+      process.env.STRIPE_PRICE_LOCAL_STARTER_ANNUALLY ??
+      "UNCONFIGURED_local_starter_annually",
+  },
+  local_pro: {
+    monthly:
+      process.env.STRIPE_PRICE_LOCAL_PRO_MONTHLY ??
+      "UNCONFIGURED_local_pro_monthly",
+    annual:
+      process.env.STRIPE_PRICE_LOCAL_PRO_ANNUALLY ??
+      "UNCONFIGURED_local_pro_annually",
+  },
+  local_business: {
+    monthly:
+      process.env.STRIPE_PRICE_LOCAL_BUSINESS_MONTHLY ??
+      "UNCONFIGURED_local_business_monthly",
+    annual:
+      process.env.STRIPE_PRICE_LOCAL_BUSINESS_ANNUALLY ??
+      "UNCONFIGURED_local_business_annually",
+  },
 };
 
-// Real Stripe price IDs match: price_ followed by alphanumeric chars (e.g. price_1AbC2dEfGH)
+// Real Stripe price IDs match: price_ followed by alphanumeric chars
 const STRIPE_PRICE_ID_RE = /^price_[A-Za-z0-9]+$/;
 
-export function getPriceId(tier: PlanTier): string {
-  const priceId = STRIPE_PRICES[tier] ?? STRIPE_PRICES.local_solo;
+export function getPriceId(tier: PlanTier, period: BillingPeriod = "monthly"): string {
+  const priceId = STRIPE_PRICES[tier]?.[period] ?? STRIPE_PRICES.local_solo.monthly;
   if (!STRIPE_PRICE_ID_RE.test(priceId)) {
     throw new Error(
-      `Stripe price ID for tier "${tier}" is not configured. Set STRIPE_PRICE_${tier.toUpperCase()}_MONTHLY or ensure products are synced at startup.`
+      `Stripe price ID for tier "${tier}" period "${period}" is not configured.`
     );
   }
   return priceId;
@@ -57,17 +81,17 @@ export async function ensureStripeProducts(): Promise<void> {
         logger.info("Created Stripe product", { tier, productId });
       }
 
-      // Find or create the monthly price
       const prices = await stripe.prices.list({
         product: productId,
         limit: 10,
       });
+
+      // Find or create the monthly price
       let monthlyPrice = prices.data.find(
         (p) =>
           p.recurring?.interval === "month" &&
           p.unit_amount === config.monthlyPriceCents
       );
-
       if (!monthlyPrice) {
         monthlyPrice = await stripe.prices.create({
           product: productId,
@@ -79,8 +103,26 @@ export async function ensureStripeProducts(): Promise<void> {
         logger.info("Created Stripe price", { tier, priceId: monthlyPrice.id });
       }
 
-      // Update the runtime price map so getPriceId() returns real IDs
-      STRIPE_PRICES[tier] = monthlyPrice.id;
+      // Find or create the annual price (20% discount)
+      const annualCents = Math.round(config.monthlyPriceCents * 12 * ANNUAL_DISCOUNT);
+      let annualPrice = prices.data.find(
+        (p) =>
+          p.recurring?.interval === "year" &&
+          p.unit_amount === annualCents
+      );
+      if (!annualPrice) {
+        annualPrice = await stripe.prices.create({
+          product: productId,
+          unit_amount: annualCents,
+          currency: "usd",
+          recurring: { interval: "year" },
+          metadata: { tier, period: "annual" },
+        });
+        logger.info("Created Stripe annual price", { tier, priceId: annualPrice.id });
+      }
+
+      // Update the runtime price maps
+      STRIPE_PRICES[tier] = { monthly: monthlyPrice.id, annual: annualPrice.id };
     } catch (err) {
       logger.error("Failed to ensure Stripe product", {
         tier,
