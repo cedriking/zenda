@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Nav } from "@/components/nav";
-import { useRouter, useSearchParams } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import { apiFetch, getAccessToken } from "@/lib/api-client";
 
 export default function CheckoutPage() {
