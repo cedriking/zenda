@@ -28,13 +28,13 @@ function SettingsPage() {
       try {
         setLoadError(null)
         const [biz, rec] = await Promise.all([
-          apiFetch('/business/profile'),
-          apiFetch('/business/receptionist'),
+          apiFetch<Record<string, any>>('/business/profile'),
+          apiFetch<Record<string, any>>('/business/receptionist'),
         ])
-        setBusinessProfile(biz as any)
-        setReceptionistProfile(rec as any)
-        setLastSavedBusiness(biz as any)
-        setLastSavedReceptionist(rec as any)
+        setBusinessProfile(biz)
+        setReceptionistProfile(rec)
+        setLastSavedBusiness(biz)
+        setLastSavedReceptionist(rec)
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : t('settings.errorLoad'))
       }

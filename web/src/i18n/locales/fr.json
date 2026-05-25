@@ -472,6 +472,7 @@
     "signin": "Se connecter",
     "quickStartTitle": "Vous serez en ligne en moins de 10 minutes",
     "quickStartDesc": "Voici ce qui se passe après le téléchargement :",
+    "stepLabel": "Étape {number}",
     "step1Title": "Installer et se connecter",
     "step1Desc": "Ouvrez l'installateur et connectez-vous avec le compte que vous venez de créer.",
     "step2Title": "Connecter WhatsApp",
@@ -547,5 +548,10 @@
     "heroTitle": "Des fonctionnalités qui remplissent votre agenda",
     "metaDesc": "Découvrez les fonctionnalités de Zenda : réceptionniste IA WhatsApp avec planification intelligente, rappels automatiques, support multilingue et prise en charge humaine.",
     "metaTitle": "Fonctionnalités — Réceptionniste IA WhatsApp Zenda"
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "description": "Désolé, nous n'avons pas pu trouver la page que vous cherchez.",
+    "backHome": "Retour à l'accueil"
   }
 }

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Link, useRouter } from "@/i18n/navigation";
-import { apiFetch } from "@/lib/api-client";
+import { signup } from "@/lib/api-client";
 
 export function SignupPageClient() {
   const t = useTranslations("auth");
@@ -46,10 +46,7 @@ export function SignupPageClient() {
     setLoading(true);
 
     try {
-      await apiFetch("/auth/signup", {
-        method: "POST",
-        body: JSON.stringify({ email, password, name, businessName }),
-      });
+      await signup({ email, password, name, businessName });
       router.push("/download");
     } catch (err) {
       setError((err as Error).message);

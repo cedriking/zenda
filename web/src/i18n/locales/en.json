@@ -244,7 +244,7 @@
     "faq1Q": "Can I switch plans anytime?",
     "faq1A": "Yes. Upgrade or downgrade from the dashboard. Changes take effect immediately.",
     "faq2Q": "Is there a free trial?",
-    "faq2A": "Zenda supports 9 languages including English, Spanish, French, German, Korean, Japanese, Chinese, Russian, and Arabic. The AI automatically detects which language the customer is using.",
+    "faq2A": "Yes! Every plan includes a 14-day free trial. No credit card required — just sign up and start using Zenda immediately.",
     "faq3Q": "What happens if I exceed my limits?",
     "faq3A": "We'll notify you before you hit limits. You can upgrade or wait until the next cycle.",
     "foundingBanner": "Limited time: 50% off your first 3 months as a founding member.",
@@ -356,8 +356,8 @@
       "feature3Desc": "List all your services with prices and durations. AI knows exactly what to offer each client.",
       "feature4Title": "Multilingual Support",
       "feature4Desc": "9 languages including English, Spanish, French, German, and more. Serve a diverse clientele without extra reception staff.",
-      "feature5Title": "Multilingual Support",
-      "feature5Desc": "9 languages including English, Spanish, French, German, and more. Serve diverse patient populations without additional staff.",
+      "feature5Title": "Flexible Scheduling",
+      "feature5Desc": "Custom hours, blocked times, and holiday settings. AI respects your schedule automatically.",
       "feature6Title": "Human Takeover",
       "feature6Desc": "Step in anytime with one click. Seamlessly hand back to AI when you are done."
     },
@@ -376,10 +376,10 @@
       "feature3Desc": "AI answers common questions about services, hours, insurance, and preparation instructions.",
       "feature4Title": "Multilingual Support",
       "feature4Desc": "9 languages including English, Spanish, French, German, and more. Serve a diverse clientele without extra reception staff.",
-      "feature5Title": "Multilingual Support",
-      "feature5Desc": "9 languages including English, Spanish, French, German, and more. Serve diverse patient populations without additional staff.",
-      "feature6Title": "Secure Communication",
-      "feature6Desc": "All conversations are encrypted. Workspace-isolated data with full audit trails."
+      "feature5Title": "Secure Communication",
+      "feature5Desc": "All conversations are encrypted. Workspace-isolated data with full audit trails.",
+      "feature6Title": "Custom Workflows",
+      "feature6Desc": "Define custom intake forms, appointment types, and escalation rules to match your clinic's processes."
     },
     "fitness": {
       "metaTitle": "AI Receptionist for Fitness Studios — Zenda",
@@ -472,6 +472,7 @@
     "signin": "Sign in",
     "quickStartTitle": "You'll be live in under 10 minutes",
     "quickStartDesc": "Here's what happens after you download:",
+    "stepLabel": "Step {number}",
     "step1Title": "Install & Sign In",
     "step1Desc": "Open the installer and log in with the account you just created.",
     "step2Title": "Connect WhatsApp",
@@ -610,5 +611,10 @@
     "heroTitle": "Features that fill your calendar",
     "metaDesc": "Explore Zenda features: AI WhatsApp receptionist with smart scheduling, automated reminders, multilingual support (9 languages), and human takeover for appointment-based businesses.",
     "metaTitle": "Features — Zenda AI WhatsApp Receptionist"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "Sorry, we couldn't find the page you were looking for.",
+    "backHome": "Back to home"
   }
 }

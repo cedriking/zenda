@@ -34,7 +34,7 @@ function CustomerProfilePage() {
     setError(false)
     try {
       const data = await apiFetch<CustomerProfile>(`/customers/${id}`)
-      setCustomer(data as any)
+      setCustomer(data)
     } catch {
       setError(true)
     }

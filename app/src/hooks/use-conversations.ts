@@ -92,11 +92,11 @@ export function useConversations() {
       const data = await apiFetch<Message[]>(
         `/conversations/${conversationId}/messages`
       );
-      const reversed = data.reverse();
+      const reversed = [...data].reverse();
       setMessages((prev) => ({ ...prev, [conversationId]: reversed }));
       if (reversed.length > 0) {
         lastMessageAtRef.current[conversationId] =
-          reversed[reversed.length - 1].createdAt;
+          reversed.at(-1).createdAt;
       }
     } catch (err) {
       console.error("Failed to load messages:", err);

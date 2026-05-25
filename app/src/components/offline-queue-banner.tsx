@@ -19,8 +19,8 @@ export function OfflineQueueBanner() {
     const check = async () => {
       try {
         const data = await apiFetch<QueueStats>('/queue')
-        setStats(data as any)
-        if ((data as any).offlineQueue?.total > 0) {
+        setStats(data)
+        if (data.offlineQueue?.total > 0) {
           setShowPanel(true)
         }
       } catch { /* offline */ }

@@ -397,7 +397,7 @@ function DashboardLayout() {
           </div>
         </header>
         <main className="flex-1 overflow-auto">
-          <div className="page-transition" key={location.pathname}>
+          <div className="page-transition">
             <Outlet />
           </div>
         </main>
@@ -469,7 +469,7 @@ function getPageTitle(pathname: string, t: (key: string) => string): string {
   }
   const match = Object.keys(PAGE_TITLE_KEYS)
     .sort((a, b) => b.length - a.length)
-    .find((p) => pathname.startsWith(p + "/"));
+    .find((p) => pathname.startsWith(`${p}/`));
   return match ? t(PAGE_TITLE_KEYS[match]) : t("nav.dashboard");
 }
 
@@ -484,28 +484,19 @@ export const Route = createFileRoute("/dashboard")({
         }
 
         // localStorage may be stale — check server state
-        const token = localStorage.getItem("accessToken");
-        if (token) {
-          try {
-            const res = await fetch("/api/onboarding/status", {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            if (res.ok) {
-              const status = await res.json();
-              if (status.currentStep === "ready") {
-                // Sync localStorage and allow access
-                workspace.onboardingStep = "ready";
-                localStorage.setItem("workspace", JSON.stringify(workspace));
-                return;
-              }
-              // Server confirms not ready — redirect
-              throw redirect({ to: getPostAuthRoute() });
-            }
-          } catch (fetchErr) {
-            // Re-throw redirect errors; other fetch failures fall through to redirect below
-            if (fetchErr && typeof fetchErr === "object" && "to" in fetchErr) {
-              throw fetchErr;
-            }
+        try {
+          const status = await apiFetch<{ currentStep: string }>(
+            "/onboarding/status"
+          );
+          if (status.currentStep === "ready") {
+            workspace.onboardingStep = "ready";
+            localStorage.setItem("workspace", JSON.stringify(workspace));
+            return;
+          }
+          throw redirect({ to: getPostAuthRoute() });
+        } catch (fetchErr) {
+          if (fetchErr && typeof fetchErr === "object" && "to" in fetchErr) {
+            throw fetchErr;
           }
         }
 

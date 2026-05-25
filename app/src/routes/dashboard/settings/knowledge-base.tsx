@@ -32,7 +32,7 @@ function KnowledgeBasePage() {
   async function loadItems() {
     try {
       const data = await apiFetch<KBItem[]>('/knowledge-base')
-      setItems(data as any)
+      setItems(data)
     } catch {
       // Knowledge base items will appear when available
     }
@@ -45,7 +45,7 @@ function KnowledgeBasePage() {
     }
     try {
       const data = await apiFetch<KBItem[]>(`/knowledge-base/search?q=${encodeURIComponent(searchQuery)}`)
-      setItems(data as any)
+      setItems(data)
     } catch {
       // Search will retry on next attempt
     }

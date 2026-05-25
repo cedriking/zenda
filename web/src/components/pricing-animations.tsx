@@ -13,6 +13,7 @@ interface Plan {
   name: string;
   originalPrice?: number;
   price: number;
+  tier: string;
 }
 
 export function PricingAnimations({ plans }: { plans: Plan[] }) {
@@ -100,17 +101,18 @@ export function PricingAnimations({ plans }: { plans: Plan[] }) {
                 ))}
               </ul>
 
-              <Link
-                className={`inline-flex items-center justify-center rounded-full py-3 font-semibold text-sm transition-colors ${
+              <button
+                type="button"
+                onClick={() => handleCheckout(plan.tier)}
+                className={`inline-flex w-full items-center justify-center rounded-full py-3 font-semibold text-sm transition-colors ${
                   plan.highlight
                     ? "bg-emerald-500 text-white shadow-emerald-500/25 shadow-lg hover:bg-emerald-600"
                     : "bg-slate-900 text-white hover:bg-slate-800"
                 }`}
-                href="/signup"
               >
                 {plan.cta}
                 <ArrowRight className="ml-2 size-4" />
-              </Link>
+              </button>
             </div>
           </StaggerChild>
         ))}

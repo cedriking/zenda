@@ -475,6 +475,7 @@
     "signin": "サインイン",
     "quickStartTitle": "10分以内に稼働開始",
     "quickStartDesc": "ダウンロード後の流れ：",
+    "stepLabel": "ステップ {number}",
     "step1Title": "インストール＆ログイン",
     "step1Desc": "インストーラーを開き、作成したアカウントでログインします。",
     "step2Title": "WhatsAppを接続",
@@ -550,5 +551,10 @@
     "heroTitle": "カレンダーを埋める機能",
     "metaDesc": "Zendaの機能をご覧ください：スマート予約、自動リマインダー、多言語サポート、人間による引き継ぎを備えたAI WhatsApp受付。",
     "metaTitle": "機能 — Zenda AI WhatsApp受付"
+  },
+  "notFound": {
+    "title": "ページが見つかりません",
+    "description": "申し訳ありませんが、お探しのページは見つかりませんでした。",
+    "backHome": "ホームに戻る"
   }
 }

@@ -472,6 +472,7 @@
     "signin": "Anmelden",
     "quickStartTitle": "In unter 10 Minuten live",
     "quickStartDesc": "Das passiert nach dem Download:",
+    "stepLabel": "Schritt {number}",
     "step1Title": "Installieren & Anmelden",
     "step1Desc": "Öffnen Sie das Installationsprogramm und melden Sie sich mit Ihrem neuen Konto an.",
     "step2Title": "WhatsApp verbinden",
@@ -547,5 +548,10 @@
     "heroTitle": "Funktionen, die Ihren Kalender füllen",
     "metaDesc": "Entdecken Sie Zenda-Funktionen: KI-WhatsApp-Rezeptionist mit intelligenter Terminplanung, automatischen Erinnerungen, mehrsprachigem Support (9 Sprachen) und menschlicher Übernahme.",
     "metaTitle": "Funktionen — Zenda KI-WhatsApp-Rezeptionist"
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "description": "Leider konnten wir die gesuchte Seite nicht finden.",
+    "backHome": "Zurück zur Startseite"
   }
 }

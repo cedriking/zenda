@@ -472,6 +472,7 @@
     "signin": "로그인",
     "quickStartTitle": "10분 안에 시작하세요",
     "quickStartDesc": "다운로드 후 다음 단계를 거칩니다:",
+    "stepLabel": "{number}단계",
     "step1Title": "설치 및 로그인",
     "step1Desc": "설치 프로그램을 열고 방금 만든 계정으로 로그인하세요.",
     "step2Title": "WhatsApp 연결",
@@ -547,5 +548,10 @@
     "heroTitle": "일정을 채워주는 기능",
     "metaDesc": "Zenda 기능 살펴보기: 스마트 예약, 자동 알림, 다국어 지원 및 인수인계가 포함된 AI WhatsApp 리셉션.",
     "metaTitle": "기능 — Zenda AI WhatsApp 리셉션"
+  },
+  "notFound": {
+    "title": "페이지를 찾을 수 없습니다",
+    "description": "죄송합니다. 찾으시는 페이지를 찾을 수 없습니다.",
+    "backHome": "홈으로 돌아가기"
   }
 }

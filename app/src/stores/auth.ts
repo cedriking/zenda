@@ -12,7 +12,7 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
     const json = decodeURIComponent(
       atob(base64)
         .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .map((c) => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`)
         .join(''),
     )
     return JSON.parse(json)
@@ -25,7 +25,7 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
  * Check whether a JWT access token is present and not expired.
  * Returns true only if the token exists and `exp` is still in the future.
  */
-function isTokenValid(token: string | null): boolean {
+export function isTokenValid(token: string | null): boolean {
   if (!token) return false
   const payload = decodeJwtPayload(token)
   if (!payload || typeof payload.exp !== 'number') return false

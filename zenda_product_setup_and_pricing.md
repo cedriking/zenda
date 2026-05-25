@@ -1,20 +1,20 @@
 # Zenda — Product Setup, Architecture, and Launch Pricing
 
-**Version:** 0.1  
-**Date:** April 27, 2026  
-**Product:** Zenda — AI Receptionist for appointment-based businesses  
-**Primary market:** LATAM, starting with Spanish + English  
-**Company/payment context:** Wyoming LLC, Stripe subscriptions  
+**Version:** 0.2
+**Date:** May 25, 2026
+**Product:** Zenda — AI Receptionist for appointment-based businesses (Zenda Local)
+**Primary market:** LATAM, multilingual (9 languages: EN, ES, AR, FR, DE, RU, ZH, JA, KO)
+**Company/payment context:** Wyoming LLC, Stripe subscriptions (USD only, MXN reference ~17.35)  
 
 ---
 
 ## 1. Executive summary
 
-Zenda is an affordable, multilingual AI receptionist for appointment-based businesses. It connects to the business owner’s WhatsApp through a desktop app, answers customers automatically, books appointments, sends reminders, follows up, escalates uncertain cases to the owner, and keeps the business calendar organized.
+Zenda is an affordable, multilingual AI receptionist for appointment-based businesses. It connects to the business owner’s WhatsApp through a desktop app (Zenda Local uses WhatsApp Business App coexistence via local Baileys-powered connector), answers customers automatically, books appointments, sends reminders, follows up, escalates uncertain cases to the owner, and keeps the business calendar organized.
 
 Zenda should not be positioned as a chatbot, automation tool, or CRM first. The strongest positioning is:
 
-> **Zenda gives your business a professional AI receptionist for WhatsApp.**
+> **Zenda Local is for businesses that already use the WhatsApp Business App and want an AI receptionist to help manage appointments naturally, safely, and automatically.**
 
 The product has three repos/apps:
 
@@ -78,29 +78,24 @@ For a brand-new product with no customers, the best strategy is:
 
 ### 3.1 Public pricing model
 
-Use USD as the base pricing because the company is a Wyoming LLC and payments will run through Stripe. For LATAM, the website can display approximate local currency where useful, but Stripe subscription objects should be maintained cleanly in USD first.
+Use USD as the base pricing because the company is a Wyoming LLC and payments will run through Stripe. MXN reference at approximately **1 USD = 17.35 MXN** (May 2026 rates).
 
-Recommended public structure:
+**Usage metric: Monthly Active Appointment Contacts** — unique customer phone numbers that receive appointment-related AI assistance from Zenda during a billing month. Do NOT price by raw message count.
 
-| Plan | Monthly | Annual equivalent | Best for |
+Recommended public structure (Zenda Local — WhatsApp Business App Coexistence):
+
+| Plan | Monthly | MXN reference | Best for |
 |---|---:|---:|---|
-| Starter | $29/month | $24/month paid yearly — $288/year | Solo professionals |
-| Pro | $69/month | $59/month paid yearly — $708/year | Small teams |
-| Business | $149/month | $119/month paid yearly — $1,428/year | Busier teams needing assisted setup |
+| Local Solo | $29/month | ~$503 MXN/mo | Very small appointment businesses |
+| Local Starter | $49/month | ~$850 MXN/mo | Small clinics, salons, studios, solo professionals |
+| Local Pro | $89/month | ~$1,544 MXN/mo | Growing businesses with steady appointment flow |
+| Local Business | $149/month | ~$2,585 MXN/mo | Higher-volume local businesses, still within safe local limits |
 
-This is low enough for LATAM adoption, but not so low that every heavy user becomes unprofitable.
+**Most popular** plan: Local Starter ($49/mo). **Target upsell**: Local Pro ($89/mo).
 
-### 3.2 Optional founding customer pricing
+### 3.2 Why this pricing works
 
-To get the first 50–100 customers, offer founding pricing only for annual or first-year commitments:
-
-| Plan | Founding monthly | Founding annual equivalent | Condition |
-|---|---:|---:|---|
-| Starter Founding | $19/month | $190/year | First 100 customers or first 3 months |
-| Pro Founding | $49/month | $490/year | First 100 customers or first 3 months |
-| Business Founding | $99/month | $990/year | Assisted setup limited by capacity |
-
-Recommendation: do **not** make founding prices permanent unless explicitly framed as “locked while subscription remains active.” Otherwise future pricing migrations become painful.
+A real receptionist in Mexico costs $7,985–$20,000 MXN/mo all-in. Even Local Business at $149/mo (~$2,585 MXN) is dramatically cheaper. Local Starter at $49/mo (~$850 MXN) is accessible for very small businesses.
 
 ### 3.3 Why not cheaper?
 
@@ -108,145 +103,178 @@ Do not launch at $9–$15/month. That makes the product look like a small WhatsA
 
 ### 3.4 Why not more expensive?
 
-Do not launch Starter at $79/month in LATAM. That matches US AI receptionist pricing but creates too much friction before Zenda has case studies, reliability reputation, and visible proof.
+Do not launch entry at $79/month in LATAM. That matches US AI receptionist pricing but creates too much friction before Zenda has case studies, reliability reputation, and visible proof.
 
 ---
 
 ## 4. Plan limits and features
 
-Public limits should be based on customer-understandable value units:
+**Usage metric: Monthly Active Appointment Contacts** — unique customer phone numbers that receive appointment-related AI assistance from Zenda during a billing month. Do NOT price by raw message count.
 
-- AI-handled conversations/month
-- Appointments/month
-- Staff members
-- Voice note minutes/month
-- Knowledge base size
-- Log retention
-- Assisted setup availability
+### Plan limits summary
 
-Internally, Zenda should track:
+| Plan | Active appointment contacts/mo | Calendars/staff | Locations | Reminders | Setup |
+|---|---:|---:|---:|---|---|
+| Local Solo | 75 | 1 | 1 | 1 per appointment | Self-serve |
+| Local Starter | 200 | 2 | 1 | Day-before + same-day | Self-serve |
+| Local Pro | 600 | 5 | 2 | Configurable within safe limits | Priority |
+| Local Business | 1,200 | 10 | 3 | Configurable within safe limits | Assisted setup included |
 
-- Text tokens
-- Audio transcription minutes
-- Tool calls
-- Provider cost per workspace
-- Messages received/sent
-- Conversation count
-- Appointment count
-- Queue size
-- Escalation count
+### What is included in EVERY paid plan
 
-### 4.1 Starter — Solo Receptionist
+- AI receptionist for appointment conversations
+- WhatsApp Business App Coexistence connector (1 number = 1 business = 1 local connector)
+- Calendar connection
+- Appointment booking, rescheduling, cancellations
+- Availability checking
+- Voice note understanding (NOT a premium feature — voice notes are core in LATAM)
+- Multilingual customer conversations based on customer language (all 9 languages)
+- Owner notifications
+- Human escalation
+- Opt-out handling
+- Safe outbound limits
+- No marketing, no broadcasts, no cold outreach
 
-**Price:** $29/month or $288/year  
-**Target:** Solo professionals: barbers, nail techs, coaches, therapists, independent wellness providers, small beauty services.
+### 4.1 Local Solo — $29/month
+
+**MXN reference:** ~$503 MXN/mo
+**Target:** Very small appointment businesses that need help answering and organizing appointment requests.
 
 Includes:
 
-- 1 WhatsApp connection
-- 1 business owner login
-- Solo-mode dashboard
-- AI receptionist for WhatsApp
-- English + Spanish
-- Client language detection
+- 1 WhatsApp Business App number
+- 1 Zenda assistant
+- 1 business location
+- 1 connected calendar
+- Up to **75 monthly active appointment contacts**
 - Appointment booking
-- Rescheduling
-- Cancellation
-- Confirmation messages
-- Reminder messages
-- Follow-up messages
-- Human escalation
-- Pause/resume automation per chat
-- Internal Zenda calendar
-- Services and business hours
-- Basic knowledge base
+- Rescheduling and cancellations
+- Basic business FAQs
+- Basic service list
+- Basic availability checking
+- Appointment confirmations
+- 1 reminder per appointment
 - Voice note understanding
-- Client memory
-- Basic logs
-- Auto-start desktop app
+- Multilingual conversations based on customer language
+- Basic owner notifications
+- Self-serve setup
 
-Suggested limits:
+Limitations:
 
-```txt
-300 AI-handled conversations/month
-150 appointments/month
-120 voice-note minutes/month
-1 active staff profile: the owner
-30-day conversation/activity log retention
-Basic support
-```
+- No advanced policy handling
+- No multi-location
+- No additional staff calendars
+- No custom escalation rules
+- No advanced analytics
+- No bulk imports
+- No marketing / broadcasts / aggressive follow-ups
 
-### 4.2 Pro — Team Receptionist
+### 4.2 Local Starter — $49/month
 
-**Price:** $69/month or $708/year  
-**Target:** Small teams: salons, spas, clinics, small dental/health/wellness offices, training studios.
+**MXN reference:** ~$850 MXN/mo
+**Target:** Small businesses that want Zenda to handle most appointment conversations automatically.
+
+Includes everything in Solo, plus:
+
+- Up to **200 monthly active appointment contacts**
+- Up to 2 connected calendars or staff schedules
+- Up to 15 services
+- Day-before reminders
+- Same-day reminders
+- Business hours handling
+- Basic cancellation and rescheduling rules
+- Basic price answers if configured by the owner
+- Human escalation notifications
+- Missed-message recovery inside safe limits
+- Simple appointment history
+- Basic dashboard analytics
+
+Limitations:
+
+- 1 WhatsApp Business App number
+- 1 location
+- No advanced custom workflows
+- No multi-branch routing
+- No high-volume imports
+- No broadcast workflows
+- No marketing
+
+### 4.3 Local Pro — $89/month
+
+**MXN reference:** ~$1,544 MXN/mo
+**Target:** Businesses that depend on WhatsApp for scheduling and want deeper assistant configuration.
 
 Includes everything in Starter, plus:
 
-- Team-mode dashboard
-- Up to 5 staff members
-- Staff-specific availability
-- Services assigned to staff
-- Team calendar
-- Appointment assignment
-- Owner notification rules
-- More advanced knowledge base
-- Team-level analytics
-- Assisted setup available as paid add-on or limited onboarding session
+- Up to **600 monthly active appointment contacts**
+- Up to 5 connected calendars or staff schedules
+- Up to 2 business locations
+- Unlimited configured services
+- Advanced cancellation and rescheduling behavior
+- Deposit, refund, discount, and policy handling using owner-approved answers
+- Custom assistant behavior controls
+- More detailed owner notification settings
+- Important-change-only notifications
+- Customer notes
+- Appointment tags
+- No-show follow-up inside safe limits
+- Conversation summaries for the business owner
+- Better analytics: booked, rescheduled, cancelled, escalated, unanswered
+- Priority support
 
-Suggested limits:
+Limitations:
 
-```txt
-1,000 AI-handled conversations/month
-500 appointments/month
-300 voice-note minutes/month
-Up to 5 staff members
-90-day conversation/activity log retention
-Priority support
-```
+- 1 WhatsApp Business App number
+- Still no marketing / bulk messaging / cold outreach
+- Local connector safety limits remain enforced
+- If the business consistently exceeds safe volume, recommend migration to the official WhatsApp Business API
 
-### 4.3 Business — Advanced Receptionist
+### 4.4 Local Business — $149/month
 
-**Price:** $149/month or $1,428/year  
-**Target:** Busier appointment businesses with more volume, more staff, or higher-value appointments.
+**MXN reference:** ~$2,585 MXN/mo
+**Target:** High-touch businesses with heavier scheduling needs that still want to use their WhatsApp Business App.
 
 Includes everything in Pro, plus:
 
-- Up to 15 staff members
-- Advanced routing rules
-- More detailed analytics
-- Advanced audit logs
-- Exports
-- Assisted onboarding included
-- Higher queue priority
-- More customization
-- Early access to integrations
+- Up to **1,200 monthly active appointment contacts**
+- Up to 10 connected calendars or staff schedules
+- Up to 3 locations
+- Advanced routing by service, staff member, location, or schedule
+- Custom escalation rules
+- Advanced assistant playbooks
+- Appointment audit logs
+- Connector health monitoring
+- Higher-priority support
+- Assisted setup included
+- Migration review for official WhatsApp Business API readiness
 
-Suggested limits:
+Limitations:
 
-```txt
-3,000 AI-handled conversations/month
-1,500 appointments/month
-800 voice-note minutes/month
-Up to 15 staff members
-180-day conversation/activity log retention
-Priority support + assisted onboarding
-```
+- 1 WhatsApp Business App number
+- Local connector only after suitability review
+- No marketing / broadcasts / high-volume proactive messaging
+- If the business needs more than 1,200 active appointment contacts/month, recommend the official WhatsApp Business API path
 
-### 4.4 Overage strategy
+### 4.5 Overage strategy
 
-Do not interrupt operations immediately when limits are exceeded. Use soft limits first:
+Do NOT use overage fees for Zenda Local — they encourage unsafe behavior. Instead:
 
 1. At 80% usage: notify owner.
-2. At 95% usage: notify owner and recommend upgrade.
-3. At 100% usage: continue core flows for a short grace period.
-4. After grace period: restrict AI handling for new conversations or require upgrade.
+2. At 100%: keep inbound handling active but restrict non-essential proactive automations.
+3. Recommend upgrading the plan.
+4. If Local Business exceeds safe limits, recommend official WhatsApp Business API migration.
 
-Suggested overage language:
+### 4.6 Add-ons
 
-> Your plan includes generous AI usage for normal appointment handling. If your business grows beyond your plan limits, Zenda will notify you before any restriction and help you upgrade to the right plan.
+| Add-on | USD | MXN reference | Notes |
+|---|---:|---:|---|
+| Assisted setup | $99 one-time | ~$1,718 MXN | Included in Local Business |
+| Extra staff/calendar | $9/mo | ~$156 MXN | Only available Pro+ |
+| Extra location | $19/mo | ~$330 MXN | Only available Pro+ |
+| Custom assistant behavior setup | $149 one-time | ~$2,585 MXN | Good for clinics/salons with policies |
+| Official WhatsApp API migration | Custom | Custom | For high-volume clients |
 
-Do not publicly mention tokens.
+Do NOT sell extra WhatsApp numbers on Zenda Local. Local = 1 business = 1 WhatsApp Business App number = 1 local connector. Multiple numbers should move to the official API path.
 
 ---
 
@@ -291,7 +319,7 @@ Why:
 - Solo businesses are common
 - Owners dislike constant interruptions
 - Appointment reminders are valuable
-- English/Spanish support can be a differentiator
+- Multilingual support (9 languages) can be a differentiator
 
 ### 5.3 Third vertical: clinics and dental offices
 
@@ -1708,9 +1736,9 @@ It consists of:
 
 Zenda answers customers automatically, books appointments after confirmation, sends reminders, understands voice notes, handles reschedules/cancellations, escalates uncertain conversations, and lets the owner take over or return a chat to auto mode.
 
-Zenda supports English and Spanish from day one.
+Zenda supports 9 languages from day one: English, Spanish, Arabic, French, German, Russian, Chinese, Japanese, and Korean.
 
-The product is priced for LATAM as an affordable mass-market receptionist, with Starter, Pro, and Business plans.
+The product is priced for LATAM as an affordable mass-market receptionist, with Local Solo, Local Starter, Local Pro, and Local Business plans.
 ```
 
 ---

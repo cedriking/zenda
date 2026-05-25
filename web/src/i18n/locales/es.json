@@ -244,7 +244,7 @@
     "faq1Q": "¿Puedo cambiar de plan en cualquier momento?",
     "faq1A": "Sí. Sube o baja de categoría desde el panel. Los cambios toman efecto inmediatamente.",
     "faq2Q": "¿Hay una prueba gratis?",
-    "faq2A": "Zenda soporta 9 idiomas incluyendo inglés, español, francés, alemán, coreano, japonés, chino, ruso y árabe. La IA detecta automáticamente qué idioma está usando el cliente.",
+    "faq2A": "¡Sí! Todos los planes incluyen una prueba gratis de 14 días. No se necesita tarjeta de crédito — solo regístrate y comienza a usar Zenda inmediatamente.",
     "faq3Q": "¿Qué pasa si supero mis límites?",
     "faq3A": "Te notificaremos antes de alcanzar los límites. Puedes subir de plan o esperar hasta el siguiente ciclo.",
     "foundingBanner": "Tiempo limitado: 50% de descuento tus primeros 3 meses como miembro fundador.",
@@ -356,8 +356,8 @@
       "feature3Desc": "Lista todos tus servicios con precios y duraciones. La IA sabe exactamente qué ofrecer a cada cliente.",
       "feature4Title": "Soporte multilingüe",
       "feature4Desc": "9 idiomas incluyendo inglés, español, francés, alemán y más. Atiende a una clientela diversa sin personal adicional de recepción.",
-      "feature5Title": "Soporte multilingüe",
-      "feature5Desc": "9 idiomas incluyendo inglés, español, francés, alemán y más. Atiende a poblaciones diversas sin personal adicional.",
+      "feature5Title": "Horario flexible",
+      "feature5Desc": "Horas personalizadas, bloques de tiempo y configuración de días festivos. La IA respeta tu agenda automáticamente.",
       "feature6Title": "Toma de control humana",
       "feature6Desc": "Interviene en cualquier momento con un clic. Transferencia fluida de vuelta a la IA cuando termines."
     },
@@ -376,10 +376,10 @@
       "feature3Desc": "La IA responde preguntas comunes sobre servicios, horarios, seguros e instrucciones de preparación.",
       "feature4Title": "Soporte multilingüe",
       "feature4Desc": "9 idiomas incluyendo inglés, español, francés, alemán y más. Atiende a una clientela diversa sin personal adicional de recepción.",
-      "feature5Title": "Soporte multilingüe",
-      "feature5Desc": "9 idiomas incluyendo inglés, español, francés, alemán y más. Atiende a poblaciones diversas sin personal adicional.",
-      "feature6Title": "Comunicación segura",
-      "feature6Desc": "Todas las conversaciones están cifradas. Datos aislados por espacio de trabajo con registros de auditoría completos."
+      "feature5Title": "Comunicación segura",
+      "feature5Desc": "Todas las conversaciones están cifradas. Datos aislados por espacio de trabajo con registros de auditoría completos.",
+      "feature6Title": "Flujos personalizados",
+      "feature6Desc": "Define formularios de ingreso personalizados, tipos de citas y reglas de escalado para que coincidan con los procesos de tu clínica."
     },
     "fitness": {
       "metaTitle": "Recepcionista con IA para estudios de fitness — Zenda",
@@ -472,6 +472,7 @@
     "signin": "Iniciar sesión",
     "quickStartTitle": "Estarás operativo en menos de 10 minutos",
     "quickStartDesc": "Esto es lo que pasa después de descargar:",
+    "stepLabel": "Paso {number}",
     "step1Title": "Instalar e Iniciar Sesión",
     "step1Desc": "Abre el instalador e inicia sesión con la cuenta que acabas de crear.",
     "step2Title": "Conectar WhatsApp",
@@ -608,5 +609,10 @@
     "heroTitle": "Funciones que llenan tu agenda",
     "metaDesc": "Explora las funciones de Zenda: recepcionista IA por WhatsApp con agendamiento inteligente, recordatorios automáticos, soporte multilingüe y toma de control humana para negocios basados en citas.",
     "metaTitle": "Funciones — Recepcionista IA por WhatsApp Zenda"
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "description": "Lo sentimos, no pudimos encontrar la página que buscas.",
+    "backHome": "Volver al inicio"
   }
 }

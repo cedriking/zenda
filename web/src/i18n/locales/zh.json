@@ -474,6 +474,7 @@
     "signin": "直接登录",
     "quickStartTitle": "10分钟内即可上线",
     "quickStartDesc": "下载后会经历以下步骤：",
+    "stepLabel": "第 {number} 步",
     "step1Title": "安装并登录",
     "step1Desc": "打开安装程序，使用刚创建的账户登录。",
     "step2Title": "连接WhatsApp",
@@ -549,5 +550,10 @@
     "heroTitle": "填满您日程的功能",
     "metaDesc": "探索 Zenda 功能：具备智能排班、自动提醒、多语言支持和人工接管的 AI WhatsApp 接待员。",
     "metaTitle": "功能 — Zenda AI WhatsApp 接待员"
+  },
+  "notFound": {
+    "title": "页面未找到",
+    "description": "抱歉，我们无法找到您要访问的页面。",
+    "backHome": "返回首页"
   }
 }

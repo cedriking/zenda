@@ -87,12 +87,14 @@ async function findLatestArtifact(
   return null;
 }
 
+const GITHUB_REPO = process.env.GITHUB_REPO ?? "cedriking/zenda";
+
 async function findGitHubRelease(
   extension: string,
 ): Promise<string | null> {
   try {
     const res = await fetch(
-      "https://api.github.com/repos/cedriking/zenda/releases/latest",
+      `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`,
       { next: { revalidate: 300 } },
     );
     if (!res.ok) return null;

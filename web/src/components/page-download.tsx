@@ -133,7 +133,7 @@ export function DownloadPageClient() {
                   <div className="pt-2">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-primary text-xs uppercase tracking-wide">
-                        Step {idx + 1}
+                        {t("stepLabel", { number: idx + 1 })}
                       </span>
                     </div>
                     <h3 className="font-semibold text-foreground">

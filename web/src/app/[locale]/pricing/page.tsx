@@ -28,6 +28,7 @@ export default async function PricingPage() {
 
   const PLANS = [
     {
+      tier: "local_solo",
       name: t("soloName"),
       price: 29,
       desc: t("soloDesc"),
@@ -42,6 +43,7 @@ export default async function PricingPage() {
       highlight: false,
     },
     {
+      tier: "local_starter",
       name: t("starterName"),
       price: 49,
       desc: t("starterDesc"),
@@ -57,6 +59,7 @@ export default async function PricingPage() {
       highlight: true,
     },
     {
+      tier: "local_pro",
       name: t("proName"),
       price: 89,
       desc: t("proDesc"),
@@ -72,6 +75,7 @@ export default async function PricingPage() {
       highlight: false,
     },
     {
+      tier: "local_business",
       name: t("businessName"),
       price: 149,
       desc: t("businessDesc"),

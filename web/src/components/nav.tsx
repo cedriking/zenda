@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Link } from '@/i18n/navigation'
+import { Link, usePathname } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { Menu, X, MessageCircle } from 'lucide-react'
 import { LanguageSwitcher } from '@/components/language-switcher'
@@ -46,14 +46,16 @@ function GhostButton({ href, children, dark = false }: { href: string; children:
 
 export function Nav({ variant = 'home' }: { variant?: 'home' | 'simple' }) {
   const t = useTranslations('nav')
+  const pathname = usePathname()
+  const isHome = pathname === '/'
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
   const NAV_LINKS = [
     { href: '/features', label: t('features'), hash: false },
     { href: '/pricing', label: t('pricing'), hash: false },
-    { href: '#how-it-works', label: t('howItWorks'), hash: true },
-    { href: '#faq', label: t('faq'), hash: true },
+    { href: isHome ? '#how-it-works' : '/#how-it-works', label: t('howItWorks'), hash: isHome },
+    { href: isHome ? '#faq' : '/#faq', label: t('faq'), hash: isHome },
   ] as const
 
   useEffect(() => {

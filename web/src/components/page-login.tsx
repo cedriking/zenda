@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Link, useRouter } from "@/i18n/navigation";
-import { apiFetch } from "@/lib/api-client";
+import { login } from "@/lib/api-client";
 
 export function LoginPageClient() {
   const t = useTranslations("auth");
@@ -21,10 +21,7 @@ export function LoginPageClient() {
     setError("");
 
     try {
-      await apiFetch("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-      });
+      await login(email, password);
       router.push("/download");
     } catch (err) {
       setError((err as Error).message);
