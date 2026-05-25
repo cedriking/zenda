@@ -4,13 +4,13 @@
       "default": "Zenda — KI-Empfangsassistent für Ihr Unternehmen",
       "template": "%s — Zenda"
     },
-    "description": "Mehrsprachiger KI-Empfangsassistent, der Termine, Erinnerungen und Kundengespräche über WhatsApp verwaltet. Entwickelt für Unternehmen in Lateinamerika.",
+    "description": "Mehrsprachiger KI-Empfangsassistent, der Termine, Erinnerungen und Kundengespräche über WhatsApp verwaltet. Entwickelt für terminbasierte Unternehmen.",
     "keywords": [
       "KI-Empfangsassistent",
       "WhatsApp",
       "Terminbuchung",
       "Termine",
-      "Lateinamerika",
+      "Weltweit",
       "Kundenservice",
       "Erinnerungen",
       "Terminplanung"
@@ -34,7 +34,7 @@
     "menuToggle": "Menü umschalten"
   },
   "footer": {
-    "tagline": "KI-Empfangsassistent für terminbasierte Unternehmen in Lateinamerika. Rund um die Uhr auf WhatsApp verfügbar.",
+    "tagline": "KI-Empfangsassistent für terminbasierte Unternehmen. Rund um die Uhr auf WhatsApp verfügbar.",
     "product": "Produkt",
     "features": "Funktionen",
     "pricing": "Preise",
@@ -47,13 +47,13 @@
     "privacyPolicy": "Datenschutzerklärung",
     "termsOfService": "Nutzungsbedingungen",
     "copyright": "Alle Rechte vorbehalten.",
-    "builtIn": "Entwickelt in Lateinamerika"
+    "builtIn": "Globaler Service"
   },
   "home": {
     "heroBadge": "KI-Empfangsassistent für terminbasierte Unternehmen",
     "heroTitle1": "Ihr KI-Empfangsassistent,",
     "heroTitle2": "der keine Nachricht verpasst",
-    "heroDesc": "Zenda verwaltet Kundengespräche, bucht Termine und sendet Erinnerungen — alles über WhatsApp. Entwickelt für Unternehmen in Lateinamerika.",
+    "heroDesc": "Zenda übernimmt Kundengespräche, Terminbuchungen und Erinnerungen — alles über WhatsApp. Entwickelt für terminbasierte Unternehmen.",
     "startFreeTrial": "Kostenlos testen",
     "seeHowItWorks": "So funktioniert es",
     "statAppointments": "Gebuchte Termine",

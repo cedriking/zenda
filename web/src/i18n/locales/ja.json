@@ -37,7 +37,7 @@
     "menuToggle": "メニューを開く"
   },
   "footer": {
-    "tagline": "ラテンアメリカの予約制ビジネス向けAI受付。WhatsAppで24時間365日対応。",
+    "tagline": "予約制ビジネス向けAI受付。WhatsAppで24時間365日対応。",
     "product": "プロダクト",
     "features": "機能",
     "pricing": "料金",
@@ -50,13 +50,13 @@
     "privacyPolicy": "プライバシーポリシー",
     "termsOfService": "利用規約",
     "copyright": "All rights reserved.",
-    "builtIn": "ラテンアメリカで開発"
+    "builtIn": "グローバル対応"
   },
   "home": {
     "heroBadge": "予約制ビジネス向けAI受付",
     "heroTitle1": "メッセージを見逃さない",
     "heroTitle2": "24時間対応のAI受付",
-    "heroDesc": "ZendaはWhatsAppを通じて、顧客対応、予約受付、リマインダー送信をすべて自動化します。ラテンアメリカの予約制ビジネスに特化して設計されています。",
+    "heroDesc": "ZendaはWhatsAppを通じて、顧客対応、予約受付、リマインダー送信をすべて自動化します。予約制ビジネスに特化して設計されています。",
     "startFreeTrial": "無料トライアルを始める",
     "seeHowItWorks": "ご利用の流れ",
     "statAppointments": "件の予約完了",

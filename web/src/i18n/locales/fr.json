@@ -4,13 +4,13 @@
       "default": "Zenda — Réceptionniste IA pour votre entreprise",
       "template": "%s — Zenda"
     },
-    "description": "Réceptionniste IA multilingue qui gère les rendez-vous, les rappels et les conversations clients via WhatsApp. Conçu pour les entreprises d'Amérique latine.",
+    "description": "Réceptionniste IA multilingue qui gère les rendez-vous, les rappels et les conversations clients via WhatsApp. Conçu pour les entreprises sur rendez-vous.",
     "keywords": [
       "réceptionniste IA",
       "WhatsApp",
       "prise de rendez-vous",
       "réservation",
-      "Amérique latine",
+      "Monde entier",
       "service client",
       "rappels automatiques",
       "planification"
@@ -34,7 +34,7 @@
     "menuToggle": "Ouvrir le menu"
   },
   "footer": {
-    "tagline": "Réceptionniste IA pour les entreprises fonctionnant sur rendez-vous en Amérique latine. Disponible 24h/24 sur WhatsApp.",
+    "tagline": "Réceptionniste IA pour les entreprises fonctionnant sur rendez-vous. Disponible 24h/24 sur WhatsApp.",
     "product": "Produit",
     "features": "Fonctionnalités",
     "pricing": "Tarifs",
@@ -47,13 +47,13 @@
     "privacyPolicy": "Politique de confidentialité",
     "termsOfService": "Conditions d'utilisation",
     "copyright": "Tous droits réservés.",
-    "builtIn": "Développé en Amérique latine"
+    "builtIn": "Service mondial"
   },
   "home": {
     "heroBadge": "Réceptionniste IA pour les entreprises sur rendez-vous",
     "heroTitle1": "Votre réceptionniste IA",
     "heroTitle2": "qui ne manque jamais un message",
-    "heroDesc": "Zenda gère les conversations clients, réserve les rendez-vous et envoie des rappels — le tout via WhatsApp. Conçu pour les entreprises d'Amérique latine.",
+    "heroDesc": "Zenda gère les conversations clients, les rendez-vous et les rappels — le tout via WhatsApp. Conçu pour les entreprises sur rendez-vous.",
     "startFreeTrial": "Essai gratuit",
     "seeHowItWorks": "Voir comment ça marche",
     "statAppointments": "Rendez-vous réservés",

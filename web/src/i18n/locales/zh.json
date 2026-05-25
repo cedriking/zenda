@@ -4,7 +4,7 @@
       "default": "Zenda — 您企业的智能AI前台",
       "template": "%s — Zenda"
     },
-    "description": "多语言AI智能前台，通过WhatsApp自动处理预约、提醒和客户对话。专为拉丁美洲预约类企业打造，7×24小时在线服务。",
+    "description": "多语言AI智能前台，通过WhatsApp自动处理预约、提醒和客户对话。专为预约类企业打造，7×24小时在线服务。",
     "keywords": [
       "AI前台",
       "智能前台",
@@ -13,7 +13,7 @@
       "自动提醒",
       "客户服务",
       "预约管理",
-      "拉丁美洲",
+      "全球",
       "美容院管理",
       "诊所排程"
     ],
@@ -36,7 +36,7 @@
     "menuToggle": "切换菜单"
   },
   "footer": {
-    "tagline": "专为拉丁美洲预约类企业打造的AI智能前台。7×24小时WhatsApp在线服务。",
+    "tagline": "专为预约类企业打造的AI智能前台。7×24小时WhatsApp在线服务。",
     "product": "产品",
     "features": "功能",
     "pricing": "定价",
@@ -49,13 +49,13 @@
     "privacyPolicy": "隐私政策",
     "termsOfService": "服务条款",
     "copyright": "保留所有权利。",
-    "builtIn": "拉美本土打造"
+    "builtIn": "全球服务"
   },
   "home": {
     "heroBadge": "预约类企业的AI智能前台",
     "heroTitle1": "您的AI前台",
     "heroTitle2": "绝不遗漏任何消息",
-    "heroDesc": "Zenda通过WhatsApp为您处理客户对话、预约安排和提醒通知——专为拉丁美洲企业量身打造。",
+    "heroDesc": "Zenda通过WhatsApp为您处理客户对话、预约安排和提醒通知——专为预约类企业量身打造。",
     "startFreeTrial": "免费试用",
     "seeHowItWorks": "了解工作原理",
     "statAppointments": "已成功预约",
