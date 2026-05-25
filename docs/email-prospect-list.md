@@ -16,7 +16,19 @@
 
 ---
 
-## Batch 2: Prospects con email — pendiente envío
+## Batch 2: Emails enviados (25 mayo 2026)
+
+| # | Negocio | Email | Vertical | Status |
+|---|---------|--------|----------|--------|
+| 4 | Yanbal México | contacto@yanbal.com | Ventas directas/beauty | Enviado |
+| 5 | DentiFind | contacto@dentifind.com | Dental platform | Enviado |
+| 6 | Koi Spa | info@koi-spa.com | Wellness/spa | Enviado |
+| 7 | The Barbershop MX | contacto@thebarbershop.com.mx | Barbería | Enviado |
+| 8 | Nail Bar MX | contacto@nailbar.com.mx | Uñas | Enviado |
+| 9 | Sport Life MX | info@sportlife.com.mx | Fitness | Enviado |
+| 10 | Doctoralia MX | contacto@doctoralia.com.mx | Citas médicas | Enviado |
+
+## Batch 3: Prospects pendientes de envío (emails inferidos)
 
 Estos negocios tienen sitio web con página de contacto. Emails inferidos del dominio (formato común México: info@, contacto@, hola@ + dominio). Requieren verificación manual antes de envío.
 
@@ -24,29 +36,28 @@ Estos negocios tienen sitio web con página de contacto. Emails inferidos del do
 
 | # | Negocio | Ciudad | Sitio Web | Email Probable | Vertical |
 |---|---------|--------|-----------|----------------|----------|
-| 4 | Peluquería Salvaje | CDMX | peluqueriasalvaje.com | info@peluqueriasalvaje.com | Peluquería |
-| 5 | Sister's Salón | CDMX | sisterssalon.com.mx | contacto@sisterssalon.com.mx | Belleza |
-| 6 | Cut & Color Studio | Monterrey | cutandcolor.mx | info@cutandcolor.mx | Colorista |
-| 7 | Casa Uña | Guadalajara | casauna.mx | contacto@casauna.mx | Uñas |
-| 8 | Beauty Concept | CDMX | beautyconcept.com.mx | info@beautyconcept.com.mx | Belleza integral |
-| 9 | Studio 22 | Querétaro | studio22.com.mx | contacto@studio22.com.mx | Peluquería |
+| 11 | Peluquería Salvaje | CDMX | peluqueriasalvaje.com | info@peluqueriasalvaje.com | Peluquería |
+| 12 | Sister's Salón | CDMX | sisterssalon.com.mx | contacto@sisterssalon.com.mx | Belleza |
+| 13 | Cut & Color Studio | Monterrey | cutandcolor.mx | info@cutandcolor.mx | Colorista |
+| 14 | Casa Uña | Guadalajara | casauna.mx | contacto@casauna.mx | Uñas |
+| 15 | Beauty Concept | CDMX | beautyconcept.com.mx | info@beautyconcept.com.mx | Belleza integral |
+| 16 | Studio 22 | Querétaro | studio22.com.mx | contacto@studio22.com.mx | Peluquería |
 
 ### Dental / Salud
 
 | # | Negocio | Ciudad | Sitio Web | Email Probable | Vertical |
 |---|---------|--------|-----------|----------------|----------|
-| 10 | Clínica Dental del Valle | CDMX | clinicadentaldelvalle.com | info@clinicadentaldelvalle.com | Dental |
-| 11 | Odontología Premium | Monterrey | odontologiapremium.mx | contacto@odontologiapremium.mx | Dental |
-| 12 | Dental Art | Guadalajara | dentalart.com.mx | info@dentalart.com.mx | Dental |
-| 13 | Clínica Dental smile | Querétaro | dentalsmile.mx | contacto@dentalsmile.mx | Dental |
+| 17 | Clínica Dental del Valle | CDMX | clinicadentaldelvalle.com | info@clinicadentaldelvalle.com | Dental |
+| 18 | Odontología Premium | Monterrey | odontologiapremium.mx | contacto@odontologiapremium.mx | Dental |
+| 19 | Dental Art | Guadalajara | dentalart.com.mx | info@dentalart.com.mx | Dental |
 
 ### Spa / Wellness
 
 | # | Negocio | Ciudad | Sitio Web | Email Probable | Vertical |
 |---|---------|--------|-----------|----------------|----------|
-| 14 | Spa Retreat CDMX | CDMX | sparetreatcdmx.com | info@sparetreatcdmx.com | Spa |
-| 15 | Zen Spa | Monterrey | zenspa.com.mx | contacto@zenspa.com.mx | Spa |
-| 16 | Body & Soul Spa | Cancún | bodyandsoulspa.mx | info@bodyandsoulspa.mx | Spa |
+| 20 | Spa Retreat CDMX | CDMX | sparetreatcdmx.com | info@sparetreatcdmx.com | Spa |
+| 21 | Zen Spa | Monterrey | zenspa.com.mx | contacto@zenspa.com.mx | Spa |
+| 22 | Body & Soul Spa | Cancún | bodyandsoulspa.mx | info@bodyandsoulspa.mx | Spa |
 
 ---
 
