@@ -5,10 +5,14 @@ import { eq } from "drizzle-orm";
 import { getPriceId } from "./products.js";
 import { stripe } from "./stripe.js";
 
+const FOUNDING_COUPON_ID = process.env.STRIPE_FOUNDING_COUPON_ID ?? "";
+const TRIAL_DAYS = 14;
+
 export async function createCheckoutSession(
   workspaceId: string,
   customerEmail: string,
-  tier: PlanTier
+  tier: PlanTier,
+  founding = false
 ): Promise<{ url: string }> {
   if (!stripe) {
     throw new Error("Stripe is not configured");
@@ -22,7 +26,6 @@ export async function createCheckoutSession(
   let customerId = customers.data[0]?.id;
 
   if (customerId) {
-    // Update workspace ID on existing customer
     await stripe.customers.update(customerId, {
       metadata: { workspaceId },
     });
@@ -43,9 +46,14 @@ export async function createCheckoutSession(
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${process.env.APP_URL ?? "http://localhost:5173"}/dashboard?billing=success`,
     cancel_url: `${process.env.APP_URL ?? "http://localhost:5173"}/dashboard/settings?billing=cancel`,
-    metadata: { workspaceId, tier },
+    metadata: { workspaceId, tier, founding: founding ? "true" : "false" },
+    discounts:
+      founding && FOUNDING_COUPON_ID
+        ? [{ coupon: FOUNDING_COUPON_ID }]
+        : undefined,
     subscription_data: {
       metadata: { workspaceId, tier },
+      trial_period_days: founding ? TRIAL_DAYS : undefined,
     },
   });
 

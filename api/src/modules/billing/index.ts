@@ -57,7 +57,8 @@ export const billingModule = new Elysia({ prefix: "/billing" })
         const session = await createCheckoutSession(
           workspaceId as string,
           data.email,
-          (data.tier ?? "local_solo") as PlanTier
+          (data.tier ?? "local_solo") as PlanTier,
+          data.founding === "true"
         );
         return session;
       } catch (err) {
@@ -73,6 +74,7 @@ export const billingModule = new Elysia({ prefix: "/billing" })
       body: t.Object({
         tier: t.String(),
         email: t.String(),
+        founding: t.Optional(t.String()),
       }),
     }
   )
