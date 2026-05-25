@@ -1,17 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 const GITHUB_REPO = "cedriking/zenda";
-const FALLBACK_BASE = "https://zenda.bot";
+const FALLBACK_BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://zenda.bot";
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 export async function GET(_request: NextRequest) {
   try {
-    // Fetch the latest release from GitHub API
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github+json",
+    };
+    if (GITHUB_TOKEN) {
+      headers.Authorization = `Bearer ${GITHUB_TOKEN}`;
+    }
+
     const res = await fetch(
       `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`,
-      {
-        headers: { Accept: "application/vnd.github+json" },
-        next: { revalidate: 300 }, // cache for 5 minutes
-      }
+      { headers, next: { revalidate: 300 } },
     );
 
     if (!res.ok) {
