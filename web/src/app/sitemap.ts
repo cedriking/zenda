@@ -21,6 +21,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/blog/whatsapp-beauty-salon",
     "/blog/whatsapp-dentista-citas",
     "/blog/whatsapp-salon-belleza",
+    "/blog/whatsapp-fitness-booking",
+    "/blog/whatsapp-spa-citas",
     "/legal/privacy",
     "/legal/terms",
   ];
