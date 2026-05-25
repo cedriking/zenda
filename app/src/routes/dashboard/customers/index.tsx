@@ -1,16 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState, useMemo } from "react";
+import {
+  AlertCircle,
+  Calendar,
+  Phone,
+  Search,
+  User,
+  Users,
+  X,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../services/api-client";
-import {
-  Search,
-  X,
-  User,
-  Phone,
-  Calendar,
-  AlertCircle,
-  Users,
-} from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/customers/")({
   component: CustomersPage,
@@ -18,11 +18,11 @@ export const Route = createFileRoute("/dashboard/customers/")({
 
 interface CustomerSummary {
   id: string;
-  phoneNumber: string;
-  name: string | null;
   language: string;
-  totalAppointments: number;
   lastVisit: string | null;
+  name: string | null;
+  phoneNumber: string;
+  totalAppointments: number;
 }
 
 function CustomersPage() {
@@ -32,12 +32,7 @@ function CustomersPage() {
   const [error, setError] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    loadCustomers();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  async function loadCustomers() {
+  const loadCustomers = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
@@ -47,11 +42,17 @@ function CustomersPage() {
       setError(true);
     }
     setLoading(false);
-  }
+  }, []);
+
+  useEffect(() => {
+    loadCustomers();
+  }, [loadCustomers]);
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return customers;
+    if (!q) {
+      return customers;
+    }
     return customers.filter(
       (c) =>
         (c.name ?? "").toLowerCase().includes(q) ||
@@ -68,15 +69,15 @@ function CustomersPage() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="max-w-md mx-auto mt-12 text-center">
+        <div className="mx-auto mt-12 max-w-md text-center">
           <AlertCircle className="mx-auto mb-4 text-destructive" size={40} />
-          <h2 className="text-lg font-semibold mb-2">
+          <h2 className="mb-2 font-semibold text-lg">
             {t("customer.loadError")}
           </h2>
           <button
-            type="button"
+            className="rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
             onClick={loadCustomers}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            type="button"
           >
             {t("customer.retry")}
           </button>
@@ -87,11 +88,11 @@ function CustomersPage() {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-foreground">
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="font-bold text-2xl text-foreground">
           {t("customer.listingTitle")}
         </h2>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-muted-foreground text-sm">
           {filtered.length} {filtered.length === 1 ? "customer" : "customers"}
         </span>
       </div>
@@ -99,21 +100,21 @@ function CustomersPage() {
       {/* Search */}
       <div className="relative mb-6">
         <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
           size={18}
         />
         <input
-          type="text"
-          value={searchQuery}
+          className="w-full rounded-lg border border-border bg-input py-2.5 pr-10 pl-10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder={t("customer.searchPlaceholder")}
-          className="w-full pl-10 pr-10 py-2.5 bg-input border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+          type="text"
+          value={searchQuery}
         />
         {searchQuery && (
           <button
-            type="button"
+            className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             onClick={() => setSearchQuery("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            type="button"
           >
             <X size={18} />
           </button>
@@ -122,9 +123,9 @@ function CustomersPage() {
 
       {/* Empty state */}
       {filtered.length === 0 && (
-        <div className="text-center py-12">
+        <div className="py-12 text-center">
           <Users className="mx-auto mb-4 text-muted-foreground" size={48} />
-          <h3 className="text-lg font-semibold mb-1">
+          <h3 className="mb-1 font-semibold text-lg">
             {searchQuery
               ? t("common.noResults", "No results")
               : t("customer.noCustomers")}
@@ -141,28 +142,28 @@ function CustomersPage() {
       <div className="space-y-2">
         {filtered.map((customer) => (
           <Link
+            className="flex items-center gap-4 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-accent/50"
             key={customer.id}
-            to="/dashboard/customers/$id"
             params={{ id: customer.id }}
-            className="flex items-center gap-4 p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
+            to="/dashboard/customers/$id"
           >
             {/* Avatar */}
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
               {customer.name ? (
-                <span className="text-sm font-semibold text-primary">
+                <span className="font-semibold text-primary text-sm">
                   {customer.name.charAt(0).toUpperCase()}
                 </span>
               ) : (
-                <User size={18} className="text-primary" />
+                <User className="text-primary" size={18} />
               )}
             </div>
 
             {/* Info */}
-            <div className="flex-1 min-w-0">
-              <div className="font-medium text-foreground truncate">
+            <div className="min-w-0 flex-1">
+              <div className="truncate font-medium text-foreground">
                 {customer.name ?? t("customer.unknownName")}
               </div>
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <div className="flex items-center gap-3 text-muted-foreground text-sm">
                 <span className="flex items-center gap-1">
                   <Phone size={13} />
                   {customer.phoneNumber}
@@ -180,7 +181,7 @@ function CustomersPage() {
 
             {/* Language badge */}
             {customer.language && (
-              <span className="flex-shrink-0 text-xs font-medium px-2 py-1 rounded-full bg-muted text-muted-foreground uppercase">
+              <span className="flex-shrink-0 rounded-full bg-muted px-2 py-1 font-medium text-muted-foreground text-xs uppercase">
                 {customer.language}
               </span>
             )}

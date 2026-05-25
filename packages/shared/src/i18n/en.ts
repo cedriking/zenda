@@ -376,7 +376,8 @@ export const en = {
   customer: {
     notFound: "Customer not found",
     errorTitle: "Failed to load customer",
-    errorDescription: "Something went wrong loading this customer's profile. Please try again.",
+    errorDescription:
+      "Something went wrong loading this customer's profile. Please try again.",
     backToConversations: "Back to conversations",
     unknownName: "Unknown Customer",
     langSpanish: "Spanish",
@@ -386,7 +387,8 @@ export const en = {
     listingTitle: "Customers",
     searchPlaceholder: "Search by name or phone…",
     noCustomers: "No customers yet",
-    noCustomersHint: "Customers will appear here once they message your business.",
+    noCustomersHint:
+      "Customers will appear here once they message your business.",
     loadError: "Failed to load customers",
     retry: "Retry",
     phone: "Phone",
