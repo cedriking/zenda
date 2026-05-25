@@ -43,5 +43,8 @@ jobs:
       - name: Make and Publish (${{ matrix.maker }})
         working-directory: app
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          S3_DOWNLOADS_ENDPOINT: ${{ secrets.S3_DOWNLOADS_ENDPOINT }}
+          S3_DOWNLOADS_ACCESS_KEY_ID: ${{ secrets.S3_DOWNLOADS_ACCESS_KEY_ID }}
+          S3_DOWNLOADS_SECRET_ACCESS_KEY: ${{ secrets.S3_DOWNLOADS_SECRET_ACCESS_KEY }}
+          S3_DOWNLOADS_BUCKET: ${{ secrets.S3_DOWNLOADS_BUCKET }}
         run: npx electron-forge publish
