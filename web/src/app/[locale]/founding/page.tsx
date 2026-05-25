@@ -4,6 +4,10 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { FoundingPageClient } from "@/components/page-founding";
 
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("founding");
   return {
@@ -63,7 +67,8 @@ const T_KEYS = [
   "errorPasswordMin",
 ] as const;
 
-export default async function FoundingPage() {
+export default async function FoundingPage({ params }: Props) {
+  const { locale } = await params;
   const t = await getTranslations("founding");
 
   const strings: Record<string, string> = {};
@@ -74,7 +79,7 @@ export default async function FoundingPage() {
   return (
     <div className="min-h-screen bg-neutral-200">
       <Nav variant="simple" />
-      <FoundingPageClient t={(k: string) => strings[k] ?? k} />
+      <FoundingPageClient locale={locale} t={(k: string) => strings[k] ?? k} />
       <Footer />
     </div>
   );

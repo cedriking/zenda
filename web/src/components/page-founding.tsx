@@ -6,10 +6,11 @@ import { useRouter } from "@/i18n/navigation";
 import { apiFetch } from "@/lib/api-client";
 
 interface FoundingPageClientProps {
+  locale: string;
   t: (key: string) => string;
 }
 
-export function FoundingPageClient({ t }: FoundingPageClientProps) {
+export function FoundingPageClient({ t, locale }: FoundingPageClientProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,7 +39,7 @@ export function FoundingPageClient({ t }: FoundingPageClientProps) {
           password,
           name,
           businessName,
-          language: "es",
+          language: locale,
         }),
       });
       setStep("success");
