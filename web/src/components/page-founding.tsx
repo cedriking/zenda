@@ -10,7 +10,10 @@ interface FoundingPageClientProps {
   strings: Record<string, string>;
 }
 
-export function FoundingPageClient({ strings, locale }: FoundingPageClientProps) {
+export function FoundingPageClient({
+  strings,
+  locale,
+}: FoundingPageClientProps) {
   const t = (key: string) => strings[key] ?? key;
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -63,7 +66,7 @@ export function FoundingPageClient({ strings, locale }: FoundingPageClientProps)
           <p className="mb-8 text-slate-600">{t("successBody")}</p>
           <Button
             className="rounded-full bg-slate-900 px-8 py-3 text-white hover:bg-slate-800"
-            onClick={() => router.push("/download")}
+            onClick={() => router.push("/pricing?founding=true")}
           >
             {t("successCta")}
           </Button>

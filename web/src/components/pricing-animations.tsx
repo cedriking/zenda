@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight, Check } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { FadeUp, StaggerChild, StaggerContainer } from "@/components/motion";
@@ -20,12 +21,18 @@ interface Plan {
 export function PricingAnimations({ plans }: { plans: Plan[] }) {
   const t = useTranslations("pricing");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isFounding = searchParams.get("founding") === "true";
 
   const handleCheckout = useCallback(
     (tier: string) => {
-      router.push(`/checkout?tier=${encodeURIComponent(tier)}`);
+      const params = new URLSearchParams({ tier });
+      if (isFounding) {
+        params.set("founding", "true");
+      }
+      router.push(`/checkout?${params.toString()}`);
     },
-    [router]
+    [router, isFounding]
   );
 
   return (
