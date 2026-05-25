@@ -36,6 +36,12 @@ export async function GET(_request: NextRequest) {
       }
     }
 
+    // Strategy 3: Fall back to GitHub Releases
+    const githubUrl = await findGitHubRelease(".dmg");
+    if (githubUrl) {
+      return NextResponse.redirect(githubUrl);
+    }
+
     // No download source configured
     return NextResponse.redirect(
       `${FALLBACK_BASE}/download?error=no-release`
@@ -79,4 +85,23 @@ async function findLatestArtifact(
   }
 
   return null;
+}
+
+async function findGitHubRelease(
+  extension: string,
+): Promise<string | null> {
+  try {
+    const res = await fetch(
+      "https://api.github.com/repos/cedriking/zenda/releases/latest",
+      { next: { revalidate: 300 } },
+    );
+    if (!res.ok) return null;
+    const release = await res.json();
+    const asset = release?.assets?.find((a: { name: string }) =>
+      a.name.endsWith(extension),
+    );
+    return asset?.browser_download_url ?? null;
+  } catch {
+    return null;
+  }
 }
