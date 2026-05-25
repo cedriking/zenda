@@ -47,7 +47,8 @@ export const de: TranslationStrings = {
     chats: "Chats",
     calendar: "Kalender",
     settings: "Einstellungen",
-    analytics: "Analytik",
+    analytics: "Analysen",
+    customers: "Kunden",
   },
   layout: {
     skipToContent: "Zum Inhalt",
@@ -361,7 +362,8 @@ export const de: TranslationStrings = {
   customer: {
     notFound: "Kunde nicht gefunden",
     errorTitle: "Kunde konnte nicht geladen werden",
-    errorDescription: "Beim Laden dieses Kundenprofils ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+    errorDescription:
+      "Beim Laden dieses Kundenprofils ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
     backToConversations: "Zurück zu Gesprächen",
     unknownName: "Unbekannter Kunde",
     langSpanish: "Spanisch",
@@ -375,6 +377,15 @@ export const de: TranslationStrings = {
     aiMemoryEmpty:
       "Noch keine gelernten Präferenzen. Sie erscheinen mit weiteren Gesprächen.",
     aiMemorySource: "Quelle: {{source}}",
+    listingTitle: "Kunden",
+    searchPlaceholder: "Nach Name oder Telefon suchen…",
+    noCustomers: "Noch keine Kunden",
+    noCustomersHint:
+      "Kunden erscheinen hier, sobald sie Ihrem Unternehmen schreiben.",
+    loadError: "Kunden konnten nicht geladen werden",
+    retry: "Erneut versuchen",
+    phone: "Telefon",
+    appointmentsCount: "{{count}} Termine",
   },
   appointments: {
     title: "Termine",
@@ -493,8 +504,10 @@ export const de: TranslationStrings = {
     sending: "Senden...",
     sendAll: "Alle senden",
     clear: "Leeren",
-    flushFailed: "Fehler beim Senden der Nachrichten. Bitte versuchen Sie es erneut.",
-    clearFailed: "Fehler beim Leeren der Entwürfe. Bitte versuchen Sie es erneut.",
+    flushFailed:
+      "Fehler beim Senden der Nachrichten. Bitte versuchen Sie es erneut.",
+    clearFailed:
+      "Fehler beim Leeren der Entwürfe. Bitte versuchen Sie es erneut.",
   },
   common: {
     loading: "Laden...",

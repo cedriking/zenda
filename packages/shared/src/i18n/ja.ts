@@ -48,6 +48,7 @@ export const ja: TranslationStrings = {
     calendar: "カレンダー",
     settings: "設定",
     analytics: "分析",
+    customers: "顧客",
   },
   layout: {
     skipToContent: "コンテンツへスキップ",
@@ -354,7 +355,8 @@ export const ja: TranslationStrings = {
   customer: {
     notFound: "お客様が見つかりません",
     errorTitle: "お客様の読み込みに失敗しました",
-    errorDescription: "このお客様のプロフィールの読み込み中にエラーが発生しました。もう一度お試しください。",
+    errorDescription:
+      "このお客様のプロフィールの読み込み中にエラーが発生しました。もう一度お試しください。",
     backToConversations: "会話に戻る",
     unknownName: "不明なお客様",
     langSpanish: "スペイン語",
@@ -366,6 +368,14 @@ export const ja: TranslationStrings = {
     aiMemoryDescription: "AI受付が会話から学習したお客様情報。",
     aiMemoryEmpty: "まだ学習した設定はありません。会話を通じて蓄積されます。",
     aiMemorySource: "出典：{{source}}",
+    listingTitle: "顧客",
+    searchPlaceholder: "名前または電話番号で検索…",
+    noCustomers: "まだ顧客がいません",
+    noCustomersHint: "顧客がビジネスにメッセージを送るとここに表示されます。",
+    loadError: "顧客の読み込みに失敗しました",
+    retry: "再試行",
+    phone: "電話",
+    appointmentsCount: "{{count}}件の予約",
   },
   appointments: {
     title: "予約",

@@ -47,6 +47,7 @@ export const ko: TranslationStrings = {
     calendar: "캘린더",
     settings: "설정",
     analytics: "분석",
+    customers: "고객",
   },
   layout: {
     skipToContent: "콘텐츠로 이동",
@@ -352,7 +353,8 @@ export const ko: TranslationStrings = {
   customer: {
     notFound: "고객을 찾을 수 없습니다",
     errorTitle: "고객 로드 실패",
-    errorDescription: "이 고객의 프로필을 로드하는 중 오류가 발생했습니다. 다시 시도해 주세요.",
+    errorDescription:
+      "이 고객의 프로필을 로드하는 중 오류가 발생했습니다. 다시 시도해 주세요.",
     backToConversations: "대화로 돌아가기",
     unknownName: "알 수 없는 고객",
     langSpanish: "스페인어",
@@ -364,6 +366,14 @@ export const ko: TranslationStrings = {
     aiMemoryDescription: "AI 리셉셔니스트가 대화에서 학습한 고객 정보입니다.",
     aiMemoryEmpty: "아직 학습된 선호가 없습니다. 대화를 통해 축적됩니다.",
     aiMemorySource: "출처: {{source}}",
+    listingTitle: "고객",
+    searchPlaceholder: "이름 또는 전화번호로 검색…",
+    noCustomers: "아직 고객이 없습니다",
+    noCustomersHint: "고객이 비즈니스에 메시지를 보내면 여기에 나타납니다.",
+    loadError: "고객 로드 실패",
+    retry: "재시도",
+    phone: "전화",
+    appointmentsCount: "{{count}}건의 예약",
   },
   appointments: {
     title: "예약",

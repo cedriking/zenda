@@ -47,6 +47,7 @@ export const ru: TranslationStrings = {
     calendar: "Календарь",
     settings: "Настройки",
     analytics: "Аналитика",
+    customers: "Клиенты",
   },
   layout: {
     skipToContent: "Перейти к содержимому",
@@ -353,7 +354,8 @@ export const ru: TranslationStrings = {
   customer: {
     notFound: "Клиент не найден",
     errorTitle: "Не удалось загрузить клиента",
-    errorDescription: "Произошла ошибка при загрузке профиля клиента. Пожалуйста, попробуйте снова.",
+    errorDescription:
+      "Произошла ошибка при загрузке профиля клиента. Пожалуйста, попробуйте снова.",
     backToConversations: "Назад к диалогам",
     unknownName: "Неизвестный клиент",
     langSpanish: "Испанский",
@@ -366,6 +368,14 @@ export const ru: TranslationStrings = {
       "Информация, которую ИИ-ресепшионист узнал из диалогов.",
     aiMemoryEmpty: "Пока нет изученных предпочтений. Они появятся с диалогами.",
     aiMemorySource: "Источник: {{source}}",
+    listingTitle: "Клиенты",
+    searchPlaceholder: "Поиск по имени или телефону…",
+    noCustomers: "Клиентов пока нет",
+    noCustomersHint: "Клиенты появятся здесь, когда напишут вашему бизнесу.",
+    loadError: "Не удалось загрузить клиентов",
+    retry: "Повторить",
+    phone: "Телефон",
+    appointmentsCount: "{{count}} записей",
   },
   appointments: {
     title: "Записи",

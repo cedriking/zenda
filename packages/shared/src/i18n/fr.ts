@@ -48,6 +48,7 @@ export const fr: TranslationStrings = {
     calendar: "Calendrier",
     settings: "Paramètres",
     analytics: "Analytique",
+    customers: "Clients",
   },
   layout: {
     skipToContent: "Aller au contenu",
@@ -362,7 +363,8 @@ export const fr: TranslationStrings = {
   customer: {
     notFound: "Client non trouvé",
     errorTitle: "Échec du chargement du client",
-    errorDescription: "Une erreur s'est produite lors du chargement du profil de ce client. Veuillez réessayer.",
+    errorDescription:
+      "Une erreur s'est produite lors du chargement du profil de ce client. Veuillez réessayer.",
     backToConversations: "Retour aux conversations",
     unknownName: "Client inconnu",
     langSpanish: "Espagnol",
@@ -376,6 +378,15 @@ export const fr: TranslationStrings = {
     aiMemoryEmpty:
       "Pas encore de préférences apprises. Elles apparaîtront avec les conversations.",
     aiMemorySource: "Source : {{source}}",
+    listingTitle: "Clients",
+    searchPlaceholder: "Rechercher par nom ou téléphone…",
+    noCustomers: "Aucun client pour l'instant",
+    noCustomersHint:
+      "Les clients apparaîtront ici lorsqu'ils contacteront votre entreprise.",
+    loadError: "Échec du chargement des clients",
+    retry: "Réessayer",
+    phone: "Téléphone",
+    appointmentsCount: "{{count}} rendez-vous",
   },
   appointments: {
     title: "Rendez-vous",
@@ -494,7 +505,8 @@ export const fr: TranslationStrings = {
     sending: "Envoi en cours...",
     sendAll: "Tout envoyer",
     clear: "Effacer",
-    flushFailed: "Échec de l'envoi des messages en attente. Veuillez réessayer.",
+    flushFailed:
+      "Échec de l'envoi des messages en attente. Veuillez réessayer.",
     clearFailed: "Échec de l'effacement des brouillons. Veuillez réessayer.",
   },
   common: {

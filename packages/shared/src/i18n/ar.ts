@@ -46,7 +46,8 @@ export const ar: TranslationStrings = {
     chats: "الدردشات",
     calendar: "التقويم",
     settings: "الإعدادات",
-    analytics: "التحليلات",
+    analytics: "تحليلات",
+    customers: "العملاء",
   },
   layout: {
     skipToContent: "تخطي إلى المحتوى",
@@ -355,7 +356,8 @@ export const ar: TranslationStrings = {
   customer: {
     notFound: "العميل غير موجود",
     errorTitle: "فشل تحميل العميل",
-    errorDescription: "حدث خطأ أثناء تحميل ملف هذا العميل. يرجى المحاولة مرة أخرى.",
+    errorDescription:
+      "حدث خطأ أثناء تحميل ملف هذا العميل. يرجى المحاولة مرة أخرى.",
     backToConversations: "العودة للمحادثات",
     unknownName: "عميل غير معروف",
     langSpanish: "الإسبانية",
@@ -368,6 +370,14 @@ export const ar: TranslationStrings = {
       "المعلومات التي تعلمتها موظفة الاستقبال الذكية عن هذا العميل من المحادثات.",
     aiMemoryEmpty: "لا توجد تفضيلات مستفادة بعد. ستظهر مع حدوث المحادثات.",
     aiMemorySource: "المصدر: {{source}}",
+    listingTitle: "العملاء",
+    searchPlaceholder: "ابحث بالاسم أو الهاتف…",
+    noCustomers: "لا يوجد عملاء بعد",
+    noCustomersHint: "سيظهر العملاء هنا بمجرد مراسلتهم لعملك.",
+    loadError: "فشل تحميل العملاء",
+    retry: "إعادة المحاولة",
+    phone: "الهاتف",
+    appointmentsCount: "{{count}} مواعيد",
   },
   appointments: {
     title: "المواعيد",

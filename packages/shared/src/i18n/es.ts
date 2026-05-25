@@ -48,6 +48,7 @@ export const es: TranslationStrings = {
     calendar: "Calendario",
     settings: "Configuración",
     analytics: "Analíticas",
+    customers: "Clientes",
   },
   layout: {
     skipToContent: "Saltar al contenido",
@@ -360,13 +361,23 @@ export const es: TranslationStrings = {
   customer: {
     notFound: "Cliente no encontrado",
     errorTitle: "Error al cargar el cliente",
-    errorDescription: "Ocurrió un error al cargar el perfil de este cliente. Por favor, inténtelo de nuevo.",
+    errorDescription:
+      "Ocurrió un error al cargar el perfil de este cliente. Por favor, inténtelo de nuevo.",
     backToConversations: "Volver a conversaciones",
     unknownName: "Cliente Desconocido",
     langSpanish: "Español",
     langEnglish: "Inglés",
     totalAppointments: "Total de Citas",
     lastVisit: "Última Visita",
+    listingTitle: "Clientes",
+    searchPlaceholder: "Buscar por nombre o teléfono…",
+    noCustomers: "Sin clientes aún",
+    noCustomersHint:
+      "Los clientes aparecerán aquí cuando envíen un mensaje a tu negocio.",
+    loadError: "Error al cargar clientes",
+    retry: "Reintentar",
+    phone: "Teléfono",
+    appointmentsCount: "{{count}} citas",
     never: "Nunca",
     aiMemoryHeading: "Lo que Zenda Sabe",
     aiMemoryDescription:
