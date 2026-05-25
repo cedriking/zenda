@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Footer } from "@/components/footer";
+import { JsonLdScript } from "@/components/json-ld";
 import { Nav } from "@/components/nav";
 import { VerticalAnimations } from "@/components/vertical-animations";
 import { Link } from "@/i18n/navigation";
@@ -16,8 +17,27 @@ export interface VerticalPageConfig {
 export async function VerticalPage({ config }: { config: VerticalPageConfig }) {
   const t = await getTranslations("verticals");
 
+  const serviceLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: config.headline,
+    description: config.description,
+    provider: {
+      "@type": "Organization",
+      name: "Zenda",
+      url: "https://zenda.bot",
+    },
+    serviceType: "AI Receptionist",
+    areaServed: {
+      "@type": "GeoShape",
+      name: "Latin America",
+    },
+    url: `https://zenda.bot/${config.slug}`,
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-neutral-200 pt-16">
+      <JsonLdScript data={serviceLd} />
       <Nav variant="simple" />
 
       <main className="relative flex-1 overflow-hidden">

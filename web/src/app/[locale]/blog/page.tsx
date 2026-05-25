@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Footer } from "@/components/footer";
+import { JsonLdScript } from "@/components/json-ld";
 import { Nav } from "@/components/nav";
 
 export function generateMetadata(): Metadata {
@@ -129,8 +130,28 @@ export default function BlogIndexPage() {
   const esPosts = posts.filter((p) => p.lang === "es");
   const enPosts = posts.filter((p) => p.lang === "en");
 
+  const blogLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "Zenda Blog",
+    description: "WhatsApp automation guides for appointment-based businesses",
+    url: "https://zenda.bot/blog",
+    publisher: {
+      "@type": "Organization",
+      name: "Zenda",
+      url: "https://zenda.bot",
+    },
+    blogPost: posts.map((p) => ({
+      "@type": "BlogPosting",
+      headline: p.title,
+      description: p.description,
+      url: `https://zenda.bot/blog/${p.slug}`,
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-white">
+      <JsonLdScript data={blogLd} />
       <Nav variant="simple" />
 
       <main className="mx-auto max-w-4xl px-6 py-16">

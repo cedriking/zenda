@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Footer } from "@/components/footer";
+import { JsonLdScript } from "@/components/json-ld";
 import { Nav } from "@/components/nav";
 import { FoundingPageClient } from "@/components/page-founding";
 
@@ -76,8 +77,22 @@ export default async function FoundingPage({ params }: Props) {
     strings[key] = t(key);
   }
 
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [1, 2, 3, 4].map((i) => ({
+      "@type": "Question",
+      name: t(`faq${i}Q`),
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: t(`faq${i}A`),
+      },
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-neutral-200">
+      <JsonLdScript data={faqLd} />
       <Nav variant="simple" />
       <FoundingPageClient locale={locale} strings={strings} />
       <Footer />
