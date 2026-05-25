@@ -87,7 +87,7 @@ async function setupProducts() {
   // Create a webhook endpoint if in live mode
   if (isLive) {
     console.log("IMPORTANT: Create a Stripe webhook endpoint:");
-    console.log("  URL: https://zenda.bot/billing/webhook");
+    console.log("  URL: https://api.zenda.bot/billing/webhook");
     console.log(
       "  Events: checkout.session.completed, customer.subscription.created,"
     );
