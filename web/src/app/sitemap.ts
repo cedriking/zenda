@@ -12,6 +12,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/beauty",
     "/wellness",
     "/clinics",
+    "/dental",
+    "/fitness",
     "/founding",
     "/blog",
     "/blog/whatsapp-citas-salon",
