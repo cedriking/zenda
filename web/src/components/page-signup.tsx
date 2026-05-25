@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Nav } from "@/components/nav";
@@ -7,9 +8,48 @@ import { Button } from "@/components/ui/button";
 import { Link, useRouter } from "@/i18n/navigation";
 import { signup } from "@/lib/api-client";
 
+const HAS_UPPER = /[A-Z]/;
+const HAS_LOWER = /[a-z]/;
+const HAS_DIGIT = /\d/;
+const HAS_SPECIAL = /[^A-Za-z0-9]/;
+
+function getStrengthColor(strength: number, active: boolean): string {
+  if (!active) {
+    return "bg-muted";
+  }
+  if (strength <= 1) {
+    return "bg-red-400";
+  }
+  if (strength <= 2) {
+    return "bg-yellow-400";
+  }
+  if (strength <= 3) {
+    return "bg-primary";
+  }
+  return "bg-green-500";
+}
+
+function getStrengthTextColor(strength: number): string {
+  if (strength <= 1) {
+    return "text-red-500";
+  }
+  if (strength <= 2) {
+    return "text-yellow-600";
+  }
+  if (strength <= 3) {
+    return "text-primary";
+  }
+  return "text-green-600";
+}
+
 export function SignupPageClient() {
   const t = useTranslations("auth");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const checkoutTier = searchParams.get("checkout");
+  const isFounding =
+    searchParams.get("coupon") === "aRgf7NZC" ||
+    searchParams.get("founding") === "true";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -22,16 +62,29 @@ export function SignupPageClient() {
     if (password.length >= 8) {
       score++;
     }
-    if (/[A-Z]/.test(password) && /[a-z]/.test(password)) {
+    if (HAS_UPPER.test(password) && HAS_LOWER.test(password)) {
       score++;
     }
-    if (/\d/.test(password)) {
+    if (HAS_DIGIT.test(password)) {
       score++;
     }
-    if (/[^A-Za-z0-9]/.test(password)) {
+    if (HAS_SPECIAL.test(password)) {
       score++;
     }
     return score;
+  })();
+
+  const strengthLabel = (() => {
+    if (passwordStrength <= 1) {
+      return t("passwordWeak");
+    }
+    if (passwordStrength <= 2) {
+      return t("passwordFair");
+    }
+    if (passwordStrength <= 3) {
+      return t("passwordGood");
+    }
+    return t("passwordStrong");
   })();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -47,7 +100,15 @@ export function SignupPageClient() {
 
     try {
       await signup({ email, password, name, businessName });
-      router.push("/download");
+      if (checkoutTier) {
+        const params = new URLSearchParams({ tier: checkoutTier });
+        if (isFounding) {
+          params.set("founding", "true");
+        }
+        router.push(`/checkout?${params.toString()}`);
+      } else {
+        router.push("/download");
+      }
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -77,11 +138,15 @@ export function SignupPageClient() {
             )}
 
             <div>
-              <label className="mb-1.5 block font-medium text-sm">
+              <label
+                className="mb-1.5 block font-medium text-sm"
+                htmlFor="name"
+              >
                 {t("nameLabel")}
               </label>
               <input
                 className={inputClass}
+                id="name"
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t("namePlaceholder")}
                 required
@@ -91,11 +156,15 @@ export function SignupPageClient() {
             </div>
 
             <div>
-              <label className="mb-1.5 block font-medium text-sm">
+              <label
+                className="mb-1.5 block font-medium text-sm"
+                htmlFor="businessName"
+              >
                 {t("businessNameLabel")}
               </label>
               <input
                 className={inputClass}
+                id="businessName"
                 onChange={(e) => setBusinessName(e.target.value)}
                 placeholder={t("businessNamePlaceholder")}
                 required
@@ -105,11 +174,15 @@ export function SignupPageClient() {
             </div>
 
             <div>
-              <label className="mb-1.5 block font-medium text-sm">
+              <label
+                className="mb-1.5 block font-medium text-sm"
+                htmlFor="email"
+              >
                 {t("emailLabel")}
               </label>
               <input
                 className={inputClass}
+                id="email"
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t("emailPlaceholder")}
                 required
@@ -119,11 +192,15 @@ export function SignupPageClient() {
             </div>
 
             <div>
-              <label className="mb-1.5 block font-medium text-sm">
+              <label
+                className="mb-1.5 block font-medium text-sm"
+                htmlFor="password"
+              >
                 {t("passwordLabel")}
               </label>
               <input
                 className={inputClass}
+                id="password"
                 minLength={8}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={t("passwordSignupPlaceholder")}
@@ -136,39 +213,15 @@ export function SignupPageClient() {
                   <div className="mb-1 flex gap-1">
                     {[1, 2, 3, 4].map((i) => (
                       <div
-                        className={`h-1 flex-1 rounded-full ${
-                          passwordStrength >= i
-                            ? passwordStrength <= 1
-                              ? "bg-red-400"
-                              : passwordStrength <= 2
-                                ? "bg-yellow-400"
-                                : passwordStrength <= 3
-                                  ? "bg-primary"
-                                  : "bg-green-500"
-                            : "bg-muted"
-                        }`}
+                        className={`h-1 flex-1 rounded-full ${getStrengthColor(passwordStrength, passwordStrength >= i)}`}
                         key={i}
                       />
                     ))}
                   </div>
                   <p
-                    className={`text-xs ${
-                      passwordStrength <= 1
-                        ? "text-red-500"
-                        : passwordStrength <= 2
-                          ? "text-yellow-600"
-                          : passwordStrength <= 3
-                            ? "text-primary"
-                            : "text-green-600"
-                    }`}
+                    className={`text-xs ${getStrengthTextColor(passwordStrength)}`}
                   >
-                    {passwordStrength <= 1
-                      ? t("passwordWeak")
-                      : passwordStrength <= 2
-                        ? t("passwordFair")
-                        : passwordStrength <= 3
-                          ? t("passwordGood")
-                          : t("passwordStrong")}
+                    {strengthLabel}
                   </p>
                 </div>
               )}

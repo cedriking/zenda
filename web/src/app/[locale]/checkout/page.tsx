@@ -1,15 +1,16 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Nav } from "@/components/nav";
 import { useRouter } from "@/i18n/navigation";
-import { useSearchParams } from "next/navigation";
 import { apiFetch, getAccessToken } from "@/lib/api-client";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tier = searchParams.get("tier") ?? "";
+  const founding = searchParams.get("founding") === "true";
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -18,14 +19,19 @@ export default function CheckoutPage() {
 
       if (!token) {
         // Not logged in — redirect to signup with checkout intent
-        router.replace(`/signup?checkout=${encodeURIComponent(tier)}`);
+        router.replace(
+          `/signup?checkout=${encodeURIComponent(tier)}&founding=${founding}`
+        );
         return;
       }
 
       try {
         const data = await apiFetch<{ url: string }>("/billing/checkout", {
           method: "POST",
-          body: JSON.stringify({ tier }),
+          body: JSON.stringify({
+            tier,
+            founding: founding ? "true" : undefined,
+          }),
         });
 
         if (data.url) {
@@ -43,7 +49,7 @@ export default function CheckoutPage() {
     } else {
       router.replace("/pricing");
     }
-  }, [tier, router]);
+  }, [tier, founding, router]);
 
   return (
     <div className="flex min-h-screen flex-col pt-16">
