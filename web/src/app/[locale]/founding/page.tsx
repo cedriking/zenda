@@ -79,7 +79,7 @@ export default async function FoundingPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-neutral-200">
       <Nav variant="simple" />
-      <FoundingPageClient locale={locale} t={(k: string) => strings[k] ?? k} />
+      <FoundingPageClient locale={locale} strings={strings} />
       <Footer />
     </div>
   );

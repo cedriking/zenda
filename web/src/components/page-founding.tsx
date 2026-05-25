@@ -7,10 +7,11 @@ import { apiFetch } from "@/lib/api-client";
 
 interface FoundingPageClientProps {
   locale: string;
-  t: (key: string) => string;
+  strings: Record<string, string>;
 }
 
-export function FoundingPageClient({ t, locale }: FoundingPageClientProps) {
+export function FoundingPageClient({ strings, locale }: FoundingPageClientProps) {
+  const t = (key: string) => strings[key] ?? key;
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
