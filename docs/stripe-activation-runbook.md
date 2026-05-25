@@ -25,7 +25,10 @@ This script will:
 - Create monthly prices: $29, $49, $89, $149 USD
 - Print the env vars you need to set
 
-**Copy the output** — you'll need the price IDs for Step 3.
+**Note:** As of commit `16cbf38`, the API automatically discovers price IDs from
+Stripe at startup. The `STRIPE_PRICE_*` env vars are now optional — the code
+will find or create the correct prices in Stripe and use them automatically.
+You can still set them explicitly to override the auto-discovered values.
 
 ## Step 3: Register Webhook Endpoint (3 min)
 
@@ -50,6 +53,10 @@ Go to your Coolify instance and update these env vars for the **API** service:
 ```
 STRIPE_SECRET_KEY=sk_live_XXXXXXXXXXXXXXXXXXXX
 STRIPE_WEBHOOK_SECRET=whsec_XXXXXXXXXXXXXXXXXXXX
+```
+
+**Optional** — price ID env vars (auto-discovered from Stripe at startup):
+```
 STRIPE_PRICE_LOCAL_SOLO_MONTHLY=price_XXXXXXXX
 STRIPE_PRICE_LOCAL_STARTER_MONTHLY=price_XXXXXXXX
 STRIPE_PRICE_LOCAL_PRO_MONTHLY=price_XXXXXXXX
@@ -85,8 +92,8 @@ After the services restart, test the billing:
 
 **"Failed to create checkout session"**
 - Verify `STRIPE_SECRET_KEY` starts with `sk_live_`
-- Verify price IDs start with `price_` (not `price_local_...`)
-- Check API logs in Coolify
+- Verify the API container was rebuilt after the latest commit (price IDs are auto-discovered)
+- Check API logs in Coolify — should show "Created Stripe product/price" or "Synced price" messages
 
 **"Invalid request: invalid_price"**
 - The price IDs in env vars don't match what's in Stripe
