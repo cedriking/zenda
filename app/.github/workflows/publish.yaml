@@ -1,3 +1,6 @@
+# NOTE: The active workflow is at .github/workflows/publish.yaml (repo root).
+# GitHub Actions only discovers workflows at the repo root .github/workflows/.
+# This file is kept for reference.
 name: Publish Desktop App
 
 on:
@@ -22,28 +25,26 @@ jobs:
           - os: windows-latest
             maker: squirrel
     runs-on: ${{ matrix.os }}
+    env:
+      HUSKY: 0
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Install Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
           cache: npm
 
-      - name: Install root dependencies
+      - name: Install all dependencies
         run: npm ci
 
       - name: Build workspace packages
         run: npx turbo build --filter=@zenda/shared --filter=@zenda/db
 
-      - name: Install app dependencies
-        working-directory: app
-        run: npm ci
-
       - name: Make and Publish (${{ matrix.maker }})
         working-directory: app
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run publish
+        run: npx electron-forge publish
