@@ -417,7 +417,8 @@
       "feature5Desc": "英语和西班牙语。无需额外前台人员即可服务多元化的患者群体。",
       "feature6Title": "安全通信",
       "feature6Desc": "所有对话均加密，提供完整审计追踪。"
-    }
+    },
+    "otherVerticals": "我们也服务于其他行业"
   },
   "auth": {
     "loginTitle": "欢迎回来",

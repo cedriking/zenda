@@ -418,7 +418,8 @@
       "feature5Desc": "English and Spanish. Serve diverse patient populations without additional front-desk staff.",
       "feature6Title": "Secure Communication",
       "feature6Desc": "All conversations are encrypted with full audit trails. Compliant messaging out of the box."
-    }
+    },
+    "otherVerticals": "Also serving other industries"
   },
   "auth": {
     "loginTitle": "Welcome back",

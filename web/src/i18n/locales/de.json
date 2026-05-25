@@ -415,7 +415,8 @@
       "feature5Desc": "Englisch und Spanisch. Betreuen Sie diverse Patienten ohne zusätzliches Empfangspersonal.",
       "feature6Title": "Sichere Kommunikation",
       "feature6Desc": "Alle Gespräche verschlüsselt mit vollständigen Audit-Trails."
-    }
+    },
+    "otherVerticals": "Wir bedienen auch andere Branchen"
   },
   "auth": {
     "loginTitle": "Willkommen zurück",

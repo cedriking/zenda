@@ -1,63 +1,101 @@
-import { Link } from '@/i18n/navigation'
-import { Nav } from '@/components/nav'
-import { Footer } from '@/components/footer'
-import { VerticalAnimations } from '@/components/vertical-animations'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations } from "next-intl/server";
+import { Footer } from "@/components/footer";
+import { Nav } from "@/components/nav";
+import { VerticalAnimations } from "@/components/vertical-animations";
+import { Link } from "@/i18n/navigation";
 
 export interface VerticalPageConfig {
-  slug: string
-  title: string
-  headline: string
-  description: string
-  featuresSectionTitle: string
-  features: { title: string; desc: string }[]
+  description: string;
+  features: { title: string; desc: string }[];
+  featuresSectionTitle: string;
+  headline: string;
+  slug: string;
+  title: string;
 }
 
 export async function VerticalPage({ config }: { config: VerticalPageConfig }) {
-  const t = await getTranslations('verticals')
+  const t = await getTranslations("verticals");
 
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-200 pt-16">
+    <div className="flex min-h-screen flex-col bg-neutral-200 pt-16">
       <Nav variant="simple" />
 
-      <main className="flex-1 relative overflow-hidden">
-        <div className="bg-white rounded-b-[2rem] shadow-2xl">
-          <section className="relative py-20 px-6 overflow-hidden">
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-emerald-500/5 rounded-full -translate-y-1/2 translate-x-1/4" />
-            <div className="max-w-4xl mx-auto text-center">
-              <VerticalAnimations variant="hero" headline={config.headline} description={config.description} />
+      <main className="relative flex-1 overflow-hidden">
+        <div className="rounded-b-[2rem] bg-white shadow-2xl">
+          <section className="relative overflow-hidden px-6 py-20">
+            <div className="absolute top-0 right-0 h-[400px] w-[400px] translate-x-1/4 -translate-y-1/2 rounded-full bg-emerald-500/5" />
+            <div className="mx-auto max-w-4xl text-center">
+              <VerticalAnimations
+                description={config.description}
+                headline={config.headline}
+                variant="hero"
+              />
             </div>
           </section>
 
-          <section className="relative py-16 px-6">
-            <div className="max-w-4xl mx-auto">
-              <VerticalAnimations variant="features" title={config.featuresSectionTitle} features={config.features} />
+          <section className="relative px-6 py-16">
+            <div className="mx-auto max-w-4xl">
+              <VerticalAnimations
+                features={config.features}
+                title={config.featuresSectionTitle}
+                variant="features"
+              />
             </div>
           </section>
         </div>
 
         {/* CTA section */}
-        <section className="py-20 px-6">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-slate-950 rounded-[2rem] p-8 md:p-12 text-center">
-              <h2 className="text-2xl md:text-3xl font-black text-white mb-4">
-                {t('ctaTitle', { title: config.title.toLowerCase() })}
+        <section className="px-6 py-20">
+          <div className="mx-auto max-w-4xl">
+            <div className="rounded-[2rem] bg-slate-950 p-8 text-center md:p-12">
+              <h2 className="mb-4 font-black text-2xl text-white md:text-3xl">
+                {t("ctaTitle", { title: config.title.toLowerCase() })}
               </h2>
-              <p className="text-slate-400 mb-6">
-                {t('ctaDesc')}
-              </p>
+              <p className="mb-6 text-slate-400">{t("ctaDesc")}</p>
               <Link
+                className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-3.5 font-semibold text-base text-white shadow-emerald-500/25 shadow-xl transition-colors hover:bg-emerald-600"
                 href="/signup"
-                className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-3.5 text-base font-semibold text-white hover:bg-emerald-600 transition-colors shadow-xl shadow-emerald-500/25"
               >
-                {t('ctaButton')}
+                {t("ctaButton")}
               </Link>
             </div>
           </div>
         </section>
+
+        {/* Cross-linking: other verticals */}
+        {(() => {
+          const allVerticals = [
+            { slug: "beauty", label: t("beauty.title") },
+            { slug: "clinics", label: t("clinics.title") },
+            { slug: "wellness", label: t("wellness.title") },
+            { slug: "fitness", label: t("fitness.title") },
+            { slug: "dental", label: t("dental.title") },
+          ];
+          const others = allVerticals.filter((v) => v.slug !== config.slug);
+          return (
+            <section className="px-6 py-12">
+              <div className="mx-auto max-w-4xl text-center">
+                <h3 className="mb-6 font-semibold text-lg text-neutral-700">
+                  {t("otherVerticals")}
+                </h3>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {others.map((v) => (
+                    <Link
+                      className="inline-flex items-center rounded-full border border-neutral-300 bg-white px-5 py-2 font-medium text-neutral-700 text-sm transition-colors hover:border-emerald-500 hover:text-emerald-600"
+                      href={`/${v.slug}`}
+                      key={v.slug}
+                    >
+                      {v.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        })()}
       </main>
 
       <Footer />
     </div>
-  )
+  );
 }

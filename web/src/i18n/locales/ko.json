@@ -415,7 +415,8 @@
       "feature5Desc": "영어 및 스페인어. 추가 데스크 직원 없이 다양한 환자층을 서비스합니다.",
       "feature6Title": "안전한 통신",
       "feature6Desc": "모든 대화가 암호화되며 전체 감사 추적이 제공됩니다."
-    }
+    },
+    "otherVerticals": "다른 산업도 서비스합니다"
   },
   "auth": {
     "loginTitle": "다시 오셨군요",

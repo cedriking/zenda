@@ -415,7 +415,8 @@
       "feature5Desc": "Anglais et espagnol. Servez une population diverse sans personnel supplémentaire.",
       "feature6Title": "Communication sécurisée",
       "feature6Desc": "Toutes les conversations sont chiffrées avec pistes d'audit complètes."
-    }
+    },
+    "otherVerticals": "Nous servons aussi d'autres secteurs"
   },
   "auth": {
     "loginTitle": "Bon retour",

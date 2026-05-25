@@ -418,7 +418,8 @@
       "feature5Desc": "英語とスペイン語。追加の受付スタッフなしで多様な患者に対応。",
       "feature6Title": "安全な通信",
       "feature6Desc": "すべての会話が暗号化され、完全な監査証跡を提供。"
-    }
+    },
+    "otherVerticals": "他の業界にも対応"
   },
   "auth": {
     "loginTitle": "おかえりなさい",

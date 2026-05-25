@@ -415,7 +415,8 @@
       "feature5Desc": "Inglés y español. Atiende a poblaciones de pacientes diversas sin personal adicional en recepción.",
       "feature6Title": "Comunicación segura",
       "feature6Desc": "Todas las conversaciones cifradas con registros de auditoría completos. Mensajería compatible desde el primer día."
-    }
+    },
+    "otherVerticals": "También servimos a otras industrias"
   },
   "auth": {
     "loginTitle": "Bienvenido de nuevo",
