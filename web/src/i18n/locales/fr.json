@@ -435,7 +435,9 @@
     "step4Title": "C'est parti !",
     "step4Desc": "Votre réceptionniste IA commence immédiatement à gérer les messages clients.",
     "needHelp": "Besoin d'aide ? Consultez le {link}.",
-    "docsLink": "Guide de démarrage"
+    "docsLink": "Guide de démarrage",
+    "troubleDownloading": "Problème de téléchargement ?",
+    "githubReleases": "Contactez le support pour le lien de téléchargement"
   },
   "gettingStarted": {
     "title": "Guide de démarrage rapide",

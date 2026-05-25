@@ -437,7 +437,9 @@
     "step4Title": "上线！",
     "step4Desc": "您的AI前台立即开始处理客户消息。",
     "needHelp": "需要帮助？查看{link}。",
-    "docsLink": "快速入门指南"
+    "docsLink": "快速入门指南",
+    "troubleDownloading": "下载遇到问题？",
+    "githubReleases": "请联系客服获取下载链接"
   },
   "gettingStarted": {
     "title": "快速入门指南",

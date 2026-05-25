@@ -435,7 +435,9 @@
     "step4Title": "Loslegen",
     "step4Desc": "Ihre KI-Rezeptionistin beginnt sofort, Kundennachrichten zu bearbeiten.",
     "needHelp": "Brauchen Sie Hilfe? Schauen Sie in die {link}.",
-    "docsLink": "Erste-Schritte-Anleitung"
+    "docsLink": "Erste-Schritte-Anleitung",
+    "troubleDownloading": "Probleme beim Herunterladen?",
+    "githubReleases": "Kontaktieren Sie den Support für den Download-Link"
   },
   "gettingStarted": {
     "title": "Schnellstart-Anleitung",

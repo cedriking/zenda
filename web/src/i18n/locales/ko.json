@@ -435,7 +435,9 @@
     "step4Title": "시작!",
     "step4Desc": "AI 리셉셔니스트가 즉시 고객 메시지 처리를 시작합니다.",
     "needHelp": "도움이 필요하신가요? {link}를 확인하세요.",
-    "docsLink": "빠른 시작 가이드"
+    "docsLink": "빠른 시작 가이드",
+    "troubleDownloading": "다운로드에 문제가 있으신가요?",
+    "githubReleases": "다운로드 링크는 지원팀에 문의해 주세요"
   },
   "gettingStarted": {
     "title": "빠른 시작 가이드",

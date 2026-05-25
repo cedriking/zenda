@@ -101,9 +101,7 @@ export function DownloadPageClient() {
             {t("troubleDownloading")}{" "}
             <a
               className="text-primary underline"
-              href="https://github.com/cedriking/zenda/releases"
-              rel="noopener noreferrer"
-              target="_blank"
+              href="mailto:hello@zenda.bot?subject=Download%20Link%20Request"
             >
               {t("githubReleases")}
             </a>

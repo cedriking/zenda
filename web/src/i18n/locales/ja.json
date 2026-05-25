@@ -438,7 +438,9 @@
     "step4Title": "稼働開始！",
     "step4Desc": "AI受付がすぐに顧客メッセージの対応を開始します。",
     "needHelp": "ヘルプが必要ですか？{link}をご覧ください。",
-    "docsLink": "はじめにガイド"
+    "docsLink": "はじめにガイド",
+    "troubleDownloading": "ダウンロードに問題がありますか？",
+    "githubReleases": "ダウンロードリンクはサポートにお問い合わせください"
   },
   "gettingStarted": {
     "title": "クイックスタートガイド",
