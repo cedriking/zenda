@@ -10,13 +10,56 @@ import {
   Send,
   User,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useConversations } from "../../../hooks/use-conversations";
 
 export const Route = createFileRoute("/dashboard/conversations/$id")({
   component: ConversationDetailPage,
 });
+
+function MessageBubble({
+  msg,
+}: {
+  msg: { id: string; senderType: string; body: string; createdAt: string };
+}) {
+  const isCustomer = msg.senderType === "customer";
+  const isAi = msg.senderType === "ai";
+  const time = new Date(msg.createdAt).toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const bubbleStyles: Record<string, string> = {
+    customer: "rounded-bl-sm bg-muted text-foreground",
+    ai: "rounded-br-sm bg-primary text-white",
+    owner: "rounded-br-sm bg-emerald-500 text-white",
+  };
+  const bubbleClass = bubbleStyles[msg.senderType] ?? bubbleStyles.owner;
+
+  return (
+    <div
+      className={`flex ${isCustomer ? "justify-start" : "justify-end"} fade-in-0 slide-in-from-bottom-1 animate-in duration-300`}
+    >
+      <div className="flex flex-col items-end">
+        <div className={`max-w-[75%] rounded-2xl px-3.5 py-2.5 ${bubbleClass}`}>
+          <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed">
+            {msg.body}
+          </p>
+        </div>
+        <span className="mt-1 mr-1 text-[10px] text-muted-foreground">
+          {isAi && (
+            <Bot aria-hidden="true" className="mr-0.5 inline" size={10} />
+          )}
+          {!(isCustomer || isAi) && (
+            <User aria-hidden="true" className="mr-0.5 inline" size={10} />
+          )}
+          {time}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function ConversationDetailPage() {
   const { t } = useTranslation();
@@ -136,6 +179,29 @@ function ConversationDetailPage() {
   };
 
   const convMessages = messages[id] ?? [];
+
+  // Build date separators for messages
+  type Msg = (typeof convMessages)[number];
+  type ChatItem =
+    | { type: "date"; date: string; id: string }
+    | { type: "message"; msg: Msg };
+
+  const chatItems: ChatItem[] = useMemo(() => {
+    const items: ChatItem[] = [];
+    let lastDate = "";
+    for (const msg of convMessages) {
+      const msgDate = new Date(msg.createdAt).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      });
+      if (msgDate !== lastDate) {
+        items.push({ type: "date", date: msgDate, id: `date-${msg.id}` });
+        lastDate = msgDate;
+      }
+      items.push({ type: "message", msg });
+    }
+    return items;
+  }, [convMessages]);
 
   return (
     <div className="flex h-full flex-col">
@@ -328,7 +394,7 @@ function ConversationDetailPage() {
       <div
         aria-label={t("conversation.messagesAria")}
         aria-live="polite"
-        className="flex-1 space-y-3 overflow-auto p-4"
+        className="flex-1 space-y-1 overflow-auto px-4 py-4"
         onScroll={handleScroll}
         ref={scrollContainerRef}
         role="log"
@@ -338,35 +404,20 @@ function ConversationDetailPage() {
             {t("conversation.noMessages")}
           </div>
         )}
-        {convMessages.map((msg) => (
-          <div
-            className={`flex ${msg.senderType === "customer" ? "justify-start" : "justify-end"}`}
-            key={msg.id}
-          >
+        {chatItems.map((item) =>
+          item.type === "date" ? (
             <div
-              className={`max-w-[70%] rounded-lg px-4 py-2 ${
-                msg.senderType === "customer"
-                  ? "bg-muted text-foreground"
-                  : msg.senderType === "ai"
-                    ? "bg-primary text-white"
-                    : "bg-emerald-500 text-white"
-              }`}
+              className="flex items-center justify-center py-3"
+              key={item.id}
             >
-              <div className="mb-1 flex items-center gap-1">
-                {msg.senderType === "ai" ? (
-                  <Bot aria-label="AI" size={12} />
-                ) : (
-                  <User aria-label="Human" size={12} />
-                )}
-                <span className="text-xs opacity-75">{msg.senderType}</span>
-              </div>
-              <p className="text-sm">{msg.body}</p>
-              <span className="mt-1 block text-xs opacity-50">
-                {new Date(msg.createdAt).toLocaleTimeString()}
+              <span className="rounded-full bg-muted px-3 py-1 text-[11px] text-muted-foreground">
+                {item.date}
               </span>
             </div>
-          </div>
-        ))}
+          ) : (
+            <MessageBubble key={item.msg.id} msg={item.msg} />
+          )
+        )}
         <div ref={messagesEndRef} />
       </div>
 
