@@ -2,10 +2,22 @@ name: Publish Release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 0.1.0)"
+        required: false
+        type: string
 
 jobs:
   publish-release:
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            maker: dmg
+          - os: windows-latest
+            maker: squirrel
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: write
     steps:
@@ -19,9 +31,11 @@ jobs:
           cache: npm
 
       - name: Install and build
+        working-directory: app
         run: npm ci
 
-      - name: Publish Release
+      - name: Make and Publish (${{ matrix.maker }})
+        working-directory: app
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run publish

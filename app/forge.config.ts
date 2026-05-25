@@ -1,6 +1,5 @@
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
-import { MakerDeb } from "@electron-forge/maker-deb";
-import { MakerRpm } from "@electron-forge/maker-rpm";
+import { MakerDMG } from "@electron-forge/maker-dmg";
 import { MakerSquirrel } from "@electron-forge/maker-squirrel";
 import { MakerZIP } from "@electron-forge/maker-zip";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
@@ -13,22 +12,20 @@ const config: ForgeConfig = {
   },
   rebuildConfig: {},
   makers: [
-    new MakerSquirrel({}),
+    new MakerDMG({}, ["darwin"]),
     new MakerZIP({}, ["darwin"]),
-    new MakerRpm({}),
-    new MakerDeb({}),
+    new MakerSquirrel({}, ["win32"]),
   ],
   publishers: [
     {
-      // Publish to S3 or compatible storage.
-      // Set S3_BUCKET, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY env vars.
-      // Artifacts will be available at https://zenda.bot/updates/{platform}/{arch}/
-      name: "@electron-forge/publisher-s3",
+      name: "@electron-forge/publisher-github",
       config: {
-        bucket: process.env.S3_BUCKET ?? "zenda-updates",
-        region: process.env.AWS_REGION ?? "us-east-1",
-        folder: "updates",
-        public: true,
+        repository: {
+          owner: "ruvnet",
+          name: "zenda",
+        },
+        prerelease: false,
+        draft: true,
       },
     },
   ],
