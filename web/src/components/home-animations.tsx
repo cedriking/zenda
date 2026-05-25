@@ -623,15 +623,15 @@ export function HomeAnimations({
                 {[
                   {
                     time: "10:00",
-                    name: "Maria García",
-                    service: "Haircut + Beard",
+                    name: t("vcApt1Name"),
+                    service: t("vcApt1Service"),
                   },
                   {
                     time: "14:00",
-                    name: "Carlos López",
-                    service: "Hair Treatment",
+                    name: t("vcApt2Name"),
+                    service: t("vcApt2Service"),
                   },
-                  { time: "16:30", name: "Ana Torres", service: "Manicure" },
+                  { time: "16:30", name: t("vcApt3Name"), service: t("vcApt3Service") },
                 ].map((apt) => (
                   <div
                     className="flex items-center gap-3 border-slate-200 border-t py-2 first:border-0"
