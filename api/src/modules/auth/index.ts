@@ -17,12 +17,14 @@ import { serverError } from "../../utils/errors.js";
 export const authModule = new Elysia({ prefix: "/auth" })
   .use(authBase)
   .post("/signup", async ({ body, jwt, refreshJwt, set }) => {
+    const rawBody = body as Record<string, unknown>;
     const parsed = signupSchema.safeParse(body);
     if (!parsed.success) {
       set.status = 400;
       return { error: "Validation failed", details: parsed.error.issues };
     }
     const { name, email, password, businessName, language } = parsed.data;
+    const signupSource = (rawBody.source as string) ?? "direct";
 
     try {
       // Check existing user
@@ -62,7 +64,9 @@ export const authModule = new Elysia({ prefix: "/auth" })
             .from(workspaces)
             .where(eq(workspaces.slug, slug))
             .limit(1);
-          if (!existing) break;
+          if (!existing) {
+            break;
+          }
           suffix++;
           slug = `${baseSlug}-${suffix}`;
         }
@@ -113,6 +117,7 @@ export const authModule = new Elysia({ prefix: "/auth" })
       logger.info("User signed up", {
         userId: result.user.id,
         workspaceId: result.workspace.id,
+        source: signupSource,
       });
 
       return {
@@ -131,8 +136,8 @@ export const authModule = new Elysia({ prefix: "/auth" })
           onboardingStep: result.workspace.onboardingStep,
         },
       };
-    } catch (err: any) {
-      logger.error("Signup error", { email, error: err?.message });
+    } catch (err: unknown) {
+      logger.error("Signup error", { email, error: (err as Error).message });
       return serverError(set, "Failed to create account");
     }
   })
@@ -215,8 +220,8 @@ export const authModule = new Elysia({ prefix: "/auth" })
           onboardingStep: workspace.onboardingStep,
         },
       };
-    } catch (err: any) {
-      logger.error("Login error", { email, error: err?.message });
+    } catch (err: unknown) {
+      logger.error("Login error", { email, error: (err as Error).message });
       return serverError(set, "Login failed");
     }
   })
@@ -271,8 +276,8 @@ export const authModule = new Elysia({ prefix: "/auth" })
       }
 
       return { accessToken, refreshToken: newRefreshToken };
-    } catch (err: any) {
-      logger.error("Token refresh error", { error: err?.message });
+    } catch (err: unknown) {
+      logger.error("Token refresh error", { error: (err as Error).message });
       return serverError(set, "Token refresh failed");
     }
   })
@@ -331,8 +336,8 @@ export const authModule = new Elysia({ prefix: "/auth" })
 
       logger.info("User logged out", { userId });
       return { success: true };
-    } catch (err: any) {
-      logger.error("Logout error", { error: err?.message });
+    } catch (err: unknown) {
+      logger.error("Logout error", { error: (err as Error).message });
       return serverError(set, "Logout failed");
     }
   });

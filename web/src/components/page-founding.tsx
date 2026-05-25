@@ -40,6 +40,7 @@ export function FoundingPageClient({ t, locale }: FoundingPageClientProps) {
           name,
           businessName,
           language: locale,
+          source: "founding",
         }),
       });
       setStep("success");
