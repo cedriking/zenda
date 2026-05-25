@@ -18,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/founding",
     "/recepcionista-virtual-whatsapp",
     "/automatizar-citas-whatsapp",
+    "/referir",
     "/blog",
     "/blog/whatsapp-citas-salon",
     "/blog/reducir-ausencias-clinica",
