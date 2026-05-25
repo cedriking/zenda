@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/wellness",
     "/clinics",
     "/founding",
+    "/blog/whatsapp-citas-salon",
     "/legal/privacy",
     "/legal/terms",
   ];
@@ -46,6 +47,9 @@ function getPriority(route: string): number {
   }
   if (route === "/founding") {
     return 0.9;
+  }
+  if (route.startsWith("/blog")) {
+    return 0.8;
   }
   if (route.includes("legal")) {
     return 0.3;
