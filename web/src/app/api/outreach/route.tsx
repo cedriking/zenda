@@ -1,6 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
-
-export const runtime = "edge";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 const PROSPECTS = [
   {
