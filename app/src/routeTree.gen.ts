@@ -19,6 +19,7 @@ import { Route as AuthConnectWhatsappRouteImport } from './routes/auth/connect-w
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
 import { Route as DashboardConversationsIndexRouteImport } from './routes/dashboard/conversations/index'
 import { Route as DashboardAppointmentsIndexRouteImport } from './routes/dashboard/appointments/index'
+import { Route as DashboardCustomersIndexRouteImport } from './routes/dashboard/customers/index'
 import { Route as DashboardAnalyticsIndexRouteImport } from './routes/dashboard/analytics/index'
 import { Route as DashboardSettingsSafetyRouteImport } from './routes/dashboard/settings/safety'
 import { Route as DashboardSettingsReceptionistRouteImport } from './routes/dashboard/settings/receptionist'
@@ -80,6 +81,11 @@ const DashboardAppointmentsIndexRoute =
     path: '/appointments/',
     getParentRoute: () => DashboardRoute,
   } as any)
+const DashboardCustomersIndexRoute = DashboardCustomersIndexRouteImport.update({
+  id: '/customers/',
+  path: '/customers/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardAnalyticsIndexRoute = DashboardAnalyticsIndexRouteImport.update({
   id: '/analytics/',
   path: '/analytics/',
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/analytics/': typeof DashboardAnalyticsIndexRoute
   '/dashboard/appointments/': typeof DashboardAppointmentsIndexRoute
   '/dashboard/conversations/': typeof DashboardConversationsIndexRoute
+  '/dashboard/customers/': typeof DashboardCustomersIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/dashboard/analytics': typeof DashboardAnalyticsIndexRoute
   '/dashboard/appointments': typeof DashboardAppointmentsIndexRoute
   '/dashboard/conversations': typeof DashboardConversationsIndexRoute
+  '/dashboard/customers': typeof DashboardCustomersIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
 }
 export interface FileRoutesById {
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/dashboard/analytics/': typeof DashboardAnalyticsIndexRoute
   '/dashboard/appointments/': typeof DashboardAppointmentsIndexRoute
   '/dashboard/conversations/': typeof DashboardConversationsIndexRoute
+  '/dashboard/customers/': typeof DashboardCustomersIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/dashboard/analytics/'
     | '/dashboard/appointments/'
     | '/dashboard/conversations/'
+    | '/dashboard/customers/'
     | '/dashboard/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
     | '/dashboard/analytics'
     | '/dashboard/appointments'
     | '/dashboard/conversations'
+    | '/dashboard/customers'
     | '/dashboard/settings'
   id:
     | '__root__'
@@ -245,6 +256,7 @@ export interface FileRouteTypes {
     | '/dashboard/analytics/'
     | '/dashboard/appointments/'
     | '/dashboard/conversations/'
+    | '/dashboard/customers/'
     | '/dashboard/settings/'
   fileRoutesById: FileRoutesById
 }
@@ -378,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCustomersIdRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/customers/': {
+      id: '/dashboard/customers/'
+      path: '/customers'
+      fullPath: '/dashboard/customers/'
+      preLoaderRoute: typeof DashboardCustomersIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/conversations/$id': {
       id: '/dashboard/conversations/$id'
       path: '/conversations/$id'
@@ -400,6 +419,7 @@ interface DashboardRouteChildren {
   DashboardAnalyticsIndexRoute: typeof DashboardAnalyticsIndexRoute
   DashboardAppointmentsIndexRoute: typeof DashboardAppointmentsIndexRoute
   DashboardConversationsIndexRoute: typeof DashboardConversationsIndexRoute
+  DashboardCustomersIndexRoute: typeof DashboardCustomersIndexRoute
   DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute
 }
 
@@ -415,6 +435,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAnalyticsIndexRoute: DashboardAnalyticsIndexRoute,
   DashboardAppointmentsIndexRoute: DashboardAppointmentsIndexRoute,
   DashboardConversationsIndexRoute: DashboardConversationsIndexRoute,
+  DashboardCustomersIndexRoute: DashboardCustomersIndexRoute,
   DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,
 }
 

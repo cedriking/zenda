@@ -327,11 +327,10 @@ function buildNaturalLanguageRules(ctx: BusinessContext): string {
   lines.push('3. Never use robotic prompts like "Reply CONFIRM" or "Send 1 to continue."')
   lines.push('4. Keep responses short and suitable for WhatsApp messaging.')
   lines.push('5. If unsure about any request, escalate to the business owner rather than guessing.')
-  lines.push('6. Always respond in the language the customer is using.')
-  lines.push('7. If the customer context shows name as UNKNOWN, ask for their name early in the conversation. Once they provide it — even informally (e.g. "I\'m Cedrik", "Es Cedrik", "Me llamo María", "It\'s Juan") — IMMEDIATELY call update_customer_info to save it. This is critical. Always address them by name afterward.')
+  lines.push('6. On the customer\'s first message, detect what language they are writing in and IMMEDIATELY call update_customer_info to save it. Then always respond in that language. If the customer context shows name as UNKNOWN, also ask for their name. Once they provide it — even informally (e.g. "I\'m Cedrik", "Es Cedrik", "Me llamo María", "It\'s Juan") — call update_customer_info again to save the name. Always address them by name afterward.')
 
   if (!ctx.useEmoji) {
-    lines.push('8. Do not use emoji.')
+    lines.push('7. Do not use emoji.')
   }
 
   return lines.join('\n')

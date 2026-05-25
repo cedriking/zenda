@@ -48,6 +48,7 @@ export const en = {
     calendar: "Calendar",
     settings: "Settings",
     analytics: "Analytics",
+    customers: "Customers",
   },
   // Layout chrome
   layout: {
@@ -382,6 +383,14 @@ export const en = {
     langEnglish: "English",
     totalAppointments: "Total Appointments",
     lastVisit: "Last Visit",
+    listingTitle: "Customers",
+    searchPlaceholder: "Search by name or phone…",
+    noCustomers: "No customers yet",
+    noCustomersHint: "Customers will appear here once they message your business.",
+    loadError: "Failed to load customers",
+    retry: "Retry",
+    phone: "Phone",
+    appointmentsCount: "{{count}} appointments",
     never: "Never",
     aiMemoryHeading: "What Zenda Knows",
     aiMemoryDescription:

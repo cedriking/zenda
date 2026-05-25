@@ -123,16 +123,17 @@ export async function processIncomingMessage(
       }
     }
 
-    // 1. Resolve language: prefer persisted customer language, then workspace default, then detect
-    const detectedLanguage = (detectLanguage(msg.body) || "en") as "en" | "es";
-
-    // 1a. Load workspace default language
+    // 1. Load workspace default language first (used as fallback)
     const [wsLang] = await db
       .select({ defaultLanguage: workspaces.defaultLanguage })
       .from(workspaces)
       .where(eq(workspaces.id, workspaceId))
       .limit(1);
     const workspaceLanguage = (wsLang?.defaultLanguage as "en" | "es") ?? "en";
+
+    // 1a. Heuristic hint for initial customer creation — the AI agent will
+    //     override this via update_customer_info on first contact
+    const detectedLanguage = (detectLanguage(msg.body) ?? workspaceLanguage) as "en" | "es";
 
     // 2. Find or create customer (using phone number or thread ID)
     const customer = await resolveOrCreateCustomer(
@@ -141,11 +142,9 @@ export async function processIncomingMessage(
       detectedLanguage
     );
 
-    // 2a. Determine language priority: customer persisted > workspace default > detected
+    // 2a. Determine language priority: customer persisted > workspace default
     const language: "en" | "es" =
-      (customer.language as "en" | "es") ??
-      workspaceLanguage ??
-      detectedLanguage;
+      (customer.language as "en" | "es") ?? workspaceLanguage;
 
     // 2a. Consent management — reset outbound counter, ensure consent record exists
     await resetOnInbound(workspaceId, customer.id);
