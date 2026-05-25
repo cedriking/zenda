@@ -3,6 +3,8 @@
 ## Pipeline Status
 - **Target**: 10 paying customers
 - **Pipeline**: 0 / 10
+- **Stripe**: LIVE (confirmed heartbeat 12 — all 4 tiers create cs_live_ checkout sessions)
+- **Landing page**: https://zenda.bot/es/founding (deployed, needs Coolify rebuild)
 - **Last Updated**: 2026-05-25
 
 ## Sales Funnel
