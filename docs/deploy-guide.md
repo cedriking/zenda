@@ -1,6 +1,6 @@
 # Deployment Guide — Zenda Production
 
-**Last updated:** 2026-05-25 (CTO final status)
+**Last updated:** 2026-05-25 (Heartbeat 21)
 **Applies to:** Coolify deployment on VPS
 
 ## Deployment Status
@@ -51,6 +51,23 @@ curl -s -o /dev/null -w "%{http_code}" https://zenda.bot/api/download/macos
 ```
 
 ## After All Steps Complete
+
+Begin customer outreach:
+1. **START HERE:** `docs/day1-outreach-playbook.md` — copy-paste ready WhatsApp messages
+2. Use templates in `docs/founding-customer-outreach.md`
+3. Track pipeline in `docs/founding-customer-pipeline.md`
+4. Share founding page link: `https://zenda.bot/founding`
+5. Track UTM: source=whatsapp, campaign=founding_100
+
+## Heartbeat Log
+
+### Heartbeat 21 (2026-05-25)
+- All production systems HEALTHY: API, DB, Redis, Stripe, all web pages 200 OK
+- Created Day 1 Outreach Playbook: docs/day1-outreach-playbook.md (copy-paste ready)
+- GITHUB_TOKEN: still not set → download routes still broken
+- STRIPE_FOUNDING_COUPON_ID: still not set → no 50% discount at checkout
+- Outreach CAN START NOW without these (trial works, discount is nice-to-have)
+- ZEN-81 blocked by ZEN-80 in Paperclip system (incorrect dependency — outreach only needs founding page)
 
 Begin customer outreach:
 1. Use templates in `docs/founding-customer-outreach.md`

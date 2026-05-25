@@ -64,6 +64,15 @@ Each signup from `/founding` should include UTM tracking:
 
 ## Heartbeat Log
 
+### Heartbeat 21 (2026-05-25)
+- Production: ALL HEALTHY (API, DB, Redis, Stripe, all web pages 200 OK)
+- Created docs/day1-outreach-playbook.md — copy-paste ready outreach with WhatsApp templates, objection handling, Google Maps search
+- ZEN-81 still blocked by ZEN-80 in Paperclip system (incorrect dependency — outreach only needs founding page)
+- ZEN-66 updated with full progress report
+- GITHUB_TOKEN and STRIPE_FOUNDING_COUPON_ID still not set (board/CTO action needed)
+- Outreach can START NOW — founding page live, Stripe live, funnel verified
+- Key insight: desktop app download is post-sale, not pre-sale
+
 ### Heartbeat 19 (2026-05-25)
 - Paperclip API down (connection refused), cannot update issues
 - Pushed commit d544f60: updated founding success message to mention trial + discount
