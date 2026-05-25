@@ -18,6 +18,7 @@ export async function generateMetadata({ params }: Props) {
   const t = await getTranslations({ locale, namespace: "metadata" });
 
   return {
+    metadataBase: new URL("https://zenda.bot"),
     title: {
       default: t("title.default"),
       template: t("title.template"),
