@@ -99,7 +99,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         />
       </head>
       <body>
-        <LocaleProvider locale={locale} messages={messages}>
+        <LocaleProvider locale={locale} messages={messages} now={new Date()}>
           {children}
         </LocaleProvider>
         <CookieConsent />
