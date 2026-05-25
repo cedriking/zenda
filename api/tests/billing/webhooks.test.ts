@@ -111,7 +111,7 @@ describe("handleWebhook - checkout.session.completed", () => {
       type: "checkout.session.completed",
       data: {
         object: {
-          metadata: { workspaceId: "ws-1", tier: "pro", period: "monthly" },
+          metadata: { workspaceId: "ws-1", tier: "pro", billingPeriod: "monthly" },
           customer: "cus_123",
           subscription: "sub_123",
         },

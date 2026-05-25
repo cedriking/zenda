@@ -45,7 +45,7 @@ async function handleCheckoutCompleted(event: Stripe.Event): Promise<void> {
   const session = event.data.object as Stripe.Checkout.Session;
   const workspaceId = session.metadata?.workspaceId;
   const tier = session.metadata?.tier as string;
-  const period = session.metadata?.period as string;
+  const period = session.metadata?.billingPeriod as string;
 
   if (!workspaceId) {
     return;
