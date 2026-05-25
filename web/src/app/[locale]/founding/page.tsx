@@ -12,13 +12,69 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// Keys used by FoundingPageClient — resolved to strings in server component
+// so the function is never passed across the server/client boundary.
+const T_KEYS = [
+  "badge",
+  "heroTitle",
+  "heroSubtitle",
+  "trialBadge",
+  "discountBadge",
+  "whatYouGet",
+  "feature1Title",
+  "feature1Desc",
+  "feature2Title",
+  "feature2Desc",
+  "feature3Title",
+  "feature3Desc",
+  "feature4Title",
+  "feature4Desc",
+  "feature5Title",
+  "feature5Desc",
+  "howItWorks",
+  "step1Title",
+  "step1Desc",
+  "step2Title",
+  "step2Desc",
+  "step3Title",
+  "step3Desc",
+  "testimonial1",
+  "testimonial1Author",
+  "faq1Q",
+  "faq1A",
+  "faq2Q",
+  "faq2A",
+  "faq3Q",
+  "faq3A",
+  "faq4Q",
+  "faq4A",
+  "formTitle",
+  "labelName",
+  "labelBusiness",
+  "labelEmail",
+  "labelPassword",
+  "submit",
+  "submitting",
+  "formDisclaimer",
+  "successTitle",
+  "successBody",
+  "successCta",
+  "spotsRemaining",
+  "errorPasswordMin",
+] as const;
+
 export default async function FoundingPage() {
   const t = await getTranslations("founding");
+
+  const strings: Record<string, string> = {};
+  for (const key of T_KEYS) {
+    strings[key] = t(key);
+  }
 
   return (
     <div className="min-h-screen bg-neutral-200">
       <Nav variant="simple" />
-      <FoundingPageClient t={t} />
+      <FoundingPageClient t={(k: string) => strings[k] ?? k} />
       <Footer />
     </div>
   );
