@@ -42,7 +42,7 @@ Buscamos una persona proactiva para realizar ventas por WhatsApp a negocios de b
 - Scripts de manejo de objeciones
 - Capacitación completa
 
-**Para aplicar, envía:**
+**Para aplicar, envía un email a hello@zenda.bot con asunto "Zenda Outreach - [Tu País]":**
 1. Tu nombre y país
 2. 1-2 oraciones sobre tu experiencia en ventas
 3. Un mensaje de WhatsApp de ejemplo vendiendo un software de agendamiento a un salón de belleza (en español)
@@ -82,7 +82,7 @@ We're hiring a part-time Spanish-speaking sales contractor to do WhatsApp outrea
 
 We provide all materials: message templates, prospect lists with WhatsApp numbers, objection handling scripts, and full training.
 
-**To apply:** Send a sample WhatsApp cold message selling a booking software to a beauty salon — in Spanish.
+**To apply:** Send an email to hello@zenda.bot with subject "Zenda Outreach - [Your Country]" including your name, country, sales experience, and a sample cold WhatsApp message selling Zenda to a beauty salon (in Spanish).
 
 ---
 
@@ -119,10 +119,9 @@ Looking for a Spanish-speaking freelancer to send WhatsApp messages to beauty sa
    - Use the short description above
    - Budget: $300-500
 
-4. **WhatsApp application channel**:
-   - Set up a dedicated WhatsApp number (or use business WhatsApp)
-   - Replace `[BOARD PHONE]` in the job posting with the actual number
-   - Applicants will send their sample messages there
+4. **Application channel**:
+   - Applicants send email to hello@zenda.bot with subject "Zenda Outreach - [Country]"
+   - No WhatsApp setup needed — email handles all applications
 
 **Timeline:**
 - Day 1: Post on all 3 platforms
