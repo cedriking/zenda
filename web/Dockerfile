@@ -19,7 +19,7 @@ COPY packages/shared/package.json ./packages/shared/package.json
 COPY packages/shared/ ./packages/shared/
 RUN npm run --workspace @zenda/shared build
 
-# Build web
+# Build web (cache bust 2026-05-26)
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json ./package.json
