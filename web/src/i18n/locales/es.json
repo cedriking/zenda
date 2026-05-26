@@ -439,6 +439,45 @@
     },
     "otherVerticals": "También servimos a otras industrias"
   },
+  "forgotPassword": {
+    "title": "¿Olvidaste tu contraseña?",
+    "desc": "Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.",
+    "checkEmail": "Revisa tu correo",
+    "sentDesc": "Si existe una cuenta con ese correo, recibirás un enlace de restablecimiento en breve.",
+    "notReceived": "¿No recibiste el correo? Revisa tu carpeta de spam o intenta de nuevo.",
+    "tryAgain": "Intentar de nuevo",
+    "emailLabel": "Correo electrónico",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "submit": "Enviar enlace de restablecimiento",
+    "sending": "Enviando...",
+    "rememberPassword": "¿Recuerdas tu contraseña?",
+    "backToLogin": "Volver a iniciar sesión"
+  },
+  "resetPassword": {
+    "title": "Establecer nueva contraseña",
+    "desc": "Ingresa tu nueva contraseña abajo.",
+    "successTitle": "Contraseña restablecida",
+    "successDesc": "Tu contraseña ha sido restablecida exitosamente.",
+    "continueToLogin": "Ir a iniciar sesión",
+    "newPasswordLabel": "Nueva contraseña",
+    "newPasswordPlaceholder": "Al menos 8 caracteres",
+    "confirmPasswordLabel": "Confirmar contraseña",
+    "confirmPasswordPlaceholder": "Confirma tu nueva contraseña",
+    "submit": "Restablecer contraseña",
+    "resetting": "Restableciendo...",
+    "errorTooShort": "La contraseña debe tener al menos 8 caracteres",
+    "errorMismatch": "Las contraseñas no coinciden",
+    "errorResetFailed": "Error al restablecer la contraseña",
+    "invalidTitle": "Enlace inválido",
+    "invalidDesc": "Este enlace de restablecimiento es inválido o ha expirado.",
+    "requestNewLink": "Solicitar un nuevo enlace de restablecimiento",
+    "backToLogin": "Volver a iniciar sesión"
+  },
+  "cookieConsent": {
+    "message": "Usamos cookies para mejorar tu experiencia y analizar el tráfico del sitio. Al continuar, aceptas nuestra <privacy>Política de Privacidad</privacy>.",
+    "accept": "Aceptar",
+    "decline": "Rechazar"
+  },
   "auth": {
     "loginTitle": "Bienvenido de nuevo",
     "loginDesc": "Inicia sesión en tu cuenta de Zenda.",
@@ -469,7 +508,8 @@
     "termsLink": "Términos de servicio",
     "privacyLink": "Política de privacidad",
     "haveAccount": "¿Ya tienes una cuenta?",
-    "loginLink": "Iniciar sesión"
+    "loginLink": "Iniciar sesión",
+    "foundingBadge": "Miembro fundador — 50% de descuento + 14 días gratis"
   },
   "download": {
     "title": "¡Ya estás dentro! Aquí está tu siguiente paso",
@@ -615,7 +655,8 @@
     "demoMsg2": "¡Hola María! 👋 Te atiendo enseguida.\n\nPara un corte de pelo, tenemos disponibilidad:\n\n📅 Hoy 3:00 PM con Carlos\n📅 Mañana 11:00 AM con Laura\n\n¿Cuál prefieres?",
     "demoMsg3": "Hoy a las 3 con Carlos por favor",
     "demoMsg4": "✅ ¡Listo! Tu cita:\n\n💇 Corte de pelo\n👤 Carlos\n📅 Hoy, 3:00 PM\n📍 Beauty Studio\n\nTe envío un recordatorio 2 horas antes.",
-    "demoPlaceholder": "Escribe un mensaje..."
+    "demoPlaceholder": "Escribe un mensaje...",
+    "faqTitle": "Preguntas frecuentes"
   },
   "legal": {
     "privacyTitle": "Política de privacidad",

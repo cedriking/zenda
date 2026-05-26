@@ -657,7 +657,8 @@
     "demoMsg2": "Hi María! 👋 I'll help you right away.\n\nFor a haircut, we have availability:\n\n📅 Today 3:00 PM with Carlos\n📅 Tomorrow 11:00 AM with Laura\n\nWhich do you prefer?",
     "demoMsg3": "Today at 3 with Carlos please",
     "demoMsg4": "✅ Done! Your appointment:\n\n💇 Haircut\n👤 Carlos\n📅 Today, 3:00 PM\n📍 Beauty Studio\n\nI'll send you a reminder 2 hours before.",
-    "demoPlaceholder": "Type a message..."
+    "demoPlaceholder": "Type a message...",
+    "faqTitle": "Frequently Asked Questions"
   },
   "legal": {
     "privacyTitle": "Privacy Policy",
