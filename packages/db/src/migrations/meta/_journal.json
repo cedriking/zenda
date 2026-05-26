@@ -29,6 +29,13 @@
       "when": 1748278000000,
       "tag": "0006_add_free_tier",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1748282000000,
+      "tag": "0007_add_partners_referrals",
+      "breakpoints": true
     }
   ]
 }

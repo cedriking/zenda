@@ -32,6 +32,7 @@ import { conversationModule } from "./modules/conversation/index.js";
 import { composioModule } from "./modules/integrations/composio/index.js";
 import { knowledgeBaseModule } from "./modules/knowledge-base/index.js";
 import { messagingModule } from "./modules/messaging/index.js";
+import { partnersModule } from "./modules/partners/index.js";
 import { monitoringModule } from "./modules/monitoring/index.js";
 import { notificationModule } from "./modules/notification/index.js";
 import { onboardingModule } from "./modules/onboarding/index.js";
@@ -65,6 +66,7 @@ const PUBLIC_PATHS = [
   "/billing/webhook",
   "/billing/plans",
   "/ws",
+  "/partners",
 ];
 
 function isPublicPath(path: string): boolean {
@@ -218,6 +220,7 @@ const _app = new Elysia()
 
   // ── Public routes ───────────────────────────────────────────────
   .use(authModule)
+  .use(partnersModule)
   .use(billingModule)
 
   // ── Authenticated routes ────────────────────────────────────────
