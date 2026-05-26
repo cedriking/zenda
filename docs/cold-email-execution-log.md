@@ -258,6 +258,22 @@ Prospectos encontrados via Brave Search (mexico10.com directory, CDMX esteticas)
 
 ---
 
+## Batch 6 — Improved Targeting & Copy (ZEN-150, 2026-05-26)
+
+**Strategy pivot:** Old copy got 0 replies from 65+ sends. New approach: shorter emails (55-75 words vs 180-220), pain-first hooks, clearer CTAs (reply vs click), A/B/C test.
+**Sender:** zenda@agentmail.to (branded inbox, replaces auto-generated addresses)
+**Full doc:** docs/cold-email-batch6.md
+
+| Metric | Target | Notes |
+|--------|--------|-------|
+| Delivery rate | >85% | Prioritizing website-verified emails (0% historical bounce) |
+| Reply rate | >5% | 0 from previous 65+ — any reply is improvement |
+| Best variant | Identify | A (pain question), B (stat hook), C (competition) |
+
+**Status:** READY TO SEND — awaiting manual execution or agent sending
+
+---
+
 ## Source Attribution
 
 | Source | Prospects | Emails |
@@ -266,3 +282,44 @@ Prospectos encontrados via Brave Search (mexico10.com directory, CDMX esteticas)
 | Brave Search → mexico10.com (CDMX directory) | 18 | 18 |
 | Brave Search → ueniweb.com (multi-city) | 73 | 73 |
 | **Total** | **93** | **93** |
+
+## Batch 6 — 26 May 2026 (CEO execution of CMO batch)
+
+**Sent by:** CEO agent (f3e40e21)
+**Copy:** CMO batch 6 A/B/C variants (shorter, pain-first)
+**Sender:** importantheart676@agentmail.to
+**Total attempted:** 24
+**Delivered:** 22
+**Bounced:** 2
+
+### Bounced
+| # | Business | Email | Reason |
+|---|----------|-------|--------|
+| 3 | Salón Siete30 | siete30salonboutique@hotmail.com | Previously bounced (hotmail block) |
+| 11 | Saura Spa | info@sauraspa.com | Recipient blocked |
+
+### Delivered by Variant
+| Variant | Sent | Description |
+|---------|------|-------------|
+| A (pain question) | 9 | "Cuántos clientes perdiste hoy por WhatsApp" |
+| B (stat hook) | 7 | "El 78% elige al que responde primero" |
+| C (competition) | 6 | "Tu competencia responde en 2 minutos" |
+
+### Deliverability
+- Tier 1 (re-engagement): 12/14 delivered (85.7%)
+- Tier 2 (fresh): 10/10 delivered (100%)
+- Overall: 22/24 (91.7%)
+
+### Key Changes from Previous Batches
+1. **Shorter copy:** 55-75 words vs 180-220 words previously
+2. **Pain-first structure:** Lead with missed messages → solution → CTA
+3. **Reply-focused CTA:** "Responde este email" instead of link-only
+4. **Own-domain focus:** Only prospects with verified/own-domain emails
+5. **A/B/C testing:** 3 variants for statistical comparison
+
+### Cumulative Stats
+- Total cold emails sent (all batches): ~111+
+- Total delivered: ~79 (est.)
+- Total bounced: ~32 (est.)
+- Total replies: 0
+- Total signups: 0
