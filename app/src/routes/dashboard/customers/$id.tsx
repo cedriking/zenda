@@ -1,144 +1,202 @@
-import { Link, useParams } from '@/utils/router'
-import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import { apiFetch } from '../../../services/api-client'
-import { ArrowLeft, User, Phone, Globe, Brain, Calendar, AlertCircle } from 'lucide-react'
+import {
+  AlertCircle,
+  ArrowLeft,
+  Brain,
+  Calendar,
+  Globe,
+  Phone,
+  User,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Link, useParams } from "@/utils/router";
+import { apiFetch } from "../../../services/api-client";
 
 interface CustomerProfile {
-  id: string
-  phoneNumber: string
-  name: string | null
-  language: string
-  totalAppointments: number
-  lastVisit: string | null
-  memory: Array<{ key: string; value: string; source: string }>
+  id: string;
+  language: string;
+  lastVisit: string | null;
+  memory: Array<{ key: string; value: string; source: string }>;
+  name: string | null;
+  phoneNumber: string;
+  totalAppointments: number;
 }
 
 export default function CustomerProfilePage() {
-  const { t } = useTranslation()
-  const { id } = useParams()
-  const [customer, setCustomer] = useState<CustomerProfile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const { t } = useTranslation();
+  const { id } = useParams();
+  const [customer, setCustomer] = useState<CustomerProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    loadCustomer()
-  }, [id])
+    loadCustomer();
+  }, [loadCustomer]);
 
   async function loadCustomer() {
-    setLoading(true)
-    setError(false)
+    setLoading(true);
+    setError(false);
     try {
-      const data = await apiFetch<CustomerProfile>(`/customers/${id}`)
-      setCustomer(data)
+      const data = await apiFetch<CustomerProfile>(`/customers/${id}`);
+      setCustomer(data);
     } catch {
-      setError(true)
+      setError(true);
     }
-    setLoading(false)
+    setLoading(false);
   }
 
   if (loading) {
-    return <div className="p-6 text-muted-foreground">{t('common.loading')}</div>
+    return (
+      <div className="p-6">
+        <div className="mb-6 h-5 w-40 animate-pulse rounded bg-muted" />
+        <div className="max-w-2xl">
+          <div className="mb-6 rounded-lg border border-border bg-card p-6">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 animate-pulse rounded-full bg-muted" />
+              <div className="space-y-2">
+                <div className="h-6 w-48 animate-pulse rounded bg-muted" />
+                <div className="h-4 w-64 animate-pulse rounded bg-muted" />
+              </div>
+            </div>
+            <div className="mt-6 grid grid-cols-2 gap-4 border-border border-t pt-4">
+              <div className="space-y-2">
+                <div className="h-4 w-28 animate-pulse rounded bg-muted" />
+                <div className="h-6 w-16 animate-pulse rounded bg-muted" />
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+                <div className="h-6 w-24 animate-pulse rounded bg-muted" />
+              </div>
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-6">
+            <div className="mb-4 h-6 w-32 animate-pulse rounded bg-muted" />
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div className="h-16 animate-pulse rounded-lg bg-muted" key={i} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
     return (
       <div className="p-6">
-        <div className="max-w-md mx-auto mt-12 text-center">
+        <div className="mx-auto mt-12 max-w-md text-center">
           <AlertCircle className="mx-auto mb-4 text-destructive" size={40} />
-          <h2 className="text-lg font-semibold mb-2">{t('customer.errorTitle')}</h2>
-          <p className="text-muted-foreground mb-4">{t('customer.errorDescription')}</p>
+          <h2 className="mb-2 font-semibold text-lg">
+            {t("customer.errorTitle")}
+          </h2>
+          <p className="mb-4 text-muted-foreground">
+            {t("customer.errorDescription")}
+          </p>
           <button
+            className="rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
             onClick={loadCustomer}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
           >
-            {t('common.retry')}
+            {t("common.retry")}
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   if (!customer) {
-    return <div className="p-6 text-muted-foreground">{t('customer.notFound')}</div>
+    return (
+      <div className="p-6 text-muted-foreground">{t("customer.notFound")}</div>
+    );
   }
 
   return (
     <div className="p-6">
       <Link
+        className="mb-6 flex items-center gap-2 text-muted-foreground text-sm hover:text-foreground"
         to="/dashboard/customers"
-        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
       >
         <ArrowLeft size={16} />
-        {t('customer.backToCustomers')}
+        {t("customer.backToCustomers")}
       </Link>
 
       <div className="max-w-2xl">
         {/* Header */}
-        <div className="bg-card rounded-lg border border-border p-6 mb-6">
+        <div className="mb-6 rounded-lg border border-border bg-card p-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-              <User size={24} className="text-primary" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <User className="text-primary" size={24} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-foreground">
-                {customer.name ?? t('customer.unknownName')}
+              <h2 className="font-bold text-foreground text-xl">
+                {customer.name ?? t("customer.unknownName")}
               </h2>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+              <div className="mt-1 flex items-center gap-4 text-muted-foreground text-sm">
                 <span className="flex items-center gap-1">
                   <Phone size={14} />
                   {customer.phoneNumber}
                 </span>
                 <span className="flex items-center gap-1">
                   <Globe size={14} />
-                  {customer.language === 'es' ? t('customer.langSpanish') : t('customer.langEnglish')}
+                  {t(`customer.lang.${customer.language}`, customer.language.toUpperCase())}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-border">
+          <div className="mt-6 grid grid-cols-2 gap-4 border-border border-t pt-4">
             <div>
-              <div className="text-sm text-muted-foreground">{t('customer.totalAppointments')}</div>
-              <div className="text-lg font-semibold flex items-center gap-1">
+              <div className="text-muted-foreground text-sm">
+                {t("customer.totalAppointments")}
+              </div>
+              <div className="flex items-center gap-1 font-semibold text-lg">
                 <Calendar size={16} />
                 {customer.totalAppointments}
               </div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">{t('customer.lastVisit')}</div>
-              <div className="text-lg font-semibold">
-                {customer.lastVisit ? new Date(customer.lastVisit).toLocaleDateString() : t('customer.never')}
+              <div className="text-muted-foreground text-sm">
+                {t("customer.lastVisit")}
+              </div>
+              <div className="font-semibold text-lg">
+                {customer.lastVisit
+                  ? new Date(customer.lastVisit).toLocaleDateString()
+                  : t("customer.never")}
               </div>
             </div>
           </div>
         </div>
 
         {/* AI Memory */}
-        <div className="bg-card rounded-lg border border-border p-6">
-          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
-            <Brain size={20} className="text-primary" />
-            {t('customer.aiMemoryHeading')}
+        <div className="rounded-lg border border-border bg-card p-6">
+          <h3 className="mb-4 flex items-center gap-2 font-semibold text-foreground text-lg">
+            <Brain className="text-primary" size={20} />
+            {t("customer.aiMemoryHeading")}
           </h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            {t('customer.aiMemoryDescription')}
+          <p className="mb-4 text-muted-foreground text-sm">
+            {t("customer.aiMemoryDescription")}
           </p>
 
           {customer.memory.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Brain size={32} className="mx-auto mb-2 opacity-50" />
-              <p className="text-sm">{t('customer.aiMemoryEmpty')}</p>
+            <div className="py-8 text-center text-muted-foreground">
+              <Brain className="mx-auto mb-2 opacity-50" size={32} />
+              <p className="text-sm">{t("customer.aiMemoryEmpty")}</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {customer.memory.map((mem, idx) => (
-                <div key={idx} className="flex items-start gap-3 bg-muted rounded-lg p-3">
-                  <div className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded mt-0.5">
+              {customer.memory.map((mem) => (
+                <div
+                  className="flex items-start gap-3 rounded-lg bg-muted p-3"
+                  key={`${mem.key}-${mem.source}`}
+                >
+                  <div className="mt-0.5 rounded bg-primary/10 px-2 py-0.5 text-primary text-xs">
                     {mem.key}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm text-foreground">{mem.value}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{t('customer.aiMemorySource', { source: mem.source })}</p>
+                    <p className="text-foreground text-sm">{mem.value}</p>
+                    <p className="mt-1 text-muted-foreground text-xs">
+                      {t("customer.aiMemorySource", { source: mem.source })}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -147,5 +205,5 @@ export default function CustomerProfilePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

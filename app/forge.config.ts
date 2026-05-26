@@ -25,7 +25,9 @@ const config: ForgeConfig = {
     {
       name: "@electron-forge/publisher-s3",
       config: {
-        endPoint: process.env.S3_DOWNLOADS_ENDPOINT ?? "https://xxx.r2.cloudflarestorage.com",
+        endPoint:
+          process.env.S3_DOWNLOADS_ENDPOINT ??
+          "https://xxx.r2.cloudflarestorage.com",
         accessKey: process.env.S3_DOWNLOADS_ACCESS_KEY_ID ?? "",
         secretKey: process.env.S3_DOWNLOADS_SECRET_ACCESS_KEY ?? "",
         bucket: process.env.S3_DOWNLOADS_BUCKET ?? "zenda-downloads",
@@ -65,6 +67,7 @@ const config: ForgeConfig = {
       [FuseV1Options.EnableNodeCliInspectArguments]: false,
       [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
+      [FuseV1Options.GrantFileProtocolExtraPrivileges]: false,
     }),
   ],
 };

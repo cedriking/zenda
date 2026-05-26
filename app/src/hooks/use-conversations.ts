@@ -40,6 +40,8 @@ export function useConversations() {
 
   // Track lastMessageAt per conversation to avoid redundant reloads
   const lastMessageAtRef = useRef<Record<string, string>>({});
+  // Track message counts per conversation to avoid object-reference deps in effects
+  const messageCountRef = useRef<Record<string, number>>({});
 
   const loadConversations = useCallback(async (page = 0) => {
     if (page === 0) {
@@ -93,9 +95,9 @@ export function useConversations() {
       );
       const reversed = [...data].reverse();
       setMessages((prev) => ({ ...prev, [conversationId]: reversed }));
-      if (reversed.length > 0 && reversed[reversed.length - 1]) {
-        lastMessageAtRef.current[conversationId] =
-          reversed[reversed.length - 1].createdAt;
+      messageCountRef.current[conversationId] = reversed.length;
+      if (reversed.length > 0 && reversed.at(-1)!) {
+        lastMessageAtRef.current[conversationId] = reversed.at(-1)!.createdAt;
       }
     } catch (err) {
       console.error("Failed to load messages:", err);
@@ -137,6 +139,8 @@ export function useConversations() {
         ...prev,
         [conversationId]: [...(prev[conversationId] ?? []), msg],
       }));
+      messageCountRef.current[conversationId] =
+        (messageCountRef.current[conversationId] ?? 0) + 1;
       lastMessageAtRef.current[conversationId] = msg.createdAt;
       return msg;
     },
@@ -170,7 +174,7 @@ export function useConversations() {
         if (response.conversationId && response.message) {
           setMessages((prev) => {
             const existing = prev[response.conversationId!] ?? [];
-            if (existing.some((m) => m.id === response.message!.id)) {
+            if (existing.some((m) => m.id === response.message?.id)) {
               return prev;
             }
             return {
@@ -178,6 +182,8 @@ export function useConversations() {
               [response.conversationId!]: [...existing, response.message!],
             };
           });
+          messageCountRef.current[response.conversationId] =
+            (messageCountRef.current[response.conversationId] ?? 0) + 1;
           if (response.message.createdAt) {
             lastMessageAtRef.current[response.conversationId] =
               response.message.createdAt;

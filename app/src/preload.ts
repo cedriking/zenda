@@ -27,17 +27,17 @@ contextBridge.exposeInMainWorld("electron", {
       "appointment:update",
     ];
     if (allowed.includes(channel)) {
-      const listener = (_event: Electron.IpcRendererEvent, ...args: unknown[]) => callback(...args);
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        ...args: unknown[]
+      ) => callback(...args);
       ipcRenderer.on(channel, listener);
       return () => ipcRenderer.removeListener(channel, listener);
     }
     return () => {};
   },
   send: (channel: string, ...args: unknown[]) => {
-    const allowed = [
-      "whatsapp:forward-message",
-      "whatsapp:forward-status",
-    ];
+    const allowed = ["whatsapp:forward-message", "whatsapp:forward-status"];
     if (allowed.includes(channel)) {
       ipcRenderer.send(channel, ...args);
     }
@@ -45,7 +45,12 @@ contextBridge.exposeInMainWorld("electron", {
 });
 
 // ORPC server setup
+const allowedOrigin =
+  typeof location === "undefined" ? "file://" : location.origin;
 window.addEventListener("message", (event) => {
+  if (event.origin !== allowedOrigin && event.origin !== "file://") {
+    return;
+  }
   if (event.data === IPC_CHANNELS.START_ORPC_SERVER) {
     const [serverPort] = event.ports;
 

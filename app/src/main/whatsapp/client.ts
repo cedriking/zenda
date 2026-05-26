@@ -27,6 +27,7 @@ let isInitializing = false;
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 5;
 const emitter = new EventEmitter();
+emitter.setMaxListeners(20);
 
 let currentStatus: WhatsAppStatus = { status: "disconnected" };
 
@@ -365,6 +366,7 @@ export function disconnectWhatsApp() {
   }
   isInitializing = false;
   reconnectAttempts = 0;
+  emitter.removeAllListeners();
   emitStatus({ status: "disconnected" });
 }
 

@@ -1,4 +1,5 @@
 import { type BrowserWindow, ipcMain } from "electron";
+import { z } from "zod";
 import { updateWhatsAppHealth } from "../../main/health-monitor.js";
 import { updateTrayStatus } from "../../main/tray.js";
 import {
@@ -17,7 +18,42 @@ import {
 } from "../../main/whatsapp/client.js";
 import { clearSession } from "../../main/whatsapp/session.js";
 
-export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
+const bridgeConnectSchema = z.object({
+  workspaceId: z.string().min(1),
+  accessToken: z
+    .string()
+    .min(1)
+    .refine((val) => val.split(".").length === 3, {
+      message:
+        "accessToken must be a JWT-like string (header.payload.signature)",
+    }),
+});
+
+const forwardMessageSchema = z.object({
+  phoneNumber: z.string().min(1),
+  body: z.string(),
+  contentType: z.string(),
+  mediaUrl: z.string().optional(),
+  timestamp: z.string(),
+  externalMessageId: z.string().optional(),
+});
+
+const forwardStatusSchema = z.object({
+  status: z.string().min(1),
+  phoneNumber: z.string().optional(),
+});
+
+let statusUnsubscribe: (() => void) | null = null;
+
+export function registerWhatsAppIPC(
+  getWindow: () => BrowserWindow | null
+): void {
+  // Clean up previous status subscription if re-registering
+  if (statusUnsubscribe) {
+    statusUnsubscribe();
+    statusUnsubscribe = null;
+  }
+
   // Init WhatsApp client (fire-and-forget so it can't block the renderer)
   ipcMain.handle("whatsapp:init", () => {
     console.log("[IPC] whatsapp:init received");
@@ -28,7 +64,8 @@ export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
       console.log("[IPC] Client already connected, re-emitting status");
       sendToRenderer("whatsapp:status", status);
     } else {
-      initWhatsAppClient(mainWindow).catch((err) => {
+      const win = getWindow();
+      initWhatsAppClient(win ?? undefined).catch((err) => {
         console.error("[IPC] whatsapp:init error:", err);
       });
     }
@@ -52,60 +89,44 @@ export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
   });
 
   // Connect bridge to backend
-  ipcMain.handle(
-    "bridge:connect",
-    (
-      _event,
-      {
-        workspaceId,
-        accessToken,
-      }: {
-        workspaceId: string;
-        accessToken: string;
-      }
-    ) => {
-      connectBridge(workspaceId, accessToken);
-      return { success: true };
+  ipcMain.handle("bridge:connect", (_event, args: unknown) => {
+    const parsed = bridgeConnectSchema.safeParse(args);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.flatten() };
     }
-  );
+    const { workspaceId, accessToken } = parsed.data;
+    connectBridge(workspaceId, accessToken);
+    return { success: true };
+  });
 
   // Forward incoming WhatsApp message to backend
-  ipcMain.on(
-    "whatsapp:forward-message",
-    (
-      _event,
-      message: {
-        phoneNumber: string;
-        body: string;
-        contentType: string;
-        mediaUrl?: string;
-        timestamp: string;
-        externalMessageId?: string;
-      }
-    ) => {
-      sendToBackend({ type: "whatsapp.message", ...message });
+  ipcMain.on("whatsapp:forward-message", (_event, args: unknown) => {
+    const parsed = forwardMessageSchema.safeParse(args);
+    if (!parsed.success) {
+      console.error(
+        "[IPC] Invalid whatsapp:forward-message payload:",
+        parsed.error.flatten()
+      );
+      return;
     }
-  );
+    sendToBackend({ type: "whatsapp.message", ...parsed.data });
+  });
 
   // Forward WhatsApp status to backend
-  ipcMain.on(
-    "whatsapp:forward-status",
-    (
-      _event,
-      {
-        status,
-        phoneNumber,
-      }: {
-        status: string;
-        phoneNumber?: string;
-      }
-    ) => {
-      sendToBackend({ type: "whatsapp.status", status, phoneNumber });
+  ipcMain.on("whatsapp:forward-status", (_event, args: unknown) => {
+    const parsed = forwardStatusSchema.safeParse(args);
+    if (!parsed.success) {
+      console.error(
+        "[IPC] Invalid whatsapp:forward-status payload:",
+        parsed.error.flatten()
+      );
+      return;
     }
-  );
+    sendToBackend({ type: "whatsapp.status", ...parsed.data });
+  });
 
   // Listen for WhatsApp client status changes and forward to renderer
-  onStatus((status: WhatsAppStatus) => {
+  statusUnsubscribe = onStatus((status: WhatsAppStatus) => {
     sendToRenderer("whatsapp:status", status);
 
     const connected = status.status === "connected";

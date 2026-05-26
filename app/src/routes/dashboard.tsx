@@ -1,10 +1,4 @@
 import {
-  Link,
-  Outlet,
-  useLocation,
-  useNavigate,
-} from "@/utils/router";
-import {
   BarChart3,
   Bell,
   Calendar,
@@ -20,8 +14,10 @@ import {
   WifiOff,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toggleTheme } from "@/actions/theme";
+import { Link, Outlet, useLocation, useNavigate } from "@/utils/router";
 import { ConnectivityBanner } from "../components/connectivity-banner";
 import { useDashboardShortcuts } from "../hooks/use-keyboard-shortcuts";
 import { useWhatsApp } from "../hooks/use-whatsapp";
@@ -51,23 +47,22 @@ export default function DashboardLayout() {
   // Initialize keyboard shortcuts
   const shortcuts = useDashboardShortcuts();
 
-  // Initialize theme from localStorage
+  // Sync isDark state from DOM class changes (set by toggleTheme from @/actions/theme)
   useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    const dark = stored === "dark" || (!stored && prefersDark);
-    setIsDark(dark);
-    document.documentElement.classList.toggle("dark", dark);
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    setIsDark(document.documentElement.classList.contains("dark"));
+    return () => observer.disconnect();
   }, []);
 
-  const toggleTheme = () => {
-    const next = !isDark;
-    setIsDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("theme", next ? "dark" : "light");
-  };
+  const handleToggleTheme = useCallback(() => {
+    toggleTheme();
+  }, []);
 
   useEffect(() => {
     // Poll notifications count
@@ -86,7 +81,10 @@ export default function DashboardLayout() {
     loadNotifications();
 
     return () => clearInterval(interval);
-  }, []);
+  }, [
+    // Initial load
+    loadNotifications,
+  ]);
 
   // Onboarding guard — redirect if workspace not ready
   useEffect(() => {
@@ -149,34 +147,33 @@ export default function DashboardLayout() {
     }
   };
 
-  const timeAgo = useMemo(
-    () =>
-      (dateStr: string): string => {
-        const now = Date.now();
-        const then = new Date(dateStr).getTime();
-        const diffMs = now - then;
-        const diffSeconds = Math.floor(diffMs / 1000);
-        const diffMinutes = Math.floor(diffSeconds / 60);
-        const diffHours = Math.floor(diffMinutes / 60);
-        const diffDays = Math.floor(diffHours / 24);
+  const timeAgo = useCallback(
+    (dateStr: string): string => {
+      const now = Date.now();
+      const then = new Date(dateStr).getTime();
+      const diffMs = now - then;
+      const diffSeconds = Math.floor(diffMs / 1000);
+      const diffMinutes = Math.floor(diffSeconds / 60);
+      const diffHours = Math.floor(diffMinutes / 60);
+      const diffDays = Math.floor(diffHours / 24);
 
-        if (diffSeconds < 60) {
-          return t("timeAgo.justNow");
-        }
-        if (diffMinutes < 60) {
-          return t("timeAgo.minAgo", { count: diffMinutes });
-        }
-        if (diffHours < 24) {
-          return t("timeAgo.hourAgo", { count: diffHours });
-        }
-        if (diffDays === 1) {
-          return t("timeAgo.yesterday");
-        }
-        if (diffDays < 7) {
-          return t("timeAgo.dayAgo", { count: diffDays });
-        }
-        return new Date(dateStr).toLocaleDateString();
-      },
+      if (diffSeconds < 60) {
+        return t("timeAgo.justNow");
+      }
+      if (diffMinutes < 60) {
+        return t("timeAgo.minAgo", { count: diffMinutes });
+      }
+      if (diffHours < 24) {
+        return t("timeAgo.hourAgo", { count: diffHours });
+      }
+      if (diffDays === 1) {
+        return t("timeAgo.yesterday");
+      }
+      if (diffDays < 7) {
+        return t("timeAgo.dayAgo", { count: diffDays });
+      }
+      return new Date(dateStr).toLocaleDateString();
+    },
     [t]
   );
 
@@ -199,11 +196,7 @@ export default function DashboardLayout() {
           </p>
         </div>
 
-        <nav
-          aria-label="Main navigation"
-          className="flex-1 space-y-1 p-2"
-          role="navigation"
-        >
+        <nav aria-label="Main navigation" className="flex-1 space-y-1 p-2">
           <NavLink
             exact
             icon={<LayoutDashboard size={20} />}
@@ -252,7 +245,6 @@ export default function DashboardLayout() {
               aria-label="WhatsApp disconnected — click to connect"
               className="mb-1 flex cursor-pointer items-center gap-2 text-destructive text-sm hover:text-destructive/80"
               onClick={() => navigate("/auth/connect-whatsapp")}
-              role="status"
             >
               <WifiOff size={16} /> {t("whatsapp.connect")}
             </button>
@@ -279,7 +271,7 @@ export default function DashboardLayout() {
                   isDark ? "Switch to light mode" : "Switch to dark mode"
                 }
                 className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                onClick={toggleTheme}
+                onClick={handleToggleTheme}
               >
                 {isDark ? <Sun size={16} /> : <Moon size={16} />}
               </button>
@@ -313,8 +305,8 @@ export default function DashboardLayout() {
               </button>
             </div>
             <div className="space-y-3">
-              {shortcuts.map((s, i) => (
-                <div className="flex items-center justify-between" key={i}>
+              {shortcuts.map((s) => (
+                <div className="flex items-center justify-between" key={s.key}>
                   <span className="text-foreground text-sm">
                     {s.description}
                   </span>
@@ -449,35 +441,41 @@ function isMac(): boolean {
   );
 }
 
-function NavLink({
-  to,
-  icon,
-  label,
-  exact = false,
-}: {
-  to: string;
-  icon: React.ReactNode;
-  label: string;
-  exact?: boolean;
-}) {
-  const location = useLocation();
-  const isActive = exact
-    ? location === to
-    : location === to || location.startsWith(`${to}/`);
-  return (
-    <Link
-      className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground ${
-        isActive
-          ? "bg-accent text-accent-foreground font-medium"
-          : "text-muted-foreground"
-      }`}
-      to={to}
-    >
-      {icon}
-      <span>{label}</span>
-    </Link>
-  );
-}
+const NavLink = memo(
+  function NavLink({
+    to,
+    icon,
+    label,
+    exact = false,
+  }: {
+    to: string;
+    icon: React.ReactNode;
+    label: string;
+    exact?: boolean;
+  }) {
+    const location = useLocation();
+    const isActive = exact
+      ? location === to
+      : location === to || location.startsWith(`${to}/`);
+    return (
+      <Link
+        className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground ${
+          isActive
+            ? "bg-accent font-medium text-accent-foreground"
+            : "text-muted-foreground"
+        }`}
+        to={to}
+      >
+        {icon}
+        <span>{label}</span>
+      </Link>
+    );
+  },
+  (prev, next) =>
+    prev.to === next.to &&
+    prev.label === next.label &&
+    prev.exact === next.exact
+);
 
 const PAGE_TITLE_KEYS: Record<string, string> = {
   "/dashboard": "nav.dashboard",
@@ -485,7 +483,7 @@ const PAGE_TITLE_KEYS: Record<string, string> = {
   "/dashboard/appointments": "nav.calendar",
   "/dashboard/settings": "nav.settings",
   "/dashboard/analytics": "nav.analytics",
-  "/dashboard/integrations": "Integrations",
+  "/dashboard/integrations": "nav.integrations",
 };
 
 function getPageTitle(pathname: string, t: (key: string) => string): string {

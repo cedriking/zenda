@@ -1,69 +1,73 @@
-import { Component, type ReactNode } from 'react'
+import { Component, type ReactNode } from "react";
 
 interface Props {
-  children: ReactNode
+  children: ReactNode;
 }
 
 interface State {
-  hasError: boolean
-  error: Error | null
+  error: Error | null;
+  hasError: boolean;
 }
 
 export default class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
-    super(props)
-    this.state = { hasError: false, error: null }
+    super(props);
+    this.state = { hasError: false, error: null };
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error }
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    console.error('[ErrorBoundary] Uncaught error:', error, errorInfo)
+    console.error("[ErrorBoundary] Uncaught error:", error, errorInfo);
   }
 
   handleReset = (): void => {
-    this.setState({ hasError: false, error: null })
-  }
+    this.setState({ hasError: false, error: null });
+  };
 
   render() {
+    const isDev = import.meta.env.DEV;
+
     if (this.state.hasError) {
       return (
         <div className="flex min-h-screen items-center justify-center p-8">
           <div className="max-w-md text-center">
-            <h2 className="text-xl font-bold mb-2">Something went wrong</h2>
-            <p className="text-sm text-muted-foreground mb-2">
+            <h2 className="mb-2 font-bold text-xl">Something went wrong</h2>
+            <p className="mb-2 text-muted-foreground text-sm">
               An unexpected error occurred. Please try refreshing the page.
             </p>
-            {this.state.error && (
-              <details className="text-left text-sm text-muted-foreground mb-4">
-                <summary className="cursor-pointer hover:text-foreground">Error details</summary>
-                <pre className="mt-2 whitespace-pre-wrap break-all text-xs bg-muted p-3 rounded-md">
+            {this.state.error && isDev && (
+              <details className="mb-4 text-left text-muted-foreground text-sm">
+                <summary className="cursor-pointer hover:text-foreground">
+                  Error details
+                </summary>
+                <pre className="mt-2 whitespace-pre-wrap break-all rounded-md bg-muted p-3 text-xs">
                   {this.state.error.message}
                   {this.state.error.stack && `\n\n${this.state.error.stack}`}
                 </pre>
               </details>
             )}
-            <div className="flex gap-3 justify-center">
+            <div className="flex justify-center gap-3">
               <button
-                onClick={this.handleReset}
                 className="rounded-md bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90"
+                onClick={this.handleReset}
               >
                 Try Again
               </button>
               <button
-                onClick={() => window.location.reload()}
                 className="rounded-md border px-4 py-2 text-sm hover:bg-muted"
+                onClick={() => window.location.reload()}
               >
                 Reload App
               </button>
             </div>
           </div>
         </div>
-      )
+      );
     }
 
-    return this.props.children
+    return this.props.children;
   }
 }

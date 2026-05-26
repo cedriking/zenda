@@ -2,5 +2,5 @@
 // This component is never rendered — the guard redirects / to /dashboard
 
 export default function IndexRedirect() {
-  return null
+  return null;
 }

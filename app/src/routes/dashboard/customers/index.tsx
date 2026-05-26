@@ -1,4 +1,3 @@
-import { Link } from "@/utils/router";
 import {
   AlertCircle,
   Calendar,
@@ -10,6 +9,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "@/utils/router";
 import { apiFetch } from "../../../services/api-client";
 
 interface CustomerSummary {
@@ -58,7 +58,27 @@ export default function CustomersPage() {
 
   if (loading) {
     return (
-      <div className="p-6 text-muted-foreground">{t("common.loading")}</div>
+      <div className="p-6">
+        <div className="mb-6 flex items-center justify-between">
+          <div className="h-8 w-40 animate-pulse rounded bg-muted" />
+          <div className="h-5 w-20 animate-pulse rounded bg-muted" />
+        </div>
+        <div className="mb-6 h-11 animate-pulse rounded-lg bg-muted" />
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              className="flex items-center gap-4 rounded-lg border border-border bg-card p-4"
+              key={i}
+            >
+              <div className="h-10 w-10 animate-pulse rounded-full bg-muted" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+                <div className="h-3 w-48 animate-pulse rounded bg-muted" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     );
   }
 
@@ -89,7 +109,7 @@ export default function CustomersPage() {
           {t("customer.listingTitle")}
         </h2>
         <span className="text-muted-foreground text-sm">
-          {filtered.length} {filtered.length === 1 ? "customer" : "customers"}
+          {t("customer.customerCount", "{{count}} customer(s)", { count: filtered.length })}
         </span>
       </div>
 

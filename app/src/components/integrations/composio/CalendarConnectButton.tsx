@@ -1,73 +1,75 @@
-import { useState } from 'react'
-import { Button } from '../../ui/button'
-import { Loader2, Calendar, ExternalLink, CheckCircle } from 'lucide-react'
-import { openExternalLink } from '@/actions/shell'
+import { Calendar, CheckCircle, ExternalLink, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { openExternalLink } from "@/actions/shell";
+import { Button } from "../../ui/button";
 
 interface CalendarConnectButtonProps {
-  isConnected?: boolean
-  isConnecting?: boolean
-  onConnect?: () => void
-  apiBaseUrl?: string
-  provider?: 'google' | 'outlook'
-  className?: string
+  apiBaseUrl?: string;
+  className?: string;
+  isConnected?: boolean;
+  isConnecting?: boolean;
+  onConnect?: () => void;
+  provider?: "google" | "outlook";
 }
 
 export function CalendarConnectButton({
   isConnected = false,
   isConnecting = false,
   onConnect,
-  apiBaseUrl = 'https://api.zenda.bot',
-  provider = 'google',
+  apiBaseUrl = "https://api.zenda.bot",
+  provider = "google",
   className,
 }: CalendarConnectButtonProps) {
-  const [isOpening, setIsOpening] = useState(false)
+  const [isOpening, setIsOpening] = useState(false);
 
   const handleConnect = async () => {
-    if (isConnected || isConnecting || isOpening) return
+    if (isConnected || isConnecting || isOpening) {
+      return;
+    }
 
-    setIsOpening(true)
+    setIsOpening(true);
     try {
       // Open Composio OAuth flow for Google Calendar
-      const connectUrl = `${apiBaseUrl}/integrations/composio/oauth/calendar?provider=${provider}`
-      openExternalLink(connectUrl)
+      const connectUrl = `${apiBaseUrl}/integrations/composio/oauth/calendar?provider=${provider}`;
+      openExternalLink(connectUrl);
 
-      onConnect?.()
+      onConnect?.();
     } catch (error) {
-      console.error('Failed to open calendar connection:', error)
+      console.error("Failed to open calendar connection:", error);
     } finally {
-      setTimeout(() => setIsOpening(false), 1000)
+      setTimeout(() => setIsOpening(false), 1000);
     }
-  }
+  };
 
   if (isConnected) {
     return (
-      <Button variant="outline" size="sm" disabled className={className}>
-        <CheckCircle size={14} className="mr-1.5 text-green-500" />
+      <Button className={className} disabled size="sm" variant="outline">
+        <CheckCircle className="mr-1.5 text-green-500" size={14} />
         Calendar Connected
       </Button>
-    )
+    );
   }
 
   return (
     <Button
-      variant={isConnecting ? 'secondary' : 'default'}
-      size="sm"
-      onClick={handleConnect}
-      disabled={isConnecting || isOpening}
       className={className}
+      disabled={isConnecting || isOpening}
+      onClick={handleConnect}
+      size="sm"
+      variant={isConnecting ? "secondary" : "default"}
     >
       {isConnecting || isOpening ? (
         <>
-          <Loader2 size={14} className="mr-1.5 animate-spin" />
+          <Loader2 className="mr-1.5 animate-spin" size={14} />
           Connecting...
         </>
       ) : (
         <>
-          <Calendar size={14} className="mr-1.5" />
-          <ExternalLink size={14} className="mr-1" />
-          Connect {provider === 'google' ? 'Google' : 'Outlook'} Calendar
+          <Calendar className="mr-1.5" size={14} />
+          <ExternalLink className="mr-1" size={14} />
+          Connect {provider === "google" ? "Google" : "Outlook"} Calendar
         </>
       )}
     </Button>
-  )
+  );
 }

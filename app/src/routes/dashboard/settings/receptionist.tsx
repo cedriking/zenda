@@ -1,24 +1,29 @@
-import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import { apiFetch } from '../../../services/api-client'
-import { Bot, AlertCircle } from 'lucide-react'
+import { AlertCircle, Bot } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { apiFetch } from "../../../services/api-client";
 
-type PersonalityPreset = 'Professional' | 'Warm' | 'Minimal' | 'Premium' | 'Friendly'
+type PersonalityPreset =
+  | "Professional"
+  | "Warm"
+  | "Minimal"
+  | "Premium"
+  | "Friendly";
 
 interface ReceptionistSettings {
-  personalityPreset: PersonalityPreset
-  formalityLevel: number
-  concisenessLevel: number
-  warmthLevel: number
-  useEmoji: boolean
-  speaksAsBusiness: boolean
-  proactivelySuggestTimes: boolean
-  confirmsBeforeBooking: boolean
-  greetingStyle: string
+  concisenessLevel: number;
+  confirmsBeforeBooking: boolean;
+  formalityLevel: number;
+  greetingStyle: string;
+  personalityPreset: PersonalityPreset;
+  proactivelySuggestTimes: boolean;
+  speaksAsBusiness: boolean;
+  useEmoji: boolean;
+  warmthLevel: number;
 }
 
 const DEFAULT_SETTINGS: ReceptionistSettings = {
-  personalityPreset: 'Professional',
+  personalityPreset: "Professional",
   formalityLevel: 3,
   concisenessLevel: 3,
   warmthLevel: 3,
@@ -26,114 +31,133 @@ const DEFAULT_SETTINGS: ReceptionistSettings = {
   speaksAsBusiness: true,
   proactivelySuggestTimes: true,
   confirmsBeforeBooking: true,
-  greetingStyle: '',
-}
+  greetingStyle: "",
+};
 
-const PERSONALITY_PRESETS: PersonalityPreset[] = ['Professional', 'Warm', 'Minimal', 'Premium', 'Friendly']
+const PERSONALITY_PRESETS: PersonalityPreset[] = [
+  "Professional",
+  "Warm",
+  "Minimal",
+  "Premium",
+  "Friendly",
+];
 
 export default function ReceptionistSettingsPage() {
-  const { t } = useTranslation()
-  const [settings, setSettings] = useState<ReceptionistSettings>(DEFAULT_SETTINGS)
-  const [saving, setSaving] = useState(false)
-  const [saveError, setSaveError] = useState<string | null>(null)
-  const [saveSuccess, setSaveSuccess] = useState(false)
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const { t } = useTranslation();
+  const [settings, setSettings] =
+    useState<ReceptionistSettings>(DEFAULT_SETTINGS);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
       try {
-        setLoadError(null)
-        const data = await apiFetch<ReceptionistSettings>('/settings/receptionist')
-        setSettings({ ...DEFAULT_SETTINGS, ...data })
+        setLoadError(null);
+        const data = await apiFetch<ReceptionistSettings>(
+          "/settings/receptionist"
+        );
+        setSettings({ ...DEFAULT_SETTINGS, ...data });
       } catch {
-        setLoadError(t('settings.errorLoad'))
+        setLoadError(t("settings.errorLoad"));
       }
     }
-    load()
-  }, [])
+    load();
+  }, [t]);
 
   async function handleSave() {
-    setSaving(true)
-    setSaveError(null)
-    setSaveSuccess(false)
+    setSaving(true);
+    setSaveError(null);
+    setSaveSuccess(false);
 
     try {
-      await apiFetch('/settings/receptionist', {
-        method: 'PATCH',
+      await apiFetch("/settings/receptionist", {
+        method: "PATCH",
         body: settings,
-      })
-      setSaveSuccess(true)
-      setTimeout(() => setSaveSuccess(false), 3000)
+      });
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : t('settings.errorSave'))
+      setSaveError(
+        err instanceof Error ? err.message : t("settings.errorSave")
+      );
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
   }
 
-  function updateField<K extends keyof ReceptionistSettings>(key: K, value: ReceptionistSettings[K]) {
-    setSettings(prev => ({ ...prev, [key]: value }))
+  function updateField<K extends keyof ReceptionistSettings>(
+    key: K,
+    value: ReceptionistSettings[K]
+  ) {
+    setSettings((prev) => ({ ...prev, [key]: value }));
   }
 
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+        <h2 className="flex items-center gap-2 font-bold text-2xl text-foreground">
           <Bot size={24} />
-          {t('receptionist.settings')}
+          {t("receptionist.settings")}
         </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          {t('settings.description')}
+        <p className="mt-1 text-muted-foreground text-sm">
+          {t("settings.description")}
         </p>
       </div>
 
       {loadError && (
-        <div className="mb-4 rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-sm text-amber-600 flex items-center gap-2">
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-amber-600 text-sm">
           <AlertCircle size={16} />
           {loadError}
         </div>
       )}
 
       {saveError && (
-        <div className="mb-4 rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive flex items-center gap-2">
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-destructive text-sm">
           <AlertCircle size={16} />
           {saveError}
         </div>
       )}
 
       {saveSuccess && (
-        <div className="mb-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm text-emerald-600">
-          {t('settings.saved')}
+        <div className="mb-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-emerald-600 text-sm">
+          {t("settings.saved")}
         </div>
       )}
 
-      <div className="bg-card rounded-lg border border-border p-6 space-y-6">
+      <div className="space-y-6 rounded-lg border border-border bg-card p-6">
         {/* Personality Preset */}
         <fieldset>
-          <legend className="block text-sm font-medium text-foreground mb-3">{t('settings.tone')}</legend>
+          <legend className="mb-3 block font-medium text-foreground text-sm">
+            {t("settings.tone")}
+          </legend>
           <div className="flex flex-wrap gap-3">
-            {PERSONALITY_PRESETS.map(preset => (
+            {PERSONALITY_PRESETS.map((preset) => (
               <label
-                key={preset}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer transition-colors ${
+                className={`flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
                   settings.personalityPreset === preset
-                    ? 'bg-primary/10 border-primary text-primary'
-                    : 'bg-card border-border text-foreground hover:bg-muted'
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-card text-foreground hover:bg-muted"
                 }`}
+                key={preset}
               >
                 <input
-                  type="radio"
-                  name="personalityPreset"
-                  value={preset}
                   checked={settings.personalityPreset === preset}
-                  onChange={() => updateField('personalityPreset', preset)}
                   className="sr-only"
+                  name="personalityPreset"
+                  onChange={() => updateField("personalityPreset", preset)}
+                  type="radio"
+                  value={preset}
                 />
-                <span className="text-sm font-medium">
-                  {preset === 'Professional' ? t('settings.toneProfessional')
-                    : preset === 'Warm' ? t('settings.toneWarm')
-                    : preset === 'Friendly' ? t('settings.toneFriendly')
-                    : preset}
+                <span className="font-medium text-sm">
+                  {preset === "Professional"
+                    ? t("settings.toneProfessional")
+                    : preset === "Warm"
+                      ? t("settings.toneWarm")
+                      : preset === "Friendly"
+                        ? t("settings.toneFriendly")
+                        : preset}
                 </span>
               </label>
             ))}
@@ -141,88 +165,88 @@ export default function ReceptionistSettingsPage() {
         </fieldset>
 
         {/* Level Sliders */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <SliderField
-            label="Formality"
+            highLabel={t("settings.slider.formal", "Formal")}
+            label={t("settings.slider.formality", "Formality")}
+            lowLabel={t("settings.toneCasual")}
+            onChange={(v) => updateField("formalityLevel", v)}
             value={settings.formalityLevel}
-            onChange={v => updateField('formalityLevel', v)}
-            lowLabel={t('settings.toneCasual')}
-            highLabel="Formal"
           />
           <SliderField
-            label="Conciseness"
+            highLabel={t("settings.slider.brief", "Brief")}
+            label={t("settings.slider.conciseness", "Conciseness")}
+            lowLabel={t("settings.slider.detailed", "Detailed")}
+            onChange={(v) => updateField("concisenessLevel", v)}
             value={settings.concisenessLevel}
-            onChange={v => updateField('concisenessLevel', v)}
-            lowLabel="Detailed"
-            highLabel="Brief"
           />
           <SliderField
-            label="Warmth"
+            highLabel={t("settings.toneWarm")}
+            label={t("settings.slider.warmth", "Warmth")}
+            lowLabel={t("settings.slider.reserved", "Reserved")}
+            onChange={(v) => updateField("warmthLevel", v)}
             value={settings.warmthLevel}
-            onChange={v => updateField('warmthLevel', v)}
-            lowLabel="Reserved"
-            highLabel={t('settings.toneWarm')}
           />
         </div>
 
         {/* Toggles */}
         <div className="space-y-3">
           <ToggleField
-            label="Use emoji in messages"
-            description="Allow the receptionist to include emoji for a friendlier tone"
             checked={settings.useEmoji}
-            onChange={v => updateField('useEmoji', v)}
+            description={t("settings.toggles.useEmojiDesc", "Allow the receptionist to include emoji for a friendlier tone")}
+            label={t("settings.toggles.useEmoji", "Use emoji in messages")}
+            onChange={(v) => updateField("useEmoji", v)}
           />
           <ToggleField
-            label="Speak as the business"
-            description="Use 'we' instead of 'I' to represent the business collectively"
             checked={settings.speaksAsBusiness}
-            onChange={v => updateField('speaksAsBusiness', v)}
+            description={t("settings.toggles.speaksAsBusinessDesc", "Use 'we' instead of 'I' to represent the business collectively")}
+            label={t("settings.toggles.speaksAsBusiness", "Speak as the business")}
+            onChange={(v) => updateField("speaksAsBusiness", v)}
           />
           <ToggleField
-            label="Proactively suggest times"
-            description="Offer available time slots without waiting for the customer to ask"
             checked={settings.proactivelySuggestTimes}
-            onChange={v => updateField('proactivelySuggestTimes', v)}
+            description={t("settings.toggles.proactiveSuggestDesc", "Offer available time slots without waiting for the customer to ask")}
+            label={t("settings.toggles.proactiveSuggest", "Proactively suggest times")}
+            onChange={(v) => updateField("proactivelySuggestTimes", v)}
           />
           <ToggleField
-            label="Confirm before booking"
-            description="Always ask for explicit confirmation before finalizing an appointment"
             checked={settings.confirmsBeforeBooking}
-            onChange={v => updateField('confirmsBeforeBooking', v)}
+            description={t("settings.toggles.confirmBeforeDesc", "Always ask for explicit confirmation before finalizing an appointment")}
+            label={t("settings.toggles.confirmBefore", "Confirm before booking")}
+            onChange={(v) => updateField("confirmsBeforeBooking", v)}
           />
         </div>
 
         {/* Greeting Style */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            {t('settings.greetingTemplate')}
+          <label className="mb-1 block font-medium text-foreground text-sm">
+            {t("settings.greetingTemplate")}
           </label>
           <input
+            className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+            onChange={(e) => updateField("greetingStyle", e.target.value)}
+            placeholder={t("settings.greetingPlaceholder")}
             type="text"
             value={settings.greetingStyle}
-            onChange={e => updateField('greetingStyle', e.target.value)}
-            placeholder={t('settings.greetingPlaceholder')}
-            className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary bg-card text-foreground"
           />
-          <p className="text-xs text-muted-foreground mt-1">
-            Use {'{business}'} and {'{name}'} as placeholders for your business and receptionist name
+          <p className="mt-1 text-muted-foreground text-xs">
+            {t("settings.greetingPlaceholderHint", "Use {{business}} and {{name}} as placeholders for your business and receptionist name")}
           </p>
         </div>
 
         {/* Save */}
         <div className="pt-2">
           <button
-            onClick={handleSave}
+            className="rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             disabled={saving}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
+            onClick={handleSave}
           >
-            {saving ? t('common.saving') : t('settings.saveReceptionist')}
+            {saving ? t("common.saving") : t("settings.saveReceptionist")}
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function SliderField({
@@ -232,31 +256,33 @@ function SliderField({
   lowLabel,
   highLabel,
 }: {
-  label: string
-  value: number
-  onChange: (value: number) => void
-  lowLabel: string
-  highLabel: string
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  lowLabel: string;
+  highLabel: string;
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
+      <label className="mb-1 block font-medium text-foreground text-sm">
+        {label}
+      </label>
       <input
-        type="range"
-        min={1}
+        className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-muted accent-primary"
         max={5}
+        min={1}
+        onChange={(e) => onChange(Number.parseInt(e.target.value, 10))}
         step={1}
+        type="range"
         value={value}
-        onChange={e => onChange(parseInt(e.target.value))}
-        className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
       />
-      <div className="flex justify-between text-xs text-muted-foreground mt-1">
+      <div className="mt-1 flex justify-between text-muted-foreground text-xs">
         <span>{lowLabel}</span>
         <span className="font-medium text-foreground">{value} / 5</span>
         <span>{highLabel}</span>
       </div>
     </div>
-  )
+  );
 }
 
 function ToggleField({
@@ -265,32 +291,32 @@ function ToggleField({
   checked,
   onChange,
 }: {
-  label: string
-  description: string
-  checked: boolean
-  onChange: (value: boolean) => void
+  label: string;
+  description: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
 }) {
   return (
-    <label className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted cursor-pointer">
+    <label className="flex cursor-pointer items-center justify-between rounded-lg border border-border p-3 hover:bg-muted">
       <div>
-        <span className="text-sm font-medium text-foreground">{label}</span>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <span className="font-medium text-foreground text-sm">{label}</span>
+        <p className="text-muted-foreground text-xs">{description}</p>
       </div>
       <button
-        type="button"
-        role="switch"
         aria-checked={checked}
-        onClick={() => onChange(!checked)}
         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-          checked ? 'bg-primary' : 'bg-muted'
+          checked ? "bg-primary" : "bg-muted"
         }`}
+        onClick={() => onChange(!checked)}
+        role="switch"
+        type="button"
       >
         <span
           className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-            checked ? 'translate-x-6' : 'translate-x-1'
+            checked ? "translate-x-6" : "translate-x-1"
           }`}
         />
       </button>
     </label>
-  )
+  );
 }

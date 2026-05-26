@@ -23,6 +23,10 @@ export function ConnectivityBanner() {
   useEffect(() => {
     // Check API reachability immediately on mount, then periodically
     const check = async () => {
+      // Skip health check when the page is hidden
+      if (document.visibilityState === "hidden") {
+        return;
+      }
       try {
         await apiFetch("/health", { method: "GET" });
         setIsOffline(false);

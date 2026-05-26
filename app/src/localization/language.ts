@@ -1,6 +1,6 @@
 export interface Language {
-  key: string
-  nativeName: string
-  englishName: string
-  dir: 'ltr' | 'rtl'
+  dir: "ltr" | "rtl";
+  englishName: string;
+  key: string;
+  nativeName: string;
 }

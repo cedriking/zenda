@@ -2,6 +2,20 @@ const API_BASE_URL = import.meta.env.VITE_API_URL ?? "https://api.zenda.bot";
 
 export { API_BASE_URL };
 
+// Lazy import to avoid circular dependency — auth store is only needed on refresh failure
+let _authStoreLogout: (() => void) | null = null;
+async function getAuthStoreLogout(): Promise<(() => void) | null> {
+  if (!_authStoreLogout) {
+    try {
+      const mod = await import("@/stores/auth");
+      _authStoreLogout = mod.useAuthStore.getState().logout;
+    } catch {
+      // Module not yet available
+    }
+  }
+  return _authStoreLogout;
+}
+
 export class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) {
@@ -37,8 +51,11 @@ async function refreshAccessToken(): Promise<string | null> {
       return null;
     }
     const data = await res.json();
-    if (typeof data.accessToken !== 'string' || typeof data.refreshToken !== 'string') {
-      throw new Error('Invalid refresh response');
+    if (
+      typeof data.accessToken !== "string" ||
+      typeof data.refreshToken !== "string"
+    ) {
+      throw new Error("Invalid refresh response");
     }
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("refreshToken", data.refreshToken);
@@ -54,7 +71,9 @@ export { refreshAccessToken };
 let refreshPromise: Promise<string | null> | null = null;
 function deduplicatedRefresh(): Promise<string | null> {
   if (!refreshPromise) {
-    refreshPromise = refreshAccessToken().finally(() => { refreshPromise = null; });
+    refreshPromise = refreshAccessToken().finally(() => {
+      refreshPromise = null;
+    });
   }
   return refreshPromise;
 }
@@ -85,11 +104,17 @@ export async function apiFetch<T>(
     if (token) {
       response = await makeRequest(token);
     } else {
-      // Refresh failed — clear session and redirect to login
+      // Refresh failed — clear session, reset auth store, and redirect to login
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("workspace");
       localStorage.removeItem("user");
+      try {
+        const logout = await getAuthStoreLogout();
+        logout?.();
+      } catch {
+        /* best effort */
+      }
       window.location.href = "/auth/login";
       throw new Error("Session expired");
     }

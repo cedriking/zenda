@@ -200,7 +200,7 @@ export default function AppointmentsPage() {
         <div className="flex items-center gap-3">
           <div className="flex overflow-hidden rounded-lg border border-border">
             <button
-              aria-label="Calendar view"
+              aria-label={t("calendar.aria.calendarView", "Calendar view")}
               className={`px-3 py-1.5 text-sm ${view === "calendar" ? "bg-primary text-white" : "bg-card text-foreground"}`}
               onClick={() => setView("calendar")}
               type="button"
@@ -208,7 +208,7 @@ export default function AppointmentsPage() {
               {t("calendar.viewWeek")}
             </button>
             <button
-              aria-label="List view"
+              aria-label={t("calendar.aria.listView", "List view")}
               className={`px-3 py-1.5 text-sm ${view === "list" ? "bg-primary text-white" : "bg-card text-foreground"}`}
               onClick={() => setView("list")}
               type="button"
@@ -217,7 +217,10 @@ export default function AppointmentsPage() {
             </button>
           </div>
           <button
-            aria-label="Create new appointment"
+            aria-label={t(
+              "calendar.aria.newAppointment",
+              "Create new appointment"
+            )}
             className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm text-white hover:bg-primary/90"
             onClick={() => setShowCreateForm(true)}
             type="button"
@@ -249,7 +252,7 @@ export default function AppointmentsPage() {
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
-            aria-label="Previous week"
+            aria-label={t("calendar.aria.prevWeek", "Previous week")}
             className="rounded p-1 hover:bg-muted"
             onClick={prevWeek}
             type="button"
@@ -264,7 +267,7 @@ export default function AppointmentsPage() {
             {t("calendar.today")}
           </button>
           <button
-            aria-label="Next week"
+            aria-label={t("calendar.aria.nextWeek", "Next week")}
             className="rounded p-1 hover:bg-muted"
             onClick={nextWeek}
             type="button"
@@ -418,7 +421,7 @@ function CalendarWeekView({
 
   return (
     <div className="overflow-auto rounded-lg border border-border bg-card">
-      <table aria-label="Weekly calendar" className="w-full min-w-[700px]">
+      <table aria-label={t("calendar.aria.weeklyCalendar", "Weekly calendar")} className="w-full min-w-[700px]">
         <thead>
           <tr className="border-border border-b">
             <th
@@ -478,7 +481,7 @@ function CalendarWeekView({
                         <div
                           className={`mb-0.5 cursor-default rounded px-1.5 py-1 text-[10px] leading-tight ${getStatusColorClass(apt.status)}`}
                           key={apt.id}
-                          title={`${apt.customerName ?? apt.customerPhone ?? "Unknown"} — ${apt.serviceName ?? ""}${apt.notes ? `\n${apt.notes}` : ""}\n${statusLabels[apt.status] ?? apt.status}`}
+                          title={`${apt.customerName ?? apt.customerPhone ?? t("calendar.unknownCustomer", "Unknown")} — ${apt.serviceName ?? ""}${apt.notes ? `\n${apt.notes}` : ""}\n${statusLabels[apt.status] ?? apt.status}`}
                         >
                           <div className="truncate font-semibold">
                             {timeStr}
@@ -771,7 +774,7 @@ function CreateAppointmentModal({
               <option value="">{t("calendar.servicePlaceholder")}</option>
               {services.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.name} ({s.durationMinutes} min)
+                  {s.name} ({s.durationMinutes} {t("calendar.minutesShort", "min")})
                 </option>
               ))}
             </select>

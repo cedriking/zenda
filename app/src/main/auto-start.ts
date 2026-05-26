@@ -1,29 +1,39 @@
-import { app } from 'electron'
-import path from 'node:path'
-import fs from 'node:fs'
+import { execSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { app } from "electron";
 
-const AUTO_START_KEY = 'com.zenda.app'
+const AUTO_START_KEY = "com.zenda.app";
+
+function xmlEscape(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
 export function setAutoStart(enabled: boolean): boolean {
   try {
-    if (process.platform === 'darwin') {
-      return setAutoStartMac(enabled)
-    } else if (process.platform === 'win32') {
-      return setAutoStartWindows(enabled)
+    if (process.platform === "darwin") {
+      return setAutoStartMac(enabled);
     }
-    return false
+    if (process.platform === "win32") {
+      return setAutoStartWindows(enabled);
+    }
+    return false;
   } catch {
-    return false
+    return false;
   }
 }
 
 function setAutoStartMac(enabled: boolean): boolean {
   const plistPath = path.join(
-    app.getPath('home'),
-    'Library',
-    'LaunchAgents',
-    `${AUTO_START_KEY}.plist`,
-  )
+    app.getPath("home"),
+    "Library",
+    "LaunchAgents",
+    `${AUTO_START_KEY}.plist`
+  );
 
   if (enabled) {
     const plist = `<?xml version="1.0" encoding="UTF-8"?>
@@ -34,36 +44,35 @@ function setAutoStartMac(enabled: boolean): boolean {
   <string>${AUTO_START_KEY}</string>
   <key>ProgramArguments</key>
   <array>
-    <string>${process.execPath}</string>
+    <string>${xmlEscape(process.execPath)}</string>
   </array>
   <key>RunAtLoad</key>
   <true/>
   <key>KeepAlive</key>
   <false/>
 </dict>
-</plist>`
-    fs.writeFileSync(plistPath, plist, 'utf-8')
-  } else {
-    if (fs.existsSync(plistPath)) {
-      fs.unlinkSync(plistPath)
-    }
+</plist>`;
+    fs.writeFileSync(plistPath, plist, "utf-8");
+  } else if (fs.existsSync(plistPath)) {
+    fs.unlinkSync(plistPath);
   }
-  return true
+  return true;
 }
 
 function setAutoStartWindows(enabled: boolean): boolean {
-  const { execSync } = require('child_process') as typeof import('child_process')
-  const exePath = app.getPath('exe')
-  const escapedPath = exePath.replace(/"/g, '\\"')
+  const exePath = app.getPath("exe");
+  const escapedPath = exePath.replace(/"/g, '\\"');
 
   if (enabled) {
-    const regCommand = `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" /v "${AUTO_START_KEY}" /t REG_SZ /d "${escapedPath}" /f`
-    execSync(regCommand)
+    const regCommand = `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" /v "${AUTO_START_KEY}" /t REG_SZ /d "${escapedPath}" /f`;
+    execSync(regCommand);
   } else {
     try {
-      const regCommand = `reg delete "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" /v "${AUTO_START_KEY}" /f`
-      execSync(regCommand)
-    } catch { /* key doesn't exist */ }
+      const regCommand = `reg delete "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" /v "${AUTO_START_KEY}" /f`;
+      execSync(regCommand);
+    } catch {
+      /* key doesn't exist */
+    }
   }
-  return true
+  return true;
 }

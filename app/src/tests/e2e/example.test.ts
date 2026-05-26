@@ -7,11 +7,6 @@ import {
 } from "@playwright/test";
 import { findLatestBuild, parseElectronApp } from "electron-playwright-helpers";
 
-/*
- * Using Playwright with Electron:
- * https://www.electronjs.org/pt/docs/latest/tutorial/automated-testing#using-playwright
- */
-
 let electronApp: ElectronApplication;
 
 test.beforeAll(async () => {
@@ -35,10 +30,9 @@ test.beforeAll(async () => {
   });
 });
 
-test("renders the first page", async () => {
+test("Zenda app launches and shows the main window", async () => {
   const page: Page = await electronApp.firstWindow();
 
-  const title = await page.waitForSelector("h1");
-  const text = await title.textContent();
-  expect(text).toBe("electron-shadcn");
+  const title = await page.title();
+  expect(title).toBe("Zenda");
 });

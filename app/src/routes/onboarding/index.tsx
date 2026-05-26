@@ -1,4 +1,3 @@
-import { useNavigate } from "@/utils/router";
 import {
   ArrowRight,
   Building2,
@@ -11,6 +10,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "@/utils/router";
 import { openExternalLink } from "../../actions/shell";
 import { apiFetch } from "../../services/api-client";
 import { useAuthStore } from "../../stores/auth";
@@ -237,7 +237,11 @@ export default function OnboardingPage() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: t("common.error"), id: ++msgIdRef.current },
+        {
+          role: "assistant",
+          content: t("common.error"),
+          id: ++msgIdRef.current,
+        },
       ]);
     } finally {
       setLoading(false);
@@ -291,7 +295,11 @@ export default function OnboardingPage() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: t("common.error"), id: ++msgIdRef.current },
+        {
+          role: "assistant",
+          content: t("common.error"),
+          id: ++msgIdRef.current,
+        },
       ]);
     } finally {
       setCheckoutLoading(null);

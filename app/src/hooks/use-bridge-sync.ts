@@ -10,7 +10,7 @@ import { refreshAccessToken } from "../services/api-client";
  * to refresh the token via /auth/refresh and reconnects.
  */
 
-function refreshBridgeToken(attempted: React.MutableRefObject<boolean>): void {
+function refreshBridgeToken(attempted: React.RefObject<boolean>): void {
   const refreshToken = localStorage.getItem("refreshToken");
 
   if (!refreshToken) {
@@ -30,7 +30,15 @@ function refreshBridgeToken(attempted: React.MutableRefObject<boolean>): void {
       console.log("[useBridgeSync] Token refreshed, reconnecting bridge");
 
       const workspaceRaw = localStorage.getItem("workspace");
-      const workspace = workspaceRaw ? JSON.parse(workspaceRaw) : null;
+      let workspace: { id?: string } | null = null;
+      try {
+        workspace = workspaceRaw ? JSON.parse(workspaceRaw) : null;
+      } catch {
+        console.warn(
+          "[useBridgeSync] Corrupted workspace data in localStorage"
+        );
+        workspace = null;
+      }
 
       if (workspace?.id && window.electron?.invoke) {
         attempted.current = true;

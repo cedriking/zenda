@@ -11,8 +11,34 @@ import { IPC_CHANNELS, inDevelopment } from "./constants";
 import { setAutoStart } from "./main/auto-start";
 import { startHealthMonitor } from "./main/health-monitor";
 import { createTray } from "./main/tray";
-import { getBasePath } from "./utils/path";
 import { setMainWindow } from "./main/whatsapp/bridge.js";
+import { getBasePath } from "./utils/path";
+
+let isQuitting = false;
+
+// Module-level before-quit handler (registered once)
+app.on("before-quit", (e) => {
+  if (isQuitting) {
+    return;
+  }
+  e.preventDefault();
+  isQuitting = true;
+  (async () => {
+    try {
+      const { shutdownWhatsApp } = await import("./main/whatsapp/client.js");
+      const { disconnectBridge } = await import("./main/whatsapp/bridge.js");
+      const { stopHealthMonitor } = await import("./main/health-monitor.js");
+      shutdownWhatsApp();
+      disconnectBridge();
+      stopHealthMonitor();
+    } catch {
+      // best-effort cleanup
+    } finally {
+      setMainWindow(null);
+      app.quit();
+    }
+  })();
+});
 
 function createWindow() {
   const basePath = getBasePath();
@@ -27,7 +53,7 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       nodeIntegrationInSubFrames: false,
-
+      nodeIntegrationInWorker: false,
       preload,
     },
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "hidden",
@@ -37,35 +63,26 @@ function createWindow() {
   ipcContext.setMainWindow(mainWindow);
   setMainWindow(mainWindow);
 
+  // Content Security Policy
+  mainWindow.webContents.session.webRequest.onHeadersReceived(
+    (details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          "Content-Security-Policy": [
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src wss:*.zenda.bot https:; img-src 'self' data: blob:; font-src 'self'",
+          ],
+        },
+      });
+    }
+  );
+
   // Minimize to tray instead of closing
   mainWindow.on("close", (event) => {
-    if (!(app as unknown as { isQuitting?: boolean }).isQuitting) {
+    if (!isQuitting) {
       event.preventDefault();
       mainWindow.hide();
     }
-  });
-
-  let isQuitting = false;
-  app.on("before-quit", (e) => {
-    if (isQuitting) return;
-    e.preventDefault();
-    isQuitting = true;
-    (app as unknown as { isQuitting: boolean }).isQuitting = true;
-    (async () => {
-      try {
-        const { shutdownWhatsApp } = await import("./main/whatsapp/client.js");
-        const { disconnectBridge } = await import("./main/whatsapp/bridge.js");
-        const { stopHealthMonitor } = await import("./main/health-monitor.js");
-        shutdownWhatsApp();
-        disconnectBridge();
-        stopHealthMonitor();
-      } catch {
-        // best-effort cleanup
-      } finally {
-        setMainWindow(null);
-        app.quit();
-      }
-    })();
   });
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -75,6 +92,8 @@ function createWindow() {
       path.join(basePath, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
     );
   }
+
+  return mainWindow;
 }
 
 async function installExtensions() {
@@ -122,7 +141,7 @@ app.whenReady().then(async () => {
     // Register WhatsApp IPC handlers
     const { registerWhatsAppIPC } = await import("./ipc/modules/whatsapp");
     if (ipcContext.mainWindow) {
-      registerWhatsAppIPC(ipcContext.mainWindow);
+      registerWhatsAppIPC(() => ipcContext.mainWindow ?? null);
 
       // Auto-init WhatsApp if session exists (user already connected before)
       const { hasSession } = await import("./main/whatsapp/session.js");
@@ -143,7 +162,7 @@ app.whenReady().then(async () => {
       autoConnectBridge();
 
       // System tray
-      createTray(ipcContext.mainWindow);
+      createTray(() => ipcContext.mainWindow ?? null);
 
       // Auto-start on boot
       setAutoStart(true);
@@ -164,9 +183,12 @@ app.on("window-all-closed", () => {
   }
 });
 
-app.on("activate", () => {
+app.on("activate", async () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
+    const { registerWhatsAppIPC } = await import("./ipc/modules/whatsapp");
+    createTray(() => ipcContext.mainWindow ?? null);
+    registerWhatsAppIPC(() => ipcContext.mainWindow ?? null);
   }
 });
 //osX only ends

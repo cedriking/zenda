@@ -3,10 +3,18 @@ import { createRoot } from "react-dom/client";
 import { useTranslation } from "react-i18next";
 import { updateAppLanguage } from "./actions/language";
 import { syncWithLocalTheme } from "./actions/theme";
-import { Router } from "./utils/router";
-import { routes, authGuard, indexGuard } from "./utils/routes";
 import ErrorBoundary from "./components/error-boundary";
+import { Router } from "./utils/router";
+import { authGuard, indexGuard, routes } from "./utils/routes";
 import "./localization/i18n";
+
+function DashboardErrorBoundary({ children }: { children: React.ReactNode }) {
+  return <ErrorBoundary>{children}</ErrorBoundary>;
+}
+
+function RouteErrorBoundaries({ children }: { children: React.ReactNode }) {
+  return <DashboardErrorBoundary>{children}</DashboardErrorBoundary>;
+}
 
 export default function App() {
   const { i18n } = useTranslation();
@@ -17,10 +25,12 @@ export default function App() {
   }, [i18n]);
 
   return (
-    <Router
-      routes={routes}
-      guards={[{ check: authGuard }, { check: indexGuard }]}
-    />
+    <RouteErrorBoundaries>
+      <Router
+        guards={[{ check: authGuard }, { check: indexGuard }]}
+        routes={routes}
+      />
+    </RouteErrorBoundaries>
   );
 }
 

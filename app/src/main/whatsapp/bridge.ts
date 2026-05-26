@@ -45,6 +45,10 @@ interface PendingReply {
 }
 const pendingReplies: PendingReply[] = [];
 const MAX_REPLY_RETRIES = 3;
+const MAX_PENDING_REPLIES = 100;
+
+// Track active composing intervals for cleanup
+const activeComposingIntervals: Set<ReturnType<typeof setInterval>> = new Set();
 
 const WS_URL = process.env.ZENDA_API_WS_URL ?? "wss://api.zenda.bot/ws";
 
@@ -60,21 +64,20 @@ function markdownToWhatsApp(text: string): string {
   result = result.replace(/(?<!\w)\*(?!\s)(.+?)(?<!\s)\*(?!\w)/g, "_$1_");
   // Restore bold placeholders
   result = result.replace(/\x00BOLD\x00(.+?)\x00\/BOLD\x00/g, "*$1*");
-  return result
-    // ~~strikethrough~~ → ~strikethrough~
-    .replace(/~~(.+?)~~/g, "~$1~")
-    // `inline code` → ```inline code```
-    .replace(/`([^`]+)`/g, "```$1```")
-    // ### header → *header*
-    .replace(/^#{1,6}\s+(.+)$/gm, "*$1*")
-    // - bullets → • bullets
-    .replace(/^-\s+/gm, "• ");
+  return (
+    result
+      // ~~strikethrough~~ → ~strikethrough~
+      .replace(/~~(.+?)~~/g, "~$1~")
+      // `inline code` → ```inline code```
+      .replace(/`([^`]+)`/g, "```$1```")
+      // ### header → *header*
+      .replace(/^#{1,6}\s+(.+)$/gm, "*$1*")
+      // - bullets → • bullets
+      .replace(/^-\s+/gm, "• ")
+  );
 }
 
-function handleServerMessage(
-  ws: WebSocket,
-  data: Buffer
-): void {
+function handleServerMessage(ws: WebSocket, data: Buffer): void {
   try {
     const payload = JSON.parse(data.toString());
 
@@ -97,9 +100,9 @@ function handleServerMessage(
   }
 }
 
-function handleResponseSend(
-  payload: { data?: { phoneNumber?: string; message?: { body?: string } } }
-): void {
+function handleResponseSend(payload: {
+  data?: { phoneNumber?: string; message?: { body?: string } };
+}): void {
   const phoneNumber = payload.data?.phoneNumber;
   const messageBody = payload.data?.message?.body;
   log(
@@ -123,10 +126,7 @@ function handleResponseSend(
   }
 }
 
-export function connectBridge(
-  workspaceId: string,
-  accessToken: string
-): void {
+export function connectBridge(workspaceId: string, accessToken: string): void {
   // Clear any pending timers from a previous connection attempt
   if (reconnectTimer) {
     clearTimeout(reconnectTimer);
@@ -255,10 +255,7 @@ export function connectBridge(
     );
     reconnectTimer = setTimeout(() => {
       if (savedCreds) {
-        connectBridge(
-          savedCreds.workspaceId,
-          savedCreds.accessToken
-        );
+        connectBridge(savedCreds.workspaceId, savedCreds.accessToken);
       }
     }, backoff);
   });
@@ -280,9 +277,12 @@ export function sendToBackend(data: unknown): boolean {
       log(`Queued message (queue: ${pendingQueue.length}/${MAX_PENDING})`);
     } else {
       log("Queue full — dropping message");
-      const last = pendingQueue[pendingQueue.length - 1];
+      const last = pendingQueue.at(-1);
       if (last && typeof last === "object" && "jid" in last && "text" in last) {
-        sendToRenderer("bridge:queue-overflow", { jid: (last as { jid: string }).jid, text: (last as { text: string }).text });
+        sendToRenderer("bridge:queue-overflow", {
+          jid: (last as { jid: string }).jid,
+          text: (last as { text: string }).text,
+        });
       }
     }
     return false;
@@ -312,6 +312,10 @@ function sendWhatsAppReply(jid: string, text: string): void {
       (r) => r.jid === jid && r.text === text
     );
     if (!alreadyQueued) {
+      if (pendingReplies.length >= MAX_PENDING_REPLIES) {
+        pendingReplies.shift();
+        log("Pending replies cap reached, dropping oldest");
+      }
       pendingReplies.push({ jid, text, retries: 0 });
     }
     return;
@@ -332,9 +336,11 @@ function sendWhatsAppReply(jid: string, text: string): void {
         .catch((e: unknown) => log("sendPresenceUpdate refresh failed", e));
     }
   }, 4000);
+  activeComposingIntervals.add(composingInterval);
 
   setTimeout(() => {
     clearInterval(composingInterval);
+    activeComposingIntervals.delete(composingInterval);
 
     // Re-check socket after delay — it may have disconnected
     const currentSock = getClient();
@@ -359,7 +365,11 @@ function sendWhatsAppReply(jid: string, text: string): void {
         const alreadyQueued = pendingReplies.some(
           (r) => r.jid === jid && r.text === text
         );
-        if (!alreadyQueued && pendingReplies.length < MAX_PENDING) {
+        if (!alreadyQueued) {
+          if (pendingReplies.length >= MAX_PENDING_REPLIES) {
+            pendingReplies.shift();
+            log("Pending replies cap reached, dropping oldest");
+          }
           pendingReplies.push({ jid, text, retries: 0 });
         }
       });
@@ -388,17 +398,24 @@ export function flushPendingReplies(): void {
 export function disconnectBridge(): void {
   if (reconnectTimer) {
     clearTimeout(reconnectTimer);
+    reconnectTimer = null;
   }
   if (stabilizeTimer) {
     clearTimeout(stabilizeTimer);
     stabilizeTimer = null;
   }
+  // Clear all active composing intervals
+  for (const interval of activeComposingIntervals) {
+    clearInterval(interval);
+  }
+  activeComposingIntervals.clear();
   if (ws) {
     ws.close();
     ws = null;
   }
   reconnectAttempts = 0;
   authFailures = 0;
+  pendingQueue.length = 0;
   pendingReplies.length = 0;
 }
 

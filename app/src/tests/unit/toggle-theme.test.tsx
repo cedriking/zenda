@@ -1,26 +1,33 @@
-import { render } from "@testing-library/react";
-import { expect, test } from "vitest";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it } from "vitest";
 import ToggleTheme from "@/components/toggle-theme";
+import { ipc } from "@/ipc/manager";
 
-test("renders ToggleTheme", () => {
-  const { getByRole } = render(<ToggleTheme />);
-  const isButton = getByRole("button");
+describe("ToggleTheme", () => {
+  it("renders a button", () => {
+    render(<ToggleTheme />);
+    const button = screen.getByRole("button");
+    expect(button).toBeInTheDocument();
+  });
 
-  expect(isButton).toBeInTheDocument();
-});
+  it("renders an svg icon inside the button", () => {
+    render(<ToggleTheme />);
+    const svg = screen.getByRole("button").querySelector("svg");
+    expect(svg).toBeInTheDocument();
+  });
 
-test("has icon", () => {
-  const { getByRole } = render(<ToggleTheme />);
-  const button = getByRole("button");
-  const icon = button.querySelector("svg");
+  it("shows the moon icon by default (light mode)", () => {
+    render(<ToggleTheme />);
+    const svg = screen.getByRole("button").querySelector("svg");
+    expect(svg?.classList).toContain("lucide-moon");
+  });
 
-  expect(icon).toBeInTheDocument();
-});
-
-test("is moon icon", () => {
-  const svgIconClassName: string = "lucide-moon";
-  const { getByRole } = render(<ToggleTheme />);
-  const svg = getByRole("button").querySelector("svg");
-
-  expect(svg?.classList).toContain(svgIconClassName);
+  it("calls toggleTheme IPC on click", async () => {
+    const user = userEvent.setup();
+    render(<ToggleTheme />);
+    const button = screen.getByRole("button");
+    await user.click(button);
+    expect(ipc.client.theme.toggleThemeMode).toHaveBeenCalled();
+  });
 });

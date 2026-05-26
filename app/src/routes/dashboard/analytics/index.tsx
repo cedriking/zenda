@@ -4,26 +4,52 @@ import {
   BarChart3,
   Calendar,
   Clock,
+  Loader2,
   MessageSquare,
   Zap,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import type React from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { apiFetch } from "../../../services/api-client";
+
+// Lazy-load recharts to reduce initial bundle size
+const Area = lazy(() => import("recharts").then((m) => ({ default: m.Area })));
+const AreaChart = lazy(() =>
+  import("recharts").then((m) => ({ default: m.AreaChart }))
+);
+const Bar = lazy(() => import("recharts").then((m) => ({ default: m.Bar })));
+const BarChart = lazy(() =>
+  import("recharts").then((m) => ({ default: m.BarChart }))
+);
+const CartesianGrid = lazy(() =>
+  import("recharts").then((m) => ({ default: m.CartesianGrid }))
+);
+const Cell = lazy(() => import("recharts").then((m) => ({ default: m.Cell })));
+const Pie = lazy(() => import("recharts").then((m) => ({ default: m.Pie })));
+const PieChart = lazy(() =>
+  import("recharts").then((m) => ({ default: m.PieChart }))
+);
+const ResponsiveContainer = lazy(() =>
+  import("recharts").then((m) => ({ default: m.ResponsiveContainer }))
+);
+const Tooltip = lazy(() =>
+  import("recharts").then((m) => ({ default: m.Tooltip }))
+);
+const XAxis = lazy(() =>
+  import("recharts").then((m) => ({ default: m.XAxis }))
+);
+const YAxis = lazy(() =>
+  import("recharts").then((m) => ({ default: m.YAxis }))
+);
+
+function ChartSkeleton() {
+  return (
+    <div className="flex h-64 animate-pulse items-center justify-center rounded-lg bg-muted/20">
+      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+    </div>
+  );
+}
 
 interface AnalyticsData {
   ai: { providerBreakdown: Record<string, number>; totalTokens: number };
@@ -128,7 +154,7 @@ export default function AnalyticsPage() {
           <AlertCircle className="h-5 w-5 shrink-0 text-red-500" />
           <div>
             <p className="font-medium text-red-800 text-sm">
-              Failed to load analytics
+              {t("analytics.error.title", "Failed to load analytics")}
             </p>
             <p className="mt-1 text-red-600 text-xs">{error}</p>
           </div>
@@ -137,7 +163,7 @@ export default function AnalyticsPage() {
             onClick={loadAnalytics}
             type="button"
           >
-            Retry
+            {t("common.retry", "Retry")}
           </button>
         </div>
       </div>
@@ -176,7 +202,12 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="relative space-y-6 p-6">
+      {loading && data && (
+        <div className="absolute inset-0 z-10 flex items-start justify-center bg-background/60 pt-12">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="flex items-center gap-2 font-semibold text-xl">
@@ -188,9 +219,15 @@ export default function AnalyticsPage() {
           onChange={(e) => setPeriod(Number(e.target.value))}
           value={period}
         >
-          <option value={7}>Last 7 days</option>
-          <option value={30}>Last 30 days</option>
-          <option value={90}>Last 90 days</option>
+          <option value={7}>
+            {t("analytics.period.last7Days", "Last 7 days")}
+          </option>
+          <option value={30}>
+            {t("analytics.period.last30Days", "Last 30 days")}
+          </option>
+          <option value={90}>
+            {t("analytics.period.last90Days", "Last 90 days")}
+          </option>
         </select>
       </div>
 
@@ -199,7 +236,9 @@ export default function AnalyticsPage() {
         <MetricCard
           icon={MessageSquare}
           label={t("analytics.metrics.conversations", "Conversations")}
-          sub={`${convByDay.length} days tracked`}
+          sub={t("analytics.metrics.daysTracked", "{{count}} days tracked", {
+            count: convByDay.length,
+          })}
           value={data.conversations.total}
         />
         <MetricCard
@@ -222,8 +261,10 @@ export default function AnalyticsPage() {
         />
         <MetricCard
           icon={Zap}
-          label="AI Tokens"
-          sub={`${providerData.length} provider(s)`}
+          label={t("analytics.metrics.aiTokens", "AI Tokens")}
+          sub={t("analytics.metrics.providerCount", "{{count}} provider(s)", {
+            count: providerData.length,
+          })}
           value={formatTokens(data.ai.totalTokens)}
         />
         <MetricCard
@@ -241,37 +282,48 @@ export default function AnalyticsPage() {
             {t("analytics.charts.conversationsPerDay", "Conversations per day")}
           </h2>
           {convByDay.length > 0 ? (
-            <ResponsiveContainer height={260} width="100%">
-              <AreaChart data={convByDay}>
-                <CartesianGrid className="stroke-muted" strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fontSize: 11 }}
-                  tickFormatter={(d: string) => {
-                    const date = new Date(d);
-                    return `${date.getDate()}/${date.getMonth() + 1}`;
-                  }}
-                />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                <Tooltip
-                  formatter={(value) => [Number(value), "Conversations"]}
-                  labelFormatter={(d) =>
-                    new Date(String(d)).toLocaleDateString()
-                  }
-                />
-                <Area
-                  dataKey="count"
-                  fill="#6366f1"
-                  fillOpacity={0.15}
-                  stroke="#6366f1"
-                  strokeWidth={2}
-                  type="monotone"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<ChartSkeleton />}>
+              <ResponsiveContainer height={260} width="100%">
+                <AreaChart data={convByDay}>
+                  <CartesianGrid
+                    className="stroke-muted"
+                    strokeDasharray="3 3"
+                  />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 11 }}
+                    tickFormatter={(d: string) => {
+                      const date = new Date(d);
+                      return `${date.getDate()}/${date.getMonth() + 1}`;
+                    }}
+                  />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    formatter={(value) => [
+                      Number(value),
+                      t("analytics.charts.conversations", "Conversations"),
+                    ]}
+                    labelFormatter={(d) =>
+                      new Date(String(d)).toLocaleDateString()
+                    }
+                  />
+                  <Area
+                    dataKey="count"
+                    fill="#6366f1"
+                    fillOpacity={0.15}
+                    stroke="#6366f1"
+                    strokeWidth={2}
+                    type="monotone"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </Suspense>
           ) : (
             <div className="flex h-[260px] items-center justify-center text-muted-foreground text-sm">
-              No conversation data for this period
+              {t(
+                "analytics.noConversationData",
+                "No conversation data for this period"
+              )}
             </div>
           )}
         </div>
@@ -282,30 +334,41 @@ export default function AnalyticsPage() {
             {t("analytics.charts.appointmentsPerDay", "Appointments per day")}
           </h2>
           {apptByDay.length > 0 ? (
-            <ResponsiveContainer height={260} width="100%">
-              <BarChart data={apptByDay}>
-                <CartesianGrid className="stroke-muted" strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fontSize: 11 }}
-                  tickFormatter={(d: string) => {
-                    const date = new Date(d);
-                    return `${date.getDate()}/${date.getMonth() + 1}`;
-                  }}
-                />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                <Tooltip
-                  formatter={(value) => [Number(value), "Appointments"]}
-                  labelFormatter={(d) =>
-                    new Date(String(d)).toLocaleDateString()
-                  }
-                />
-                <Bar dataKey="count" fill="#10b981" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<ChartSkeleton />}>
+              <ResponsiveContainer height={260} width="100%">
+                <BarChart data={apptByDay}>
+                  <CartesianGrid
+                    className="stroke-muted"
+                    strokeDasharray="3 3"
+                  />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 11 }}
+                    tickFormatter={(d: string) => {
+                      const date = new Date(d);
+                      return `${date.getDate()}/${date.getMonth() + 1}`;
+                    }}
+                  />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    formatter={(value) => [
+                      Number(value),
+                      t("analytics.charts.appointments", "Appointments"),
+                    ]}
+                    labelFormatter={(d) =>
+                      new Date(String(d)).toLocaleDateString()
+                    }
+                  />
+                  <Bar dataKey="count" fill="#10b981" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </Suspense>
           ) : (
             <div className="flex h-[260px] items-center justify-center text-muted-foreground text-sm">
-              No appointment data for this period
+              {t(
+                "analytics.noAppointmentData",
+                "No appointment data for this period"
+              )}
             </div>
           )}
         </div>
@@ -318,32 +381,37 @@ export default function AnalyticsPage() {
         </h2>
         {providerData.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <ResponsiveContainer height={220} width="100%">
-              <PieChart>
-                <Pie
-                  cx="50%"
-                  cy="50%"
-                  data={providerData}
-                  dataKey="value"
-                  innerRadius={50}
-                  label={({ name, percent }) =>
-                    `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
-                  }
-                  outerRadius={80}
-                  paddingAngle={2}
-                >
-                  {providerData.map((entry, index) => (
-                    <Cell
-                      fill={PIE_COLORS[index % PIE_COLORS.length]}
-                      key={`cell-${entry.name}`}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(value) => [formatTokens(Number(value)), "Tokens"]}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<ChartSkeleton />}>
+              <ResponsiveContainer height={220} width="100%">
+                <PieChart>
+                  <Pie
+                    cx="50%"
+                    cy="50%"
+                    data={providerData}
+                    dataKey="value"
+                    innerRadius={50}
+                    label={({ name, percent }) =>
+                      `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
+                    }
+                    outerRadius={80}
+                    paddingAngle={2}
+                  >
+                    {providerData.map((entry, index) => (
+                      <Cell
+                        fill={PIE_COLORS[index % PIE_COLORS.length]}
+                        key={`cell-${entry.name}`}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value) => [
+                      formatTokens(Number(value)),
+                      t("analytics.charts.tokens", "Tokens"),
+                    ]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </Suspense>
             <div className="flex flex-col justify-center gap-3">
               {providerData.map((provider, i) => {
                 const total = providerData.reduce((s, p) => s + p.value, 0);
