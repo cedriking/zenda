@@ -1,7 +1,7 @@
 # Zenda Email Outreach Template (Fallback Channel)
 
 ## Context
-WhatsApp outreach is blocked pending Kapso API key. Email outreach is a viable alternative that requires no special tooling.
+WhatsApp outreach is blocked pending Kapso API key. Email outreach is a viable alternative that requires no special tooling. **Free tier now live** — mention in all emails as lowest barrier to entry.
 
 ## Subject Lines (A/B test)
 - **A**: "Tu clínica dental pierde citas por mensajes sin responder"
@@ -26,7 +26,7 @@ Trabajo con clínicas y negocios de citas en Latinoamérica, y un problema que v
 - Envía recordatorios para reducir ausencias
 - Funciona en español, portugués, inglés y 6 idiomas más
 
-**Te ofrezco 30 días gratis** (sin tarjeta de crédito) como uno de nuestros primeros usuarios.
+**Te ofrezco 14 días gratis + 50% de descuento los primeros 3 meses** como uno de nuestros primeros usuarios. También tenemos un plan **gratis** para siempre (hasta 25 contactos mensuales) si quieres probar sin compromiso.
 
 → https://zenda.bot/signup?coupon=aRgf7NZC
 

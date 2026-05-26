@@ -96,3 +96,22 @@ Even "Best" and "OK" sources must pass the verification tool before sending.
 - **Bounced:** 9 unique addresses
 - **Replies:** 0
 - **Conversion rate:** 0% (0 signups from cold email)
+
+---
+
+## Batch 3: New Verified Prospects — 26 May 2026 (READY TO SEND)
+
+**All emails verified via MX check using `bun run scripts/verify-prospect-emails.ts`**
+
+| # | Negocio | Ciudad | Email | Segment | Verified |
+|---|---------|--------|-------|---------|----------|
+| 13 | Dentística MX | CDMX | contacto@dentisticamx.com | Dental | MX OK |
+| 14 | Smile Dental | CDMX | contacto@smiledental.com.mx | Dental | MX OK |
+| 15 | Depilación Laser MX | CDMX | info@depilacionlaser.com.mx | Beauty/Spa | MX OK |
+| 16 | Clínica Avellaneda | Buenos Aires | contacto@clinicaavellaneda.com | Medical | MX OK |
+| 17 | Dentys | São Paulo | info@dentys.com.br | Dental | MX OK |
+| 18 | OdontoPrev | São Paulo | contato@odontoprev.com.br | Dental | MX OK |
+
+**Status:** Emails verified but NOT yet sent. AgentMail API returned route errors on 26 May 2026. Next heartbeat should attempt sending.
+
+**IMPORTANT:** Use coupon link `https://zenda.bot/signup?coupon=aRgf7NZC` in all emails. The free tier ($0/mo, 25 contacts) is now live — mention this in the email as an even lower barrier to entry.
