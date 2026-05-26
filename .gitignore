@@ -13,5 +13,9 @@ test-results
 # Paperclip local config
 .paperclip/
 
+# Claude Code / Ruflo agent state (contains secrets, symlinks, local config)
+.claude/
+.agents/
+
 # TypeScript incremental build cache
 *tsconfig*.tsbuildinfo
