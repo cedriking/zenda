@@ -1,23 +1,36 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "whatsapp-salon-belleza";
   return {
     title:
       "WhatsApp para Salones de Belleza: Agenda Más Citas y Mantén Tu Silla Ocupada | Zenda",
     description:
       "Cómo los salones de belleza usan WhatsApp para agendar más citas, reducir inasistencias 40% y responder clientes al instante. Guía gratis con configuración en 5 minutos.",
     alternates: {
-      canonical: "https://zenda.bot/es/blog/whatsapp-salon-belleza",
+      canonical: `https://zenda.bot/${locale}/blog/${slug}`,
+      languages: {
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/blog/${slug}`])
+        ),
+        "x-default": `https://zenda.bot/en/blog/${slug}`,
+      },
     },
     openGraph: {
       title:
         "WhatsApp para Salones de Belleza: Agenda Más Citas y Mantén Tu Silla Ocupada",
       description:
         "Salones de belleza que automatizan WhatsApp llenan 40% más espacios vacíos. Descubre cómo.",
-      url: "https://zenda.bot/es/blog/whatsapp-salon-belleza",
+      url: `https://zenda.bot/${locale}/blog/${slug}`,
       type: "article",
     },
   };

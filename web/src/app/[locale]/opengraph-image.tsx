@@ -1,10 +1,21 @@
 import { ImageResponse } from "next/og";
+import { taglines, features, cta } from "@/lib/og-data";
 
 export const alt = "Zenda — AI Receptionist for Your Business";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function Image() {
+export default async function Image({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const tagline = taglines[locale] || taglines.en;
+  const locFeatures = features[locale] ?? features.en;
+  const locCta = cta[locale] ?? cta.en;
+
+  const isRtl = locale === "ar";
+  const direction = isRtl ? "rtl" : "ltr";
+  const textAlign = isRtl ? "right" : "left";
+  const alignItems = isRtl ? "flex-end" : "flex-start";
+
   return new ImageResponse(
     <div
       style={{
@@ -12,10 +23,12 @@ export default function Image() {
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        alignItems: "flex-start",
+        alignItems,
         justifyContent: "center",
         backgroundColor: "#0f172a",
         padding: "80px",
+        direction,
+        textAlign,
       }}
     >
       {/* Accent bar */}
@@ -51,7 +64,7 @@ export default function Image() {
           lineHeight: 1.3,
         }}
       >
-        Your AI receptionist that never misses a message.
+        {tagline}
       </div>
       {/* Features */}
       <div
@@ -64,11 +77,11 @@ export default function Image() {
           gap: 24,
         }}
       >
-        <span>WhatsApp AI Receptionist</span>
+        <span>{locFeatures[0]}</span>
         <span style={{ color: "#475569" }}>·</span>
-        <span>9 Languages</span>
+        <span>{locFeatures[1]}</span>
         <span style={{ color: "#475569" }}>·</span>
-        <span>Smart Scheduling</span>
+        <span>{locFeatures[2]}</span>
       </div>
       {/* CTA Button */}
       <div
@@ -83,7 +96,7 @@ export default function Image() {
           color: "#ffffff",
         }}
       >
-        Start Free Trial
+        {locCta}
       </div>
       {/* URL */}
       <div

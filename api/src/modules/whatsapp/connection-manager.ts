@@ -18,30 +18,42 @@ interface AuthenticatedWS extends WSConnection {
   };
 }
 
-// Track active connections: workspaceId -> WebSocket
-const connections = new Map<string, AuthenticatedWS>();
+// Track active connections: workspaceId -> { ws, generation }
+const connections = new Map<string, { ws: AuthenticatedWS; generation: number }>();
+let globalGeneration = 0;
 
 export function addConnection(workspaceId: string, ws: AuthenticatedWS) {
-  // Close existing connection for this workspace (1 connection per workspace in v1)
-  const existing = connections.get(workspaceId);
-  if (existing && existing.readyState === 1) {
-    existing.close(1000, "Replaced by new connection");
+  const old = connections.get(workspaceId);
+  const generation = ++globalGeneration;
+
+  // Set the new connection FIRST, then close the old one.
+  // This prevents the old socket's close handler from deleting the new connection.
+  connections.set(workspaceId, { ws, generation });
+
+  if (old && old.ws.readyState === 1) {
+    old.ws.close(1000, "Replaced by new connection");
   }
-  connections.set(workspaceId, ws);
 }
 
-export function removeConnection(workspaceId: string) {
+export function removeConnection(workspaceId: string, ws?: unknown) {
+  // If a ws reference is provided, only remove if it matches the current entry.
+  // This prevents a stale close handler from evicting a newer connection.
+  if (ws) {
+    const entry = connections.get(workspaceId);
+    if (entry && entry.ws !== ws) return;
+  }
   connections.delete(workspaceId);
 }
 
 export function getConnection(
   workspaceId: string
 ): AuthenticatedWS | undefined {
-  return connections.get(workspaceId);
+  return connections.get(workspaceId)?.ws;
 }
 
 export function sendToWorkspace(workspaceId: string, data: unknown): boolean {
-  const ws = connections.get(workspaceId);
+  const entry = connections.get(workspaceId);
+  const ws = entry?.ws;
   if (!ws || ws.readyState !== 1) {
     const typed = data as Record<string, unknown> | undefined;
     logger.warn("sendToWorkspace: WS not connected, message dropped", {
@@ -60,8 +72,8 @@ export function getActiveWorkspaceCount(): number {
 }
 
 export function isWorkspaceConnected(workspaceId: string): boolean {
-  const ws = connections.get(workspaceId);
-  return ws !== undefined && ws.readyState === 1;
+  const entry = connections.get(workspaceId);
+  return entry !== undefined && entry.ws.readyState === 1;
 }
 
 // Heartbeat: ping every 30s, close if no pong for 60s
@@ -79,7 +91,7 @@ export function startHeartbeat(workspaceId: string, ws: AuthenticatedWS) {
     if (!isAlive) {
       ws.close(4001, "Heartbeat timeout");
       clearInterval(heartbeatInterval);
-      removeConnection(workspaceId);
+      removeConnection(workspaceId, ws);
       return;
     }
     isAlive = false;

@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { db } from "@zenda/db/client";
 import {
+  planTierEnum,
   subscriptions,
   whatsappConnections,
   workspaces,
@@ -11,7 +12,9 @@ import { ADMIN_SECRET } from "../../config/env.js";
 import { logger } from "../../infra/logger.js";
 import { authBase } from "../../middleware/auth.js";
 import { typedContext } from "../../middleware/typed-context.js";
-import { notFound, serverError } from "../../utils/errors.js";
+import { badRequest, notFound, serverError } from "../../utils/errors.js";
+
+const VALID_PLAN_TIERS: Set<string> = new Set(planTierEnum.enumValues);
 
 const forbiddenRes = new Response(
   JSON.stringify({ error: "Admin access denied" }),
@@ -22,11 +25,11 @@ const forbiddenRes = new Response(
 );
 
 function safeCompare(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    return false;
-  }
-  const bufA = Buffer.from(a);
-  const bufB = Buffer.from(b);
+  const maxLen = Math.max(a.length, b.length);
+  const bufA = Buffer.alloc(maxLen);
+  const bufB = Buffer.alloc(maxLen);
+  bufA.write(a);
+  bufB.write(b);
   return timingSafeEqual(bufA, bufB);
 }
 
@@ -36,18 +39,9 @@ export const adminModule = new Elysia({ prefix: "/admin" })
   .onBeforeHandle(
     ({
       headers,
-      userId,
     }: {
       headers: Record<string, string | undefined>;
-      userId: string | null;
     }) => {
-      if (!userId) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-
       const secret = headers["x-admin-secret"];
       if (!(ADMIN_SECRET && secret && safeCompare(secret, ADMIN_SECRET))) {
         return forbiddenRes;
@@ -140,11 +134,14 @@ export const adminModule = new Elysia({ prefix: "/admin" })
   .post("/workspaces/:id/override-plan", async ({ params, body, set }) => {
     try {
       const data = body as Record<string, string>;
+      if (!data.planTier || !VALID_PLAN_TIERS.has(data.planTier)) {
+        return badRequest(set, `Invalid planTier. Must be one of: ${planTierEnum.enumValues.join(", ")}`);
+      }
       await db
         .update(subscriptions)
         .set({
           // biome-ignore lint/suspicious/noExplicitAny: planTier is a pgEnum that doesn't accept string directly
-          planTier: data.planTier as any,
+          planTier: data.planTier as typeof planTierEnum.enumValues[number],
           status: "active",
           updatedAt: new Date(),
         })

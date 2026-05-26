@@ -615,5 +615,18 @@
     "title": "Página no encontrada",
     "description": "Lo sentimos, no pudimos encontrar la página que buscas.",
     "backHome": "Volver al inicio"
+  },
+  "blog": {
+    "metaTitle": "Blog — Zenda",
+    "metaDescription": "Guias y estrategias para automatizar citas con WhatsApp IA. Reduce ausencias, llena cancelaciones y haz crecer tu negocio.",
+    "ogTitle": "Blog de Zenda — Automatizacion de Citas por WhatsApp",
+    "ogDescription": "Descubre como los negocios usan WhatsApp IA para reducir ausencias 40% y automatizar reservas.",
+    "heading": "Blog",
+    "subheading": "Guias, estrategias y numeros reales para negocios que usan WhatsApp para gestionar citas.",
+    "spanishSection": "Articulos en Espanol",
+    "englishSection": "Articulos en Ingles",
+    "ctaTitle": "Listo para dejar de perder citas?",
+    "ctaDesc": "14 dias gratis. Sin tarjeta de credito. Funciona con tu WhatsApp actual.",
+    "ctaButton": "Comenzar prueba gratis"
   }
 }

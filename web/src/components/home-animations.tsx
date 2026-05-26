@@ -16,8 +16,8 @@ import {
   Stethoscope,
   UserCheck,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import {
   AccordionItem,
   FadeUp,
@@ -34,6 +34,8 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     </span>
   );
 }
+
+/* ── Static data builders (called once per render, but keep outside for clarity) ── */
 
 /* ── Main component ── */
 export function HomeAnimations({
@@ -54,141 +56,172 @@ export function HomeAnimations({
   children?: React.ReactNode;
 }) {
   const t = useTranslations("home");
+  const locale = useLocale();
 
-  /* ── Hero value props ── */
-  const HERO_VALUES = [
-    { value: t("heroValue247"), label: t("heroValue247Label") },
-    { value: t("heroValueBilingual"), label: t("heroValueBilingualLabel") },
-    { value: t("heroValueSetup"), label: t("heroValueSetupLabel") },
-  ];
+  const formatPrice = (amount: number) =>
+    new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+    }).format(amount);
 
-  /* ── Audiences ── */
-  const AUDIENCES = [
-    {
-      icon: Scissors,
-      title: t("audienceBeautyTitle"),
-      desc: t("audienceBeautyDesc"),
-    },
-    {
-      icon: Heart,
-      title: t("audienceWellnessTitle"),
-      desc: t("audienceWellnessDesc"),
-    },
-    {
-      icon: Stethoscope,
-      title: t("audienceHealthTitle"),
-      desc: t("audienceHealthDesc"),
-    },
-    {
-      icon: Star,
-      title: t("audienceOtherTitle"),
-      desc: t("audienceOtherDesc"),
-    },
-  ];
+  /* ── Memoized data arrays ── */
+  const HERO_VALUES = useMemo(
+    () => [
+      { value: t("heroValue247"), label: t("heroValue247Label") },
+      { value: t("heroValueBilingual"), label: t("heroValueBilingualLabel") },
+      { value: t("heroValueSetup"), label: t("heroValueSetupLabel") },
+    ],
+    [t]
+  );
 
-  /* ── Capabilities ── */
-  const CAPABILITIES = [
-    { icon: Bot, title: t("capAiTitle"), desc: t("capAiDesc") },
-    {
-      icon: CalendarClock,
-      title: t("capSchedulingTitle"),
-      desc: t("capSchedulingDesc"),
-    },
-    { icon: Bell, title: t("capRemindersTitle"), desc: t("capRemindersDesc") },
-    { icon: Brain, title: t("capLearningTitle"), desc: t("capLearningDesc") },
-    {
-      icon: UserCheck,
-      title: t("capTakeoverTitle"),
-      desc: t("capTakeoverDesc"),
-    },
-    {
-      icon: Smartphone,
-      title: t("capWhatsappTitle"),
-      desc: t("capWhatsappDesc"),
-    },
-  ];
+  const AUDIENCES = useMemo(
+    () => [
+      {
+        icon: Scissors,
+        title: t("audienceBeautyTitle"),
+        desc: t("audienceBeautyDesc"),
+      },
+      {
+        icon: Heart,
+        title: t("audienceWellnessTitle"),
+        desc: t("audienceWellnessDesc"),
+      },
+      {
+        icon: Stethoscope,
+        title: t("audienceHealthTitle"),
+        desc: t("audienceHealthDesc"),
+      },
+      {
+        icon: Star,
+        title: t("audienceOtherTitle"),
+        desc: t("audienceOtherDesc"),
+      },
+    ],
+    [t]
+  );
 
-  /* ── Feature sections with visuals ── */
-  const FEATURE_SECTIONS = [
-    {
-      title: t("featureChatTitle"),
-      desc: t("featureChatDesc"),
-      visual: "chat" as const,
-    },
-    {
-      title: t("featureCalendarTitle"),
-      desc: t("featureCalendarDesc"),
-      visual: "calendar" as const,
-    },
-    {
-      title: t("featureSettingsTitle"),
-      desc: t("featureSettingsDesc"),
-      visual: "settings" as const,
-    },
-    {
-      title: t("featureSafetyTitle"),
-      desc: t("featureSafetyDesc"),
-      visual: "safety" as const,
-    },
-  ];
+  const CAPABILITIES = useMemo(
+    () => [
+      { icon: Bot, title: t("capAiTitle"), desc: t("capAiDesc") },
+      {
+        icon: CalendarClock,
+        title: t("capSchedulingTitle"),
+        desc: t("capSchedulingDesc"),
+      },
+      {
+        icon: Bell,
+        title: t("capRemindersTitle"),
+        desc: t("capRemindersDesc"),
+      },
+      { icon: Brain, title: t("capLearningTitle"), desc: t("capLearningDesc") },
+      {
+        icon: UserCheck,
+        title: t("capTakeoverTitle"),
+        desc: t("capTakeoverDesc"),
+      },
+      {
+        icon: Smartphone,
+        title: t("capWhatsappTitle"),
+        desc: t("capWhatsappDesc"),
+      },
+    ],
+    [t]
+  );
 
-  /* ── Safety pillars ── */
-  const SAFETY_PILLARS = [
-    { title: t("safetyConsentTitle"), desc: t("safetyConsentDesc") },
-    { title: t("safetyLimitsTitle"), desc: t("safetyLimitsDesc") },
-    { title: t("safetyAuditTitle"), desc: t("safetyAuditDesc") },
-    { title: t("safetyGuardrailsTitle"), desc: t("safetyGuardrailsDesc") },
-  ];
+  const FEATURE_SECTIONS = useMemo(
+    () => [
+      {
+        title: t("featureChatTitle"),
+        desc: t("featureChatDesc"),
+        visual: "chat" as const,
+      },
+      {
+        title: t("featureCalendarTitle"),
+        desc: t("featureCalendarDesc"),
+        visual: "calendar" as const,
+      },
+      {
+        title: t("featureSettingsTitle"),
+        desc: t("featureSettingsDesc"),
+        visual: "settings" as const,
+      },
+      {
+        title: t("featureSafetyTitle"),
+        desc: t("featureSafetyDesc"),
+        visual: "safety" as const,
+      },
+    ],
+    [t]
+  );
 
-  /* ── Dashboard cards ── */
-  const DASHBOARD_CARDS = [
-    {
-      title: t("dashAppointmentsTitle"),
-      value: "8",
-      change: t("dashAppointmentsChange"),
-    },
-    {
-      title: t("dashConversationsTitle"),
-      value: "23",
-      change: t("dashConversationsChange"),
-    },
-    {
-      title: t("dashBookingsTitle"),
-      value: "34",
-      change: t("dashBookingsChange"),
-    },
-  ];
+  const SAFETY_PILLARS = useMemo(
+    () => [
+      { title: t("safetyConsentTitle"), desc: t("safetyConsentDesc") },
+      { title: t("safetyLimitsTitle"), desc: t("safetyLimitsDesc") },
+      { title: t("safetyAuditTitle"), desc: t("safetyAuditDesc") },
+      { title: t("safetyGuardrailsTitle"), desc: t("safetyGuardrailsDesc") },
+    ],
+    [t]
+  );
 
-  /* ── Industries ── */
-  const INDUSTRIES = [
-    t("indBeauty"),
-    t("indDental"),
-    t("indHealth"),
-    t("indBarber"),
-    t("indGym"),
-    t("indPet"),
-    t("indConsulting"),
-    t("indPhoto"),
-    t("indMassage"),
-    t("indNail"),
-  ];
+  const DASHBOARD_CARDS = useMemo(
+    () => [
+      {
+        title: t("dashAppointmentsTitle"),
+        value: "8",
+        change: t("dashAppointmentsChange"),
+      },
+      {
+        title: t("dashConversationsTitle"),
+        value: "23",
+        change: t("dashConversationsChange"),
+      },
+      {
+        title: t("dashBookingsTitle"),
+        value: "34",
+        change: t("dashBookingsChange"),
+      },
+    ],
+    [t]
+  );
 
-  /* ── How It Works ── */
-  const HOW_IT_WORKS = [
-    { step: "01", title: t("step1Title"), desc: t("step1Desc") },
-    { step: "02", title: t("step2Title"), desc: t("step2Desc") },
-    { step: "03", title: t("step3Title"), desc: t("step3Desc") },
-  ];
+  const INDUSTRIES = useMemo(
+    () => [
+      t("indBeauty"),
+      t("indDental"),
+      t("indHealth"),
+      t("indBarber"),
+      t("indGym"),
+      t("indPet"),
+      t("indConsulting"),
+      t("indPhoto"),
+      t("indMassage"),
+      t("indNail"),
+    ],
+    [t]
+  );
 
-  /* ── FAQs ── */
-  const FAQS = [
-    { q: t("faq1Q"), a: t("faq1A") },
-    { q: t("faq2Q"), a: t("faq2A") },
-    { q: t("faq3Q"), a: t("faq3A") },
-    { q: t("faq4Q"), a: t("faq4A") },
-    { q: t("faq5Q"), a: t("faq5A") },
-    { q: t("faq6Q"), a: t("faq6A") },
-  ];
+  const HOW_IT_WORKS = useMemo(
+    () => [
+      { step: "01", title: t("step1Title"), desc: t("step1Desc") },
+      { step: "02", title: t("step2Title"), desc: t("step2Desc") },
+      { step: "03", title: t("step3Title"), desc: t("step3Desc") },
+    ],
+    [t]
+  );
+
+  const FAQS = useMemo(
+    () => [
+      { q: t("faq1Q"), a: t("faq1A") },
+      { q: t("faq2Q"), a: t("faq2A") },
+      { q: t("faq3Q"), a: t("faq3A") },
+      { q: t("faq4Q"), a: t("faq4A") },
+      { q: t("faq5Q"), a: t("faq5A") },
+      { q: t("faq6Q"), a: t("faq6A") },
+    ],
+    [t]
+  );
 
   /* ── Visual Card sub-component ── */
   function VisualCard({
@@ -631,7 +664,11 @@ export function HomeAnimations({
                     name: t("vcApt2Name"),
                     service: t("vcApt2Service"),
                   },
-                  { time: "16:30", name: t("vcApt3Name"), service: t("vcApt3Service") },
+                  {
+                    time: "16:30",
+                    name: t("vcApt3Name"),
+                    service: t("vcApt3Service"),
+                  },
                 ].map((apt) => (
                   <div
                     className="flex items-center gap-3 border-slate-200 border-t py-2 first:border-0"
@@ -677,7 +714,7 @@ export function HomeAnimations({
     return (
       <div className="text-center">
         <p className="mb-6 text-lg text-slate-600">
-          {t("pricingTeaser", { price: "$29" })}
+          {t("pricingTeaser", { price: formatPrice(29) })}
         </p>
         <Link
           className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-3.5 font-semibold text-base text-white shadow-emerald-500/25 shadow-xl transition-colors hover:bg-emerald-600"

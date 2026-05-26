@@ -1,22 +1,35 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "whatsapp-spa-citas";
   return {
     title:
       "WhatsApp para Spas: Automatiza Citas y Aumenta tus Ingresos | Zenda",
     description:
       "Cómo los spas usan WhatsApp para automatizar reservas, reducir cancelaciones 40% y aumentar ingresos. Guía con calculadora de ROI y configuración en 5 minutos.",
     alternates: {
-      canonical: "https://zenda.bot/es/blog/whatsapp-spa-citas",
+      canonical: `https://zenda.bot/${locale}/blog/${slug}`,
+      languages: {
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/blog/${slug}`])
+        ),
+        "x-default": `https://zenda.bot/en/blog/${slug}`,
+      },
     },
     openGraph: {
       title: "WhatsApp para Spas: Automatiza Citas y Aumenta tus Ingresos",
       description:
         "Spas que automatizan WhatsApp reducen cancelaciones 40% y aumentan reservas. Descubre cómo.",
-      url: "https://zenda.bot/es/blog/whatsapp-spa-citas",
+      url: `https://zenda.bot/${locale}/blog/${slug}`,
       type: "article",
     },
   };

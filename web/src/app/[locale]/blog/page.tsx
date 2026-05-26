@@ -1,23 +1,35 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { Footer } from "@/components/footer";
 import { JsonLdScript } from "@/components/json-ld";
 import { Nav } from "@/components/nav";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "blog" });
+
   return {
-    title:
-      "Blog — WhatsApp Automation Guides for Appointment-Based Businesses | Zenda",
-    description:
-      "Guides, ROI calculators, and step-by-step tutorials for beauty salons, dental clinics, fitness studios, and spas using WhatsApp to automate appointments and reduce no-shows.",
+    title: t("metaTitle"),
+    description: t("metaDescription"),
     alternates: {
-      canonical: "https://zenda.bot/blog",
+      canonical: `https://zenda.bot/${locale}/blog`,
+      languages: {
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/blog`])
+        ),
+        "x-default": "https://zenda.bot/en/blog",
+      },
     },
     openGraph: {
-      title: "Zenda Blog — WhatsApp Automation Guides",
-      description:
-        "Learn how appointment-based businesses use WhatsApp to reduce no-shows, book more appointments, and grow revenue.",
-      url: "https://zenda.bot/blog",
+      title: t("ogTitle"),
+      description: t("ogDescription"),
+      url: `https://zenda.bot/${locale}/blog`,
       type: "website",
     },
   };
@@ -126,7 +138,10 @@ const categoryColors: Record<string, string> = {
   Spas: "bg-purple-50 text-purple-700",
 };
 
-export default function BlogIndexPage() {
+export default async function BlogIndexPage({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "blog" });
+
   const esPosts = posts.filter((p) => p.lang === "es");
   const enPosts = posts.filter((p) => p.lang === "en");
 
@@ -135,7 +150,7 @@ export default function BlogIndexPage() {
     "@type": "Blog",
     name: "Zenda Blog",
     description: "WhatsApp automation guides for appointment-based businesses",
-    url: "https://zenda.bot/blog",
+    url: `https://zenda.bot/${locale}/blog`,
     publisher: {
       "@type": "Organization",
       name: "Zenda",
@@ -145,7 +160,7 @@ export default function BlogIndexPage() {
       "@type": "BlogPosting",
       headline: p.title,
       description: p.description,
-      url: `https://zenda.bot/blog/${p.slug}`,
+      url: `https://zenda.bot/${locale}/blog/${p.slug}`,
     })),
   };
 
@@ -157,17 +172,16 @@ export default function BlogIndexPage() {
       <main className="mx-auto max-w-4xl px-6 py-16">
         <header className="mb-12">
           <h1 className="mb-4 font-bold text-3xl text-slate-900 md:text-4xl">
-            Blog
+            {t("heading")}
           </h1>
           <p className="text-lg text-slate-600">
-            Guías, calculadoras de ROI y tutoriales para automatizar tu negocio
-            con WhatsApp.
+            {t("subheading")}
           </p>
         </header>
 
         <section className="mb-12">
           <h2 className="mb-6 font-bold text-slate-900 text-xl">
-            Artículos en Español
+            {t("spanishSection")}
           </h2>
           <div className="grid gap-6 sm:grid-cols-2">
             {esPosts.map((post) => (
@@ -194,7 +208,7 @@ export default function BlogIndexPage() {
 
         <section className="mb-12">
           <h2 className="mb-6 font-bold text-slate-900 text-xl">
-            Articles in English
+            {t("englishSection")}
           </h2>
           <div className="grid gap-6 sm:grid-cols-2">
             {enPosts.map((post) => (
@@ -221,16 +235,16 @@ export default function BlogIndexPage() {
 
         <section className="rounded-2xl bg-slate-900 p-8 text-center">
           <h2 className="mb-3 font-bold text-2xl text-white">
-            Ready to automate your WhatsApp?
+            {t("ctaTitle")}
           </h2>
           <p className="mb-6 text-slate-400">
-            14-day free trial. No credit card. Set up in 5 minutes.
+            {t("ctaDesc")}
           </p>
           <Link
             className="inline-block rounded-full bg-emerald-500 px-8 py-3 font-semibold text-white transition-colors hover:bg-emerald-600"
             href="/founding"
           >
-            Start free trial
+            {t("ctaButton")}
           </Link>
         </section>
       </main>

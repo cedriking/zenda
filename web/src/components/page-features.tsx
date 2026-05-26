@@ -1,13 +1,38 @@
-import { getTranslations } from "next-intl/server";
+import {
+  Bell,
+  Bot,
+  Brain,
+  Calendar,
+  MessageSquare,
+  Settings,
+  Shield,
+  UserCheck,
+} from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { Footer } from "@/components/footer";
 import { JsonLdScript } from "@/components/json-ld";
 import { Nav } from "@/components/nav";
 import { Link } from "@/i18n/navigation";
 
+const CORE_ICONS: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
+  "💬": MessageSquare,
+  "🤖": Bot,
+  "📅": Calendar,
+  "🔔": Bell,
+  "🧠": Brain,
+  "👤": UserCheck,
+};
+
+const DETAIL_ICONS = [MessageSquare, Calendar, Settings, Shield];
+
 export async function FeaturesPage() {
   const t = await getTranslations("features");
   const tHome = await getTranslations("home");
+  const locale = await getLocale();
 
   const softwareLd = {
     "@context": "https://schema.org",
@@ -22,38 +47,38 @@ export async function FeaturesPage() {
       priceCurrency: "USD",
     },
     operatingSystem: "WhatsApp",
-    url: "https://zenda.bot/features",
+    url: `https://zenda.bot/${locale}/features`,
   };
 
   const coreFeatures = [
     {
       desc: tHome("capWhatsappDesc"),
-      icon: "💬",
+      emoji: "💬",
       title: tHome("capWhatsappTitle"),
     },
     {
       desc: tHome("capAiDesc"),
-      icon: "🤖",
+      emoji: "🤖",
       title: tHome("capAiTitle"),
     },
     {
       desc: tHome("capSchedulingDesc"),
-      icon: "📅",
+      emoji: "📅",
       title: tHome("capSchedulingTitle"),
     },
     {
       desc: tHome("capRemindersDesc"),
-      icon: "🔔",
+      emoji: "🔔",
       title: tHome("capRemindersTitle"),
     },
     {
       desc: tHome("capLearningDesc"),
-      icon: "🧠",
+      emoji: "🧠",
       title: tHome("capLearningTitle"),
     },
     {
       desc: tHome("capTakeoverDesc"),
-      icon: "👤",
+      emoji: "👤",
       title: tHome("capTakeoverTitle"),
     },
   ];
@@ -107,7 +132,7 @@ export async function FeaturesPage() {
           <section className="relative overflow-hidden px-6 py-20">
             <div className="absolute top-0 right-0 h-[400px] w-[400px] translate-x-1/4 -translate-y-1/2 rounded-full bg-emerald-500/5" />
             <div className="mx-auto max-w-4xl text-center">
-              <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-700">
+              <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-1.5 font-semibold text-emerald-700 text-xs uppercase tracking-wider">
                 {t("badge")}
               </span>
               <h1 className="mb-6 font-black text-4xl text-slate-900 md:text-5xl">
@@ -126,18 +151,28 @@ export async function FeaturesPage() {
                 {t("coreTitle")}
               </h2>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {coreFeatures.map((f) => (
-                  <div
-                    className="rounded-2xl border border-neutral-100 bg-neutral-50 p-6 transition-shadow hover:shadow-lg"
-                    key={f.title}
-                  >
-                    <span className="mb-3 block text-3xl">{f.icon}</span>
-                    <h3 className="mb-2 font-bold text-lg text-slate-900">
-                      {f.title}
-                    </h3>
-                    <p className="text-sm text-slate-500">{f.desc}</p>
-                  </div>
-                ))}
+                {coreFeatures.map((f) => {
+                  const Icon = CORE_ICONS[f.emoji];
+                  return (
+                    <div
+                      className="rounded-2xl border border-neutral-100 bg-neutral-50 p-6 transition-shadow hover:shadow-lg"
+                      key={f.title}
+                    >
+                      {Icon ? (
+                        <Icon
+                          aria-hidden="true"
+                          className="mb-3 size-8 text-emerald-600"
+                        />
+                      ) : (
+                        <span className="mb-3 block text-3xl">{f.emoji}</span>
+                      )}
+                      <h3 className="mb-2 font-bold text-lg text-slate-900">
+                        {f.title}
+                      </h3>
+                      <p className="text-slate-500 text-sm">{f.desc}</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </section>
@@ -150,22 +185,30 @@ export async function FeaturesPage() {
               {t("detailsTitle")}
             </h2>
             <div className="space-y-8">
-              {detailedFeatures.map((f, i) => (
-                <div
-                  className={`flex flex-col items-center gap-6 rounded-[2rem] bg-white p-8 shadow-lg md:flex-row ${i % 2 === 1 ? "md:flex-row-reverse" : ""}`}
-                  key={f.title}
-                >
-                  <div className="flex-1">
-                    <h3 className="mb-3 font-bold text-xl text-slate-900">
-                      {f.title}
-                    </h3>
-                    <p className="text-slate-500">{f.desc}</p>
+              {detailedFeatures.map((f, i) => {
+                const Icon = DETAIL_ICONS[i];
+                return (
+                  <div
+                    className={`flex flex-col items-center gap-6 rounded-[2rem] bg-white p-8 shadow-lg md:flex-row ${i % 2 === 1 ? "md:flex-row-reverse" : ""}`}
+                    key={f.title}
+                  >
+                    <div className="flex-1">
+                      <h3 className="mb-3 font-bold text-slate-900 text-xl">
+                        {f.title}
+                      </h3>
+                      <p className="text-slate-500">{f.desc}</p>
+                    </div>
+                    <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-2xl bg-emerald-50">
+                      {Icon && (
+                        <Icon
+                          aria-hidden="true"
+                          className="size-12 text-emerald-600"
+                        />
+                      )}
+                    </div>
                   </div>
-                  <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-5xl">
-                    {i === 0 ? "💬" : i === 1 ? "📅" : i === 2 ? "⚙️" : "🛡️"}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
@@ -186,7 +229,7 @@ export async function FeaturesPage() {
                     <h3 className="mb-2 font-semibold text-emerald-400">
                       {f.title}
                     </h3>
-                    <p className="text-sm text-slate-400">{f.desc}</p>
+                    <p className="text-slate-400 text-sm">{f.desc}</p>
                   </div>
                 ))}
               </div>
@@ -203,7 +246,7 @@ export async function FeaturesPage() {
             <p className="mb-8 text-slate-500">{t("ctaDesc")}</p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
-                className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-3.5 font-semibold text-base text-white shadow-xl shadow-emerald-500/25 transition-colors hover:bg-emerald-600"
+                className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-3.5 font-semibold text-base text-white shadow-emerald-500/25 shadow-xl transition-colors hover:bg-emerald-600"
                 href="/signup"
               >
                 {t("ctaButton")}

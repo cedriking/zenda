@@ -1,20 +1,14 @@
 "use client";
 
+import { CheckCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
 import { apiFetch } from "@/lib/api-client";
 
-interface FoundingPageClientProps {
-  locale: string;
-  strings: Record<string, string>;
-}
-
-export function FoundingPageClient({
-  strings,
-  locale,
-}: FoundingPageClientProps) {
-  const t = (key: string) => strings[key] ?? key;
+export function FoundingPageClient({ locale }: { locale: string }) {
+  const t = useTranslations("founding");
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -59,7 +53,13 @@ export function FoundingPageClient({
     return (
       <main className="flex items-center justify-center px-6 py-20">
         <div className="max-w-lg text-center">
-          <div className="mb-6 text-6xl">&#10003;</div>
+          <div className="mb-6">
+            <CheckCircle
+              aria-hidden="true"
+              className="mx-auto size-16 text-emerald-500"
+            />
+            <span className="sr-only">{t("successTitle")}</span>
+          </div>
           <h2 className="mb-4 font-bold text-2xl text-slate-900">
             {t("successTitle")}
           </h2>
@@ -170,7 +170,7 @@ export function FoundingPageClient({
         {/* FAQ */}
         <div className="mx-auto mb-16 max-w-2xl">
           <h2 className="mb-8 text-center font-bold text-2xl text-slate-900">
-            FAQ
+            {t("faqTitle")}
           </h2>
           {[1, 2, 3, 4].map((i) => (
             <div className="mb-4" key={`faq-${i}`}>

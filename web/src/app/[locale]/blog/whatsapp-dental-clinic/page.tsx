@@ -1,23 +1,36 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "whatsapp-dental-clinic";
   return {
     title:
       "WhatsApp for Dental Clinics: Reduce Cancellations & Fill Your Calendar | Zenda",
     description:
       "How dental clinics use WhatsApp automation to reduce cancellations by 40%, fill last-minute openings, and book more patients. Step-by-step guide with ROI calculator.",
     alternates: {
-      canonical: "https://zenda.bot/blog/whatsapp-dental-clinic",
+      canonical: `https://zenda.bot/${locale}/blog/${slug}`,
+      languages: {
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/blog/${slug}`])
+        ),
+        "x-default": `https://zenda.bot/en/blog/${slug}`,
+      },
     },
     openGraph: {
       title:
         "WhatsApp for Dental Clinics: Reduce Cancellations & Fill Your Calendar",
       description:
         "Dental clinics using WhatsApp automation cut cancellations 40%. See the numbers and how to start.",
-      url: "https://zenda.bot/blog/whatsapp-dental-clinic",
+      url: `https://zenda.bot/${locale}/blog/${slug}`,
       type: "article",
     },
   };

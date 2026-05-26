@@ -47,6 +47,21 @@ const STRIPE_PRICES: Record<string, Record<BillingPeriod, string>> = {
 // Real Stripe price IDs match: price_ followed by alphanumeric chars
 const STRIPE_PRICE_ID_RE = /^price_[A-Za-z0-9]+$/;
 
+/**
+ * Reverse lookup: find the tier associated with a known Stripe price ID.
+ * Returns null if the price ID is not in our configured map.
+ */
+export function tierFromPriceId(priceId: string): PlanTier | null {
+  for (const [tier, periods] of Object.entries(STRIPE_PRICES)) {
+    for (const price of Object.values(periods)) {
+      if (price === priceId) {
+        return tier as PlanTier;
+      }
+    }
+  }
+  return null;
+}
+
 export function getPriceId(tier: PlanTier, period: BillingPeriod = "monthly"): string {
   const priceId = STRIPE_PRICES[tier]?.[period] ?? STRIPE_PRICES.local_solo.monthly;
   if (!STRIPE_PRICE_ID_RE.test(priceId)) {

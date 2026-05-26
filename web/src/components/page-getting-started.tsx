@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowRight,
   Clock,
   Download,
   Lightbulb,
@@ -68,7 +69,7 @@ export function GettingStartedPageClient() {
                 </div>
                 <div className="pt-1.5">
                   <span className="font-semibold text-emerald-600 text-xs uppercase tracking-wide">
-                    Step {idx + 1}
+                    {t("stepLabel", { number: idx + 1 })}
                   </span>
                   <h3 className="font-semibold text-foreground">
                     {t(step.titleKey)}
@@ -81,7 +82,8 @@ export function GettingStartedPageClient() {
                       className="mt-2 inline-flex items-center gap-1 font-medium text-primary text-sm hover:underline"
                       href={ctaHref}
                     >
-                      {t(ctaKey)} →
+                      {t(ctaKey)}{" "}
+                      <ArrowRight aria-hidden="true" className="size-3" />
                     </Link>
                   )}
                 </div>

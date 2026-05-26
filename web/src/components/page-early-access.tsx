@@ -15,10 +15,12 @@ export function EarlyAccessPageClient() {
   const [businessType, setBusinessType] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     try {
       await apiFetch("/support/waitlist", {
@@ -26,8 +28,8 @@ export function EarlyAccessPageClient() {
         body: JSON.stringify({ email, name, businessType }),
       });
       setSubmitted(true);
-    } catch {
-      /* */
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("submitError"));
     }
     setLoading(false);
   }
@@ -59,6 +61,12 @@ export function EarlyAccessPageClient() {
             <h1 className="mb-4 font-bold text-4xl">{t("title")}</h1>
             <p className="mb-8 text-lg text-muted-foreground">{t("desc")}</p>
 
+            {error && (
+              <div className="mb-4 rounded-lg bg-red-50 p-3 text-red-600 text-sm">
+                {error}
+              </div>
+            )}
+
             <form className="space-y-4 text-left" onSubmit={handleSubmit}>
               <div>
                 <label className="mb-1.5 block font-medium text-sm">
@@ -79,7 +87,7 @@ export function EarlyAccessPageClient() {
                 <input
                   className={inputClass}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@business.com"
+                  placeholder={t("emailPlaceholder")}
                   required
                   type="email"
                   value={email}

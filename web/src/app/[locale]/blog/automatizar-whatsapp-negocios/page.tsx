@@ -1,22 +1,35 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "automatizar-whatsapp-negocios";
   return {
     title:
       "Como Automatizar WhatsApp para tu Negocio en 2025 | Guía Completa | Zenda",
     description:
       "Guía paso a paso para automatizar WhatsApp Business en tu salón, clínica o spa. Aprende a configurar respuestas automáticas, agendar citas y reducir ausencias sin conocimientos técnicos.",
     alternates: {
-      canonical: "https://zenda.bot/blog/automatizar-whatsapp-negocios",
+      canonical: `https://zenda.bot/${locale}/blog/${slug}`,
+      languages: {
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/blog/${slug}`])
+        ),
+        "x-default": `https://zenda.bot/en/blog/${slug}`,
+      },
     },
     openGraph: {
       title: "Como Automatizar WhatsApp para tu Negocio en 2025",
       description:
         "Guía completa para automatizar WhatsApp Business. Respuestas automáticas, citas y recordatorios.",
-      url: "https://zenda.bot/blog/automatizar-whatsapp-negocios",
+      url: `https://zenda.bot/${locale}/blog/${slug}`,
       type: "article",
     },
   };

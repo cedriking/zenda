@@ -48,7 +48,7 @@ const PERSONALITY_TEMPLATES: Record<
       bodyEn: ({ customerName, serviceName, time, date }) =>
         `Dear ${customerName}, this is a confirmation of your ${serviceName} appointment scheduled for ${date} at ${time}. We look forward to welcoming you.`,
       bodyEs: ({ customerName, serviceName, time, date }) =>
-        `Estimad${customerName.endsWith("a") ? "a" : "o"} ${customerName}, le confirmamos su cita de ${serviceName} para el ${date} a las ${time}. Le esperamos.`,
+        `Estimado/a ${customerName}, le confirmamos su cita de ${serviceName} para el ${date} a las ${time}. Le esperamos.`,
     },
     "2h": {
       titleEn: "Appointment Soon",
@@ -56,7 +56,7 @@ const PERSONALITY_TEMPLATES: Record<
       bodyEn: ({ customerName, serviceName, time }) =>
         `Dear ${customerName}, your ${serviceName} appointment is at ${time}. Does this still work for you?`,
       bodyEs: ({ customerName, serviceName, time }) =>
-        `Estimad${customerName.endsWith("a") ? "a" : "o"} ${customerName}, su cita de ${serviceName} es a las ${time}. Confirme su asistencia, por favor.`,
+        `Estimado/a ${customerName}, su cita de ${serviceName} es a las ${time}. Confirme su asistencia, por favor.`,
     },
   },
   warm: {
@@ -135,6 +135,8 @@ const PERSONALITY_TEMPLATES: Record<
 
 const DEFAULT_PERSONALITY = "warm";
 const _DEFAULT_TEMPLATE = "24h";
+const MAX_RETRIES = 3;
+const reminderRetryCount = new Map<string, number>();
 
 function getTemplateForPersonality(
   personality: PersonalityPreset | null,
@@ -285,9 +287,30 @@ export async function processDueReminders(): Promise<number> {
   }
 
   let sentCount = 0;
+  const BATCH_SIZE = 10;
 
-  for (const reminder of dueReminders) {
-    try {
+  for (let batchStart = 0; batchStart < dueReminders.length; batchStart += BATCH_SIZE) {
+    const batch = dueReminders.slice(batchStart, batchStart + BATCH_SIZE);
+    const results = await Promise.allSettled(
+      batch.map((reminder: typeof reminders.$inferSelect) => processSingleReminder(reminder))
+    );
+
+    for (const result of results) {
+      if (result.status === "fulfilled" && result.value) {
+        sentCount++;
+      }
+    }
+  }
+
+  return sentCount;
+}
+
+/**
+ * Process a single reminder. Returns true if sent successfully.
+ * On exception, increments retry count; after MAX_RETRIES, marks as failed.
+ */
+async function processSingleReminder(reminder: typeof reminders.$inferSelect): Promise<boolean> {
+  try {
       // ── 1. Fetch appointment with all related data including consent ──
       const [appointmentRow] = await db
         .select({
@@ -320,7 +343,7 @@ export async function processDueReminders(): Promise<number> {
           .update(reminders)
           .set({ status: "failed" })
           .where(eq(reminders.id, reminder.id));
-        continue;
+        return false;
       }
 
       const {
@@ -336,7 +359,7 @@ export async function processDueReminders(): Promise<number> {
           .update(reminders)
           .set({ status: "failed" })
           .where(eq(reminders.id, reminder.id));
-        continue;
+        return false;
       }
 
       // ── 2. Reminder deduplication guard ──
@@ -358,7 +381,7 @@ export async function processDueReminders(): Promise<number> {
           .update(reminders)
           .set({ status: "failed" })
           .where(eq(reminders.id, reminder.id));
-        continue;
+        return false;
       }
 
       // ── 3. Sending policy engine check (via policy-gate) ──
@@ -369,7 +392,7 @@ export async function processDueReminders(): Promise<number> {
         channel: "whatsapp_ba_bridge",
         appointmentCancelled: (apt.status as string) === "cancelled",
         appointmentCompleted: apt.status === "completed",
-        appointmentTimePassed: new Date(apt.startAt) < now,
+        appointmentTimePassed: new Date(apt.startAt) < new Date(),
         isDuplicate: false,
         connectorSessionStable: true, // assume stable when processing reminders
       });
@@ -384,7 +407,7 @@ export async function processDueReminders(): Promise<number> {
           .update(reminders)
           .set({ status: "failed" })
           .where(eq(reminders.id, reminder.id));
-        continue;
+        return false;
       }
 
       // ── 4. Compose message with personality-adaptive templates (S15) ──
@@ -462,17 +485,28 @@ export async function processDueReminders(): Promise<number> {
         templateKey,
       });
 
-      if (delivered) {
-        sentCount++;
-      }
+      return delivered;
     } catch (err) {
       logger.error("Failed to send reminder", {
         reminderId: reminder.id,
         error: (err as Error).message,
       });
-      // Leave as pending so it retries on the next cycle
-    }
-  }
 
-  return sentCount;
+      // Increment retry count; mark as failed after MAX_RETRIES
+      const retryCount = (reminderRetryCount.get(reminder.id) ?? 0) + 1;
+      reminderRetryCount.set(reminder.id, retryCount);
+      if (retryCount >= MAX_RETRIES) {
+        await db
+          .update(reminders)
+          .set({ status: "failed" })
+          .where(eq(reminders.id, reminder.id));
+        reminderRetryCount.delete(reminder.id);
+        logger.warn("Reminder exceeded max retries, marking as failed", {
+          reminderId: reminder.id,
+          retryCount,
+        });
+      }
+
+      return false;
+    }
 }

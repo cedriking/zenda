@@ -557,5 +557,18 @@
     "title": "ページが見つかりません",
     "description": "申し訳ありませんが、お探しのページは見つかりませんでした。",
     "backHome": "ホームに戻る"
+  },
+  "blog": {
+    "metaTitle": "ブログ — Zenda",
+    "metaDescription": "WhatsApp AIで予約自動化するためのガイドと戦略。無断キャンセルを減らし、予約枠を埋めてビジネスを成長させましょう。",
+    "ogTitle": "Zendaブログ — WhatsApp予約自動化",
+    "ogDescription": "ビジネスがWhatsApp AIを使って無断キャンセルを40%削減し、予約を自動化する方法をご紹介します。",
+    "heading": "ブログ",
+    "subheading": "WhatsAppで予約管理を行うビジネスのためのガイド、戦略、実際の数字。",
+    "spanishSection": "スペイン語の記事",
+    "englishSection": "英語の記事",
+    "ctaTitle": "予約の見逃しを終わりにしませんか？",
+    "ctaDesc": "14日間無料トライアル。クレジットカード不要。既存のWhatsAppで利用可能。",
+    "ctaButton": "無料トライアルを開始"
   }
 }

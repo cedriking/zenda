@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Link } from "@/i18n/navigation";
 import { apiFetch } from "@/lib/api-client";
 
 export function ResetPasswordClient() {
+  const t = useTranslations("resetPassword");
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
   const [newPassword, setNewPassword] = useState("");
@@ -22,15 +24,15 @@ export function ResetPasswordClient() {
         <Nav variant="simple" />
         <main className="flex flex-1 items-center justify-center px-6">
           <div className="w-full max-w-md text-center">
-            <h1 className="mt-6 mb-2 font-bold text-2xl">Invalid Link</h1>
+            <h1 className="mt-6 mb-2 font-bold text-2xl">{t("invalidTitle")}</h1>
             <p className="mb-6 text-muted-foreground">
-              This password reset link is invalid or has expired.
+              {t("invalidDesc")}
             </p>
             <Link
               className="text-primary hover:underline"
               href="/forgot-password"
             >
-              Request a new reset link
+              {t("requestNewLink")}
             </Link>
           </div>
         </main>
@@ -43,11 +45,11 @@ export function ResetPasswordClient() {
     setError("");
 
     if (newPassword.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError(t("errorTooShort"));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("errorMismatch"));
       return;
     }
 
@@ -59,7 +61,7 @@ export function ResetPasswordClient() {
       });
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Password reset failed");
+      setError(err instanceof Error ? err.message : t("errorResetFailed"));
     } finally {
       setLoading(false);
     }
@@ -73,12 +75,10 @@ export function ResetPasswordClient() {
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
             <h1 className="mt-6 mb-2 font-bold text-2xl">
-              {success ? "Password Reset" : "Set New Password"}
+              {success ? t("successTitle") : t("title")}
             </h1>
             <p className="text-muted-foreground">
-              {success
-                ? "Your password has been reset successfully."
-                : "Enter your new password below."}
+              {success ? t("successDesc") : t("desc")}
             </p>
           </div>
 
@@ -88,26 +88,27 @@ export function ResetPasswordClient() {
                 className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-6 py-2.5 font-medium text-sm text-white hover:bg-slate-800"
                 href="/login"
               >
-                Continue to Login
+                {t("continueToLogin")}
               </Link>
             </div>
           ) : (
             <form className="space-y-4" onSubmit={handleSubmit}>
               {error && (
-                <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-destructive text-sm">
+                <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-destructive text-sm" role="alert">
                   {error}
                 </div>
               )}
 
               <div>
-                <label className="mb-1.5 block font-medium text-sm">
-                  New Password
+                <label className="mb-1.5 block font-medium text-sm" htmlFor="new-password">
+                  {t("newPasswordLabel")}
                 </label>
                 <input
                   className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring"
+                  id="new-password"
                   minLength={8}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="At least 8 characters"
+                  placeholder={t("newPasswordPlaceholder")}
                   required
                   type="password"
                   value={newPassword}
@@ -115,14 +116,15 @@ export function ResetPasswordClient() {
               </div>
 
               <div>
-                <label className="mb-1.5 block font-medium text-sm">
-                  Confirm Password
+                <label className="mb-1.5 block font-medium text-sm" htmlFor="confirm-password">
+                  {t("confirmPasswordLabel")}
                 </label>
                 <input
                   className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring"
+                  id="confirm-password"
                   minLength={8}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm your new password"
+                  placeholder={t("confirmPasswordPlaceholder")}
                   required
                   type="password"
                   value={confirmPassword}
@@ -134,7 +136,7 @@ export function ResetPasswordClient() {
                 disabled={loading}
                 type="submit"
               >
-                {loading ? "Resetting..." : "Reset Password"}
+                {loading ? t("resetting") : t("submit")}
               </Button>
             </form>
           )}

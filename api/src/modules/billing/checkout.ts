@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { getPriceId, type BillingPeriod } from "./products.js";
 import { stripe } from "./stripe.js";
 
-const FOUNDING_COUPON_ID = process.env.STRIPE_FOUNDING_COUPON_ID ?? "aRgf7NZC";
+const FOUNDING_COUPON_ID = process.env.STRIPE_FOUNDING_COUPON_ID ?? "";
 const TRIAL_DAYS = 14;
 
 export async function createCheckoutSession(

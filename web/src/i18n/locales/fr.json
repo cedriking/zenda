@@ -554,5 +554,18 @@
     "title": "Page introuvable",
     "description": "Désolé, nous n'avons pas pu trouver la page que vous cherchez.",
     "backHome": "Retour à l'accueil"
+  },
+  "blog": {
+    "metaTitle": "Blog — Zenda",
+    "metaDescription": "Guides et stratégies pour automatiser la prise de rendez-vous avec WhatsApp IA. Réduisez les absences, remplissez les annulations et développez votre activité.",
+    "ogTitle": "Blog Zenda — Automatisation de rendez-vous WhatsApp",
+    "ogDescription": "Découvrez comment les entreprises utilisent WhatsApp IA pour réduire les absences de 40% et automatiser les réservations.",
+    "heading": "Blog",
+    "subheading": "Guides, stratégies et chiffres réels pour les entreprises utilisant WhatsApp pour gérer les rendez-vous.",
+    "spanishSection": "Articles en espagnol",
+    "englishSection": "Articles en anglais",
+    "ctaTitle": "Prêt à ne plus manquer de rendez-vous ?",
+    "ctaDesc": "Essai gratuit de 14 jours. Sans carte bancaire. Fonctionne avec votre WhatsApp existant.",
+    "ctaButton": "Commencer l'essai gratuit"
   }
 }

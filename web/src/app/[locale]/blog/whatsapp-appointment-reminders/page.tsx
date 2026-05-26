@@ -1,20 +1,33 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "whatsapp-appointment-reminders";
   return {
     title: "WhatsApp Appointment Reminders: Reduce No-Shows by 40% | Zenda",
     description:
       "Learn how automated WhatsApp appointment reminders reduce no-shows by up to 40%. Complete guide for salons, clinics, and appointment-based businesses.",
     alternates: {
-      canonical: "https://zenda.bot/blog/whatsapp-appointment-reminders",
+      canonical: `https://zenda.bot/${locale}/blog/${slug}`,
+      languages: {
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/blog/${slug}`])
+        ),
+        "x-default": `https://zenda.bot/en/blog/${slug}`,
+      },
     },
     openGraph: {
       title: "WhatsApp Appointment Reminders: Reduce No-Shows by 40%",
       description: "Automated WhatsApp reminders cut no-shows by 40%. See how.",
-      url: "https://zenda.bot/blog/whatsapp-appointment-reminders",
+      url: `https://zenda.bot/${locale}/blog/${slug}`,
       type: "article",
     },
   };

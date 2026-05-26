@@ -25,7 +25,9 @@ const INJECTION_PATTERNS: Array<{ regex: RegExp; flag: string }> = [
   { regex: /override\s+(previous|all)\s+/i, flag: 'override' },
 ]
 
-const EMERGENCY_KEYWORDS = [
+// EMERGENCY_KEYWORDS is the authoritative source for emergency keyword detection.
+// engine.ts should import from here instead of maintaining its own list.
+export const EMERGENCY_KEYWORDS = [
   // English
   'emergency',
   '911',
@@ -81,11 +83,19 @@ export function sanitizeCustomerMessage(message: string): SanitizeResult {
     sanitized = sanitized.replace(/^\s*\/\s*/, '')
   }
 
-  // 3. Strip prompt-injection patterns
-  for (const { regex, flag } of INJECTION_PATTERNS) {
-    if (regex.test(sanitized)) {
-      flags.push(flag)
-      sanitized = sanitized.replace(regex, '[removed]')
+  // 3. Strip prompt-injection patterns (multi-pass until fixed point, max 5 iterations)
+  let changed = true
+  let passes = 0
+  const MAX_SANITIZER_PASSES = 5
+  while (changed && passes < MAX_SANITIZER_PASSES) {
+    changed = false
+    passes++
+    for (const { regex, flag } of INJECTION_PATTERNS) {
+      if (regex.test(sanitized)) {
+        if (!flags.includes(flag)) flags.push(flag)
+        sanitized = sanitized.replace(regex, '[removed]')
+        changed = true
+      }
     }
   }
 

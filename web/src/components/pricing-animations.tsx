@@ -2,7 +2,7 @@
 
 import { ArrowRight, Check } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { FadeUp, StaggerChild, StaggerContainer } from "@/components/motion";
 import { useRouter } from "@/i18n/navigation";
@@ -18,9 +18,18 @@ interface Plan {
   tier: string;
 }
 
+function formatPrice(amount: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+  }).format(amount);
+}
+
 export function PricingAnimations({ plans }: { plans: Plan[] }) {
   const t = useTranslations("pricing");
   const router = useRouter();
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const isFounding = searchParams.get("founding") === "true";
 
@@ -87,13 +96,13 @@ export function PricingAnimations({ plans }: { plans: Plan[] }) {
                     <span
                       className={`mr-2 text-sm line-through ${plan.highlight ? "text-slate-600" : "text-slate-300"}`}
                     >
-                      ${plan.originalPrice}
+                      {formatPrice(plan.originalPrice, locale)}
                     </span>
                   )}
                 <span
                   className={`font-black text-4xl ${plan.highlight ? "text-white" : "text-slate-900"}`}
                 >
-                  ${plan.price}
+                  {formatPrice(plan.price, locale)}
                 </span>
                 <span
                   className={`text-sm ${plan.highlight ? "text-slate-400" : "text-slate-500"}`}

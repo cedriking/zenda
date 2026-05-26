@@ -1,22 +1,35 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "whatsapp-dentista-citas";
   return {
     title:
       "WhatsApp para Dentistas: Reduce Cancelaciones y Llena tu Agenda | Zenda",
     description:
       "Cómo las clínicas dentales usan WhatsApp para reducir cancelaciones 40%, llenar cupos de última hora y captar más pacientes. Guía con calculadora de ROI.",
     alternates: {
-      canonical: "https://zenda.bot/es/blog/whatsapp-dentista-citas",
+      canonical: `https://zenda.bot/${locale}/blog/${slug}`,
+      languages: {
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/blog/${slug}`])
+        ),
+        "x-default": `https://zenda.bot/en/blog/${slug}`,
+      },
     },
     openGraph: {
       title: "WhatsApp para Dentistas: Reduce Cancelaciones y Llena tu Agenda",
       description:
         "Clínicas dentales que usan WhatsApp automation reducen cancelaciones 40%. Mira los números.",
-      url: "https://zenda.bot/es/blog/whatsapp-dentista-citas",
+      url: `https://zenda.bot/${locale}/blog/${slug}`,
       type: "article",
     },
   };

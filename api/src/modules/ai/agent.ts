@@ -59,6 +59,8 @@ const ALL_TOOLS = [
 ];
 
 const MAX_ITERATIONS = 6;
+const AGENT_LOOP_TIMEOUT_MS = 60_000;
+const MAX_CONTEXT_MESSAGES = 40;
 
 // Per-customer rate limiting (max 10 messages per minute) via Redis
 const RATE_LIMIT_WINDOW_S = 60;
@@ -163,13 +165,21 @@ export async function runAgent(
       tool_call_id?: string;
     }> = [{ role: "system", content: systemPrompt }];
 
-    // Add history in chronological order
+    // Add history in chronological order (including tool-call sequences)
     const reversed = history.reverse();
     for (const msg of reversed) {
       if (msg.senderType === "customer") {
         chatMessages.push({ role: "user", content: msg.body });
       } else if (msg.senderType === "ai") {
-        chatMessages.push({ role: "assistant", content: msg.body });
+        // Include AI messages that may carry tool_calls in their metadata
+        const assistantMsg: Record<string, unknown> = { role: "assistant", content: msg.body };
+        // Reconstruct tool_calls from metadata if present
+        const toolCallsData = (msg as Record<string, unknown>).toolCalls;
+        if (Array.isArray(toolCallsData)) {
+          assistantMsg.tool_calls = toolCallsData;
+        }
+        // biome-ignore lint/suspicious/noExplicitAny: pre-existing type mismatch
+        chatMessages.push(assistantMsg as any);
       }
     }
 
@@ -194,6 +204,7 @@ export async function runAgent(
 
     // 7. Agent loop: call LLM -> execute tools -> repeat
     let iterations = 0;
+    const loopStartTime = Date.now();
     let lastResult = await provider.chat(
       modelConfig.model,
       chatMessages,
@@ -203,6 +214,30 @@ export async function runAgent(
 
     while (lastResult.toolCalls?.length && iterations < MAX_ITERATIONS) {
       iterations++;
+
+      // Timeout guard: break if the loop has been running too long
+      if (Date.now() - loopStartTime > AGENT_LOOP_TIMEOUT_MS) {
+        logger.warn("Agent loop timeout exceeded", { workspaceId, conversationId, iterations });
+        return {
+          text: language === "es"
+            ? "Lo siento, estoy tardando demasiado en procesar tu solicitud. Un momento por favor."
+            : "I'm sorry, I'm taking too long to process your request. Please try again shortly.",
+          language,
+          provider: "system",
+          model: "timeout-fallback",
+        };
+      }
+
+      // Context window guard: trim oldest non-system messages if over limit
+      if (chatMessages.length > MAX_CONTEXT_MESSAGES) {
+        const systemMsg = chatMessages[0];
+        const rest = chatMessages.slice(1);
+        const trimmed = rest.slice(rest.length - (MAX_CONTEXT_MESSAGES - 1));
+        chatMessages.length = 0;
+        chatMessages.push(systemMsg);
+        chatMessages.push(...trimmed);
+        logger.debug("Agent context trimmed", { workspaceId, messageCount: chatMessages.length });
+      }
 
       // Add assistant's tool call message with tool_calls for API compatibility
       const assistantMsg: Record<string, unknown> = {

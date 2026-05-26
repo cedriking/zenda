@@ -1,22 +1,35 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "whatsapp-citas-salon";
   return {
     title:
       "Como Usar WhatsApp para Agendar Citas en tu Salón de Belleza | Zenda",
     description:
       "Guía completa para automatizar citas por WhatsApp en salones, clínicas y spas. Reduce ausencias, ahorra tiempo y consigue más clientes con un recepcionista AI.",
     alternates: {
-      canonical: "https://zenda.bot/blog/whatsapp-citas-salon",
+      canonical: `https://zenda.bot/${locale}/blog/${slug}`,
+      languages: {
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/blog/${slug}`])
+        ),
+        "x-default": `https://zenda.bot/en/blog/${slug}`,
+      },
     },
     openGraph: {
       title: "Como Usar WhatsApp para Agendar Citas en tu Salón de Belleza",
       description:
         "Guía completa para automatizar citas por WhatsApp. Reduce ausencias y ahorra tiempo.",
-      url: "https://zenda.bot/blog/whatsapp-citas-salon",
+      url: `https://zenda.bot/${locale}/blog/${slug}`,
       type: "article",
     },
   };

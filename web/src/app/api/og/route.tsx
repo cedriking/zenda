@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
+import { taglines, features, cta } from "@/lib/og-data";
 
 export const runtime = "edge";
 
@@ -7,18 +8,13 @@ export function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const locale = searchParams.get("locale") || "en";
 
-  const taglines: Record<string, string> = {
-    en: "Your AI receptionist that never misses a message.",
-    es: "Tu recepcionista IA que nunca pierde un mensaje.",
-    fr: "Votre réceptionniste IA qui ne rate aucun message.",
-    de: "Ihr KI-Empfänger, der keine Nachricht verpasst.",
-    pt: "Seu recepcionista IA que nunca perde uma mensagem.",
-    ja: "メッセージを見逃さないAI受付。",
-    ko: "메시지를 놓치지 않는 AI 리셉셔니스트.",
-    zh: "永不漏消息的AI前台。",
-    ru: "ИИ-ресепшн, который не пропускает ни одного сообщения.",
-    ar: "خدمة استقبال بالذكاء الاصطناعي لا تفوت أي رسالة.",
-  };
+  const isRtl = locale === "ar";
+  const direction = isRtl ? "rtl" : "ltr";
+  const textAlign = isRtl ? "right" : "left";
+  const alignItems = isRtl ? "flex-end" : "flex-start";
+
+  const locFeatures = features[locale] ?? features.en;
+  const locCta = cta[locale] ?? cta.en;
 
   return new ImageResponse(
     <div
@@ -27,10 +23,12 @@ export function GET(request: NextRequest) {
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        alignItems: "flex-start",
+        alignItems,
         justifyContent: "center",
         backgroundColor: "#0f172a",
         padding: "80px",
+        direction,
+        textAlign,
       }}
     >
       <div
@@ -73,11 +71,11 @@ export function GET(request: NextRequest) {
           gap: 24,
         }}
       >
-        <span>WhatsApp AI</span>
+        <span>{locFeatures[0]}</span>
         <span style={{ color: "#475569" }}>·</span>
-        <span>9 Languages</span>
+        <span>{locFeatures[1]}</span>
         <span style={{ color: "#475569" }}>·</span>
-        <span>Smart Scheduling</span>
+        <span>{locFeatures[2]}</span>
       </div>
       <div
         style={{
@@ -90,7 +88,7 @@ export function GET(request: NextRequest) {
           color: "#ffffff",
         }}
       >
-        Start Free Trial
+        {locCta}
       </div>
       <div style={{ fontSize: 18, color: "#475569", marginTop: 24 }}>
         zenda.bot

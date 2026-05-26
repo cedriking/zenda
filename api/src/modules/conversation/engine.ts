@@ -33,8 +33,8 @@ import { enforceLimit, trackAndEnforce } from "../usage/enforcement.js";
 import { resolveOrCreateCustomer } from "./customer-resolver.js";
 import { detectLanguage } from "./language-detector.js";
 
-// Emergency keywords in multiple languages
-const EMERGENCY_KEYWORDS = [
+// Emergency keywords in multiple languages (exported for use by other modules)
+export const EMERGENCY_KEYWORDS = [
   "emergency",
   "urgente",
   "ayuda",
@@ -108,6 +108,10 @@ export async function processIncomingMessage(
 ) {
   try {
     // 0. Dedup: skip if we already processed this exact message
+    // NOTE: A UNIQUE constraint on messages.externalMessageId is needed for
+    // atomic dedup under concurrent writes. The application-level check here
+    // is susceptible to race conditions. Add the constraint in the next migration:
+    //   ALTER TABLE messages ADD CONSTRAINT messages_external_message_id_unique UNIQUE (external_message_id);
     if (msg.externalMessageId) {
       const [existing] = await db
         .select({ id: messages.id })
@@ -123,13 +127,16 @@ export async function processIncomingMessage(
       }
     }
 
-    // 1. Load workspace default language first (used as fallback)
-    const [wsLang] = await db
-      .select({ defaultLanguage: workspaces.defaultLanguage })
+    // 1. Load workspace data (defaultLanguage + onboardingStep) in a single query
+    const [ws] = await db
+      .select({
+        defaultLanguage: workspaces.defaultLanguage,
+        onboardingStep: workspaces.onboardingStep,
+      })
       .from(workspaces)
       .where(eq(workspaces.id, workspaceId))
       .limit(1);
-    const workspaceLanguage = (wsLang?.defaultLanguage as "en" | "es") ?? "en";
+    const workspaceLanguage = (ws?.defaultLanguage as "en" | "es") ?? "en";
 
     // 1a. Heuristic hint for initial customer creation — the AI agent will
     //     override this via update_customer_info on first contact
@@ -217,12 +224,6 @@ export async function processIncomingMessage(
     }
 
     // 6. Check if onboarding is incomplete — route to onboarding flow instead of AI agent
-    const [ws] = await db
-      .select({ onboardingStep: workspaces.onboardingStep })
-      .from(workspaces)
-      .where(eq(workspaces.id, workspaceId))
-      .limit(1);
-
     const onboardingStep = (ws?.onboardingStep ??
       "not_started") as OnboardingStep;
     if (onboardingStep !== "ready") {
@@ -716,6 +717,16 @@ async function findActiveConversation(workspaceId: string, customerId: string) {
     )
     .orderBy(desc(conversations.lastMessageAt))
     .limit(1);
+
+  // Only resume conversations created within the last 24 hours
+  if (conv) {
+    const createdAt = new Date(conv.createdAt);
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    if (createdAt < twentyFourHoursAgo) {
+      return null;
+    }
+  }
+
   return conv ?? null;
 }
 
@@ -897,7 +908,7 @@ async function detectSensitiveTopic(
 
     const lowerMessage = messageBody.toLowerCase();
     for (const topic of topics) {
-      if (lowerMessage.includes(topic.toLowerCase())) {
+      if (new RegExp('\\b' + escapeRegex(topic) + '\\b', 'i').test(lowerMessage)) {
         return topic;
       }
     }
@@ -909,6 +920,13 @@ async function detectSensitiveTopic(
   }
 
   return null;
+}
+
+/**
+ * Escape special regex characters in a string for safe use in RegExp.
+ */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**

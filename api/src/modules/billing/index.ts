@@ -2,7 +2,6 @@ import type { PlanTier } from "@zenda/shared";
 import { PLANS } from "@zenda/shared";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
-import { typedContext } from "../../middleware/typed-context.js";
 import { badRequest, serverError } from "../../utils/errors.js";
 import {
   createCheckoutSession,
@@ -11,11 +10,20 @@ import {
 } from "./checkout.js";
 import { handleWebhook } from "./webhooks.js";
 
+/**
+ * Type-only decoration for context properties provided by the global auth derive.
+ * Removed typedContext to avoid runtime decoration overwriting derived auth values.
+ * The global derive in index.ts provides userId/workspaceId at runtime.
+ */
+type AuthContext = {
+  userId: string | null;
+  workspaceId: string | null;
+};
+
 export const billingModule = new Elysia({ prefix: "/billing" })
   // Public: list available plans (no auth required)
   .get("/plans", () => PLANS)
 
-  .use(typedContext)
   // Stripe webhook endpoint — NO auth (Stripe calls this directly)
   // No body schema defined so Elysia doesn't auto-parse — request.text() works
   .post("/webhook", async ({ request, set }) => {
@@ -51,7 +59,9 @@ export const billingModule = new Elysia({ prefix: "/billing" })
   // Create checkout session
   .post(
     "/checkout",
-    async ({ workspaceId, body, set }) => {
+    async (ctx) => {
+      const { body, set } = ctx;
+      const workspaceId = (ctx as unknown as AuthContext).workspaceId;
       const data = body as Record<string, string | undefined>;
       try {
         const session = await createCheckoutSession(
@@ -82,7 +92,9 @@ export const billingModule = new Elysia({ prefix: "/billing" })
   )
 
   // Create portal session
-  .post("/portal", async ({ workspaceId, set }) => {
+  .post("/portal", async (ctx) => {
+    const { set } = ctx;
+    const workspaceId = (ctx as unknown as AuthContext).workspaceId;
     try {
       return await createPortalSession(workspaceId as string);
     } catch (err) {
@@ -92,7 +104,9 @@ export const billingModule = new Elysia({ prefix: "/billing" })
   })
 
   // Get current subscription
-  .get("/subscription", async ({ workspaceId, set }) => {
+  .get("/subscription", async (ctx) => {
+    const { set } = ctx;
+    const workspaceId = (ctx as unknown as AuthContext).workspaceId;
     try {
       return await getSubscription(workspaceId as string);
     } catch (err) {

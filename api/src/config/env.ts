@@ -50,6 +50,8 @@ export function validateProductionEnv(): void {
   const required = [
     "DATABASE_URL",
     "JWT_SECRET",
+    "STRIPE_WEBHOOK_SECRET",
+    "ADMIN_SECRET",
     "JWT_REFRESH_SECRET",
     "REDIS_URL",
   ];
@@ -65,12 +67,6 @@ export function validateProductionEnv(): void {
   if (!STRIPE_SECRET_KEY) {
     throw new Error(
       "STRIPE_SECRET_KEY is required in production — billing depends on it"
-    );
-  }
-
-  if (!STRIPE_WEBHOOK_SECRET) {
-    console.warn(
-      "[env] STRIPE_WEBHOOK_SECRET not set — webhook processing will fail"
     );
   }
 

@@ -59,7 +59,7 @@ const INTENT_PATTERNS: IntentPattern[] = [
   // Confirm
   {
     intent: 'confirm',
-    pattern: /\b(?:confirm|yes\s+confirm|confirmo|confirmar|s[ií].*confirmar|confirmar.*cita|s[ií]|claro|por\s+supuesto|dale|ok|okay|perfecto)\b/i,
+    pattern: /\b(?:confirm|yes\s+confirm|confirmo|confirmar|s[ií].*confirmar|confirmar.*cita|claro|por\s+supuesto|dale|ok|okay|perfecto)\b/i,
     confidence: 0.75,
   },
   // Book / schedule

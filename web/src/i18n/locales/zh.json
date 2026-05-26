@@ -556,5 +556,18 @@
     "title": "页面未找到",
     "description": "抱歉，我们无法找到您要访问的页面。",
     "backHome": "返回首页"
+  },
+  "blog": {
+    "metaTitle": "博客 — Zenda",
+    "metaDescription": "使用 WhatsApp AI 自动化预约的指南和策略。减少爽约、填补取消空位，助力业务增长。",
+    "ogTitle": "Zenda 博客 — WhatsApp 预约自动化",
+    "ogDescription": "了解企业如何使用 WhatsApp AI 将爽约率降低 40% 并实现预约自动化。",
+    "heading": "博客",
+    "subheading": "为使用 WhatsApp 管理预约的企业提供指南、策略和真实数据。",
+    "spanishSection": "西班牙语文章",
+    "englishSection": "英语文章",
+    "ctaTitle": "准备好不再错过预约了吗？",
+    "ctaDesc": "14天免费试用。无需信用卡。可与您现有的 WhatsApp 配合使用。",
+    "ctaButton": "开始免费试用"
   }
 }

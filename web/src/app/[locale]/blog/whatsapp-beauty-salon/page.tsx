@@ -1,23 +1,36 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "whatsapp-beauty-salon";
   return {
     title:
       "WhatsApp for Beauty Salons: Book More Appointments & Keep Your Chair Full | Zenda",
     description:
       "How beauty salons use WhatsApp automation to book more appointments, reduce no-shows by 40%, and respond to clients instantly. Free guide with setup in under 5 minutes.",
     alternates: {
-      canonical: "https://zenda.bot/blog/whatsapp-beauty-salon",
+      canonical: `https://zenda.bot/${locale}/blog/${slug}`,
+      languages: {
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/blog/${slug}`])
+        ),
+        "x-default": `https://zenda.bot/en/blog/${slug}`,
+      },
     },
     openGraph: {
       title:
         "WhatsApp for Beauty Salons: Book More Appointments & Keep Your Chair Full",
       description:
         "Beauty salons using WhatsApp automation fill 40% more empty slots. See how.",
-      url: "https://zenda.bot/blog/whatsapp-beauty-salon",
+      url: `https://zenda.bot/${locale}/blog/${slug}`,
       type: "article",
     },
   };

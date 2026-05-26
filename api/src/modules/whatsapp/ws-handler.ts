@@ -98,6 +98,10 @@ const wsMeta = new WeakMap<object, WsMeta>();
 // Keyed by the raw socket so it survives Elysia WS wrapper recreation.
 const pendingAuth = new WeakMap<object, { authenticated: false }>();
 
+// Track connections where auth verification is in-flight (promise pending).
+// Prevents non-auth messages from being treated as auth failures.
+const pendingVerification = new WeakMap<object, boolean>();
+
 const AUTH_TIMEOUT_MS = 5_000;
 
 async function verifyWsToken(
@@ -153,6 +157,12 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
 
     // Handle auth message — client sends token as first message instead of URL query param
     if (pendingAuth.has(raw)) {
+      // If verification is in-flight, ignore non-auth messages (they will be
+      // re-sent by the client or are out-of-order). Don't treat as auth failure.
+      if (pendingVerification.has(raw)) {
+        return;
+      }
+
       const authTimer = (raw as Record<string, unknown>).__authTimer as
         | ReturnType<typeof setTimeout>
         | undefined;
@@ -185,10 +195,15 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
         return;
       }
 
+      // Mark verification as in-flight
+      pendingVerification.set(raw, true);
+
       const ip = getWsClientIp(ws);
       const decoded = verifyWsToken(payload.token);
       decoded
         .then((result) => {
+          pendingVerification.delete(raw);
+
           if (!result?.sub || !result?.workspaceId) {
             recordWsAuthFailure(ip);
             logger.warn("WS auth: token verification failed", {
@@ -221,6 +236,7 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
           });
         })
         .catch(() => {
+          pendingVerification.delete(raw);
           recordWsAuthFailure(ip);
           pendingAuth.delete(raw);
           if (authTimer) clearTimeout(authTimer);
@@ -383,7 +399,10 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
     });
     meta?.heartbeat.stop();
     if (workspaceId) {
-      removeConnection(workspaceId);
+      // Pass the ws reference so removeConnection can check it matches the
+      // current connection before deleting (prevents stale close handlers
+      // from evicting a newer replacement connection).
+      removeConnection(workspaceId, ws as any);
     }
     wsMeta.delete(raw);
   },

@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: Props) {
       description: t("openGraph.description"),
       url: "https://zenda.bot",
       siteName: "Zenda",
-      locale,
+      locale: ({ en: "en_US", es: "es_MX", ar: "ar_SA", fr: "fr_FR", de: "de_DE", ru: "ru_RU", zh: "zh_CN", ja: "ja_JP", ko: "ko_KR" } as Record<string, string>)[locale] ?? locale,
       type: "website",
       images: [
         {
@@ -54,9 +54,12 @@ export async function generateMetadata({ params }: Props) {
     },
     alternates: {
       canonical: `https://zenda.bot/${locale}`,
-      languages: Object.fromEntries(
-        routing.locales.map((l) => [l, `https://zenda.bot/${l}`])
-      ),
+      languages: {
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}`])
+        ),
+        "x-default": "https://zenda.bot/en",
+      },
     },
   };
 }
@@ -72,14 +75,14 @@ export default async function LocaleLayout({ children, params }: Props) {
   const lang = supportedLanguages.find((l) => l.key === locale);
   const dir = lang?.dir ?? "ltr";
 
+  const tJsonLd = await getTranslations({ locale, namespace: "metadata" });
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: "Zenda",
     applicationCategory: "BusinessApplication",
     operatingSystem: "macOS, Windows",
-    description:
-      "AI receptionist for appointment-based businesses. Handles customer conversations, scheduling, and reminders via WhatsApp.",
+    description: tJsonLd("description"),
     offers: {
       "@type": "AggregateOffer",
       lowPrice: "29",

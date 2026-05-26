@@ -29,7 +29,7 @@ export async function Footer() {
     ],
     [t("company")]: [
       { label: t("about"), href: "/docs" },
-      { label: t("contact"), href: "mailto:hello@zenda.bot" },
+      { label: t("contact"), href: "mailto:hello@zenda.bot", external: true },
     ],
     [t("legal")]: [
       { label: t("privacyPolicy"), href: "/legal/privacy" },
@@ -59,12 +59,21 @@ export async function Footer() {
                 <ul className="space-y-2.5">
                   {links.map((l) => (
                     <li key={l.label}>
-                      <Link
-                        className="text-slate-400 text-sm transition hover:text-white"
-                        href={l.href}
-                      >
-                        {l.label}
-                      </Link>
+                      {"external" in l && l.external ? (
+                        <a
+                          className="text-slate-400 text-sm transition hover:text-white"
+                          href={l.href}
+                        >
+                          {l.label}
+                        </a>
+                      ) : (
+                        <Link
+                          className="text-slate-400 text-sm transition hover:text-white"
+                          href={l.href}
+                        >
+                          {l.label}
+                        </Link>
+                      )}
                     </li>
                   ))}
                 </ul>

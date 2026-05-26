@@ -1,4 +1,5 @@
 import type { AIProvider, AITaskType, Language, PlanTier } from "@zenda/shared";
+import { isProviderHealthy } from "./circuit-breaker/index.js";
 
 interface ProviderConfig {
   maxTokens: number;
@@ -51,6 +52,9 @@ export function selectModel(ctx: RoutingContext): ProviderConfig {
       continue;
     }
     if (!isProviderAvailable(config.provider)) {
+      continue;
+    }
+    if (!isProviderHealthy(config.provider)) {
       continue;
     }
     return config;

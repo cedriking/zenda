@@ -78,5 +78,7 @@ export function createAppPlugin() {
     })
 }
 
-// Default instance for backward compat with existing imports
-export const appPlugin = createAppPlugin()
+/**
+ * NOTE: Do NOT export a singleton. Consumers must call createAppPlugin()
+ * directly to avoid shared mutable state across tests and instances.
+ */

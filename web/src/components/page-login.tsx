@@ -43,17 +43,18 @@ export function LoginPageClient() {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-destructive text-sm">
+              <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-destructive text-sm" role="alert">
                 {error}
               </div>
             )}
 
             <div>
-              <label className="mb-1.5 block font-medium text-sm">
+              <label className="mb-1.5 block font-medium text-sm" htmlFor="email">
                 {t("emailLabel")}
               </label>
               <input
                 className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring"
+                id="email"
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t("emailPlaceholder")}
                 required
@@ -63,11 +64,12 @@ export function LoginPageClient() {
             </div>
 
             <div>
-              <label className="mb-1.5 block font-medium text-sm">
+              <label className="mb-1.5 block font-medium text-sm" htmlFor="password">
                 {t("passwordLabel")}
               </label>
               <input
                 className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring"
+                id="password"
                 minLength={8}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={t("passwordPlaceholder")}

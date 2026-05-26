@@ -1,9 +1,10 @@
 'use client'
 
+import React from 'react'
 import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { Card, CardContent } from '@/components/ui/card'
-import { FadeUp, StaggerContainer, StaggerChild } from '@/components/motion'
+import { FadeUp, StaggerContainer, StaggerChild, AccordionItem } from '@/components/motion'
 
 function Section({ title, items }: { title: string; items: { title: string; content: React.ReactNode }[] }) {
   return (
@@ -193,6 +194,8 @@ export function DocsAnimations() {
     { q: t('faq4Q'), a: t('faq4A') },
   ]
 
+  const [openFaq, setOpenFaq] = React.useState<number | null>(null)
+
   return (
     <div className="relative">
       <FadeUp>
@@ -260,16 +263,17 @@ export function DocsAnimations() {
         <FadeUp>
           <h2 className="text-2xl font-bold mb-8">{t('commonQuestions')}</h2>
         </FadeUp>
-        <StaggerContainer className="space-y-3" stagger={0.08}>
-          {FAQ_ITEMS.map(item => (
-            <StaggerChild key={item.q}>
-              <div className="rounded-xl border border-border p-4 hover:shadow-sm transition">
-                <h3 className="font-semibold mb-1">{item.q}</h3>
-                <p className="text-sm text-muted-foreground">{item.a}</p>
-              </div>
-            </StaggerChild>
+        <div className="space-y-3">
+          {FAQ_ITEMS.map((item, i) => (
+            <AccordionItem
+              key={item.q}
+              question={item.q}
+              answer={item.a}
+              isOpen={openFaq === i}
+              onToggle={() => setOpenFaq(openFaq === i ? null : i)}
+            />
           ))}
-        </StaggerContainer>
+        </div>
       </section>
     </div>
   )

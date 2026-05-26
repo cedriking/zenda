@@ -1,22 +1,35 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "reducir-ausencias-clinica";
   return {
     title:
       "Como Reducir Ausencias en tu Clínica con Recordatorios WhatsApp | Zenda",
     description:
       "Aprende a reducir hasta 40% las ausencias en clínicas médicas, dentales y de terapia con recordatorios automáticos por WhatsApp. Guía práctica con pasos concretos.",
     alternates: {
-      canonical: "https://zenda.bot/blog/reducir-ausencias-clinica",
+      canonical: `https://zenda.bot/${locale}/blog/${slug}`,
+      languages: {
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/blog/${slug}`])
+        ),
+        "x-default": `https://zenda.bot/en/blog/${slug}`,
+      },
     },
     openGraph: {
       title: "Como Reducir Ausencias en tu Clínica con Recordatorios WhatsApp",
       description:
         "Reduce hasta 40% las ausencias con recordatorios automáticos por WhatsApp.",
-      url: "https://zenda.bot/blog/reducir-ausencias-clinica",
+      url: `https://zenda.bot/${locale}/blog/${slug}`,
       type: "article",
     },
   };

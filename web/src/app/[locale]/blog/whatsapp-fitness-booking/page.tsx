@@ -1,23 +1,36 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "whatsapp-fitness-booking";
   return {
     title:
       "WhatsApp for Fitness Studios: Reduce No-Shows & Book More Classes | Zenda",
     description:
       "How fitness studios and gyms use WhatsApp automation to reduce class no-shows by 40%, automate booking, and keep members engaged. Free guide with ROI calculator.",
     alternates: {
-      canonical: "https://zenda.bot/blog/whatsapp-fitness-booking",
+      canonical: `https://zenda.bot/${locale}/blog/${slug}`,
+      languages: {
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/blog/${slug}`])
+        ),
+        "x-default": `https://zenda.bot/en/blog/${slug}`,
+      },
     },
     openGraph: {
       title:
         "WhatsApp for Fitness Studios: Reduce No-Shows & Book More Classes",
       description:
         "Fitness studios using WhatsApp automation cut no-shows 40% and boost retention. See how.",
-      url: "https://zenda.bot/blog/whatsapp-fitness-booking",
+      url: `https://zenda.bot/${locale}/blog/${slug}`,
       type: "article",
     },
   };

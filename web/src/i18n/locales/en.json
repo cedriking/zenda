@@ -423,6 +423,45 @@
     },
     "otherVerticals": "Also serving other industries"
   },
+  "forgotPassword": {
+    "title": "Forgot your password?",
+    "desc": "Enter your email and we'll send you a link to reset your password.",
+    "checkEmail": "Check your email",
+    "sentDesc": "If an account exists with that email, you'll receive a password reset link shortly.",
+    "notReceived": "Didn't receive the email? Check your spam folder or try again.",
+    "tryAgain": "Try again",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "submit": "Send Reset Link",
+    "sending": "Sending...",
+    "rememberPassword": "Remember your password?",
+    "backToLogin": "Back to login"
+  },
+  "resetPassword": {
+    "title": "Set New Password",
+    "desc": "Enter your new password below.",
+    "successTitle": "Password Reset",
+    "successDesc": "Your password has been reset successfully.",
+    "continueToLogin": "Continue to Login",
+    "newPasswordLabel": "New Password",
+    "newPasswordPlaceholder": "At least 8 characters",
+    "confirmPasswordLabel": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm your new password",
+    "submit": "Reset Password",
+    "resetting": "Resetting...",
+    "errorTooShort": "Password must be at least 8 characters",
+    "errorMismatch": "Passwords do not match",
+    "errorResetFailed": "Password reset failed",
+    "invalidTitle": "Invalid Link",
+    "invalidDesc": "This password reset link is invalid or has expired.",
+    "requestNewLink": "Request a new reset link",
+    "backToLogin": "Back to login"
+  },
+  "cookieConsent": {
+    "message": "We use cookies to improve your experience and analyze site traffic. By continuing, you agree to our <privacy>Privacy Policy</privacy>.",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
   "auth": {
     "loginTitle": "Welcome back",
     "loginDesc": "Log in to your Zenda account.",
@@ -453,7 +492,8 @@
     "termsLink": "Terms of Service",
     "privacyLink": "Privacy Policy",
     "haveAccount": "Already have an account?",
-    "loginLink": "Log in"
+    "loginLink": "Log in",
+    "foundingBadge": "Founding Member \u2014 50% off + 14 days free"
   },
   "download": {
     "title": "You're in! Here's your next step",
@@ -617,5 +657,18 @@
     "title": "Page not found",
     "description": "Sorry, we couldn't find the page you were looking for.",
     "backHome": "Back to home"
+  },
+  "blog": {
+    "metaTitle": "Blog — Zenda",
+    "metaDescription": "Guides and strategies for automating appointment booking with WhatsApp AI. Reduce no-shows, fill cancellations, and grow your business.",
+    "ogTitle": "Zenda Blog — WhatsApp Appointment Automation",
+    "ogDescription": "Learn how businesses use WhatsApp AI to reduce no-shows 40% and automate booking.",
+    "heading": "Blog",
+    "subheading": "Guides, strategies, and real numbers for businesses using WhatsApp to manage appointments.",
+    "spanishSection": "Articulos en Espanol",
+    "englishSection": "English Articles",
+    "ctaTitle": "Ready to stop missing appointments?",
+    "ctaDesc": "14-day free trial. No credit card. Works with your existing WhatsApp.",
+    "ctaButton": "Start free trial"
   }
 }

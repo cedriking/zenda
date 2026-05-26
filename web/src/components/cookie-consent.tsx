@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 const CONSENT_KEY = "zenda_cookie_consent";
 
 export function CookieConsent() {
+  const t = useTranslations("cookieConsent");
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -34,12 +36,13 @@ export function CookieConsent() {
     <div className="fixed inset-x-0 bottom-0 z-50 border-t bg-white/95 p-4 shadow-lg backdrop-blur-sm md:p-6">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:flex-row md:justify-between">
         <p className="text-center text-slate-600 text-sm md:text-left">
-          We use cookies to improve your experience and analyze site traffic. By
-          continuing, you agree to our{" "}
-          <Link className="text-primary hover:underline" href="/privacy">
-            Privacy Policy
-          </Link>
-          .
+          {t.rich("message", {
+            privacy: (chunks: React.ReactNode) => (
+              <Link className="text-primary hover:underline" href="/legal/privacy">
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
         <div className="flex shrink-0 gap-3">
           <button
@@ -47,14 +50,14 @@ export function CookieConsent() {
             onClick={decline}
             type="button"
           >
-            Decline
+            {t("decline")}
           </button>
           <button
             className="rounded-lg bg-slate-900 px-4 py-2 font-medium text-sm text-white hover:bg-slate-800"
             onClick={accept}
             type="button"
           >
-            Accept
+            {t("accept")}
           </button>
         </div>
       </div>

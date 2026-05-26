@@ -22,7 +22,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function BeautyPage() {
+export default async function BeautyPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const t = await getTranslations("verticals.beauty");
 
   const config: VerticalPageConfig = {
@@ -41,5 +42,5 @@ export default async function BeautyPage() {
     ],
   };
 
-  return <VerticalPage config={config} />;
+  return <VerticalPage config={config} locale={locale} />;
 }

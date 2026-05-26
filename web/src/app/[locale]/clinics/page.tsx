@@ -22,7 +22,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function ClinicsPage() {
+export default async function ClinicsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const t = await getTranslations("verticals.clinics");
 
   const config: VerticalPageConfig = {
@@ -41,5 +42,5 @@ export default async function ClinicsPage() {
     ],
   };
 
-  return <VerticalPage config={config} />;
+  return <VerticalPage config={config} locale={locale} />;
 }

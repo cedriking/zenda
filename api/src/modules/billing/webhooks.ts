@@ -11,6 +11,7 @@ import type Stripe from "stripe";
 import { logger } from "../../infra/logger.js";
 import { resetUsageOnPlanChange } from "../usage/enforcement.js";
 import { STRIPE_WEBHOOK_SECRET, stripe } from "./stripe.js";
+import { tierFromPriceId } from "./products.js";
 
 type PlanTier = (typeof planTierEnum.enumValues)[number];
 type BillingPeriod = (typeof billingPeriodEnum.enumValues)[number];
@@ -239,19 +240,7 @@ function detectTierFromPrice(priceId: string | undefined): string | null {
   if (!priceId) {
     return null;
   }
-  if (priceId.includes("local_solo") || priceId.includes("solo")) {
-    return "local_solo";
-  }
-  if (priceId.includes("local_starter") || priceId.includes("starter")) {
-    return "local_starter";
-  }
-  if (priceId.includes("local_pro") || priceId.includes("pro")) {
-    return "local_pro";
-  }
-  if (priceId.includes("local_business") || priceId.includes("business")) {
-    return "local_business";
-  }
-  return null;
+  return tierFromPriceId(priceId);
 }
 
 function isDowngrade(from: string, to: string): boolean {

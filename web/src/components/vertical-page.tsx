@@ -14,7 +14,7 @@ export interface VerticalPageConfig {
   title: string;
 }
 
-export async function VerticalPage({ config }: { config: VerticalPageConfig }) {
+export async function VerticalPage({ config, locale }: { config: VerticalPageConfig; locale: string }) {
   const t = await getTranslations("verticals");
 
   const serviceLd = {
@@ -32,7 +32,7 @@ export async function VerticalPage({ config }: { config: VerticalPageConfig }) {
       "@type": "GeoShape",
       name: "Latin America",
     },
-    url: `https://zenda.bot/${config.slug}`,
+    url: `https://zenda.bot/${locale}/${config.slug}`,
   };
 
   return (

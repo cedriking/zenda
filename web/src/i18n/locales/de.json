@@ -554,5 +554,18 @@
     "title": "Seite nicht gefunden",
     "description": "Leider konnten wir die gesuchte Seite nicht finden.",
     "backHome": "Zurück zur Startseite"
+  },
+  "blog": {
+    "metaTitle": "Blog — Zenda",
+    "metaDescription": "Leitfäden und Strategien zur Automatisierung der Terminbuchung mit WhatsApp AI. Reduzieren Sie No-Shows, füllen Sie Stornierungen und wachsen Sie.",
+    "ogTitle": "Zenda Blog — WhatsApp Terminautomatisierung",
+    "ogDescription": "Erfahren Sie, wie Unternehmen mit WhatsApp AI No-Shows um 40% reduzieren und Buchungen automatisieren.",
+    "heading": "Blog",
+    "subheading": "Leitfäden, Strategien und echte Zahlen für Unternehmen, die WhatsApp zur Terminverwaltung nutzen.",
+    "spanishSection": "Spanische Artikel",
+    "englishSection": "Englische Artikel",
+    "ctaTitle": "Bereit, keine Termine mehr zu verpassen?",
+    "ctaDesc": "14 Tage kostenlos. Keine Kreditkarte. Funktioniert mit Ihrem bestehenden WhatsApp.",
+    "ctaButton": "Kostenlose Testversion starten"
   }
 }

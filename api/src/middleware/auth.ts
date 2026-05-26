@@ -5,8 +5,9 @@ import { JWT_REFRESH_SECRET, JWT_SECRET } from "../config/env.js";
 /**
  * Standalone JWT instance — NOT an Elysia plugin.
  * Import and use in each module that needs JWT signing/verification.
+ * This is the OPTIONAL auth base — derive only, no guard.
  */
-export const authBase = new Elysia()
+export const optionalAuthBase = new Elysia()
   .use(
     jwt({
       name: "jwt",
@@ -42,6 +43,21 @@ export const authBase = new Elysia()
       };
     }
   );
+
+/**
+ * Required auth base — derive + onBeforeHandle guard that rejects unauthenticated requests with 401.
+ */
+export const authBase = new Elysia()
+  .use(optionalAuthBase)
+  // biome-ignore lint/suspicious/noExplicitAny: Elysia doesn't propagate derived types to onBeforeHandle
+  .onBeforeHandle((ctx: any) => {
+    if (!ctx.userId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+  });
 
 export type AuthBase = typeof authBase;
 export { authBase as authPlugin };

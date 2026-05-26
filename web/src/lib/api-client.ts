@@ -59,25 +59,41 @@ export class ApiError extends Error {
   }
 }
 
+// Deduplicate concurrent refresh requests
+let refreshPromise: Promise<string | null> | null = null
+
+function deduplicatedRefresh(): Promise<string | null> {
+  if (!refreshPromise) {
+    refreshPromise = refreshAccessToken().finally(() => {
+      refreshPromise = null
+    })
+  }
+  return refreshPromise
+}
+
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   let token = getAccessToken()
 
-  const makeRequest = (accessToken: string | null) =>
-    fetch(`${API_BASE_URL}${path}`, {
+  const makeRequest = (accessToken: string | null) => {
+    const headers = new Headers(options.headers)
+    if (!headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json')
+    }
+    if (accessToken && !headers.has('Authorization')) {
+      headers.set('Authorization', `Bearer ${accessToken}`)
+    }
+    return fetch(`${API_BASE_URL}${path}`, {
       ...options,
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        ...(options.headers as Record<string, string> | undefined),
-      },
+      headers,
     })
+  }
 
   let res = await makeRequest(token)
 
   // Auto-refresh on 401
   if (res.status === 401 && token) {
-    token = await refreshAccessToken()
+    token = await deduplicatedRefresh()
     if (token) {
       res = await makeRequest(token)
     }

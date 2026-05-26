@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Link } from "@/i18n/navigation";
 import { apiFetch } from "@/lib/api-client";
 
 export function ForgotPasswordClient() {
+  const t = useTranslations("forgotPassword");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -40,27 +42,24 @@ export function ForgotPasswordClient() {
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
             <h1 className="mt-6 mb-2 font-bold text-2xl">
-              {sent ? "Check your email" : "Forgot your password?"}
+              {sent ? t("checkEmail") : t("title")}
             </h1>
             <p className="text-muted-foreground">
-              {sent
-                ? "If an account exists with that email, you'll receive a password reset link shortly."
-                : "Enter your email and we'll send you a link to reset your password."}
+              {sent ? t("sentDesc") : t("desc")}
             </p>
           </div>
 
           {sent ? (
             <div className="rounded-lg border bg-muted/50 p-6 text-center">
               <p className="mb-4 text-muted-foreground text-sm">
-                Didn&apos;t receive the email? Check your spam folder or try
-                again.
+                {t("notReceived")}
               </p>
               <button
                 className="text-primary text-sm hover:underline"
                 onClick={() => setSent(false)}
                 type="button"
               >
-                Try again
+                {t("tryAgain")}
               </button>
             </div>
           ) : (
@@ -72,13 +71,14 @@ export function ForgotPasswordClient() {
               )}
 
               <div>
-                <label className="mb-1.5 block font-medium text-sm">
-                  Email
+                <label className="mb-1.5 block font-medium text-sm" htmlFor="email">
+                  {t("emailLabel")}
                 </label>
                 <input
                   className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring"
+                  id="email"
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder={t("emailPlaceholder")}
                   required
                   type="email"
                   value={email}
@@ -90,15 +90,15 @@ export function ForgotPasswordClient() {
                 disabled={loading}
                 type="submit"
               >
-                {loading ? "Sending..." : "Send Reset Link"}
+                {loading ? t("sending") : t("submit")}
               </Button>
             </form>
           )}
 
           <p className="mt-6 text-center text-muted-foreground text-sm">
-            Remember your password?{" "}
+            {t("rememberPassword")}{" "}
             <Link className="text-primary hover:underline" href="/login">
-              Back to login
+              {t("backToLogin")}
             </Link>
           </p>
         </div>

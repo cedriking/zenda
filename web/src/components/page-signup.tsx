@@ -129,7 +129,7 @@ export function SignupPageClient() {
             {isFounding && (
               <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 font-medium text-primary text-sm">
                 <span>&#127881;</span>
-                <span>Founding Member — 50% off + 14 d&#237;as gratis</span>
+                <span>{t("foundingBadge")}</span>
               </div>
             )}
             <h1 className="mt-6 mb-2 font-bold text-2xl">{t("signupTitle")}</h1>
@@ -138,7 +138,7 @@ export function SignupPageClient() {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-destructive text-sm">
+              <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-destructive text-sm" role="alert">
                 {error}
               </div>
             )}

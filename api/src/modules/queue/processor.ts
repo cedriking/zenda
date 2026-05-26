@@ -19,6 +19,7 @@ import { dequeueNext, markFailed, markSent } from "./persistent-queue.js";
 
 let processingInterval: ReturnType<typeof setInterval> | null = null;
 let isPaused = false;
+let isProcessing = false; // concurrency guard
 
 const DEFAULT_INTERVAL_MS = 5000; // 5 seconds
 const WORKSPACE_RATE_LIMIT_PER_HOUR = 100;
@@ -27,6 +28,7 @@ const WORKSPACE_RATE_WINDOW_MS = 3_600_000; // 1 hour
 // In-memory workspace rate limit counters
 const workspaceSentTimestamps = new Map<string, number[]>();
 let killSwitchState: "running" | "paused" | null = null; // null = not yet loaded from DB
+let processingCycleCount = 0;
 
 /**
  * Check workspace-level outbound rate limit.
@@ -44,6 +46,22 @@ function recordWorkspaceSend(workspaceId: string): void {
   const timestamps = workspaceSentTimestamps.get(workspaceId) ?? [];
   timestamps.push(now);
   workspaceSentTimestamps.set(workspaceId, timestamps);
+}
+
+/**
+ * Periodic cleanup: remove workspace entries where all timestamps
+ * are outside the rate limit window, preventing unbounded Map growth.
+ */
+function cleanupStaleWorkspaceTimestamps(): void {
+  const now = Date.now();
+  for (const [workspaceId, timestamps] of workspaceSentTimestamps) {
+    const recent = timestamps.filter((t) => now - t < WORKSPACE_RATE_WINDOW_MS);
+    if (recent.length === 0) {
+      workspaceSentTimestamps.delete(workspaceId);
+    } else if (recent.length !== timestamps.length) {
+      workspaceSentTimestamps.set(workspaceId, recent);
+    }
+  }
 }
 
 /**
@@ -251,32 +269,44 @@ async function processOne(): Promise<boolean> {
 export async function processQueue(
   batchSize = 10
 ): Promise<{ processed: number }> {
-  if (isPaused) {
+  if (isPaused || isProcessing) {
     return { processed: 0 };
   }
 
-  let processed = 0;
-  for (let i = 0; i < batchSize; i++) {
-    const hadWork = await processOne();
-    if (!hadWork) {
-      break;
+  isProcessing = true;
+  try {
+    let processed = 0;
+    for (let i = 0; i < batchSize; i++) {
+      const hadWork = await processOne();
+      if (!hadWork) {
+        break;
+      }
+      processed++;
     }
-    processed++;
-  }
 
-  return { processed };
+    // Periodic cleanup of stale workspace timestamps (every 100 cycles)
+    processingCycleCount++;
+    if (processingCycleCount >= 100) {
+      processingCycleCount = 0;
+      cleanupStaleWorkspaceTimestamps();
+    }
+
+    return { processed };
+  } finally {
+    isProcessing = false;
+  }
 }
 
 /**
  * Start the queue processor on an interval.
  */
-export function startProcessor(intervalMs = DEFAULT_INTERVAL_MS): void {
+export async function startProcessor(intervalMs = DEFAULT_INTERVAL_MS): Promise<void> {
   if (processingInterval) {
     return;
   }
 
-  // Load persisted kill switch state on startup
-  loadKillSwitchState().catch(() => {});
+  // Load persisted kill switch state on startup (await, don't fire-and-forget)
+  await loadKillSwitchState();
 
   logger.info("Starting queue processor", { intervalMs });
   processingInterval = setInterval(async () => {

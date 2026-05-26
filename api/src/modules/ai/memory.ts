@@ -13,7 +13,9 @@ const RE_SERVICE_PREF =
   /(?:always|usually|suelo|siempre)\s+(?:get|do|hacer|hago)\s+(.{3,40}?)(?:\.|,|$)/i;
 const RE_POLITE = /\b(?:por favor|please|gracias|thanks|thank you)\b/i;
 const RE_NAME_FALSE_POS =
-  /^(good|fine|okay|bien|bueno|ready|listo|here|from|de|en|el|la)$/i;
+  /^(good|fine|okay|ok|bien|bueno|ready|listo|here|from|de|en|el|la|busy|sure)$/i;
+
+const NAME_MIN_LENGTH = 2;
 const RE_NAME_EN =
   /(?:my name is|i'm|i am|call me)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?)\b/i;
 const RE_NAME_ES =
@@ -142,34 +144,38 @@ export async function extractMemoryFromConversation(
     const nameMatch = text.match(pattern);
     if (nameMatch) {
       const extractedName = nameMatch[1].trim();
-      // Avoid common false positives (single-word greetings like "I'm good")
-      if (extractedName.length >= 2 && !RE_NAME_FALSE_POS.test(extractedName)) {
-        // Update customer name directly on the customers table
-        try {
-          await db
-            .update(customers)
-            .set({ name: extractedName, updatedAt: new Date() })
-            .where(
-              and(
-                eq(customers.id, customerId),
-                eq(customers.workspaceId, workspaceId)
-              )
-            );
-          preferences.push({
-            key: "name_extracted",
-            value: extractedName,
-            source: "ai_extraction",
-          });
-          logger.info("Customer name extracted from conversation", {
-            workspaceId,
-            customerId,
-            name: extractedName,
-          });
-        } catch {
-          logger.error("Failed to update customer name");
-        }
-        break;
+      // Validate: minimum length and not a common false-positive word
+      if (
+        extractedName.length < NAME_MIN_LENGTH ||
+        RE_NAME_FALSE_POS.test(extractedName)
+      ) {
+        continue;
       }
+      // Update customer name directly on the customers table
+      try {
+        await db
+          .update(customers)
+          .set({ name: extractedName, updatedAt: new Date() })
+          .where(
+            and(
+              eq(customers.id, customerId),
+              eq(customers.workspaceId, workspaceId)
+            )
+          );
+        preferences.push({
+          key: "name_extracted",
+          value: extractedName,
+          source: "ai_extraction",
+        });
+        logger.info("Customer name extracted from conversation", {
+          workspaceId,
+          customerId,
+          name: extractedName,
+        });
+      } catch {
+        logger.error("Failed to update customer name");
+      }
+      break;
     }
   }
 

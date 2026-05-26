@@ -1,9 +1,32 @@
 import type { MetadataRoute } from "next";
 import { locales } from "@/i18n/routing";
 
+const BUILD_DATE = new Date("2025-05-25");
+
+const spanishSlugs = [
+  "/blog/whatsapp-citas-salon",
+  "/blog/reducir-ausencias-clinica",
+  "/blog/automatizar-whatsapp-negocios",
+  "/blog/whatsapp-dentista-citas",
+  "/blog/whatsapp-salon-belleza",
+  "/blog/whatsapp-spa-citas",
+];
+
+const englishSlugs = [
+  "/blog/whatsapp-appointment-reminders",
+  "/blog/whatsapp-dental-clinic",
+  "/blog/whatsapp-beauty-salon",
+  "/blog/whatsapp-fitness-booking",
+];
+
+const blogSlugsByLocale: Record<string, string[]> = {
+  es: spanishSlugs,
+  en: englishSlugs,
+};
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://zenda.bot";
-  const routes = [
+  const baseRoutes = [
     "",
     "/pricing",
     "/features",
@@ -20,28 +43,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/automatizar-citas-whatsapp",
     "/referir",
     "/blog",
-    "/blog/whatsapp-citas-salon",
-    "/blog/reducir-ausencias-clinica",
-    "/blog/automatizar-whatsapp-negocios",
-    "/blog/whatsapp-appointment-reminders",
-    "/blog/whatsapp-dental-clinic",
-    "/blog/whatsapp-beauty-salon",
-    "/blog/whatsapp-dentista-citas",
-    "/blog/whatsapp-salon-belleza",
-    "/blog/whatsapp-fitness-booking",
-    "/blog/whatsapp-spa-citas",
     "/legal/privacy",
     "/legal/terms",
   ];
 
-  return locales.flatMap((locale) =>
-    routes.map((route) => ({
+  return locales.flatMap((locale) => {
+    const blogRoutes = blogSlugsByLocale[locale] ?? [];
+    const routes = [...baseRoutes, ...blogRoutes];
+    return routes.map((route) => ({
       url: `${baseUrl}/${locale}${route}`,
-      lastModified: new Date(),
+      lastModified: BUILD_DATE,
       changeFrequency: getFrequency(route),
       priority: getPriority(route),
-    }))
-  );
+    }));
+  });
 }
 
 function getFrequency(route: string): "weekly" | "yearly" | "monthly" {
