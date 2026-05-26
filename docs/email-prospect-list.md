@@ -112,6 +112,6 @@ Even "Best" and "OK" sources must pass the verification tool before sending.
 | 17 | Dentys | São Paulo | info@dentys.com.br | Dental | MX OK |
 | 18 | OdontoPrev | São Paulo | contato@odontoprev.com.br | Dental | MX OK |
 
-**Status:** Emails verified but NOT yet sent. AgentMail API returned route errors on 26 May 2026. Next heartbeat should attempt sending.
+**Status:** Emails SENT 26 May 2026 via AgentMail v0 API (`/v0/inboxes/{id}/messages/send`). All 6 delivered (Amazon SES confirmed). Follow-up cadence TBD.
 
-**IMPORTANT:** Use coupon link `https://zenda.bot/signup?coupon=aRgf7NZC` in all emails. The free tier ($0/mo, 25 contacts) is now live — mention this in the email as an even lower barrier to entry.
+**IMPORTANT:** Use coupon link `https://zenda.bot/signup?coupon=aRgf7NZC` in all emails. Free tier ($0/mo, 25 contacts) live — mentioned in email copy.
