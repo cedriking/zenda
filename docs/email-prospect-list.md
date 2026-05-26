@@ -115,3 +115,33 @@ Even "Best" and "OK" sources must pass the verification tool before sending.
 **Status:** Emails SENT 26 May 2026 via AgentMail v0 API (`/v0/inboxes/{id}/messages/send`). All 6 delivered (Amazon SES confirmed). Follow-up cadence TBD.
 
 **IMPORTANT:** Use coupon link `https://zenda.bot/signup?coupon=aRgf7NZC` in all emails. Free tier ($0/mo, 25 contacts) live — mentioned in email copy.
+
+---
+
+## Batch 4-5: MX/AR/CO Verified Prospects — 26 May 2026 (SENT)
+
+| # | Negocio | País | Email | Segment | Status |
+|---|---------|------|-------|---------|--------|
+| 19 | Orthodontics MX | MX | contacto@orthodontics.com.mx | Dental | Sent |
+| 20 | Biodent | MX | info@biodent.com.mx | Dental | Sent |
+| 21 | Salud Bucal MX | MX | contacto@saludbucal.com.mx | Dental | Sent |
+| 22 | Sonrisa MX | MX | info@sonrisa.mx | Dental | Sent |
+| 23 | Clínica Dental Mérida | MX | contacto@clinicadentalmerida.com | Dental | Sent |
+| 24 | Clínica Dental San Miguel | MX | contacto@clinicadentalsanmiguel.com | Dental | Sent |
+| 25 | Clínica Dental Monterrey | MX | contacto@clinicadentalmonterrey.com | Dental | Sent |
+| 26 | Belleza Integral | MX | info@bellezaintegral.com.mx | Beauty | Sent |
+| 27 | Laser Med | AR | contacto@lasermed.com.ar | Medical | Sent |
+| 28 | Estética Corporal | MX | info@esteticacorporal.com.mx | Spa | Sent |
+| 29 | Masajes Bogotá | CO | contacto@masajesbogota.com | Spa | Sent |
+| 30 | Clínica Dermatológica | CO | info@clinicadermatologica.com.co | Medical | Sent |
+| 31 | Barber Shop MX | MX | contacto@barbershop.com.mx | Beauty | Sent |
+| 32 | Peluquerías MX | MX | info@peluquerias.com.mx | Beauty | Sent |
+| 33 | Bellas Artes MX | MX | contacto@bellasartes.com.mx | Beauty | Sent |
+
+**Updated Stats:**
+- Total verified emails sent: 24 (across 33 verified prospects)
+- Total emails sent (all): 55+
+- Countries: MX, AR, CO, BR
+- Segments: Dental, Beauty, Spa, Medical
+- Replies: 0
+- Paying customers: 0
