@@ -261,7 +261,10 @@
     "freeFeature3": "Reserva y cancelación de citas",
     "freeFeature4": "IA en 9 idiomas",
     "ctaFree": "Empezar gratis",
-    "freeLabel": "Gratis"
+    "freeLabel": "Gratis",
+    "monthly": "Mensual",
+    "annual": "Anual",
+    "perMonthBilledAnnual": "/mes, facturación anual"
   },
   "docs": {
     "title": "Documentación",

@@ -46,6 +46,7 @@ export default async function PricingPage() {
       tier: "free",
       name: t("freeName"),
       price: 0,
+      annualPrice: 0,
       desc: t("freeDesc"),
       features: [
         t("freeFeature1"),
@@ -60,6 +61,7 @@ export default async function PricingPage() {
       tier: "local_solo",
       name: t("soloName"),
       price: 29,
+      annualPrice: 23,
       desc: t("soloDesc"),
       features: [
         t("soloFeature1"),
@@ -75,6 +77,7 @@ export default async function PricingPage() {
       tier: "local_starter",
       name: t("starterName"),
       price: 49,
+      annualPrice: 39,
       desc: t("starterDesc"),
       features: [
         t("starterFeature1"),
@@ -91,6 +94,7 @@ export default async function PricingPage() {
       tier: "local_pro",
       name: t("proName"),
       price: 89,
+      annualPrice: 71,
       desc: t("proDesc"),
       features: [
         t("proFeature1"),
@@ -107,6 +111,7 @@ export default async function PricingPage() {
       tier: "local_business",
       name: t("businessName"),
       price: 149,
+      annualPrice: 119,
       desc: t("businessDesc"),
       features: [
         t("businessFeature1"),

@@ -249,7 +249,10 @@
     "freeFeature3": "Запись и отмена записей",
     "freeFeature4": "ИИ на 9 языках",
     "ctaFree": "Начать бесплатно",
-    "freeLabel": "Бесплатно"
+    "freeLabel": "Бесплатно",
+    "monthly": "Ежемесячно",
+    "annual": "Ежегодно",
+    "perMonthBilledAnnual": "/мес, ежегодная оплата"
   },
   "docs": {
     "title": "Документация",

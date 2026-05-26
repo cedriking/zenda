@@ -261,7 +261,10 @@
     "freeFeature3": "Terminbuchung & Stornierung",
     "freeFeature4": "KI in 9 Sprachen",
     "ctaFree": "Kostenlos starten",
-    "freeLabel": "Kostenlos"
+    "freeLabel": "Kostenlos",
+    "monthly": "Monatlich",
+    "annual": "Jährlich",
+    "perMonthBilledAnnual": "/Monat, jährlich abgerechnet"
   },
   "docs": {
     "title": "Dokumentation",

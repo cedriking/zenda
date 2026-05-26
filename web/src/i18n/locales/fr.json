@@ -261,7 +261,10 @@
     "freeFeature3": "Prise de rendez-vous et annulation",
     "freeFeature4": "IA en 9 langues",
     "ctaFree": "Commencer gratuitement",
-    "freeLabel": "Gratuit"
+    "freeLabel": "Gratuit",
+    "monthly": "Mensuel",
+    "annual": "Annuel",
+    "perMonthBilledAnnual": "/mois, facturation annuelle"
   },
   "docs": {
     "title": "Documentation",

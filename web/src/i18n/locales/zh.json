@@ -263,7 +263,10 @@
     "freeFeature3": "预约和取消预约",
     "freeFeature4": "9语言AI",
     "ctaFree": "免费开始",
-    "freeLabel": "免费"
+    "freeLabel": "免费",
+    "monthly": "月付",
+    "annual": "年付",
+    "perMonthBilledAnnual": "/月，按年计费"
   },
   "docs": {
     "title": "使用文档",

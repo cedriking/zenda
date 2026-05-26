@@ -251,7 +251,10 @@
     "freeFeature3": "حجز وإلغاء المواعيد",
     "freeFeature4": "ذكاء اصطناعي بـ 9 لغات",
     "ctaFree": "ابدأ مجانًا",
-    "freeLabel": "مجاني"
+    "freeLabel": "مجاني",
+    "monthly": "شهري",
+    "annual": "سنوي",
+    "perMonthBilledAnnual": "/شهر، فوترة سنوية"
   },
   "docs": {
     "title": "التوثيق",

@@ -261,7 +261,10 @@
     "freeFeature3": "예약 및 취소",
     "freeFeature4": "9개 언어 AI",
     "ctaFree": "무료로 시작",
-    "freeLabel": "무료"
+    "freeLabel": "무료",
+    "monthly": "월간",
+    "annual": "연간",
+    "perMonthBilledAnnual": "/월, 연간 청구"
   },
   "docs": {
     "title": "문서",

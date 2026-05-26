@@ -11,6 +11,7 @@ export default function CheckoutClient() {
   const searchParams = useSearchParams();
   const tier = searchParams.get("tier") ?? "";
   const founding = searchParams.get("founding") === "true";
+  const period = searchParams.get("period") ?? "monthly";
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function CheckoutClient() {
           method: "POST",
           body: JSON.stringify({
             tier,
+            billingPeriod: period === "annual" ? "annual" : "monthly",
             founding: founding ? "true" : undefined,
           }),
         });

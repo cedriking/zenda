@@ -264,7 +264,10 @@
     "freeFeature3": "予約の予約・キャンセル",
     "freeFeature4": "9言語AI",
     "ctaFree": "無料で始める",
-    "freeLabel": "無料"
+    "freeLabel": "無料",
+    "monthly": "月額",
+    "annual": "年額",
+    "perMonthBilledAnnual": "/月、年間請求"
   },
   "docs": {
     "title": "ドキュメント",

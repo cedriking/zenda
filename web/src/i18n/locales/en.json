@@ -261,7 +261,10 @@
     "freeFeature3": "Appointment booking & cancellations",
     "freeFeature4": "9-language AI",
     "ctaFree": "Get Started Free",
-    "freeLabel": "Free"
+    "freeLabel": "Free",
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "perMonthBilledAnnual": "/mo, billed annually"
   },
   "docs": {
     "title": "Documentation",

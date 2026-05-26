@@ -3,7 +3,7 @@
 import { ArrowRight, Check } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { FadeUp, StaggerChild, StaggerContainer } from "@/components/motion";
 import { useRouter } from "@/i18n/navigation";
 
@@ -15,6 +15,7 @@ interface Plan {
   name: string;
   originalPrice?: number;
   price: number;
+  annualPrice: number;
   tier: string;
 }
 
@@ -32,6 +33,7 @@ export function PricingAnimations({ plans }: { plans: Plan[] }) {
   const locale = useLocale();
   const searchParams = useSearchParams();
   const isFounding = searchParams.get("founding") === "true";
+  const [isAnnual, setIsAnnual] = useState(false);
 
   const handleCheckout = useCallback(
     (tier: string) => {
@@ -39,10 +41,15 @@ export function PricingAnimations({ plans }: { plans: Plan[] }) {
       if (isFounding) {
         params.set("founding", "true");
       }
+      if (isAnnual) {
+        params.set("period", "annual");
+      }
       router.push(`/checkout?${params.toString()}`);
     },
-    [router, isFounding]
+    [router, isFounding, isAnnual]
   );
+
+  const getPrice = (plan: Plan) => (isAnnual ? plan.annualPrice : plan.price);
 
   return (
     <>
@@ -55,6 +62,31 @@ export function PricingAnimations({ plans }: { plans: Plan[] }) {
             {t("title")}
           </h1>
           <p className="text-lg text-slate-500">{t("desc")}</p>
+
+          {/* Monthly/Annual toggle */}
+          <div className="mt-6 inline-flex items-center gap-3 rounded-full bg-slate-100 p-1">
+            <button
+              type="button"
+              onClick={() => setIsAnnual(false)}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                !isAnnual ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              {t("monthly")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsAnnual(true)}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                isAnnual ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              {t("annual")}
+              <span className="ml-1.5 rounded-full bg-emerald-100 px-2 py-0.5 font-semibold text-emerald-700 text-xs">
+                -20%
+              </span>
+            </button>
+          </div>
         </div>
       </FadeUp>
 
@@ -102,12 +134,12 @@ export function PricingAnimations({ plans }: { plans: Plan[] }) {
                 <span
                   className={`font-black text-4xl ${plan.highlight ? "text-white" : "text-slate-900"}`}
                 >
-                  {plan.price === 0 ? t("freeLabel") : formatPrice(plan.price, locale)}
+                  {plan.price === 0 ? t("freeLabel") : formatPrice(getPrice(plan), locale)}
                 </span>
                 <span
                   className={`text-sm ${plan.highlight ? "text-slate-400" : "text-slate-500"}`}
                 >
-                  {plan.price === 0 ? "" : t("perMonth")}
+                  {plan.price === 0 ? "" : isAnnual ? t("perMonthBilledAnnual") : t("perMonth")}
                 </span>
               </div>
 
