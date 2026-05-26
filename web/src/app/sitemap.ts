@@ -62,6 +62,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/mejor-alternativa-acuity-whatsapp",
     "/chatbot-citas-whatsapp",
     "/referir",
+    "/generador-link-whatsapp",
     "/blog",
     "/legal/privacy",
     "/legal/terms",
