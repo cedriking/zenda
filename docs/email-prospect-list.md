@@ -47,15 +47,43 @@
 
 ---
 
-## Required: Email Verification Strategy
+## Email Verification — NOW AVAILABLE (ZEN-124)
 
-To scale cold email outreach beyond 3 prospects, we need **verified business emails**. Options:
+### Hard Rule: No email goes out without passing verification
 
-1. **Hunter.io API** (~$49/mo) — Bulk domain email verification. Fast, accurate.
-2. **Workana freelancer** ($300-500/mo) — Manual research of 50+ LATAM business emails.
-3. **Manual Board action** — Board visits Google Maps for each business, checks "About" for email.
+Every prospect email MUST pass verification before being added to any outreach list.
+Emails that fail verification are automatically excluded.
 
-**Recommendation:** Hunter.io is the fastest ROI. 3 prospects is not enough volume for statistical conversion.
+### Verification tool
+
+```bash
+# Verify emails from a file (one per line)
+bun run scripts/verify-prospect-emails.ts docs/prospect-emails.txt
+
+# Verify emails from stdin
+echo "contacto@example.com" | bun run scripts/verify-prospect-emails.ts
+```
+
+### How it works
+
+| Tier | Check | Cost | What it catches |
+|------|-------|------|-----------------|
+| 1 (always) | Syntax + MX records + disposable domain check | Free | Bad format, fake domains, temp emails |
+| 2 (optional) | AbstractAPI SMTP verification | Free tier: 100/mo | Catch-all domains, full mailbox, role accounts |
+
+### To enable Tier 2 (SMTP-level checks)
+
+1. Sign up at https://app.abstractapi.com/api/email-validation
+2. Add `ABSTRACT_API_KEY=your_key` to `.env`
+3. All subsequent verifications will include SMTP checks
+
+### Email sourcing priority (must follow)
+
+1. **Best:** Email found on the business's own website (contact page, footer, about)
+2. **OK:** Email found on their Google Business Profile
+3. **Reject:** Guessed/inferred patterns (contacto@, info@, hola@ + domain)
+
+Even "Best" and "OK" sources must pass the verification tool before sending.
 
 ---
 
