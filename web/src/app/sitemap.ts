@@ -63,6 +63,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/chatbot-citas-whatsapp",
     "/referir",
     "/generador-link-whatsapp",
+    "/plantillas-whatsapp-negocios",
     "/blog",
     "/legal/privacy",
     "/legal/terms",
