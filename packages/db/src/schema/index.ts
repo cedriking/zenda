@@ -5,6 +5,10 @@ export {
   createdByEnum,
   reminderStatusEnum as appointmentReminderStatusEnum,
 } from "./appointments.js";
+export {
+  agentHealthEvents,
+  agentHealthStatusEnum,
+} from "./agent-health-events.js";
 export { audioAssets } from "./audio-assets.js";
 export { actorTypeEnum, auditLogs } from "./audit-logs.js";
 export {

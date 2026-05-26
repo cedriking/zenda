@@ -7,6 +7,7 @@ export const notificationTypeEnum = pgEnum('notification_type', [
   'needs_attention', 'discount_requested', 'ai_unsure',
   'whatsapp_disconnected', 'whatsapp_reconnected',
   'usage_warning', 'usage_limit', 'payment_failed', 'subscription_updated',
+  'agent_error', 'agent_recovered',
 ])
 
 export const notifications = pgTable('notifications', {

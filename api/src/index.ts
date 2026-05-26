@@ -20,6 +20,7 @@ import { translationModule } from "./modules/ai/translation.js";
 import { analyticsModule } from "./modules/analytics/index.js";
 import { appointmentModule } from "./modules/appointment/index.js";
 import { processDueReminders } from "./modules/appointment/reminder-service.js";
+import { runHealthCheckCycle } from "./modules/monitoring/agent-health-monitor.js";
 import { authModule } from "./modules/auth/index.js";
 import { availabilityModule } from "./modules/availability/index.js";
 import { billingModule } from "./modules/billing/index.js";
@@ -326,4 +327,28 @@ setTimeout(() => {
 
 logger.info(
   `Reminder scheduler active (every ${REMINDER_INTERVAL_MS / 1000}s)`
+);
+
+// ── Agent health monitor: check every 30 minutes ─────────────────
+const AGENT_HEALTH_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
+
+async function runAgentHealthCycle() {
+  try {
+    const result = await runHealthCheckCycle();
+    if (result.alerts > 0 || result.recovered > 0) {
+      logger.info('Agent health cycle completed', result);
+    }
+  } catch (err) {
+    logger.error('Agent health cycle failed', { error: (err as Error).message });
+  }
+}
+
+// First run 60 seconds after startup (after other services settle)
+setTimeout(() => {
+  runAgentHealthCycle();
+  setInterval(runAgentHealthCycle, AGENT_HEALTH_INTERVAL_MS);
+}, 60_000);
+
+logger.info(
+  `Agent health monitor active (every ${AGENT_HEALTH_INTERVAL_MS / 1000}s)`
 );

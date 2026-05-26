@@ -4,6 +4,7 @@ import { sql } from 'drizzle-orm'
 import { logger } from '../../infra/logger.js'
 import { getCircuitStatus } from '../ai/circuit-breaker/index.js'
 import { serverError } from '../../utils/errors.js'
+import { getAgentStatusSummary, getAgentHealthHistory } from './agent-health-monitor.js'
 
 export const monitoringModule = new Elysia({ prefix: '/monitoring' })
 
@@ -75,6 +76,36 @@ export const monitoringModule = new Elysia({ prefix: '/monitoring' })
     } catch (err) {
       logger.error('Health check failed', { error: (err as Error).message })
       return serverError(set, 'Health check failed')
+    }
+  })
+
+  // Agent health summary and history — protected by shared secret
+  .get('/agents', async ({ set, headers, query }) => {
+    const monitorSecret = process.env.MONITOR_SECRET
+    if (monitorSecret) {
+      const auth = headers.authorization
+      if (!auth || auth !== `Bearer ${monitorSecret}`) {
+        set.status = 401
+        return { error: 'Unauthorized' }
+      }
+    }
+    try {
+      const agentName = query?.agent as string | undefined
+      const limit = Math.min(Number(query?.limit ?? 100), 500)
+
+      const [summary, history] = await Promise.all([
+        getAgentStatusSummary(),
+        getAgentHealthHistory(agentName, limit),
+      ])
+
+      return {
+        timestamp: new Date().toISOString(),
+        agents: summary,
+        history,
+      }
+    } catch (err) {
+      logger.error('Agent health endpoint failed', { error: (err as Error).message })
+      return serverError(set, 'Agent health check failed')
     }
   })
 

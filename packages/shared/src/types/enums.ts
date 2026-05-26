@@ -108,6 +108,9 @@ export type NotificationType =
   | 'usage_limit'
   | 'payment_failed'
   | 'subscription_updated'
+  | 'agent_error'
+  | 'agent_recovered'
+  | 'subscription_updated'
 
 // Audit log actor types
 export type ActorType = 'ai' | 'owner' | 'system' | 'customer'
