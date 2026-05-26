@@ -16,11 +16,11 @@ function generateReferralCode(): string {
 
 export const partnersModule = new Elysia({ prefix: "/partners" }).post(
   "/signup",
-  async ({ body }) => {
+  async ({ body, set }) => {
     const { name, email, website, howRefer } = body;
 
-    if (!name || !email) {
-      throw badRequest("Name and email are required");
+    if (!(name && email)) {
+      return badRequest(set, "Name and email are required");
     }
 
     // Check for existing partner with same email
@@ -31,7 +31,7 @@ export const partnersModule = new Elysia({ prefix: "/partners" }).post(
       .limit(1);
 
     if (existing.length > 0) {
-      const partner = existing[0]!;
+      const partner = existing[0];
       const baseUrl = process.env.APP_URL ?? "https://zenda.bot";
       const referralLink = `${baseUrl}?ref=${partner.referralCode}`;
       return {
@@ -49,7 +49,9 @@ export const partnersModule = new Elysia({ prefix: "/partners" }).post(
         .from(partners)
         .where(eq(partners.referralCode, referralCode))
         .limit(1);
-      if (existingCode.length === 0) break;
+      if (existingCode.length === 0) {
+        break;
+      }
       referralCode = generateReferralCode();
       attempts++;
     }
@@ -63,7 +65,7 @@ export const partnersModule = new Elysia({ prefix: "/partners" }).post(
       status: "active",
     });
 
-    logger.info({ email, referralCode }, "Partner signed up");
+    logger.info("Partner signed up", { email, referralCode });
 
     const baseUrl = process.env.APP_URL ?? "https://zenda.bot";
     const referralLink = `${baseUrl}?ref=${referralCode}`;
@@ -80,5 +82,5 @@ export const partnersModule = new Elysia({ prefix: "/partners" }).post(
       website: t.Optional(t.String({ maxLength: 500 })),
       howRefer: t.Optional(t.String()),
     }),
-  },
+  }
 );

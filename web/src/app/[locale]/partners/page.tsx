@@ -2,6 +2,7 @@ import { DollarSign, Handshake, LineChart, Users } from "lucide-react";
 import type { Metadata } from "next";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
+import { PartnerSignupForm } from "@/components/partner-signup-form";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 
@@ -15,14 +16,20 @@ export function generateMetadata(): Metadata {
     },
     openGraph: {
       title: "Programa de Partners — Zenda",
-      description: "Gana 20% de comisión refiriendo clientes a Zenda. WhatsApp + IA para negocios.",
+      description:
+        "Gana 20% de comisión refiriendo clientes a Zenda. WhatsApp + IA para negocios.",
       url: "https://zenda.bot/es/partners",
       type: "website",
     },
   };
 }
 
-export default function PartnersPage() {
+export default async function PartnersPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  await params;
   return (
     <div className="min-h-screen bg-white">
       <Nav variant="simple" />
@@ -36,7 +43,8 @@ export default function PartnersPage() {
           Gana dinero refiriendo clientes a Zenda
         </h1>
         <p className="mx-auto mb-8 max-w-xl text-slate-600">
-          ¿Eres desarrollador web, community manager o consultor en LATAM? Gana un 20% de comisión recurrente por cada negocio que refieras a Zenda.
+          ¿Eres desarrollador web, community manager o consultor en LATAM? Gana
+          un 20% de comisión recurrente por cada negocio que refieras a Zenda.
         </p>
         <div className="flex justify-center gap-4">
           <Link href="/signup">
@@ -45,7 +53,10 @@ export default function PartnersPage() {
             </Button>
           </Link>
           <Link href="/founding">
-            <Button variant="outline" className="rounded-full px-8 py-3 text-base">
+            <Button
+              className="rounded-full px-8 py-3 text-base"
+              variant="outline"
+            >
               Ver producto
             </Button>
           </Link>
@@ -60,17 +71,44 @@ export default function PartnersPage() {
           </h2>
           <div className="grid gap-8 md:grid-cols-4">
             {[
-              { icon: Users, step: "1", title: "Regístrate", desc: "Crea tu cuenta de partner con tu enlace único de referido." },
-              { icon: Handshake, step: "2", title: "Refiere clientes", desc: "Comparte tu enlace con negocios de citas: dentistas, salones, spas." },
-              { icon: DollarSign, step: "3", title: "Ellos se registran", desc: "Tu referido se registra con tu enlace y activa su cuenta." },
-              { icon: LineChart, step: "4", title: "Tú ganas", desc: "Recibes 20% de comisión mensual mientras el cliente siga activo." },
+              {
+                icon: Users,
+                step: "1",
+                title: "Regístrate",
+                desc: "Crea tu cuenta de partner con tu enlace único de referido.",
+              },
+              {
+                icon: Handshake,
+                step: "2",
+                title: "Refiere clientes",
+                desc: "Comparte tu enlace con negocios de citas: dentistas, salones, spas.",
+              },
+              {
+                icon: DollarSign,
+                step: "3",
+                title: "Ellos se registran",
+                desc: "Tu referido se registra con tu enlace y activa su cuenta.",
+              },
+              {
+                icon: LineChart,
+                step: "4",
+                title: "Tú ganas",
+                desc: "Recibes 20% de comisión mensual mientras el cliente siga activo.",
+              },
             ].map((item) => (
-              <div className="rounded-xl border border-slate-200 bg-white p-6 text-center" key={item.step}>
+              <div
+                className="rounded-xl border border-slate-200 bg-white p-6 text-center"
+                key={item.step}
+              >
                 <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
                   <item.icon className="h-6 w-6 text-emerald-600" />
                 </div>
-                <p className="mb-1 font-bold text-emerald-600 text-sm">Paso {item.step}</p>
-                <h3 className="mb-2 font-semibold text-slate-900">{item.title}</h3>
+                <p className="mb-1 font-bold text-emerald-600 text-sm">
+                  Paso {item.step}
+                </p>
+                <h3 className="mb-2 font-semibold text-slate-900">
+                  {item.title}
+                </h3>
                 <p className="text-slate-500 text-sm">{item.desc}</p>
               </div>
             ))}
@@ -88,36 +126,57 @@ export default function PartnersPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50">
                 <tr>
-                  <th className="px-4 py-3 font-semibold text-slate-600">Clientes referidos</th>
-                  <th className="px-4 py-3 font-semibold text-slate-600">Plan promedio</th>
-                  <th className="px-4 py-3 font-semibold text-slate-600">Tu comisión/mes</th>
-                  <th className="px-4 py-3 font-semibold text-slate-600">Tu comisión/año</th>
+                  <th className="px-4 py-3 font-semibold text-slate-600">
+                    Clientes referidos
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-slate-600">
+                    Plan promedio
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-slate-600">
+                    Tu comisión/mes
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-slate-600">
+                    Tu comisión/año
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 <tr>
                   <td className="px-4 py-3 text-slate-800">5 clientes</td>
                   <td className="px-4 py-3 text-slate-600">$49 USD/mes</td>
-                  <td className="px-4 py-3 font-semibold text-emerald-600">$49 USD</td>
-                  <td className="px-4 py-3 font-semibold text-emerald-600">$588 USD</td>
+                  <td className="px-4 py-3 font-semibold text-emerald-600">
+                    $49 USD
+                  </td>
+                  <td className="px-4 py-3 font-semibold text-emerald-600">
+                    $588 USD
+                  </td>
                 </tr>
                 <tr>
                   <td className="px-4 py-3 text-slate-800">15 clientes</td>
                   <td className="px-4 py-3 text-slate-600">$49 USD/mes</td>
-                  <td className="px-4 py-3 font-semibold text-emerald-600">$147 USD</td>
-                  <td className="px-4 py-3 font-semibold text-emerald-600">$1,764 USD</td>
+                  <td className="px-4 py-3 font-semibold text-emerald-600">
+                    $147 USD
+                  </td>
+                  <td className="px-4 py-3 font-semibold text-emerald-600">
+                    $1,764 USD
+                  </td>
                 </tr>
                 <tr className="bg-emerald-50">
                   <td className="px-4 py-3 text-slate-800">50 clientes</td>
                   <td className="px-4 py-3 text-slate-600">$49 USD/mes</td>
-                  <td className="px-4 py-3 font-bold text-emerald-600">$490 USD</td>
-                  <td className="px-4 py-3 font-bold text-emerald-600">$5,880 USD</td>
+                  <td className="px-4 py-3 font-bold text-emerald-600">
+                    $490 USD
+                  </td>
+                  <td className="px-4 py-3 font-bold text-emerald-600">
+                    $5,880 USD
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
           <p className="mt-4 text-slate-400 text-xs">
-            * Comisión del 20% sobre el plan que elija el cliente. Pagos mensuales mientras el cliente esté activo.
+            * Comisión del 20% sobre el plan que elija el cliente. Pagos
+            mensuales mientras el cliente esté activo.
           </p>
         </div>
       </section>
@@ -143,8 +202,13 @@ export default function PartnersPage() {
                 desc: "Recomienda Zenda a tus clientes como solución de automatización. Ingreso recurrente sin trabajo adicional.",
               },
             ].map((item) => (
-              <div className="rounded-xl border border-slate-200 bg-white p-6" key={item.title}>
-                <h3 className="mb-2 font-semibold text-slate-900">{item.title}</h3>
+              <div
+                className="rounded-xl border border-slate-200 bg-white p-6"
+                key={item.title}
+              >
+                <h3 className="mb-2 font-semibold text-slate-900">
+                  {item.title}
+                </h3>
                 <p className="text-slate-500 text-sm">{item.desc}</p>
               </div>
             ))}
@@ -166,6 +230,66 @@ export default function PartnersPage() {
               Crear cuenta de partner
             </Button>
           </Link>
+        </div>
+      </section>
+
+      {/* Partner Signup Form */}
+      <section className="mx-auto max-w-4xl px-6 pb-16">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-12 dark:bg-slate-900">
+          <h2 className="mb-2 text-center font-bold text-2xl text-slate-900 md:text-3xl">
+            Únete como partner
+          </h2>
+          <p className="mb-8 text-center text-slate-600">
+            Completa el formulario y recibe tu código de referido al instante.
+          </p>
+          <PartnerSignupForm />
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="mx-auto max-w-3xl px-6 pb-16">
+        <h2 className="mb-8 text-center font-bold text-2xl text-slate-900 md:text-3xl">
+          Preguntas frecuentes
+        </h2>
+        <div className="space-y-6">
+          <details className="group rounded-lg border border-slate-200 bg-white p-4">
+            <summary className="cursor-pointer font-semibold text-slate-900">
+              ¿Cuánto puedo ganar?
+            </summary>
+            <p className="mt-2 text-slate-600">
+              Ganas un 20% de comisión recurrente por cada cliente que refieras.
+              Si refieres un negocio que paga $49 USD/mes, ganas $9.80 USD/mes
+              durante toda la vida del cliente.
+            </p>
+          </details>
+          <details className="group rounded-lg border border-slate-200 bg-white p-4">
+            <summary className="cursor-pointer font-semibold text-slate-900">
+              ¿Cómo se rastrean mis referidos?
+            </summary>
+            <p className="mt-2 text-slate-600">
+              Cada partner recibe un código único y un enlace personalizado.
+              Cuando alguien se registra con tu enlace, el sistema lo atribuye
+              automáticamente a tu cuenta.
+            </p>
+          </details>
+          <details className="group rounded-lg border border-slate-200 bg-white p-4">
+            <summary className="cursor-pointer font-semibold text-slate-900">
+              ¿Cuándo recibo mis pagos?
+            </summary>
+            <p className="mt-2 text-slate-600">
+              Los pagos se realizan mensualmente una vez que acumules al menos
+              $50 USD en comisiones. Pago vía transferencia bancaria o PayPal.
+            </p>
+          </details>
+          <details className="group rounded-lg border border-slate-200 bg-white p-4">
+            <summary className="cursor-pointer font-semibold text-slate-900">
+              ¿Hay algún costo para ser partner?
+            </summary>
+            <p className="mt-2 text-slate-600">
+              No. El programa de partners es completamente gratis. Solo
+              necesitas registrarte y empezar a compartir tu enlace.
+            </p>
+          </details>
         </div>
       </section>
 
