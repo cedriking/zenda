@@ -65,6 +65,15 @@ export default function RecordatoriosCitasPage() {
   return (
     <div className="min-h-screen bg-white">
       <script dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} type="application/ld+json" />
+      <script dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "Zenda — Recordatorios de Citas WhatsApp",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "WhatsApp",
+        description: "Recordatorios automáticos de citas por WhatsApp. Reduce inasistencias hasta un 40%.",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "Plan gratuito disponible" },
+      }) }} type="application/ld+json" />
       <Nav variant="simple" />
 
       {/* Hero */}
@@ -144,8 +153,25 @@ export default function RecordatoriosCitasPage() {
         </div>
       </section>
 
+      {/* Pricing link */}
+      <section className="py-16">
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <h2 className="mb-4 font-bold text-2xl text-slate-900">
+            Recordatorios incluidos desde el plan gratis
+          </h2>
+          <p className="mb-6 text-slate-500">
+            Empieza con hasta 25 contactos gratis. Para más volumen, planes desde $29 USD/mes.
+          </p>
+          <Link href="/pricing">
+            <Button className="rounded-full border border-emerald-600 bg-white px-6 py-2 text-emerald-600 hover:bg-emerald-50" variant="outline">
+              Ver planes y precios →
+            </Button>
+          </Link>
+        </div>
+      </section>
+
       {/* FAQ */}
-      <section className="py-20">
+      <section className="border-slate-100 border-t bg-slate-50 py-20">
         <div className="mx-auto max-w-3xl px-6">
           <h2 className="mb-12 text-center font-bold text-2xl text-slate-900">
             Preguntas frecuentes

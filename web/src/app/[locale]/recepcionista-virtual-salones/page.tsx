@@ -68,6 +68,15 @@ export default function RecepcionistaSalonesPage() {
   return (
     <div className="min-h-screen bg-white">
       <script dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} type="application/ld+json" />
+      <script dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "Zenda — Recepcionista Virtual Salones",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "WhatsApp",
+        description: "Recepcionista virtual por WhatsApp para salones de belleza, barberías y spas.",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "Plan gratuito disponible" },
+      }) }} type="application/ld+json" />
       <Nav variant="simple" />
 
       {/* Hero */}
@@ -145,6 +154,23 @@ export default function RecepcionistaSalonesPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Pricing link */}
+      <section className="py-16">
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <h2 className="mb-4 font-bold text-2xl text-slate-900">
+            Planes desde $0 para tu salón
+          </h2>
+          <p className="mb-6 text-slate-500">
+            Empieza gratis con hasta 25 contactos. Para salones con más clientela, planes desde $29 USD/mes.
+          </p>
+          <Link href="/pricing">
+            <Button className="rounded-full border border-emerald-600 bg-white px-6 py-2 text-emerald-600 hover:bg-emerald-50" variant="outline">
+              Ver planes y precios →
+            </Button>
+          </Link>
         </div>
       </section>
 

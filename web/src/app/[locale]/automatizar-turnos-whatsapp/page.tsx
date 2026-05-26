@@ -59,6 +59,15 @@ export default function AutomatizarTurnosPage() {
   return (
     <div className="min-h-screen bg-white">
       <script dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} type="application/ld+json" />
+      <script dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "Zenda — Automatizar Turnos WhatsApp",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "WhatsApp",
+        description: "Automatizá la gestión de turnos por WhatsApp con IA. Agenda, confirma y envía recordatorios.",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "Plan gratuito disponible" },
+      }) }} type="application/ld+json" />
       <Nav variant="simple" />
 
       {/* Hero */}
@@ -145,8 +154,25 @@ export default function AutomatizarTurnosPage() {
         </div>
       </section>
 
+      {/* Pricing link */}
+      <section className="py-16">
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <h2 className="mb-4 font-bold text-2xl text-slate-900">
+            Planes desde $0 para tu negocio
+          </h2>
+          <p className="mb-6 text-slate-500">
+            Empezá gratis con hasta 25 contactos. Planes completos desde $29 USD/mes.
+          </p>
+          <Link href="/pricing">
+            <Button className="rounded-full border border-emerald-600 bg-white px-6 py-2 text-emerald-600 hover:bg-emerald-50" variant="outline">
+              Ver planes y precios →
+            </Button>
+          </Link>
+        </div>
+      </section>
+
       {/* FAQ */}
-      <section className="py-20">
+      <section className="border-slate-100 border-t bg-slate-50 py-20">
         <div className="mx-auto max-w-3xl px-6">
           <h2 className="mb-12 text-center font-bold text-2xl text-slate-900">
             Preguntas frecuentes
