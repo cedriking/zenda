@@ -5,6 +5,7 @@ const BUILD_DATE = new Date();
 
 const spanishSlugs = [
   "/blog/whatsapp-citas-salon",
+  "/blog/whatsapp-citas-barberia",
   "/blog/reducir-ausencias-clinica",
   "/blog/automatizar-whatsapp-negocios",
   "/blog/whatsapp-dentista-citas",
