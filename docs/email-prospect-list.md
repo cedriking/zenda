@@ -122,26 +122,30 @@ Even "Best" and "OK" sources must pass the verification tool before sending.
 
 | # | Negocio | País | Email | Segment | Status |
 |---|---------|------|-------|---------|--------|
-| 19 | Orthodontics MX | MX | contacto@orthodontics.com.mx | Dental | Sent |
-| 20 | Biodent | MX | info@biodent.com.mx | Dental | Sent |
-| 21 | Salud Bucal MX | MX | contacto@saludbucal.com.mx | Dental | Sent |
-| 22 | Sonrisa MX | MX | info@sonrisa.mx | Dental | Sent |
-| 23 | Clínica Dental Mérida | MX | contacto@clinicadentalmerida.com | Dental | Sent |
-| 24 | Clínica Dental San Miguel | MX | contacto@clinicadentalsanmiguel.com | Dental | Sent |
-| 25 | Clínica Dental Monterrey | MX | contacto@clinicadentalmonterrey.com | Dental | Sent |
-| 26 | Belleza Integral | MX | info@bellezaintegral.com.mx | Beauty | Sent |
-| 27 | Laser Med | AR | contacto@lasermed.com.ar | Medical | Sent |
-| 28 | Estética Corporal | MX | info@esteticacorporal.com.mx | Spa | Sent |
-| 29 | Masajes Bogotá | CO | contacto@masajesbogota.com | Spa | Sent |
-| 30 | Clínica Dermatológica | CO | info@clinicadermatologica.com.co | Medical | Sent |
-| 31 | Barber Shop MX | MX | contacto@barbershop.com.mx | Beauty | Sent |
-| 32 | Peluquerías MX | MX | info@peluquerias.com.mx | Beauty | Sent |
-| 33 | Bellas Artes MX | MX | contacto@bellasartes.com.mx | Beauty | Sent |
+| 19 | Orthodontics MX | MX | contacto@orthodontics.com.mx | Dental | Delivered → Follow-up sent |
+| 20 | Biodent | MX | info@biodent.com.mx | Dental | Delivered → Follow-up sent |
+| 21 | Salud Bucal MX | MX | contacto@saludbucal.com.mx | Dental | Delivered → Follow-up sent |
+| 22 | Sonrisa MX | MX | info@sonrisa.mx | Dental | Delivered → Follow-up sent |
+| 23 | Clínica Dental Mérida | MX | contacto@clinicadentalmerida.com | Dental | BOUNCED |
+| 24 | Clínica Dental San Miguel | MX | contacto@clinicadentalsanmiguel.com | Dental | Delivered → Follow-up sent |
+| 25 | Clínica Dental Monterrey | MX | contacto@clinicadentalmonterrey.com | Dental | BOUNCED |
+| 26 | Belleza Integral | MX | info@bellezaintegral.com.mx | Beauty | BOUNCED |
+| 27 | Laser Med | AR | contacto@lasermed.com.ar | Medical | BOUNCED |
+| 28 | Estética Corporal | MX | info@esteticacorporal.com.mx | Spa | BOUNCED |
+| 29 | Masajes Bogotá | CO | contacto@masajesbogota.com | Spa | BOUNCED |
+| 30 | Clínica Dermatológica | CO | info@clinicadermatologica.com.co | Medical | Delivered → Follow-up sent |
+| 31 | Barber Shop MX | MX | contacto@barbershop.com.mx | Beauty | BOUNCED |
+| 32 | Peluquerías MX | MX | info@peluquerias.com.mx | Beauty | Delivered → Follow-up sent |
+| 33 | Bellas Artes MX | MX | contacto@bellasartes.com.mx | Beauty | Delivered → Follow-up sent |
 
 **Updated Stats:**
-- Total verified emails sent: 24 (across 33 verified prospects)
-- Total emails sent (all): 55+
+- Total emails sent (all batches): 65+ (12 initial batches + 12 follow-ups + 9 inferred bounces + bounces)
+- Batch 3 delivery: 4/6 delivered, 2/6 bounced (clinicaavellaneda, dentys)
+- Batch 4-5 delivery: 8/15 delivered, 7/15 bounced (47% bounce rate on MX-verified)
+- Batch 4-5 follow-up: 12 emails sent (to all delivered across batch 3-5)
 - Countries: MX, AR, CO, BR
 - Segments: Dental, Beauty, Spa, Medical
 - Replies: 0
 - Paying customers: 0
+
+**CONCLUSION: Cold email has 0% conversion after 65+ emails. Pivot to direct WhatsApp outreach and content marketing.**
