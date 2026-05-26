@@ -47,9 +47,7 @@ export function SignupPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const checkoutTier = searchParams.get("checkout");
-  const isFounding =
-    searchParams.get("coupon") === "aRgf7NZC" ||
-    searchParams.get("founding") === "true";
+  const isFounding = searchParams.get("founding") === "true";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -138,7 +136,10 @@ export function SignupPageClient() {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-destructive text-sm" role="alert">
+              <div
+                className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-destructive text-sm"
+                role="alert"
+              >
                 {error}
               </div>
             )}

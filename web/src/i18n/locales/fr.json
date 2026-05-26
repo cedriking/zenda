@@ -1,4 +1,9 @@
 {
+  "common": {
+    "errorTitle": "Une erreur est survenue",
+    "errorDescription": "Une erreur inattendue s'est produite. Veuillez reessayer.",
+    "errorRetry": "Reessayer"
+  },
   "metadata": {
     "title": {
       "default": "Zenda — Réceptionniste IA pour votre entreprise",

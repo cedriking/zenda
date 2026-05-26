@@ -5,16 +5,31 @@ import {
   type VerticalPageConfig,
 } from "@/components/vertical-page";
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations("verticals.dental");
+
+  const path = "dental";
+  const locales = ["es", "en", "ar", "fr", "de", "ru", "zh", "ja", "ko"];
+  const languages: Record<string, string> = {};
+  for (const loc of locales) {
+    languages[loc] = `https://zenda.bot/${loc}/${path}`;
+  }
+  languages["x-default"] = "https://zenda.bot/en/dental";
+
   return {
     alternates: {
-      canonical: "https://zenda.bot/dental",
+      canonical: `https://zenda.bot/${locale}/${path}`,
+      languages,
     },
     openGraph: {
       title: t("metaTitle"),
       description: t("metaDesc"),
-      url: "https://zenda.bot/dental",
+      url: `https://zenda.bot/${locale}/${path}`,
       type: "website",
     },
     title: t("metaTitle"),
@@ -22,7 +37,11 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function DentalPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function DentalPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
   const { locale } = await params;
   const t = await getTranslations("verticals.dental");
 

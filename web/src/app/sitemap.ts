@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { locales } from "@/i18n/routing";
 
-const BUILD_DATE = new Date("2025-05-25");
+const BUILD_DATE = new Date();
 
 const spanishSlugs = [
   "/blog/whatsapp-citas-salon",

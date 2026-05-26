@@ -1,4 +1,9 @@
 {
+  "common": {
+    "errorTitle": "حدث خطأ ما",
+    "errorDescription": "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+    "errorRetry": "إعادة المحاولة"
+  },
   "metadata": {
     "title": {
       "default": "Zenda — موظف استقبال ذكي لعملك",

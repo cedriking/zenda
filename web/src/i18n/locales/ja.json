@@ -1,4 +1,9 @@
 {
+  "common": {
+    "errorTitle": "エラーが発生しました",
+    "errorDescription": "予期しないエラーが発生しました。もう一度お試しください。",
+    "errorRetry": "再試行"
+  },
   "metadata": {
     "title": {
       "default": "Zenda — ビジネスを支えるAI受付",

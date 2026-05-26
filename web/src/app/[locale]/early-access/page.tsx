@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation";
 
-export default function EarlyAccessPage() {
-  redirect("/signup");
+export default async function EarlyAccessPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect(`/${locale}/signup`);
 }

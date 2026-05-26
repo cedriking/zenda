@@ -1,4 +1,9 @@
 {
+  "common": {
+    "errorTitle": "Algo salio mal",
+    "errorDescription": "Ocurrio un error inesperado. Por favor, intenta de nuevo.",
+    "errorRetry": "Intentar de nuevo"
+  },
   "metadata": {
     "title": {
       "default": "Zenda — Recepcionista con IA para tu negocio",

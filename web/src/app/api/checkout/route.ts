@@ -3,12 +3,23 @@ import { type NextRequest, NextResponse } from "next/server";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://zenda.bot";
 
-export async function GET(request: NextRequest) {
+const VALID_TIERS = [
+  "local_solo",
+  "local_starter",
+  "local_pro",
+  "local_business",
+];
+
+export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const tier = searchParams.get("tier");
 
   if (!tier) {
     return NextResponse.redirect(`${APP_BASE_URL}/pricing`);
+  }
+
+  if (!VALID_TIERS.includes(tier)) {
+    return NextResponse.json({ error: "Invalid tier" }, { status: 400 });
   }
 
   // Check for stored auth token in cookie or redirect to signup
@@ -27,11 +38,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing tier" }, { status: 400 });
   }
 
+  if (!VALID_TIERS.includes(tier)) {
+    return NextResponse.json({ error: "Invalid tier" }, { status: 400 });
+  }
+
   // Forward to backend checkout endpoint
   const authHeader = request.headers.get("authorization");
-  if (!authHeader) {
+  if (!authHeader?.startsWith("Bearer ")) {
     return NextResponse.json(
-      { error: "Not authenticated", redirectUrl: `/signup?checkout=${encodeURIComponent(tier)}` },
+      {
+        error: "Not authenticated",
+        redirectUrl: `/signup?checkout=${encodeURIComponent(tier)}`,
+      },
       { status: 401 }
     );
   }

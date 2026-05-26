@@ -1,4 +1,9 @@
 {
+  "common": {
+    "errorTitle": "Etwas ist schiefgelaufen",
+    "errorDescription": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "errorRetry": "Erneut versuchen"
+  },
   "metadata": {
     "title": {
       "default": "Zenda — KI-Empfangsassistent für Ihr Unternehmen",

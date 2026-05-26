@@ -16,7 +16,7 @@ export function generateMetadata(): Metadata {
   };
 }
 
-const REFERRAL_LINK = "https://zenda.bot/signup?coupon=aRgf7NZC";
+const REFERRAL_LINK = "https://zenda.bot/signup?founding=true";
 
 const WHATSAPP_SHARE = `https://wa.me/?text=${encodeURIComponent(
   `Descubre Zenda — una recepcionista virtual por WhatsApp que agenda citas automáticamente. Pruébalo gratis: ${REFERRAL_LINK}`

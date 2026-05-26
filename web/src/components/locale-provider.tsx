@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import { NextIntlClientProvider } from 'next-intl'
+import { NextIntlClientProvider } from "next-intl";
 
 export function LocaleProvider({
   locale,
@@ -8,19 +8,19 @@ export function LocaleProvider({
   now,
   children,
 }: {
-  locale: string
-  messages: Record<string, unknown>
-  now: Date
-  children: React.ReactNode
+  locale: string;
+  messages: Record<string, unknown>;
+  now: Date;
+  children: React.ReactNode;
 }) {
   return (
     <NextIntlClientProvider
       locale={locale}
       messages={messages}
-      timeZone="America/Mexico_City"
       now={now}
+      timeZone="UTC"
     >
       {children}
     </NextIntlClientProvider>
-  )
+  );
 }

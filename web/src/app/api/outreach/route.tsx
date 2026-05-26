@@ -149,11 +149,25 @@ updateProgress();
 </html>`;
 }
 
-export function GET(_request: NextRequest) {
+const OUTREACH_PASSWORD = process.env.OUTREACH_PASSWORD ?? "9996146459";
+
+export function GET(request: NextRequest) {
+  const authHeader = request.headers.get("authorization");
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+
+  const url = new URL(request.url);
+  const queryToken = url.searchParams.get("token");
+
+  const providedToken = token ?? queryToken;
+
+  if (providedToken !== OUTREACH_PASSWORD) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
   return new NextResponse(getHtml(), {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=300",
+      "Cache-Control": "private, no-store",
     },
   });
 }

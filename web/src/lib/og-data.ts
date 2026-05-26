@@ -21,10 +21,22 @@ export const features: Record<string, [string, string, string]> = {
   en: ["WhatsApp AI", "9 Languages", "Smart Scheduling"],
   es: ["IA por WhatsApp", "9 Idiomas", "Agenda Inteligente"],
   pt: ["IA por WhatsApp", "9 Idiomas", "Agendamento Inteligente"],
+  de: ["WhatsApp-KI", "9 Sprachen", "Smarte Terminplanung"],
+  ru: ["ИИ в WhatsApp", "9 языков", "Умное расписание"],
+  zh: ["WhatsApp AI", "9种语言", "智能排期"],
+  ja: ["WhatsApp AI", "9言語対応", "スマート予約"],
+  ko: ["WhatsApp AI", "9개 언어", "스마트 일정 관리"],
+  ar: ["ذكاء اصطناعي واتساب", "9 لغات", "جدولة ذكية"],
 };
 
 export const cta: Record<string, string> = {
   en: "Start Free Trial",
   es: "Prueba Gratis",
   pt: "Teste Grátis",
+  de: "Kostenlos testen",
+  ru: "Бесплатная пробная версия",
+  zh: "免费试用",
+  ja: "無料トライアル",
+  ko: "무료 체험",
+  ar: "تجربة مجانية",
 };

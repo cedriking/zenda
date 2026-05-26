@@ -6,18 +6,33 @@ import { Nav } from "@/components/nav";
 import { PricingAnimations } from "@/components/pricing-animations";
 import { Link } from "@/i18n/navigation";
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations("pricing");
+
+  const path = "pricing";
+  const locales = ["es", "en", "ar", "fr", "de", "ru", "zh", "ja", "ko"];
+  const languages: Record<string, string> = {};
+  for (const loc of locales) {
+    languages[loc] = `https://zenda.bot/${loc}/${path}`;
+  }
+  languages["x-default"] = "https://zenda.bot/en/pricing";
+
   return {
     title: t("title"),
     description: t("desc"),
     alternates: {
-      canonical: "https://zenda.bot/pricing",
+      canonical: `https://zenda.bot/${locale}/${path}`,
+      languages,
     },
     openGraph: {
       title: t("title"),
       description: t("desc"),
-      url: "https://zenda.bot/pricing",
+      url: `https://zenda.bot/${locale}/${path}`,
       type: "website",
     },
   };
@@ -113,7 +128,7 @@ export default async function PricingPage() {
       <main className="relative overflow-hidden">
         {/* Founding member banner */}
         <div className="bg-emerald-500 px-6 py-3 text-center">
-          <p className="text-sm font-medium text-white">
+          <p className="font-medium text-sm text-white">
             {t("foundingBanner")}{" "}
             <Link
               className="underline decoration-emerald-200 underline-offset-2 hover:text-emerald-100"

@@ -1,4 +1,9 @@
 {
+  "common": {
+    "errorTitle": "문제가 발생했습니다",
+    "errorDescription": "예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.",
+    "errorRetry": "다시 시도"
+  },
   "metadata": {
     "title": {
       "default": "Zenda — 비즈니스를 위한 AI 리셉셔니스트",

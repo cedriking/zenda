@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe } from "lucide-react";
+import { ChevronDown, Globe } from "lucide-react";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { supportedLanguages } from "@/i18n/routing";
@@ -27,7 +27,7 @@ export function LanguageSwitcher({
       />
       <select
         aria-label="Language"
-        className={`cursor-pointer appearance-none rounded bg-transparent pr-1 font-medium text-sm focus:ring-2 focus:ring-emerald-500 ${
+        className={`cursor-pointer appearance-none rounded bg-transparent pr-4 font-medium text-sm focus:ring-2 focus:ring-emerald-500 ${
           isDark
             ? "text-slate-400 hover:text-white"
             : "text-slate-600 hover:text-slate-900"
@@ -41,6 +41,9 @@ export function LanguageSwitcher({
           </option>
         ))}
       </select>
+      <ChevronDown
+        className={`pointer-events-none absolute right-0 size-3 ${isDark ? "text-slate-400" : "text-slate-500"}`}
+      />
     </div>
   );
 }
