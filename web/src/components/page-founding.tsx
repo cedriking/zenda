@@ -159,6 +159,65 @@ export function FoundingPageClient({ locale }: { locale: string }) {
           </div>
         </div>
 
+        {/* WhatsApp Chat Demo */}
+        <div className="mb-16">
+          <h2 className="mb-4 text-center font-bold text-2xl text-slate-900">
+            {t("demoTitle")}
+          </h2>
+          <p className="mb-6 text-center text-slate-500 text-sm">
+            {t("demoSubtitle")}
+          </p>
+          <div className="mx-auto max-w-sm overflow-hidden rounded-2xl border border-green-200 bg-green-50 shadow-lg">
+            <div className="flex items-center gap-3 bg-green-600 px-4 py-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+              </div>
+              <div>
+                <p className="font-semibold text-sm text-white">{t("demoBusiness")}</p>
+                <p className="text-green-100 text-xs">{t("demoOnline")}</p>
+              </div>
+            </div>
+            <div className="space-y-2 bg-[#e5ddd5] px-3 py-4">
+              {/* Client message */}
+              <div className="flex justify-end">
+                <div className="max-w-[80%] rounded-lg rounded-tr-none bg-green-100 px-3 py-2 shadow-sm">
+                  <p className="text-sm text-slate-800">{t("demoMsg1")}</p>
+                  <p className="mt-1 text-right text-[10px] text-green-700">10:32 ✓✓</p>
+                </div>
+              </div>
+              {/* Zenda response */}
+              <div className="flex justify-start">
+                <div className="max-w-[85%] rounded-lg rounded-tl-none bg-white px-3 py-2 shadow-sm">
+                  <p className="text-sm text-slate-800 whitespace-pre-line">{t("demoMsg2")}</p>
+                  <p className="mt-1 text-right text-[10px] text-slate-400">10:32</p>
+                </div>
+              </div>
+              {/* Client reply */}
+              <div className="flex justify-end">
+                <div className="max-w-[80%] rounded-lg rounded-tr-none bg-green-100 px-3 py-2 shadow-sm">
+                  <p className="text-sm text-slate-800">{t("demoMsg3")}</p>
+                  <p className="mt-1 text-right text-[10px] text-green-700">10:33 ✓✓</p>
+                </div>
+              </div>
+              {/* Zenda confirmation */}
+              <div className="flex justify-start">
+                <div className="max-w-[85%] rounded-lg rounded-tl-none bg-white px-3 py-2 shadow-sm">
+                  <p className="text-sm text-slate-800 whitespace-pre-line">{t("demoMsg4")}</p>
+                  <p className="mt-1 text-right text-[10px] text-slate-400">10:33</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-green-50 px-3 py-2">
+              <div className="flex-1 rounded-full bg-white px-4 py-2 text-slate-400 text-sm">
+                {t("demoPlaceholder")}
+              </div>
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-600">
+                <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Testimonial */}
         <div className="mb-16 rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center">
           <blockquote className="mb-4 text-lg text-slate-700 italic">

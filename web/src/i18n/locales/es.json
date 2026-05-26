@@ -606,7 +606,16 @@
     "successBody": "Tu prueba gratuita de 14 días ha comenzado. Descarga la app de escritorio para configurar tu recepcionista IA y conectar tu WhatsApp. También recibiste un 50% de descuento por 3 meses como cliente fundador.",
     "successCta": "Descargar la App",
     "formDisclaimer": "Al registrarte, aceptas nuestros Términos de Servicio y Política de Privacidad. Tu prueba de 14 días comienza inmediatamente.",
-    "spotsRemaining": "Limitado a los primeros 100 negocios."
+    "spotsRemaining": "Limitado a los primeros 100 negocios.",
+    "demoTitle": "Mira cómo funciona",
+    "demoSubtitle": "Una cliente escribe por WhatsApp y la IA agenda la cita automáticamente — en 1 minuto",
+    "demoBusiness": "Beauty Studio",
+    "demoOnline": "en línea",
+    "demoMsg1": "Hola! Quisiera una cita para un corte de pelo",
+    "demoMsg2": "¡Hola María! 👋 Te atiendo enseguida.\n\nPara un corte de pelo, tenemos disponibilidad:\n\n📅 Hoy 3:00 PM con Carlos\n📅 Mañana 11:00 AM con Laura\n\n¿Cuál prefieres?",
+    "demoMsg3": "Hoy a las 3 con Carlos por favor",
+    "demoMsg4": "✅ ¡Listo! Tu cita:\n\n💇 Corte de pelo\n👤 Carlos\n📅 Hoy, 3:00 PM\n📍 Beauty Studio\n\nTe envío un recordatorio 2 horas antes.",
+    "demoPlaceholder": "Escribe un mensaje..."
   },
   "legal": {
     "privacyTitle": "Política de privacidad",
