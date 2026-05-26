@@ -18,6 +18,8 @@ const spanishSlugs = [
   "/blog/whatsapp-personal-trainer",
   "/blog/whatsapp-citas-abogado",
   "/blog/whatsapp-reservaciones-restaurante",
+  "/blog/whatsapp-citas-salon-belleza",
+  "/blog/whatsapp-lavado-auto-detailing",
 ];
 
 const englishSlugs = [
