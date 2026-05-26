@@ -16,6 +16,8 @@ const spanishSlugs = [
   "/blog/whatsapp-agente-inmobiliario",
   "/blog/whatsapp-sesiones-fotograficas",
   "/blog/whatsapp-personal-trainer",
+  "/blog/whatsapp-citas-abogado",
+  "/blog/whatsapp-reservaciones-restaurante",
 ];
 
 const englishSlugs = [
