@@ -39,8 +39,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/dental",
     "/fitness",
     "/founding",
+    "/demo",
+    "/partners",
     "/recepcionista-virtual-whatsapp",
     "/automatizar-citas-whatsapp",
+    "/recepcionista-dental-whatsapp",
+    "/recordatorios-citas-whatsapp",
+    "/automatizar-turnos-whatsapp",
+    "/recepcionista-virtual-salones",
+    "/bot-citas-whatsapp",
     "/referir",
     "/blog",
     "/legal/privacy",
@@ -82,10 +89,31 @@ function getPriority(route: string): number {
   if (route === "/founding") {
     return 0.9;
   }
+  if (route === "/demo") {
+    return 0.9;
+  }
+  if (route === "/partners") {
+    return 0.8;
+  }
   if (route === "/recepcionista-virtual-whatsapp") {
     return 0.9;
   }
   if (route === "/automatizar-citas-whatsapp") {
+    return 0.9;
+  }
+  if (route === "/recepcionista-dental-whatsapp") {
+    return 0.9;
+  }
+  if (route === "/recordatorios-citas-whatsapp") {
+    return 0.9;
+  }
+  if (route === "/automatizar-turnos-whatsapp") {
+    return 0.9;
+  }
+  if (route === "/recepcionista-virtual-salones") {
+    return 0.9;
+  }
+  if (route === "/bot-citas-whatsapp") {
     return 0.9;
   }
   if (route === "/blog") {
