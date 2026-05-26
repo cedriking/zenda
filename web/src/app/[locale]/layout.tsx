@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import { getMessages, getTranslations } from "next-intl/server";
-import { GoogleAnalytics } from "@/components/google-analytics";
 import { CookieConsent } from "@/components/cookie-consent";
+import { GoogleAnalytics } from "@/components/google-analytics";
 import { LocaleProvider } from "@/components/locale-provider";
+import { WhatsAppWidget } from "@/components/whatsapp-widget";
 import { type Locale, routing, supportedLanguages } from "@/i18n/routing";
 
 type Props = {
@@ -32,7 +33,20 @@ export async function generateMetadata({ params }: Props) {
       description: t("openGraph.description"),
       url: "https://zenda.bot",
       siteName: "Zenda",
-      locale: ({ en: "en_US", es: "es_MX", ar: "ar_SA", fr: "fr_FR", de: "de_DE", ru: "ru_RU", zh: "zh_CN", ja: "ja_JP", ko: "ko_KR" } as Record<string, string>)[locale] ?? locale,
+      locale:
+        (
+          {
+            en: "en_US",
+            es: "es_MX",
+            ar: "ar_SA",
+            fr: "fr_FR",
+            de: "de_DE",
+            ru: "ru_RU",
+            zh: "zh_CN",
+            ja: "ja_JP",
+            ko: "ko_KR",
+          } as Record<string, string>
+        )[locale] ?? locale,
       type: "website",
       images: [
         {
@@ -106,6 +120,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <GoogleAnalytics />
         <LocaleProvider locale={locale} messages={messages} now={new Date()}>
           {children}
+          <WhatsAppWidget />
           <CookieConsent />
         </LocaleProvider>
       </body>
