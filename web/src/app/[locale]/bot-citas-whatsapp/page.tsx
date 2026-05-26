@@ -12,6 +12,11 @@ export function generateMetadata(): Metadata {
       "Bot de citas por WhatsApp con inteligencia artificial. Agenda, confirma y reagenda citas automáticamente. Funciona 24/7 en español. Prueba gratis.",
     alternates: {
       canonical: "https://zenda.bot/es/bot-citas-whatsapp",
+      languages: {
+        es: "https://zenda.bot/es/bot-citas-whatsapp",
+        en: "https://zenda.bot/en/bot-citas-whatsapp",
+        "x-default": "https://zenda.bot/en/bot-citas-whatsapp",
+      },
     },
     openGraph: {
       title: "Bot de Citas por WhatsApp — Agenda Automática con IA",

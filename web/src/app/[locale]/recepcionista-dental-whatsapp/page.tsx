@@ -12,6 +12,11 @@ export function generateMetadata(): Metadata {
       "Recepcionista virtual por WhatsApp para clínicas dentales. Agenda citas, responde consultas de tratamientos y confirma turnos automáticamente. Prueba gratis.",
     alternates: {
       canonical: "https://zenda.bot/es/recepcionista-dental-whatsapp",
+      languages: {
+        es: "https://zenda.bot/es/recepcionista-dental-whatsapp",
+        en: "https://zenda.bot/en/recepcionista-dental-whatsapp",
+        "x-default": "https://zenda.bot/en/recepcionista-dental-whatsapp",
+      },
     },
     openGraph: {
       title: "Recepcionista Dental por WhatsApp — Clínicas Dentales 24/7",
@@ -151,8 +156,25 @@ export default function RecepcionistaDentalPage() {
         </div>
       </section>
 
+      {/* Pricing link */}
+      <section className="py-16">
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <h2 className="mb-4 font-bold text-2xl text-slate-900">
+            Planes desde $0 para clínicas dentales
+          </h2>
+          <p className="mb-6 text-slate-500">
+            Empieza gratis con hasta 25 contactos. Para clínicas más grandes, planes desde $29 USD/mes.
+          </p>
+          <Link href="/pricing">
+            <Button className="rounded-full border border-emerald-600 bg-white px-6 py-2 text-emerald-600 hover:bg-emerald-50" variant="outline">
+              Ver planes y precios →
+            </Button>
+          </Link>
+        </div>
+      </section>
+
       {/* FAQ */}
-      <section className="py-20">
+      <section className="border-slate-100 border-t bg-slate-50 py-20">
         <div className="mx-auto max-w-3xl px-6">
           <h2 className="mb-12 text-center font-bold text-2xl text-slate-900">
             Preguntas frecuentes sobre recepcionista dental

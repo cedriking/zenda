@@ -12,6 +12,11 @@ export function generateMetadata(): Metadata {
       "Envía recordatorios automáticos de citas por WhatsApp. Reduce inasistencias hasta un 40%. Funciona 24/7 con confirmación automática. Prueba gratis.",
     alternates: {
       canonical: "https://zenda.bot/es/recordatorios-citas-whatsapp",
+      languages: {
+        es: "https://zenda.bot/es/recordatorios-citas-whatsapp",
+        en: "https://zenda.bot/en/recordatorios-citas-whatsapp",
+        "x-default": "https://zenda.bot/en/recordatorios-citas-whatsapp",
+      },
     },
     openGraph: {
       title: "Recordatorios de Citas por WhatsApp — Reduce Inasistencias 40%",

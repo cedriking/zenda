@@ -12,6 +12,11 @@ export function generateMetadata(): Metadata {
       "Automatiza la gestión de turnos por WhatsApp en Argentina. Tu negocio responde, agenda y confirma turnos automáticamente con IA. Prueba gratis.",
     alternates: {
       canonical: "https://zenda.bot/es/automatizar-turnos-whatsapp",
+      languages: {
+        es: "https://zenda.bot/es/automatizar-turnos-whatsapp",
+        en: "https://zenda.bot/en/automatizar-turnos-whatsapp",
+        "x-default": "https://zenda.bot/en/automatizar-turnos-whatsapp",
+      },
     },
     openGraph: {
       title: "Automatizar Turnos por WhatsApp — Argentina",

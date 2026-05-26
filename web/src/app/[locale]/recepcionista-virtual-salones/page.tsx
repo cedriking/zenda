@@ -12,6 +12,11 @@ export function generateMetadata(): Metadata {
       "Recepcionista virtual por WhatsApp para salones de belleza, barberías y spas. Agenda citas, confirma turnos y envía recordatorios automáticamente. Prueba gratis.",
     alternates: {
       canonical: "https://zenda.bot/es/recepcionista-virtual-salones",
+      languages: {
+        es: "https://zenda.bot/es/recepcionista-virtual-salones",
+        en: "https://zenda.bot/en/recepcionista-virtual-salones",
+        "x-default": "https://zenda.bot/en/recepcionista-virtual-salones",
+      },
     },
     openGraph: {
       title: "Recepcionista Virtual para Salones de Belleza — WhatsApp 24/7",
