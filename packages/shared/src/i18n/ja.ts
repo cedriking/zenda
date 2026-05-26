@@ -142,6 +142,7 @@ export const ja: TranslationStrings = {
     noConversations: "会話はまだありません",
     searchPlaceholder: "会話を検索...",
     count: "{{count}}件の会話",
+    countFiltered: "{{total}}件中{{filtered}}件の会話",
     noMatch: '"{{query}}"に一致する会話はありません',
     clearSearch: "検索をクリア",
     empty: "会話はまだありません",
@@ -358,6 +359,7 @@ export const ja: TranslationStrings = {
     errorDescription:
       "このお客様のプロフィールの読み込み中にエラーが発生しました。もう一度お試しください。",
     backToConversations: "会話に戻る",
+    backToCustomers: "顧客一覧に戻る",
     unknownName: "不明なお客様",
     langSpanish: "スペイン語",
     langEnglish: "英語",

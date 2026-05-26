@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiFetch } from '../../../services/api-client'
-import { Plus, Trash2, Search, BookOpen } from 'lucide-react'
+import { Plus, Trash2, Search, BookOpen, AlertCircle } from 'lucide-react'
 
 interface KBItem {
   id: string
@@ -19,6 +19,7 @@ export default function KnowledgeBasePage() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ question: '', answer: '', category: 'general' })
   const [loading, setLoading] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   useEffect(() => {
     loadItems()
@@ -28,8 +29,9 @@ export default function KnowledgeBasePage() {
     try {
       const data = await apiFetch<KBItem[]>('/knowledge-base')
       setItems(data)
+      setSaveError(null)
     } catch {
-      // Knowledge base items will appear when available
+      setSaveError(t('knowledgeBase.errorLoad', 'Failed to load knowledge base items'))
     }
   }
 
@@ -41,14 +43,16 @@ export default function KnowledgeBasePage() {
     try {
       const data = await apiFetch<KBItem[]>(`/knowledge-base/search?q=${encodeURIComponent(searchQuery)}`)
       setItems(data)
+      setSaveError(null)
     } catch {
-      // Search will retry on next attempt
+      setSaveError(t('knowledgeBase.errorSearch', 'Search failed. Please try again.'))
     }
   }
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
+    setSaveError(null)
     try {
       await apiFetch('/knowledge-base', {
         method: 'POST',
@@ -58,7 +62,7 @@ export default function KnowledgeBasePage() {
       setShowForm(false)
       loadItems()
     } catch {
-      // Form submission error handled by UI state
+      setSaveError(t('knowledgeBase.errorSave', 'Failed to save item. Please try again.'))
     }
     setLoading(false)
   }
@@ -67,13 +71,27 @@ export default function KnowledgeBasePage() {
     try {
       await apiFetch(`/knowledge-base/${id}`, { method: 'DELETE' })
       setItems(prev => prev.filter(i => i.id !== id))
+      setSaveError(null)
     } catch {
-      // Item will remain in list; retry by refreshing
+      setSaveError(t('knowledgeBase.errorDelete', 'Failed to delete item. Please try again.'))
     }
   }
 
   return (
     <div className="p-6">
+      {saveError && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+          <AlertCircle size={16} className="shrink-0" />
+          <span>{saveError}</span>
+          <button
+            type="button"
+            onClick={() => setSaveError(null)}
+            className="ml-auto text-destructive/70 hover:text-destructive"
+          >
+            &times;
+          </button>
+        </div>
+      )}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">

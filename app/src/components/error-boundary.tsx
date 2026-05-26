@@ -33,9 +33,18 @@ export default class ErrorBoundary extends Component<Props, State> {
         <div className="flex min-h-screen items-center justify-center p-8">
           <div className="max-w-md text-center">
             <h2 className="text-xl font-bold mb-2">Something went wrong</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              {this.state.error?.message || 'An unexpected error occurred.'}
+            <p className="text-sm text-muted-foreground mb-2">
+              An unexpected error occurred. Please try refreshing the page.
             </p>
+            {this.state.error && (
+              <details className="text-left text-sm text-muted-foreground mb-4">
+                <summary className="cursor-pointer hover:text-foreground">Error details</summary>
+                <pre className="mt-2 whitespace-pre-wrap break-all text-xs bg-muted p-3 rounded-md">
+                  {this.state.error.message}
+                  {this.state.error.stack && `\n\n${this.state.error.stack}`}
+                </pre>
+              </details>
+            )}
             <div className="flex gap-3 justify-center">
               <button
                 onClick={this.handleReset}

@@ -150,6 +150,7 @@ export const en = {
     noConversations: "No conversations yet",
     searchPlaceholder: "Search conversations...",
     count: "{{count}} conversations",
+    countFiltered: "{{filtered}} of {{total}} conversations",
     noMatch: 'No conversations match "{{query}}"',
     clearSearch: "Clear search",
     empty: "No conversations yet",
@@ -379,6 +380,7 @@ export const en = {
     errorDescription:
       "Something went wrong loading this customer's profile. Please try again.",
     backToConversations: "Back to conversations",
+    backToCustomers: "Back to customers",
     unknownName: "Unknown Customer",
     langSpanish: "Spanish",
     langEnglish: "English",

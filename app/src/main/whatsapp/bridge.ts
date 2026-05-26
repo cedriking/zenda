@@ -10,6 +10,19 @@ import { getClient } from "./client.js";
 
 const log = (...args: unknown[]) => console.log("[bridge]", ...args);
 
+// Centralized renderer send — prevents crashes from destroyed windows
+let _mainWindow: Electron.BrowserWindow | null = null;
+
+export function setMainWindow(win: BrowserWindow | null) {
+  _mainWindow = win;
+}
+
+export function sendToRenderer(channel: string, ...args: unknown[]) {
+  if (_mainWindow && !_mainWindow.isDestroyed()) {
+    _mainWindow.webContents.send(channel, ...args);
+  }
+}
+
 let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let reconnectAttempts = 0;
@@ -40,45 +53,39 @@ const WS_URL = process.env.ZENDA_API_WS_URL ?? "wss://api.zenda.bot/ws";
  * WhatsApp uses *bold*, _italic_, ~strikethrough~ and ```monospace```.
  */
 function markdownToWhatsApp(text: string): string {
-  return (
-    text
-      // **bold** → *bold* (must run before italic)
-      .replace(/\*\*(.+?)\*\*/g, "*$1*")
-      // *italic* → _italic_ (single asterisks not part of bullets)
-      .replace(/(?<!\w)\*(?!\s)(.+?)(?<!\s)\*(?!\w)/g, "_$1_")
-      // ~~strikethrough~~ → ~strikethrough~
-      .replace(/~~(.+?)~~/g, "~$1~")
-      // `inline code` → ```inline code```
-      .replace(/`([^`]+)`/g, "```$1```")
-      // ### header → *header*
-      .replace(/^#{1,6}\s+(.+)$/gm, "*$1*")
-      // - bullets → • bullets
-      .replace(/^-\s+/gm, "• ")
-  );
+  // Bold: **text** → *text* (WhatsApp bold) — use placeholder to avoid
+  // the italic regex matching the same asterisks
+  let result = text.replace(/\*\*(.+?)\*\*/g, "\x00BOLD\x00$1\x00/BOLD\x00");
+  // Italic: *text* → _text_ (single asterisks not part of bullets)
+  result = result.replace(/(?<!\w)\*(?!\s)(.+?)(?<!\s)\*(?!\w)/g, "_$1_");
+  // Restore bold placeholders
+  result = result.replace(/\x00BOLD\x00(.+?)\x00\/BOLD\x00/g, "*$1*");
+  return result
+    // ~~strikethrough~~ → ~strikethrough~
+    .replace(/~~(.+?)~~/g, "~$1~")
+    // `inline code` → ```inline code```
+    .replace(/`([^`]+)`/g, "```$1```")
+    // ### header → *header*
+    .replace(/^#{1,6}\s+(.+)$/gm, "*$1*")
+    // - bullets → • bullets
+    .replace(/^-\s+/gm, "• ");
 }
 
 function handleServerMessage(
   ws: WebSocket,
-  mainWindow: BrowserWindow,
   data: Buffer
 ): void {
   try {
     const payload = JSON.parse(data.toString());
 
     if (payload.type === "response.send") {
-      handleResponseSend(mainWindow, payload);
+      handleResponseSend(payload);
     } else if (payload.type === "notification") {
-      if (!mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("notification:new", payload.data);
-      }
+      sendToRenderer("notification:new", payload.data);
     } else if (payload.type === "conversation.update") {
-      if (!mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("conversation:update", payload.data);
-      }
+      sendToRenderer("conversation:update", payload.data);
     } else if (payload.type === "appointment.update") {
-      if (!mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("appointment:update", payload.data);
-      }
+      sendToRenderer("appointment:update", payload.data);
     } else if (payload.type === "ping") {
       ws?.send(JSON.stringify({ type: "pong" }));
     } else if (payload.type === "error" && payload.code === "auth_failed") {
@@ -91,7 +98,6 @@ function handleServerMessage(
 }
 
 function handleResponseSend(
-  mainWindow: BrowserWindow,
   payload: { data?: { phoneNumber?: string; message?: { body?: string } } }
 ): void {
   const phoneNumber = payload.data?.phoneNumber;
@@ -103,9 +109,7 @@ function handleResponseSend(
     String(messageBody).slice(0, 80)
   );
 
-  if (!mainWindow.isDestroyed()) {
-    mainWindow.webContents.send("whatsapp:send-response", payload.data);
-  }
+  sendToRenderer("whatsapp:send-response", payload.data);
 
   if (phoneNumber && messageBody) {
     const jid = phoneNumber.includes("@")
@@ -120,7 +124,6 @@ function handleResponseSend(
 }
 
 export function connectBridge(
-  mainWindow: BrowserWindow,
   workspaceId: string,
   accessToken: string
 ): void {
@@ -168,9 +171,7 @@ export function connectBridge(
     // leaking the token in server access logs, proxy logs, and browser history.
     ws?.send(JSON.stringify({ type: "auth", token: accessToken }));
 
-    if (!mainWindow.isDestroyed()) {
-      mainWindow.webContents.send("bridge:status", { connected: true });
-    }
+    sendToRenderer("bridge:status", { connected: true });
 
     // Defer resetting reconnect/auth counters — the server may reject auth
     // during its open() handler, which causes close() to fire right after
@@ -197,7 +198,7 @@ export function connectBridge(
 
   ws.on("message", (data: Buffer) => {
     if (ws) {
-      handleServerMessage(ws, mainWindow, data);
+      handleServerMessage(ws, data);
     }
   });
 
@@ -214,9 +215,7 @@ export function connectBridge(
       "reason:",
       reason.toString() || "(empty)"
     );
-    if (!mainWindow.isDestroyed()) {
-      mainWindow.webContents.send("bridge:status", { connected: false });
-    }
+    sendToRenderer("bridge:status", { connected: false });
 
     // Auth-related close codes: 4001 (custom), 4003 (invalid/expired token), 1008 (policy violation)
     const isAuthError = code === 4001 || code === 4003 || code === 1008;
@@ -229,13 +228,11 @@ export function connectBridge(
       log("Too many auth failures, clearing saved credentials.");
       clearCredentials();
       currentCreds = null;
-      if (!mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("bridge:status", {
-          connected: false,
-          error: "Session expired. Please log in again.",
-          requiresReLogin: true,
-        });
-      }
+      sendToRenderer("bridge:status", {
+        connected: false,
+        error: "Session expired. Please log in again.",
+        requiresReLogin: true,
+      });
       return;
     }
 
@@ -243,12 +240,10 @@ export function connectBridge(
     reconnectAttempts++;
     if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
       log("Max reconnect attempts reached, stopping.");
-      if (!mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("bridge:status", {
-          connected: false,
-          error: `Connection lost after ${MAX_RECONNECT_ATTEMPTS} attempts. Please check your connection and re-login.`,
-        });
-      }
+      sendToRenderer("bridge:status", {
+        connected: false,
+        error: `Connection lost after ${MAX_RECONNECT_ATTEMPTS} attempts. Please check your connection and re-login.`,
+      });
       return;
     }
 
@@ -261,7 +256,6 @@ export function connectBridge(
     reconnectTimer = setTimeout(() => {
       if (savedCreds) {
         connectBridge(
-          mainWindow,
           savedCreds.workspaceId,
           savedCreds.accessToken
         );
@@ -271,12 +265,10 @@ export function connectBridge(
 
   ws.on("error", (err: Error) => {
     log("WebSocket error:", err.message);
-    if (!mainWindow.isDestroyed()) {
-      mainWindow.webContents.send("bridge:status", {
-        connected: false,
-        error: err.message,
-      });
-    }
+    sendToRenderer("bridge:status", {
+      connected: false,
+      error: err.message,
+    });
   });
 }
 
@@ -288,6 +280,10 @@ export function sendToBackend(data: unknown): boolean {
       log(`Queued message (queue: ${pendingQueue.length}/${MAX_PENDING})`);
     } else {
       log("Queue full — dropping message");
+      const last = pendingQueue[pendingQueue.length - 1];
+      if (last && typeof last === "object" && "jid" in last && "text" in last) {
+        sendToRenderer("bridge:queue-overflow", { jid: (last as { jid: string }).jid, text: (last as { text: string }).text });
+      }
     }
     return false;
   }
@@ -401,6 +397,8 @@ export function disconnectBridge(): void {
     ws.close();
     ws = null;
   }
+  reconnectAttempts = 0;
+  authFailures = 0;
   pendingReplies.length = 0;
 }
 
@@ -409,13 +407,13 @@ export function disconnectBridge(): void {
  * Falls through silently if no credentials exist — the renderer will
  * trigger bridge:connect via useBridgeSync once it loads.
  */
-export function autoConnectBridge(mainWindow: BrowserWindow): boolean {
+export function autoConnectBridge(): boolean {
   const creds = loadCredentials();
   if (!creds) {
     log("No saved bridge credentials — waiting for renderer to connect");
     return false;
   }
   log("Found saved bridge credentials, auto-connecting...");
-  connectBridge(mainWindow, creds.workspaceId, creds.accessToken);
+  connectBridge(creds.workspaceId, creds.accessToken);
   return true;
 }

@@ -142,6 +142,7 @@ export const ru: TranslationStrings = {
     noConversations: "Пока нет диалогов",
     searchPlaceholder: "Поиск диалогов...",
     count: "{{count}} диалогов",
+    countFiltered: "{{filtered}} из {{total}} диалогов",
     noMatch: 'Нет диалогов по запросу "{{query}}"',
     clearSearch: "Очистить поиск",
     empty: "Пока нет диалогов",
@@ -357,6 +358,7 @@ export const ru: TranslationStrings = {
     errorDescription:
       "Произошла ошибка при загрузке профиля клиента. Пожалуйста, попробуйте снова.",
     backToConversations: "Назад к диалогам",
+    backToCustomers: "Назад к клиентам",
     unknownName: "Неизвестный клиент",
     langSpanish: "Испанский",
     langEnglish: "Английский",

@@ -1,5 +1,9 @@
 import { ipc } from "@/ipc/manager";
 
-export function openExternalLink(url: string) {
-  return ipc.client.shell.openExternalLink({ url });
-}
+export const openExternalLink = (url: string) => {
+  try {
+    const parsed = new URL(url);
+    if (!['http:', 'https:'].includes(parsed.protocol)) return;
+  } catch { return; }
+  ipc.client.shell.openExternalLink({ url });
+};

@@ -54,9 +54,10 @@ function setAutoStartMac(enabled: boolean): boolean {
 function setAutoStartWindows(enabled: boolean): boolean {
   const { execSync } = require('child_process') as typeof import('child_process')
   const exePath = app.getPath('exe')
+  const escapedPath = exePath.replace(/"/g, '\\"')
 
   if (enabled) {
-    const regCommand = `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" /v "${AUTO_START_KEY}" /t REG_SZ /d "${exePath}" /f`
+    const regCommand = `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" /v "${AUTO_START_KEY}" /t REG_SZ /d "${escapedPath}" /f`
     execSync(regCommand)
   } else {
     try {

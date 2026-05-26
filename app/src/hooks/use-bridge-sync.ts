@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { refreshAccessToken } from "../services/api-client";
 
 /**
  * Auto-connects the WhatsApp-to-API bridge when the app loads
@@ -10,7 +11,6 @@ import { useEffect, useRef } from "react";
  */
 
 function refreshBridgeToken(attempted: React.MutableRefObject<boolean>): void {
-  const API_BASE_URL = import.meta.env.VITE_API_URL ?? "https://api.zenda.bot";
   const refreshToken = localStorage.getItem("refreshToken");
 
   if (!refreshToken) {
@@ -20,28 +20,14 @@ function refreshBridgeToken(attempted: React.MutableRefObject<boolean>): void {
     return;
   }
 
-  fetch(`${API_BASE_URL}/auth/refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refreshToken }),
-  })
-    .then((res) => {
-      if (!res.ok) {
-        throw new Error(`Refresh failed: ${res.status}`);
-      }
-      return res.json();
-    })
-    .then((data: { accessToken?: string; refreshToken?: string }) => {
-      if (!data.accessToken) {
+  refreshAccessToken()
+    .then((accessToken) => {
+      if (!accessToken) {
         console.error("[useBridgeSync] Token refresh returned no access token");
         return;
       }
 
       console.log("[useBridgeSync] Token refreshed, reconnecting bridge");
-      localStorage.setItem("accessToken", data.accessToken);
-      if (data.refreshToken) {
-        localStorage.setItem("refreshToken", data.refreshToken);
-      }
 
       const workspaceRaw = localStorage.getItem("workspace");
       const workspace = workspaceRaw ? JSON.parse(workspaceRaw) : null;
@@ -50,7 +36,7 @@ function refreshBridgeToken(attempted: React.MutableRefObject<boolean>): void {
         attempted.current = true;
         window.electron.invoke("bridge:connect", {
           workspaceId: workspace.id,
-          accessToken: data.accessToken,
+          accessToken,
         });
       }
     })

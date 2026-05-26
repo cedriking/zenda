@@ -1,5 +1,7 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? "https://api.zenda.bot";
 
+export { API_BASE_URL };
+
 export class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) {
@@ -35,12 +37,26 @@ async function refreshAccessToken(): Promise<string | null> {
       return null;
     }
     const data = await res.json();
+    if (typeof data.accessToken !== 'string' || typeof data.refreshToken !== 'string') {
+      throw new Error('Invalid refresh response');
+    }
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("refreshToken", data.refreshToken);
     return data.accessToken;
   } catch {
     return null;
   }
+}
+
+export { refreshAccessToken };
+
+// Fix 2: deduplicate concurrent refresh calls
+let refreshPromise: Promise<string | null> | null = null;
+function deduplicatedRefresh(): Promise<string | null> {
+  if (!refreshPromise) {
+    refreshPromise = refreshAccessToken().finally(() => { refreshPromise = null; });
+  }
+  return refreshPromise;
 }
 
 export async function apiFetch<T>(
@@ -65,7 +81,7 @@ export async function apiFetch<T>(
 
   // Auto-refresh on 401
   if (response.status === 401 && token) {
-    token = await refreshAccessToken();
+    token = await deduplicatedRefresh();
     if (token) {
       response = await makeRequest(token);
     } else {
@@ -75,7 +91,7 @@ export async function apiFetch<T>(
       localStorage.removeItem("workspace");
       localStorage.removeItem("user");
       window.location.href = "/auth/login";
-      return undefined as T;
+      throw new Error("Session expired");
     }
   }
 

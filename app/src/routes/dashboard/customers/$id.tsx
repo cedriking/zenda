@@ -66,11 +66,11 @@ export default function CustomerProfilePage() {
   return (
     <div className="p-6">
       <Link
-        to="/dashboard/conversations"
+        to="/dashboard/customers"
         className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
       >
         <ArrowLeft size={16} />
-        {t('customer.backToConversations')}
+        {t('customer.backToCustomers')}
       </Link>
 
       <div className="max-w-2xl">

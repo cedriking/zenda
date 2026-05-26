@@ -27,6 +27,18 @@ import SettingsSafety from '@/routes/dashboard/settings/safety'
 import SettingsReceptionist from '@/routes/dashboard/settings/receptionist'
 import SettingsMessaging from '@/routes/dashboard/settings/messaging'
 
+function NotFoundPage() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+      <h1 className="text-2xl font-bold text-foreground">Page not found</h1>
+      <p className="text-muted-foreground">The page you are looking for does not exist.</p>
+      <a href="/dashboard" className="text-primary underline hover:no-underline">
+        Go to Dashboard
+      </a>
+    </div>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Route tree
 // ---------------------------------------------------------------------------
@@ -69,6 +81,7 @@ export const routes: RouteDefinition[] = [
           },
         ],
       },
+      { path: '*', component: NotFoundPage },
     ],
   },
 ]

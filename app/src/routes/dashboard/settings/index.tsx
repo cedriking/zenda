@@ -35,7 +35,8 @@ export default function SettingsPage() {
       }
     }
     load()
-  }, [t])
+    // biome-ignore lint: exhaustive-deps - t is stable after init
+  }, [])
 
   const handleSave = async (endpoint: string, data: Record<string, any>) => {
     if (endpoint === '/business/profile') {

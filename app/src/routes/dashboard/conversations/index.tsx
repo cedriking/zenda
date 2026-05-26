@@ -60,7 +60,12 @@ export default function ConversationsPage() {
               </button>
             )}
           </div>
-          <span className="text-sm text-muted-foreground">{t('conversations.count', { count: conversations.length })}</span>
+          <span className="text-sm text-muted-foreground">
+            {searchQuery.trim()
+              ? t('conversations.countFiltered', { filtered: filtered.length, total: conversations.length })
+              : t('conversations.count', { count: conversations.length })
+            }
+          </span>
         </div>
       </div>
 

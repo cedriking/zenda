@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { apiFetch } from '../services/api-client'
 
 interface Appointment {
@@ -26,6 +26,8 @@ export function useAppointments() {
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(0)
   const PAGE_SIZE = 30
+  const pageRef = useRef(page)
+  useEffect(() => { pageRef.current = page }, [page])
 
   const loadAppointments = useCallback(async (status?: string, pageNum = 0) => {
     if (pageNum === 0) {
@@ -40,7 +42,7 @@ export function useAppointments() {
         include: 'customer,service',
         limit: String(PAGE_SIZE),
         offset: String(pageNum * PAGE_SIZE),
-        from: new Date().toISOString(),
+        from: selectedDate || new Date().toISOString(),
       })
       if (status) params.set('status', status)
       const data = await apiFetch<Appointment[]>(`/appointments?${params}`)
@@ -61,9 +63,10 @@ export function useAppointments() {
   }, [])
 
   const loadMore = useCallback(async (status?: string) => {
-    const nextPage = page + 1
+    const nextPage = pageRef.current + 1
+    pageRef.current = nextPage
     await loadAppointments(status, nextPage)
-  }, [page, loadAppointments])
+  }, [loadAppointments])
 
   const updateStatus = useCallback(async (id: string, status: string) => {
     const updated = await apiFetch<Appointment>(`/appointments/${id}/status`, {
@@ -83,6 +86,11 @@ export function useAppointments() {
     })
     return () => { unsub?.() }
   }, [])
+
+  // Reload appointments when selectedDate changes
+  useEffect(() => {
+    loadAppointments()
+  }, [selectedDate, loadAppointments])
 
   return {
     appointments,

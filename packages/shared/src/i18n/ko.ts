@@ -141,6 +141,7 @@ export const ko: TranslationStrings = {
     noConversations: "아직 대화가 없습니다",
     searchPlaceholder: "대화 검색...",
     count: "{{count}}개의 대화",
+    countFiltered: "전체 {{total}}개 중 {{filtered}}개의 대화",
     noMatch: '"{{query}}"와 일치하는 대화가 없습니다',
     clearSearch: "검색 초기화",
     empty: "아직 대화가 없습니다",
@@ -356,6 +357,7 @@ export const ko: TranslationStrings = {
     errorDescription:
       "이 고객의 프로필을 로드하는 중 오류가 발생했습니다. 다시 시도해 주세요.",
     backToConversations: "대화로 돌아가기",
+    backToCustomers: "고객 목록으로 돌아가기",
     unknownName: "알 수 없는 고객",
     langSpanish: "스페인어",
     langEnglish: "영어",

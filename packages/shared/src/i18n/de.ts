@@ -146,6 +146,7 @@ export const de: TranslationStrings = {
     noConversations: "Noch keine Gespräche",
     searchPlaceholder: "Gespräche suchen...",
     count: "{{count}} Gespräche",
+    countFiltered: "{{filtered}} von {{total}} Gesprächen",
     noMatch: 'Keine Gespräche entsprechen "{{query}}"',
     clearSearch: "Suche löschen",
     empty: "Noch keine Gespräche",
@@ -365,6 +366,7 @@ export const de: TranslationStrings = {
     errorDescription:
       "Beim Laden dieses Kundenprofils ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
     backToConversations: "Zurück zu Gesprächen",
+    backToCustomers: "Zurück zu Kunden",
     unknownName: "Unbekannter Kunde",
     langSpanish: "Spanisch",
     langEnglish: "Englisch",

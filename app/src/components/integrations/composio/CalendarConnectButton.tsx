@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button } from '../../ui/button'
 import { Loader2, Calendar, ExternalLink, CheckCircle } from 'lucide-react'
+import { openExternalLink } from '@/actions/shell'
 
 interface CalendarConnectButtonProps {
   isConnected?: boolean
@@ -28,7 +29,7 @@ export function CalendarConnectButton({
     try {
       // Open Composio OAuth flow for Google Calendar
       const connectUrl = `${apiBaseUrl}/integrations/composio/oauth/calendar?provider=${provider}`
-      window.open(connectUrl, '_blank', 'width=800,height=600')
+      openExternalLink(connectUrl)
 
       onConnect?.()
     } catch (error) {

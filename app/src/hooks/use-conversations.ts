@@ -33,7 +33,6 @@ export function useConversations() {
     string | null
   >(null);
   const [messages, setMessages] = useState<Record<string, Message[]>>({});
-  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -105,15 +104,24 @@ export function useConversations() {
 
   const updateMode = useCallback(
     async (conversationId: string, mode: string) => {
-      await apiFetch(`/conversations/${conversationId}/mode`, {
-        method: "PATCH",
-        body: { mode },
-      });
+      const prevMode = conversations.find((c) => c.id === conversationId)?.mode;
       setConversations((prev) =>
         prev.map((c) => (c.id === conversationId ? { ...c, mode } : c))
       );
+      try {
+        await apiFetch(`/conversations/${conversationId}/mode`, {
+          method: "PATCH",
+          body: { mode },
+        });
+      } catch {
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === conversationId ? { ...c, mode: prevMode! } : c
+          )
+        );
+      }
     },
-    []
+    [conversations]
   );
 
   const sendMessage = useCallback(
@@ -188,7 +196,6 @@ export function useConversations() {
     conversations,
     activeConversationId,
     messages,
-    unreadCounts,
     isLoading,
     error,
     hasMore,

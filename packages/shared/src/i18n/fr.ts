@@ -146,6 +146,7 @@ export const fr: TranslationStrings = {
     noConversations: "Pas encore de conversations",
     searchPlaceholder: "Rechercher des conversations...",
     count: "{{count}} conversations",
+    countFiltered: "{{filtered}} sur {{total}} conversations",
     noMatch: 'Aucune conversation ne correspond à "{{query}}"',
     clearSearch: "Effacer la recherche",
     empty: "Pas encore de conversations",
@@ -366,6 +367,7 @@ export const fr: TranslationStrings = {
     errorDescription:
       "Une erreur s'est produite lors du chargement du profil de ce client. Veuillez réessayer.",
     backToConversations: "Retour aux conversations",
+    backToCustomers: "Retour aux clients",
     unknownName: "Client inconnu",
     langSpanish: "Espagnol",
     langEnglish: "Anglais",

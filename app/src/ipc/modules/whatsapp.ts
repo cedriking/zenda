@@ -5,6 +5,7 @@ import {
   connectBridge,
   disconnectBridge,
   sendToBackend,
+  sendToRenderer,
 } from "../../main/whatsapp/bridge.js";
 import { clearCredentials } from "../../main/whatsapp/bridge-credentials.js";
 import {
@@ -25,7 +26,7 @@ export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
       // Client already exists from auto-init; re-emit status so the
       // renderer (which loaded after the auto-init) can catch up.
       console.log("[IPC] Client already connected, re-emitting status");
-      mainWindow.webContents.send("whatsapp:status", status);
+      sendToRenderer("whatsapp:status", status);
     } else {
       initWhatsAppClient(mainWindow).catch((err) => {
         console.error("[IPC] whatsapp:init error:", err);
@@ -63,7 +64,7 @@ export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
         accessToken: string;
       }
     ) => {
-      connectBridge(mainWindow, workspaceId, accessToken);
+      connectBridge(workspaceId, accessToken);
       return { success: true };
     }
   );
@@ -105,7 +106,7 @@ export function registerWhatsAppIPC(mainWindow: BrowserWindow): void {
 
   // Listen for WhatsApp client status changes and forward to renderer
   onStatus((status: WhatsAppStatus) => {
-    mainWindow.webContents.send("whatsapp:status", status);
+    sendToRenderer("whatsapp:status", status);
 
     const connected = status.status === "connected";
     updateWhatsAppHealth(connected);

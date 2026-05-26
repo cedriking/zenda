@@ -16,7 +16,7 @@ interface RouterState {
 export const useRouterStore = create<RouterState>((set) => ({
   pathname: '/',
   params: {},
-  navigate: (to: string) => set({ pathname: to, params: {} }),
+  navigate: (to: string) => set({ pathname: to }),
 }))
 
 /**
@@ -167,6 +167,11 @@ function matchSegment(
     return { match: true, params, remaining: pathname }
   }
 
+  // Wildcard path matches everything
+  if (routePath === '*') {
+    return { match: true, params, remaining: '' }
+  }
+
   const routeParts = routePath.split('/')
   const pathParts = pathname.split('/').filter(Boolean)
 
@@ -244,9 +249,7 @@ export function Router({ routes, guards }: RouterProps) {
   const { components, params } = result
 
   // Inject params into the store so useParams() works
-  if (Object.keys(params).length > 0) {
-    useRouterStore.setState({ params })
-  }
+  useRouterStore.setState({ params })
 
   // Build nested elements — last component is the leaf, each parent wraps the next
   let element: ReactNode = null

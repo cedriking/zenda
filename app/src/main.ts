@@ -12,6 +12,7 @@ import { setAutoStart } from "./main/auto-start";
 import { startHealthMonitor } from "./main/health-monitor";
 import { createTray } from "./main/tray";
 import { getBasePath } from "./utils/path";
+import { setMainWindow } from "./main/whatsapp/bridge.js";
 
 function createWindow() {
   const basePath = getBasePath();
@@ -34,6 +35,7 @@ function createWindow() {
       process.platform === "darwin" ? { x: 5, y: 5 } : undefined,
   });
   ipcContext.setMainWindow(mainWindow);
+  setMainWindow(mainWindow);
 
   // Minimize to tray instead of closing
   mainWindow.on("close", (event) => {
@@ -43,18 +45,27 @@ function createWindow() {
     }
   });
 
-  app.on("before-quit", async () => {
+  let isQuitting = false;
+  app.on("before-quit", (e) => {
+    if (isQuitting) return;
+    e.preventDefault();
+    isQuitting = true;
     (app as unknown as { isQuitting: boolean }).isQuitting = true;
-    try {
-      const { shutdownWhatsApp } = await import("./main/whatsapp/client.js");
-      const { disconnectBridge } = await import("./main/whatsapp/bridge.js");
-      const { stopHealthMonitor } = await import("./main/health-monitor.js");
-      shutdownWhatsApp();
-      disconnectBridge();
-      stopHealthMonitor();
-    } catch {
-      // best-effort cleanup
-    }
+    (async () => {
+      try {
+        const { shutdownWhatsApp } = await import("./main/whatsapp/client.js");
+        const { disconnectBridge } = await import("./main/whatsapp/bridge.js");
+        const { stopHealthMonitor } = await import("./main/health-monitor.js");
+        shutdownWhatsApp();
+        disconnectBridge();
+        stopHealthMonitor();
+      } catch {
+        // best-effort cleanup
+      } finally {
+        setMainWindow(null);
+        app.quit();
+      }
+    })();
   });
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -129,7 +140,7 @@ app.whenReady().then(async () => {
 
       // Auto-connect bridge using saved credentials (independent of renderer)
       const { autoConnectBridge } = await import("./main/whatsapp/bridge.js");
-      autoConnectBridge(ipcContext.mainWindow);
+      autoConnectBridge();
 
       // System tray
       createTray(ipcContext.mainWindow);
@@ -139,7 +150,7 @@ app.whenReady().then(async () => {
 
       // Health monitor
       const apiBase = import.meta.env.VITE_API_URL ?? "https://api.zenda.bot";
-      startHealthMonitor(ipcContext.mainWindow, apiBase);
+      startHealthMonitor(apiBase);
     }
   } catch (error) {
     console.error("Error during app initialization:", error);

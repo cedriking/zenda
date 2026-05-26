@@ -7,13 +7,10 @@ export const getCurrentThemeMode = os.handler(() => {
 });
 
 export const toggleThemeMode = os.handler(() => {
-  if (nativeTheme.shouldUseDarkColors) {
-    nativeTheme.themeSource = "light";
-  } else {
-    nativeTheme.themeSource = "dark";
-  }
+  const themeSource = nativeTheme.shouldUseDarkColors ? "light" : "dark";
+  nativeTheme.themeSource = themeSource;
 
-  return nativeTheme.shouldUseDarkColors;
+  return themeSource === "dark";
 });
 
 export const setThemeMode = os

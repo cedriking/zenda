@@ -74,9 +74,8 @@ interface ChatMessage {
   role: "assistant" | "user";
 }
 
-let msgId = 0;
-
 export default function OnboardingPage() {
+  const msgIdRef = useRef(0);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -131,7 +130,7 @@ export default function OnboardingPage() {
         setIsTyping(false);
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: text, id: ++msgId },
+          { role: "assistant", content: text, id: ++msgIdRef.current },
         ]);
         onComplete?.();
       }
@@ -193,7 +192,7 @@ export default function OnboardingPage() {
     setInput("");
     setMessages((prev) => [
       ...prev,
-      { role: "user", content: userMsg, id: ++msgId },
+      { role: "user", content: userMsg, id: ++msgIdRef.current },
     ]);
     setLoading(true);
 
@@ -238,7 +237,7 @@ export default function OnboardingPage() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: t("common.error"), id: ++msgId },
+        { role: "assistant", content: t("common.error"), id: ++msgIdRef.current },
       ]);
     } finally {
       setLoading(false);
@@ -261,7 +260,7 @@ export default function OnboardingPage() {
         {
           role: "user",
           content: `${t("onboarding.selectPlan")}: ${tier.charAt(0).toUpperCase()}${tier.slice(1)}`,
-          id: ++msgId,
+          id: ++msgIdRef.current,
         },
       ]);
 
@@ -292,7 +291,7 @@ export default function OnboardingPage() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: t("common.error"), id: ++msgId },
+        { role: "assistant", content: t("common.error"), id: ++msgIdRef.current },
       ]);
     } finally {
       setCheckoutLoading(null);
@@ -312,7 +311,7 @@ export default function OnboardingPage() {
 
       setMessages((prev) => [
         ...prev,
-        { role: "user", content: t("common.skip"), id: ++msgId },
+        { role: "user", content: t("common.skip"), id: ++msgIdRef.current },
       ]);
       setCurrentStep(result.nextStep);
 

@@ -142,6 +142,7 @@ export const ar: TranslationStrings = {
     noConversations: "لا توجد محادثات بعد",
     searchPlaceholder: "البحث في المحادثات...",
     count: "{{count}} محادثة",
+    countFiltered: "{{filtered}} من {{total}} محادثة",
     noMatch: 'لا توجد محادثات تطابق "{{query}}"',
     clearSearch: "مسح البحث",
     empty: "لا توجد محادثات بعد",
@@ -359,6 +360,7 @@ export const ar: TranslationStrings = {
     errorDescription:
       "حدث خطأ أثناء تحميل ملف هذا العميل. يرجى المحاولة مرة أخرى.",
     backToConversations: "العودة للمحادثات",
+    backToCustomers: "العودة إلى العملاء",
     unknownName: "عميل غير معروف",
     langSpanish: "الإسبانية",
     langEnglish: "الإنجليزية",

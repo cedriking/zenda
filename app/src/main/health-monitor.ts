@@ -1,4 +1,5 @@
 import { BrowserWindow } from 'electron'
+import { sendToRenderer } from './whatsapp/bridge.js'
 
 interface HealthStatus {
   whatsapp: boolean
@@ -16,7 +17,7 @@ let currentStatus: HealthStatus = {
 
 const CHECK_INTERVAL = 60_000
 
-export function startHealthMonitor(mainWindow: BrowserWindow, apiBaseUrl: string) {
+export function startHealthMonitor(apiBaseUrl: string) {
   if (monitorInterval) return
 
   const check = async () => {
@@ -35,7 +36,7 @@ export function startHealthMonitor(mainWindow: BrowserWindow, apiBaseUrl: string
       lastCheck: Date.now(),
     }
 
-    mainWindow.webContents.send('health-status', currentStatus)
+    sendToRenderer('health-status', currentStatus)
 
     // Auto-reconnect logic: if API is down, don't retry too aggressively
     if (!apiHealthy) {
