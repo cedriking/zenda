@@ -256,7 +256,15 @@
     "faq3Q": "制限を超えた場合はどうなりますか？",
     "faq3A": "制限に達する前に通知をお送りします。プランのアップグレード、または次の請求サイクルまでお待ちいただけます。",
     "foundingBanner": "期間限定：創設メンバーとして最初の3ヶ月間50%オフ。",
-    "foundingCta": "詳細を見る →"
+    "foundingCta": "詳細を見る →",
+    "freeName": "無料",
+    "freeDesc": "月間25連絡先までZendaをお試しください",
+    "freeFeature1": "月間最大25アクティブ連絡先",
+    "freeFeature2": "WhatsApp番号1つ、カレンダー1つ",
+    "freeFeature3": "予約の予約・キャンセル",
+    "freeFeature4": "9言語AI",
+    "ctaFree": "無料で始める",
+    "freeLabel": "無料"
   },
   "docs": {
     "title": "ドキュメント",

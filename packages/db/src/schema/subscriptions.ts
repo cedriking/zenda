@@ -1,7 +1,7 @@
 import { pgTable, uuid, varchar, timestamp, integer, boolean, pgEnum, primaryKey } from 'drizzle-orm/pg-core'
 import { workspaces } from './workspaces.js'
 
-export const planTierEnum = pgEnum('plan_tier', ['local_solo', 'local_starter', 'local_pro', 'local_business'])
+export const planTierEnum = pgEnum('plan_tier', ['free', 'local_solo', 'local_starter', 'local_pro', 'local_business'])
 export const billingPeriodEnum = pgEnum('billing_period', ['monthly', 'annual'])
 export const subscriptionStatusEnum = pgEnum('subscription_status', [
   'trialing', 'active', 'past_due', 'unpaid', 'canceled', 'incomplete', 'paused',
@@ -24,7 +24,7 @@ export const subscriptions = pgTable('subscriptions', {
   workspaceId: uuid('workspace_id').notNull().references(() => workspaces.id, { onDelete: 'cascade' }),
   stripeCustomerId: varchar('stripe_customer_id', { length: 255 }),
   stripeSubscriptionId: varchar('stripe_subscription_id', { length: 255 }),
-  planTier: planTierEnum('plan_tier').notNull().default('local_solo'),
+  planTier: planTierEnum('plan_tier').notNull().default('free'),
   billingPeriod: billingPeriodEnum('billing_period').notNull().default('monthly'),
   status: subscriptionStatusEnum('status').notNull().default('active'),
   currentPeriodStart: timestamp('current_period_start', { withTimezone: true }).notNull(),

@@ -10,6 +10,10 @@ const ANNUAL_DISCOUNT = 0.8;
 
 // Stripe price IDs per tier and billing period
 const STRIPE_PRICES: Record<string, Record<BillingPeriod, string>> = {
+  free: {
+    monthly: "free",
+    annual: "free",
+  },
   local_solo: {
     monthly:
       process.env.STRIPE_PRICE_LOCAL_SOLO_MONTHLY ??
@@ -63,8 +67,11 @@ export function tierFromPriceId(priceId: string): PlanTier | null {
 }
 
 export function getPriceId(tier: PlanTier, period: BillingPeriod = "monthly"): string {
-  const priceId = STRIPE_PRICES[tier]?.[period] ?? STRIPE_PRICES.local_solo.monthly;
-  if (!STRIPE_PRICE_ID_RE.test(priceId)) {
+  if (tier === "free") {
+    throw new Error("Free tier does not require a Stripe checkout session.");
+  }
+  const priceId = STRIPE_PRICES[tier]?.[period];
+  if (!priceId || !STRIPE_PRICE_ID_RE.test(priceId)) {
     throw new Error(
       `Stripe price ID for tier "${tier}" period "${period}" is not configured.`
     );
@@ -77,6 +84,8 @@ export async function ensureStripeProducts(): Promise<void> {
     return;
   }
   for (const [tier, config] of Object.entries(PLANS)) {
+    // Free tier has no Stripe product
+    if (tier === "free") continue;
     try {
       const products = await stripe.products.list({ limit: 100 });
       const existing = products.data.find(

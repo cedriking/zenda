@@ -43,6 +43,20 @@ export default async function PricingPage() {
 
   const PLANS = [
     {
+      tier: "free",
+      name: t("freeName"),
+      price: 0,
+      desc: t("freeDesc"),
+      features: [
+        t("freeFeature1"),
+        t("freeFeature2"),
+        t("freeFeature3"),
+        t("freeFeature4"),
+      ],
+      cta: t("ctaFree"),
+      highlight: false,
+    },
+    {
       tier: "local_solo",
       name: t("soloName"),
       price: 29,

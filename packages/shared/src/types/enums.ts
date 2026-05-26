@@ -44,7 +44,7 @@ export type SubscriptionStatus =
   | 'paused'
 
 // Plan tiers
-export type PlanTier = 'local_solo' | 'local_starter' | 'local_pro' | 'local_business'
+export type PlanTier = 'free' | 'local_solo' | 'local_starter' | 'local_pro' | 'local_business'
 
 // Setup types
 export type SetupType = 'self_serve' | 'priority' | 'assisted'

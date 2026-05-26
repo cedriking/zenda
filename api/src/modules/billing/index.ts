@@ -1,5 +1,8 @@
 import type { PlanTier } from "@zenda/shared";
 import { PLANS } from "@zenda/shared";
+import { db } from "@zenda/db/client";
+import { subscriptions } from "@zenda/db/schema";
+import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { badRequest, serverError } from "../../utils/errors.js";
@@ -63,6 +66,35 @@ export const billingModule = new Elysia({ prefix: "/billing" })
       const { body, set } = ctx;
       const workspaceId = (ctx as unknown as AuthContext).workspaceId;
       const data = body as Record<string, string | undefined>;
+      const tier = (data.tier ?? "free") as PlanTier;
+
+      // Free tier: skip Stripe, create subscription record directly
+      if (tier === "free") {
+        try {
+          const existing = await db.query.subscriptions.findFirst({
+            where: eq(subscriptions.workspaceId, workspaceId as string),
+          });
+          if (existing) {
+            // Already has a subscription — let them use the existing one
+            return { url: `${process.env.APP_URL ?? "http://localhost:5173"}/dashboard?billing=free` };
+          }
+          await db.insert(subscriptions).values({
+            workspaceId: workspaceId as string,
+            stripeCustomerId: `free_${workspaceId}`,
+            stripeSubscriptionId: `free_${workspaceId}`,
+            planTier: "free",
+            status: "active",
+            currentPeriodStart: new Date(),
+            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          });
+          logger.info("Activated free tier", { workspaceId });
+          return { url: `${process.env.APP_URL ?? "http://localhost:5173"}/dashboard?billing=free` };
+        } catch (err) {
+          logger.error("Free tier activation error", { error: (err as Error).message });
+          return serverError(set, "Failed to activate free tier");
+        }
+      }
+
       try {
         const session = await createCheckoutSession(
           workspaceId as string,

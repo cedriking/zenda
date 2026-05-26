@@ -59,7 +59,7 @@ export function PricingAnimations({ plans }: { plans: Plan[] }) {
       </FadeUp>
 
       <StaggerContainer
-        className="mx-auto grid max-w-6xl gap-6 md:grid-cols-4"
+        className="mx-auto grid max-w-7xl gap-5 md:grid-cols-5"
         stagger={0.15}
       >
         {plans.map((plan) => (
@@ -102,12 +102,12 @@ export function PricingAnimations({ plans }: { plans: Plan[] }) {
                 <span
                   className={`font-black text-4xl ${plan.highlight ? "text-white" : "text-slate-900"}`}
                 >
-                  {formatPrice(plan.price, locale)}
+                  {plan.price === 0 ? t("freeLabel") : formatPrice(plan.price, locale)}
                 </span>
                 <span
                   className={`text-sm ${plan.highlight ? "text-slate-400" : "text-slate-500"}`}
                 >
-                  {t("perMonth")}
+                  {plan.price === 0 ? "" : t("perMonth")}
                 </span>
               </div>
 

@@ -253,7 +253,15 @@
     "faq3Q": "What happens if I exceed my limits?",
     "faq3A": "We'll notify you before you hit limits. You can upgrade or wait until the next cycle.",
     "foundingBanner": "Limited time: 50% off your first 3 months as a founding member.",
-    "foundingCta": "Learn more →"
+    "foundingCta": "Learn more →",
+    "freeName": "Free",
+    "freeDesc": "Try Zenda with up to 25 monthly contacts",
+    "freeFeature1": "Up to 25 monthly active contacts",
+    "freeFeature2": "1 WhatsApp number, 1 calendar",
+    "freeFeature3": "Appointment booking & cancellations",
+    "freeFeature4": "9-language AI",
+    "ctaFree": "Get Started Free",
+    "freeLabel": "Free"
   },
   "docs": {
     "title": "Documentation",
@@ -498,7 +506,7 @@
     "privacyLink": "Privacy Policy",
     "haveAccount": "Already have an account?",
     "loginLink": "Log in",
-    "foundingBadge": "Founding Member \u2014 50% off + 14 days free"
+    "foundingBadge": "Founding Member — 50% off + 14 days free"
   },
   "download": {
     "title": "You're in! Here's your next step",

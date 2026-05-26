@@ -49,7 +49,7 @@ export async function enforceLimit(
   const tier: PlanTier =
     sub?.status === "active" || sub?.status === "trialing"
       ? (sub.planTier as PlanTier)
-      : "local_solo";
+      : "free";
   const planConfig = PLANS[tier];
   const limit = planConfig.activeContactsLimit;
 

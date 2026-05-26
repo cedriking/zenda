@@ -253,7 +253,15 @@
     "faq3Q": "¿Qué pasa si supero mis límites?",
     "faq3A": "Te notificaremos antes de alcanzar los límites. Puedes subir de plan o esperar hasta el siguiente ciclo.",
     "foundingBanner": "Tiempo limitado: 50% de descuento tus primeros 3 meses como miembro fundador.",
-    "foundingCta": "Más información →"
+    "foundingCta": "Más información →",
+    "freeName": "Gratis",
+    "freeDesc": "Prueba Zenda con hasta 25 contactos mensuales",
+    "freeFeature1": "Hasta 25 contactos activos mensuales",
+    "freeFeature2": "1 número de WhatsApp, 1 calendario",
+    "freeFeature3": "Reserva y cancelación de citas",
+    "freeFeature4": "IA en 9 idiomas",
+    "ctaFree": "Empezar gratis",
+    "freeLabel": "Gratis"
   },
   "docs": {
     "title": "Documentación",

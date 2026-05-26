@@ -253,7 +253,15 @@
     "faq3Q": "Que se passe-t-il si je dépasse mes limites ?",
     "faq3A": "Nous vous informerons avant d'atteindre vos limites. Vous pouvez passer à une offre supérieure ou attendre le prochain cycle.",
     "foundingBanner": "Offre limitée : -50% sur vos 3 premiers mois en tant que membre fondateur.",
-    "foundingCta": "En savoir plus →"
+    "foundingCta": "En savoir plus →",
+    "freeName": "Gratuit",
+    "freeDesc": "Essayez Zenda avec jusqu'à 25 contacts mensuels",
+    "freeFeature1": "Jusqu'à 25 contacts actifs par mois",
+    "freeFeature2": "1 numéro WhatsApp, 1 calendrier",
+    "freeFeature3": "Prise de rendez-vous et annulation",
+    "freeFeature4": "IA en 9 langues",
+    "ctaFree": "Commencer gratuitement",
+    "freeLabel": "Gratuit"
   },
   "docs": {
     "title": "Documentation",

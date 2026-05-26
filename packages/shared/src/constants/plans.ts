@@ -13,6 +13,17 @@ interface PlanConfig {
 }
 
 export const PLANS: Record<PlanTier, PlanConfig> = {
+  free: {
+    name: 'Free',
+    tier: 'free',
+    monthlyPriceCents: 0,
+    activeContactsLimit: 25,
+    calendarsStaffLimit: 1,
+    locationsLimit: 1,
+    setupType: 'self_serve',
+    retentionDays: 14,
+    description: 'Free — Try Zenda with up to 25 monthly contacts',
+  },
   local_solo: {
     name: 'Solo',
     tier: 'local_solo',
