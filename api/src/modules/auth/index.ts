@@ -1,8 +1,10 @@
 import { db } from "@zenda/db/client";
 import {
   businessProfiles,
+  partners,
   passwordResetTokens,
   receptionistProfiles,
+  referrals,
   revokedTokens,
   users,
   workspaceMembers,
@@ -27,6 +29,7 @@ export const authModule = new Elysia({ prefix: "/auth" })
     }
     const { name, email, password, businessName, language } = parsed.data;
     const signupSource = (rawBody.source as string) ?? "direct";
+    const referralCode = rawBody.referralCode as string | undefined;
 
     try {
       // Check existing user
@@ -101,6 +104,32 @@ export const authModule = new Elysia({ prefix: "/auth" })
 
         return { user, workspace };
       });
+
+      // Track referral if a valid referral code was provided
+      if (referralCode) {
+        try {
+          const [partner] = await db
+            .select({ id: partners.id })
+            .from(partners)
+            .where(eq(partners.referralCode, referralCode))
+            .limit(1);
+          if (partner) {
+            await db.insert(referrals).values({
+              partnerId: partner.id,
+              referredEmail: email,
+              status: "signed_up",
+            });
+            logger.info("Referral tracked", {
+              partnerId: partner.id,
+              referredEmail: email,
+            });
+          }
+        } catch (refErr) {
+          logger.error("Failed to track referral", {
+            error: (refErr as Error).message,
+          });
+        }
+      }
 
       // Generate tokens with jti for revocation support
       const accessJti = crypto.randomUUID();
