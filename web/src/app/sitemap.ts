@@ -58,6 +58,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/automatizar-turnos-whatsapp",
     "/recepcionista-virtual-salones",
     "/bot-citas-whatsapp",
+    "/mejor-alternativa-calendly-whatsapp",
+    "/mejor-alternativa-acuity-whatsapp",
+    "/chatbot-citas-whatsapp",
     "/referir",
     "/blog",
     "/legal/privacy",
@@ -124,6 +127,15 @@ function getPriority(route: string): number {
     return 0.9;
   }
   if (route === "/bot-citas-whatsapp") {
+    return 0.9;
+  }
+  if (route === "/mejor-alternativa-calendly-whatsapp") {
+    return 0.9;
+  }
+  if (route === "/mejor-alternativa-acuity-whatsapp") {
+    return 0.9;
+  }
+  if (route === "/chatbot-citas-whatsapp") {
     return 0.9;
   }
   if (route === "/blog") {
