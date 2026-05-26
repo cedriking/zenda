@@ -1,15 +1,15 @@
-import { db } from '@zenda/db/client'
-import { notifications } from '@zenda/db/schema'
-import { eq, and, desc } from 'drizzle-orm'
-import { wsMessageSender } from '../../infra/message-sender.js'
-import type { NotificationType } from '@zenda/shared'
+import { db } from "@zenda/db/client";
+import { notifications } from "@zenda/db/schema";
+import type { NotificationType } from "@zenda/shared";
+import { and, desc, eq } from "drizzle-orm";
+import { wsMessageSender } from "../../infra/message-sender.js";
 
 interface CreateNotificationInput {
-  workspaceId: string
-  type: NotificationType
-  title: string
-  body: string
-  relatedId?: string
+  body: string;
+  relatedId?: string;
+  title: string;
+  type: NotificationType;
+  workspaceId: string;
 }
 
 export async function createNotification(input: CreateNotificationInput) {
@@ -23,15 +23,15 @@ export async function createNotification(input: CreateNotificationInput) {
       body: input.body,
       relatedId: input.relatedId ?? null,
     })
-    .returning()
+    .returning();
 
   // Push to connected workspace
   wsMessageSender.send(input.workspaceId, {
-    type: 'notification',
+    type: "notification",
     data: notif,
-  })
+  });
 
-  return notif
+  return notif;
 }
 
 export async function getNotifications(workspaceId: string, limit = 50) {
@@ -40,19 +40,24 @@ export async function getNotifications(workspaceId: string, limit = 50) {
     .from(notifications)
     .where(eq(notifications.workspaceId, workspaceId))
     .orderBy(desc(notifications.createdAt))
-    .limit(limit)
+    .limit(limit);
 }
 
-export async function markNotificationRead(workspaceId: string, notificationId: string) {
+export async function markNotificationRead(
+  workspaceId: string,
+  notificationId: string
+) {
   const [updated] = await db
     .update(notifications)
     .set({ read: new Date() })
-    .where(and(
-      eq(notifications.id, notificationId),
-      eq(notifications.workspaceId, workspaceId),
-    ))
-    .returning()
-  return updated
+    .where(
+      and(
+        eq(notifications.id, notificationId),
+        eq(notifications.workspaceId, workspaceId)
+      )
+    )
+    .returning();
+  return updated;
 }
 
 /**
@@ -61,21 +66,21 @@ export async function markNotificationRead(workspaceId: string, notificationId: 
  */
 export async function sendUsageNotification(
   workspaceId: string,
-  level: 'warning' | 'limit',
+  level: "warning" | "limit"
 ): Promise<void> {
-  if (level === 'limit') {
+  if (level === "limit") {
     await createNotification({
       workspaceId,
-      type: 'usage_limit',
-      title: 'Active contact limit reached',
-      body: 'You\'ve reached your active contact limit. Proactive automations (reminders, follow-ups) are paused. Inbound messages still work. Upgrade your plan for more contacts.',
-    })
+      type: "usage_limit",
+      title: "Active contact limit reached",
+      body: "You've reached your active contact limit. Proactive automations (reminders, follow-ups) are paused. Inbound messages still work. Upgrade your plan for more contacts.",
+    });
   } else {
     await createNotification({
       workspaceId,
-      type: 'usage_warning',
-      title: 'Active contact usage at 80%',
-      body: 'You\'ve used 80% of your active appointment contacts this month. Consider upgrading to avoid hitting your limit.',
-    })
+      type: "usage_warning",
+      title: "Active contact usage at 80%",
+      body: "You've used 80% of your active appointment contacts this month. Consider upgrading to avoid hitting your limit.",
+    });
   }
 }

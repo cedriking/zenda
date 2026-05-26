@@ -71,7 +71,10 @@ export function ForgotPasswordClient() {
               )}
 
               <div>
-                <label className="mb-1.5 block font-medium text-sm" htmlFor="email">
+                <label
+                  className="mb-1.5 block font-medium text-sm"
+                  htmlFor="email"
+                >
                   {t("emailLabel")}
                 </label>
                 <input

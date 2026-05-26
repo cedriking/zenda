@@ -1,16 +1,20 @@
-import { db } from '@zenda/db/client'
-import { usageRecords, subscriptions, activeContactDedup } from '@zenda/db/schema'
-import { eq, and, gte, lte } from 'drizzle-orm'
-import type { PlanTier } from '@zenda/shared'
-import { PLANS, USAGE_WARNING_THRESHOLDS } from '@zenda/shared'
-import { createNotification } from '../notification/service.js'
-import { logger } from '../../infra/logger.js'
+import { db } from "@zenda/db/client";
+import {
+  activeContactDedup,
+  subscriptions,
+  usageRecords,
+} from "@zenda/db/schema";
+import type { PlanTier } from "@zenda/shared";
+import { PLANS, USAGE_WARNING_THRESHOLDS } from "@zenda/shared";
+import { and, eq, gte, lte } from "drizzle-orm";
+import { logger } from "../../infra/logger.js";
+import { createNotification } from "../notification/service.js";
 
 export interface ActiveContactUsage {
-  used: number
-  limit: number
-  percentage: number
-  warningLevel: 'none' | 'warn' | 'limit'
+  limit: number;
+  percentage: number;
+  used: number;
+  warningLevel: "none" | "warn" | "limit";
 }
 
 /**
@@ -22,14 +26,21 @@ export interface ActiveContactUsage {
  */
 export async function trackActiveContact(
   workspaceId: string,
-  customerPhone: string,
+  customerPhone: string
 ): Promise<{ isNew: boolean; usage: ActiveContactUsage }> {
-  const now = new Date()
-  const periodStart = new Date(now.getFullYear(), now.getMonth(), 1)
-  const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+  const now = new Date();
+  const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const periodEnd = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59
+  );
 
   // Try to insert dedup row — if it already exists, this is a no-op
-  let isNew = false
+  let isNew = false;
   try {
     await db.insert(activeContactDedup).values({
       workspaceId,
@@ -37,11 +48,11 @@ export async function trackActiveContact(
       periodStart,
       periodEnd,
       firstActionAt: now,
-    })
-    isNew = true
+    });
+    isNew = true;
   } catch {
     // Duplicate key — this phone already counted this period
-    isNew = false
+    isNew = false;
   }
 
   // Only increment the usage counter if this is a new contact
@@ -49,81 +60,98 @@ export async function trackActiveContact(
     const [existing] = await db
       .select()
       .from(usageRecords)
-      .where(and(
-        eq(usageRecords.workspaceId, workspaceId),
-        eq(usageRecords.metric, 'active_appointment_contacts'),
-        gte(usageRecords.periodStart, periodStart),
-        lte(usageRecords.periodEnd, periodEnd),
-      ))
-      .limit(1)
+      .where(
+        and(
+          eq(usageRecords.workspaceId, workspaceId),
+          eq(usageRecords.metric, "active_appointment_contacts"),
+          gte(usageRecords.periodStart, periodStart),
+          lte(usageRecords.periodEnd, periodEnd)
+        )
+      )
+      .limit(1);
 
     if (existing) {
       await db
         .update(usageRecords)
         .set({ value: existing.value + 1 })
-        .where(eq(usageRecords.id, existing.id))
+        .where(eq(usageRecords.id, existing.id));
     } else {
       await db.insert(usageRecords).values({
         workspaceId,
-        metric: 'active_appointment_contacts',
+        metric: "active_appointment_contacts",
         value: 1,
         periodStart,
         periodEnd,
-      })
+      });
     }
   }
 
-  const usage = await getActiveContactUsage(workspaceId)
+  const usage = await getActiveContactUsage(workspaceId);
 
   // Dispatch notification on threshold crossing
   if (isNew) {
-    await dispatchUsageNotification(workspaceId, usage)
+    await dispatchUsageNotification(workspaceId, usage);
   }
 
-  return { isNew, usage }
+  return { isNew, usage };
 }
 
 /**
  * Get current active contact usage for a workspace.
  */
-export async function getActiveContactUsage(workspaceId: string): Promise<ActiveContactUsage> {
-  const now = new Date()
-  const periodStart = new Date(now.getFullYear(), now.getMonth(), 1)
-  const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+export async function getActiveContactUsage(
+  workspaceId: string
+): Promise<ActiveContactUsage> {
+  const now = new Date();
+  const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const periodEnd = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59
+  );
 
   // Get current plan
   const [sub] = await db
     .select()
     .from(subscriptions)
     .where(eq(subscriptions.workspaceId, workspaceId))
-    .limit(1)
+    .limit(1);
 
-  const tier: PlanTier = (sub?.status === 'active' || sub?.status === 'trialing')
-    ? (sub.planTier as PlanTier)
-    : 'local_solo'
-  const planConfig = PLANS[tier]
-  const limit = planConfig.activeContactsLimit
+  const tier: PlanTier =
+    sub?.status === "active" || sub?.status === "trialing"
+      ? (sub.planTier as PlanTier)
+      : "local_solo";
+  const planConfig = PLANS[tier];
+  const limit = planConfig.activeContactsLimit;
 
   // Get current usage
   const [record] = await db
     .select()
     .from(usageRecords)
-    .where(and(
-      eq(usageRecords.workspaceId, workspaceId),
-      eq(usageRecords.metric, 'active_appointment_contacts'),
-      gte(usageRecords.periodStart, periodStart),
-      lte(usageRecords.periodEnd, periodEnd),
-    ))
-    .limit(1)
+    .where(
+      and(
+        eq(usageRecords.workspaceId, workspaceId),
+        eq(usageRecords.metric, "active_appointment_contacts"),
+        gte(usageRecords.periodStart, periodStart),
+        lte(usageRecords.periodEnd, periodEnd)
+      )
+    )
+    .limit(1);
 
-  const used = record?.value ?? 0
-  const percentage = limit > 0 ? used / limit : 0
+  const used = record?.value ?? 0;
+  const percentage = limit > 0 ? used / limit : 0;
 
-  let warningLevel: ActiveContactUsage['warningLevel'] = 'none'
-  if (percentage >= USAGE_WARNING_THRESHOLDS.limit) warningLevel = 'limit'
-  else if (percentage >= USAGE_WARNING_THRESHOLDS.warn) warningLevel = 'warn'
+  let warningLevel: ActiveContactUsage["warningLevel"] = "none";
+  if (percentage >= USAGE_WARNING_THRESHOLDS.limit) {
+    warningLevel = "limit";
+  } else if (percentage >= USAGE_WARNING_THRESHOLDS.warn) {
+    warningLevel = "warn";
+  }
 
-  return { used, limit, percentage, warningLevel }
+  return { used, limit, percentage, warningLevel };
 }
 
 /**
@@ -131,17 +159,21 @@ export async function getActiveContactUsage(workspaceId: string): Promise<Active
  * At >=100% of active contact limit, only inbound messages remain active.
  * No overage fees — just suppress proactive sending.
  */
-export async function shouldRestrictProactive(workspaceId: string): Promise<boolean> {
-  const usage = await getActiveContactUsage(workspaceId)
-  return usage.percentage >= USAGE_WARNING_THRESHOLDS.limit
+export async function shouldRestrictProactive(
+  workspaceId: string
+): Promise<boolean> {
+  const usage = await getActiveContactUsage(workspaceId);
+  return usage.percentage >= USAGE_WARNING_THRESHOLDS.limit;
 }
 
 /**
  * Get usage data for a billing period (kept for backward compatibility).
  */
-export async function getUsageForPeriod(workspaceId: string): Promise<ActiveContactUsage & { metric: string }> {
-  const usage = await getActiveContactUsage(workspaceId)
-  return { ...usage, metric: 'active_appointment_contacts' }
+export async function getUsageForPeriod(
+  workspaceId: string
+): Promise<ActiveContactUsage & { metric: string }> {
+  const usage = await getActiveContactUsage(workspaceId);
+  return { ...usage, metric: "active_appointment_contacts" };
 }
 
 /**
@@ -149,31 +181,31 @@ export async function getUsageForPeriod(workspaceId: string): Promise<ActiveCont
  */
 async function dispatchUsageNotification(
   workspaceId: string,
-  usage: ActiveContactUsage,
+  usage: ActiveContactUsage
 ): Promise<void> {
-  const pct = Math.round(usage.percentage * 100)
+  const pct = Math.round(usage.percentage * 100);
 
   try {
-    if (usage.warningLevel === 'limit') {
+    if (usage.warningLevel === "limit") {
       await createNotification({
         workspaceId,
-        type: 'usage_limit',
-        title: 'Active contact limit reached',
+        type: "usage_limit",
+        title: "Active contact limit reached",
         body: `You've reached ${usage.used} of ${usage.limit} active contacts this month (${pct}%). Proactive automations (reminders, follow-ups) are paused. Inbound messages still work. Upgrade your plan for more contacts.`,
-      })
-    } else if (usage.warningLevel === 'warn') {
+      });
+    } else if (usage.warningLevel === "warn") {
       await createNotification({
         workspaceId,
-        type: 'usage_warning',
+        type: "usage_warning",
         title: `Active contact usage at ${pct}%`,
         body: `You've used ${usage.used} of ${usage.limit} active appointment contacts this month. Consider upgrading to avoid hitting your limit.`,
-      })
+      });
     }
   } catch (err) {
-    logger.error('Failed to send usage notification', {
+    logger.error("Failed to send usage notification", {
       workspaceId,
       error: err instanceof Error ? err.message : String(err),
-    })
+    });
   }
 }
 
@@ -182,11 +214,11 @@ async function dispatchUsageNotification(
  * Used by appointment tools to gate bookings.
  */
 export async function checkActiveContactLimit(
-  workspaceId: string,
+  workspaceId: string
 ): Promise<{ allowed: boolean; usage: ActiveContactUsage }> {
-  const usage = await getActiveContactUsage(workspaceId)
+  const usage = await getActiveContactUsage(workspaceId);
   return {
     allowed: usage.percentage < USAGE_WARNING_THRESHOLDS.limit,
     usage,
-  }
+  };
 }

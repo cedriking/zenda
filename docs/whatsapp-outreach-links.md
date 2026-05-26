@@ -1,123 +1,129 @@
-# WhatsApp Direct Links — Founding Customer Outreach
+# WhatsApp Direct Links — Prospección México
 
-**Status:** READY TO SEND — click any link, replace [TU_NOMBRE], hit send
-**Last Updated:** 2026-05-25
-**Target:** 10 messages today, follow up 24-48h, close 10 customers in 4 weeks
+**Estado:** LISTO PARA ENVIAR — haz clic en cualquier link, reemplaza [TU_NOMBRE], envía
+**Última actualización:** 25 mayo 2026
+**Mercado:** México exclusivo
+**Meta:** 10 mensajes hoy → 3-4 respuestas → 1-2 pruebas → 1 cliente pagando en 2 semanas
 
 ---
 
-## Top 10 Priority Prospects — Click-to-Send Links
+## Top 10 Prospecciones Prioritarias — Links de Clic-para-Enviar
 
-Each link opens WhatsApp with the first-contact message pre-filled. Just replace `[TU_NOMBRE]` with your name and send.
+Cada link abre WhatsApp con el mensaje de primer contacto pre-llenado. Solo reemplaza `[TU_NOMBRE]` con tu nombre y envía.
 
-### Message Template (auto-filled by links below)
+### Mensaje Base (pre-llenado por los links de abajo)
 
-> Hola! Soy [TU_NOMBRE] de Zenda. Vi que toman citas por WhatsApp — creamos una asistente virtual que contesta automáticamente, agenda citas y manda recordatorios, todo desde su WhatsApp actual. Estamos buscando 10 negocios fundadores: 14 días gratis + 50% de descuento los primeros 3 meses. ¿Les interesa probarlo? Se configura en 5 minutos: https://zenda.bot/founding
+> Hola! Soy [TU_NOMBRE] de Zenda. Vi que [nombre del negocio] agenda citas por WhatsApp — ¿cuántas citas se les escapan al día porque no pueden contestar rápido? Creamos una asistente que responde en segundos, agenda automáticamente y manda recordatorios. Todo desde su WhatsApp actual. Oferta fundador: 14 días gratis + 50% de descuento 3 meses (~$250 MXN/mes). ¿Les interesa? zenda.bot/founding
 
-### 1. Diosas Salon de Belleza (Merida, MX)
+### 1. Diosas Salon de Belleza (Mérida, MX)
 
 ```
-https://wa.me/529992017207?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20toman%20citas%20por%20WhatsApp%20-%20creamos%20una%20asistente%20virtual%20que%20contesta%20autom%C3%A1ticamente%2C%20agenda%20citas%20y%20manda%20recordatorios%2C%20todo%20desde%20su%20WhatsApp%20actual.%20Estamos%20buscando%2010%20negocios%20fundadores%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20los%20primeros%203%20meses.%20%C2%BFLes%20interesa%20probarlo%3F%20Se%20configura%20en%205%20minutos%3A%20https%3A%2F%2Fzenda.bot%2Ffounding
+https://wa.me/529992017207?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20Diosas%20Salon%20agenda%20citas%20por%20WhatsApp%20%E2%80%94%20%C2%BFcu%C3%A1ntas%20citas%20se%20les%20escapan%20al%20d%C3%ADa%20porque%20no%20pueden%20contestar%20r%C3%A1pido%3F%0A%0ACreamos%20una%20asistente%20que%20responde%20en%20segundos%2C%20agenda%20autom%C3%A1ticamente%20y%20manda%20recordatorios.%20Todo%20desde%20su%20WhatsApp%20actual.%0A%0AOferta%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%203%20meses%20(~%24250%20MXN%2Fmes).%20%C2%BFLes%20interesa%3F%20zenda.bot%2Ffounding
 ```
 
 ### 2. Silvia Galvan Image Studio (CDMX, MX)
 
 ```
-https://wa.me/525565381048?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20toman%20citas%20por%20WhatsApp%20-%20creamos%20una%20asistente%20virtual%20que%20contesta%20autom%C3%A1ticamente%2C%20agenda%20citas%20y%20manda%20recordatorios%2C%20todo%20desde%20su%20WhatsApp%20actual.%20Estamos%20buscando%2010%20negocios%20fundadores%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20los%20primeros%203%20meses.%20%C2%BFLes%20interesa%20probarlo%3F%20Se%20configura%20en%205%20minutos%3A%20https%3A%2F%2Fzenda.bot%2Ffounding
+https://wa.me/525565381048?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20Silvia%20Galvan%20agenda%20citas%20por%20WhatsApp%20%E2%80%94%20%C2%BFcu%C3%A1ntas%20citas%20se%20les%20escapan%20al%20d%C3%ADa%20porque%20no%20pueden%20contestar%20r%C3%A1pido%3F%0A%0ACreamos%20una%20asistente%20que%20responde%20en%20segundos%2C%20agenda%20autom%C3%A1ticamente%20y%20manda%20recordatorios.%20Todo%20desde%20su%20WhatsApp%20actual.%0A%0AOferta%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%203%20meses%20(~%24250%20MXN%2Fmes).%20%C2%BFLes%20interesa%3F%20zenda.bot%2Ffounding
 ```
 
-### 3. LA BARBERA PERU (Lima, PE)
+### 3. MaquillarteVegetal (Guadalajara, MX)
 
 ```
-https://wa.me/51978743281?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20toman%20citas%20por%20WhatsApp%20-%20creamos%20una%20asistente%20virtual%20que%20contesta%20autom%C3%A1ticamente%2C%20agenda%20citas%20y%20manda%20recordatorios%2C%20todo%20desde%20su%20WhatsApp%20actual.%20Estamos%20buscando%2010%20negocios%20fundadores%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20los%20primeros%203%20meses.%20%C2%BFLes%20interesa%20probarlo%3F%20Se%20configura%20en%205%20minutos%3A%20https%3A%2F%2Fzenda.bot%2Ffounding
+https://wa.me/523325903186?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20MaquillarteVegetal%20agenda%20citas%20por%20WhatsApp%20%E2%80%94%20%C2%BFcu%C3%A1ntas%20citas%20se%20les%20escapan%20al%20d%C3%ADa%20porque%20no%20pueden%20contestar%20r%C3%A1pido%3F%0A%0ACreamos%20una%20asistente%20que%20responde%20en%20segundos%2C%20agenda%20autom%C3%A1ticamente%20y%20manda%20recordatorios.%20Todo%20desde%20su%20WhatsApp%20actual.%0A%0AOferta%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%203%20meses%20(~%24250%20MXN%2Fmes).%20%C2%BFLes%20interesa%3F%20zenda.bot%2Ffounding
 ```
 
-### 4. Clínica Dental Krebs (Lima, PE)
+### 4. NyxSpa (Cancún, MX)
 
 ```
-https://wa.me/51941460184?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20toman%20citas%20por%20WhatsApp%20-%20creamos%20una%20asistente%20virtual%20que%20contesta%20autom%C3%A1ticamente%2C%20agenda%20citas%20y%20manda%20recordatorios%2C%20todo%20desde%20su%20WhatsApp%20actual.%20Estamos%20buscando%2010%20negocios%20fundadores%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20los%20primeros%203%20meses.%20%C2%BFLes%20interesa%20probarlo%3F%20Se%20configura%20en%205%20minutos%3A%20https%3A%2F%2Fzenda.bot%2Ffounding
+https://wa.me/529981016656?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Los%20spas%20pierden%20hasta%2030%25%20de%20citas%20potenciales%20por%20respuestas%20lentas%20en%20WhatsApp.%0A%0AZenda%20es%20una%20asistente%20virtual%20que%20contesta%20en%20segundos%2C%20confirma%20citas%20y%20env%C3%ADa%20recordatorios%20%E2%80%94%20sus%20clientas%20nunca%20esperan.%0A%0AOferta%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20off%20(~%24250%20MXN%2Fmes)%3A%20zenda.bot%2Ffounding
 ```
 
-### 5. MaquillarteVegetal (Guadalajara, MX)
+### 5. MAR Franco Beauty Salon (Monterrey, MX)
 
 ```
-https://wa.me/523325903186?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20toman%20citas%20por%20WhatsApp%20-%20creamos%20una%20asistente%20virtual%20que%20contesta%20autom%C3%A1ticamente%2C%20agenda%20citas%20y%20manda%20recordatorios%2C%20todo%20desde%20su%20WhatsApp%20actual.%20Estamos%20buscando%2010%20negocios%20fundadores%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20los%20primeros%203%20meses.%20%C2%BFLes%20interesa%20probarlo%3F%20Se%20configura%20en%205%20minutos%3A%20https%3A%2F%2Fzenda.bot%2Ffounding
+https://wa.me/528118164411?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20MAR%20Franco%20agenda%20citas%20por%20WhatsApp%20%E2%80%94%20%C2%BFcu%C3%A1ntas%20citas%20se%20les%20escapan%20al%20d%C3%ADa%20porque%20no%20pueden%20contestar%20r%C3%A1pido%3F%0A%0ACreamos%20una%20asistente%20que%20responde%20en%20segundos%2C%20agenda%20autom%C3%A1ticamente%20y%20manda%20recordatorios.%20Todo%20desde%20su%20WhatsApp%20actual.%0A%0AOferta%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%203%20meses%20(~%24250%20MXN%2Fmes).%20%C2%BFLes%20interesa%3F%20zenda.bot%2Ffounding
 ```
 
-### 6. VipMen Barberias (Buenos Aires, AR)
+### 6. Rafaella Salon (Monterrey, MX)
 
 ```
-https://wa.me/541133192644?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20toman%20citas%20por%20WhatsApp%20-%20creamos%20una%20asistente%20virtual%20que%20contesta%20autom%C3%A1ticamente%2C%20agenda%20citas%20y%20manda%20recordatorios%2C%20todo%20desde%20su%20WhatsApp%20actual.%20Estamos%20buscando%2010%20negocios%20fundadores%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20los%20primeros%203%20meses.%20%C2%BFLes%20interesa%20probarlo%3F%20Se%20configura%20en%205%20minutos%3A%20https%3A%2F%2Fzenda.bot%2Ffounding
+https://wa.me/528110226671?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20Rafaella%20Salon%20agenda%20citas%20por%20WhatsApp%20%E2%80%94%20%C2%BFcu%C3%A1ntas%20citas%20se%20les%20escapan%20al%20d%C3%ADa%20porque%20no%20pueden%20contestar%20r%C3%A1pido%3F%0A%0ACreamos%20una%20asistente%20que%20responde%20en%20segundos%2C%20agenda%20autom%C3%A1ticamente%20y%20manda%20recordatorios.%20Todo%20desde%20su%20WhatsApp%20actual.%0A%0AOferta%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%203%20meses%20(~%24250%20MXN%2Fmes).%20%C2%BFLes%20interesa%3F%20zenda.bot%2Ffounding
 ```
 
-### 7. Anastacia Spa de Unas (Medellin, CO)
+### 7. Gentlemen's Barber Shop (Monterrey, MX)
 
 ```
-https://wa.me/573197163606?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20toman%20citas%20por%20WhatsApp%20-%20creamos%20una%20asistente%20virtual%20que%20contesta%20autom%C3%A1ticamente%2C%20agenda%20citas%20y%20manda%20recordatorios%2C%20todo%20desde%20su%20WhatsApp%20actual.%20Estamos%20buscando%2010%20negocios%20fundadores%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20los%20primeros%203%20meses.%20%C2%BFLes%20interesa%20probarlo%3F%20Se%20configura%20en%205%20minutos%3A%20https%3A%2F%2Fzenda.bot%2Ffounding
+https://wa.me/528116208450?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Barber%C3%ADas%20como%20Gentlemen%27s%20pierden%20clientes%20cada%20d%C3%ADa%20porque%20no%20pueden%20contestar%20WhatsApp%20mientras%20cortan%20el%20pelo.%0A%0AZenda%20responde%20por%20ti%20en%20segundos%2C%20agenda%20la%20cita%20y%20manda%20recordatorios%20%E2%80%94%20todo%20autom%C3%A1tico.%0A%0A14%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20para%20los%20primeros%2010%20negocios%20(~%24250%20MXN%2Fmes)%3A%20zenda.bot%2Ffounding
 ```
 
-### 8. NyxSpa (Cancun, MX)
+### 8. Mr. Barber's Club (Monterrey, MX)
 
 ```
-https://wa.me/529981016656?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20toman%20citas%20por%20WhatsApp%20-%20creamos%20una%20asistente%20virtual%20que%20contesta%20autom%C3%A1ticamente%2C%20agenda%20citas%20y%20manda%20recordatorios%2C%20todo%20desde%20su%20WhatsApp%20actual.%20Estamos%20buscando%2010%20negocios%20fundadores%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20los%20primeros%203%20meses.%20%C2%BFLes%20interesa%20probarlo%3F%20Se%20configura%20en%205%20minutos%3A%20https%3A%2F%2Fzenda.bot%2Ffounding
+https://wa.me/528127190953?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Barber%C3%ADas%20como%20Mr.%20Barber%27s%20Club%20pierden%20clientes%20cada%20d%C3%ADa%20porque%20no%20pueden%20contestar%20WhatsApp%20mientras%20cortan%20el%20pelo.%0A%0AZenda%20responde%20por%20ti%20en%20segundos%2C%20agenda%20la%20cita%20y%20manda%20recordatorios%20%E2%80%94%20todo%20autom%C3%A1tico.%0A%0A14%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20(~%24250%20MXN%2Fmes)%3A%20zenda.bot%2Ffounding
 ```
 
-### 9. Spauñas Depilaser (Lima, PE)
+### 9. Dante Spa For Men (Mérida, MX)
 
 ```
-https://wa.me/51979320953?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20toman%20citas%20por%20WhatsApp%20-%20creamos%20una%20asistente%20virtual%20que%20contesta%20autom%C3%A1ticamente%2C%20agenda%20citas%20y%20manda%20recordatorios%2C%20todo%20desde%20su%20WhatsApp%20actual.%20Estamos%20buscando%2010%20negocios%20fundadores%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20los%20primeros%203%20meses.%20%C2%BFLes%20interesa%20probarlo%3F%20Se%20configura%20en%205%20minutos%3A%20https%3A%2F%2Fzenda.bot%2Ffounding
+https://wa.me/529992349251?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Los%20spas%20pierden%20hasta%2030%25%20de%20citas%20potenciales%20por%20respuestas%20lentas%20en%20WhatsApp.%0A%0AZenda%20es%20una%20asistente%20virtual%20que%20contesta%20en%20segundos%2C%20confirma%20citas%20y%20env%C3%ADa%20recordatorios%20%E2%80%94%20sus%20clientes%20nunca%20esperan.%0A%0AOferta%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20off%20(~%24250%20MXN%2Fmes)%3A%20zenda.bot%2Ffounding
 ```
 
-### 10. MAR Franco Beauty Salon (Monterrey, MX)
+### 10. Silvia Galvan — Sucursal Condesa (CDMX, MX)
+
+*(Usa el mismo número que #2 — Silvia Galvan tiene 5 sucursales. Personaliza el mensaje con la sucursal.)*
+
+---
+
+## Links de Seguimiento (cuando responden)
+
+### Si dicen SÍ o "cuéntame más":
+Reemplaza `{phone}` con el número del prospecto:
 
 ```
-https://wa.me/528118164411?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20toman%20citas%20por%20WhatsApp%20-%20creamos%20una%20asistente%20virtual%20que%20contesta%20autom%C3%A1ticamente%2C%20agenda%20citas%20y%20manda%20recordatorios%2C%20todo%20desde%20su%20WhatsApp%20actual.%20Estamos%20buscando%2010%20negocios%20fundadores%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20los%20primeros%203%20meses.%20%C2%BFLes%20interesa%20probarlo%3F%20Se%20configura%20en%205%20minutos%3A%20https%3A%2F%2Fzenda.bot%2Ffounding
+https://wa.me/{phone}?text=Genial!%20Zenda%20es%20s%C3%BAper%20simple%3A%0A%0A1.%20Entra%20a%20zenda.bot%2Ffounding%20y%20crea%20tu%20cuenta%20gratis%0A2.%20Descarga%20nuestra%20app%20de%20escritorio%0A3.%20Abre%20WhatsApp%20en%20tu%20computadora%20y%20Zenda%20se%20conecta%20autom%C3%A1ticamente%0A4.%20Listo%20%E2%80%94%20Zenda%20empieza%20a%20contestar%20tus%20clientes%2024%2F7%0A%0AEl%20plan%20Solo%20cuesta%20%2429%20USD%2Fmes%20(~%24500%20pesos)%20pero%20con%20el%20descuento%20de%20fundador%20son%20solo%20%2414.50%2Fmes%20(~%24250%20pesos)%20los%20primeros%203%20meses.%0A%0A%C2%BFTe%20paso%20el%20link%20de%20registro%3F
+```
+
+### Si preguntan "¿cuánto cuesta?":
+
+```
+https://wa.me/{phone}?text=Plan%20Solo%3A%20%2429%20USD%2Fmes%20(~%24500%20MXN%2C%20para%201%20profesional)%0APlan%20Starter%3A%20%2449%20USD%2Fmes%20(~%24850%20MXN%2C%20para%20hasta%203%20profesionales)%0A%0ACon%20la%20oferta%20de%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20los%20primeros%203%20meses.%0A%0AEs%20decir%2C%20el%20primer%20mes%20con%20descuento%20sale%20menos%20de%20%24250%20pesos%20%E2%80%94%20menos%20de%20lo%20que%20cobras%20por%20una%20cita.%0A%0A%C2%BFTe%20animas%20a%20probar%3F%20zenda.bot%2Ffounding
 ```
 
 ---
 
-## Follow-Up Link (when they say yes)
+## Lote 2: Siguientes 10 Prospecciones (México)
 
-Replace `{phone}` with the prospect's number:
+Estos negocios no tienen link pre-generado — busca su WhatsApp en Google Maps y usa el template correspondiente de `outreach-execution-kit.md`.
 
-```
-https://wa.me/{phone}?text=Genial!%20Entra%20a%20https%3A%2F%2Fzenda.bot%2Ffounding%20y%20crea%20tu%20cuenta%20gratis.%20Con%20el%20descuento%20de%20fundador%20el%20primer%20mes%20sale%20menos%20de%20%2415%20USD.%20%C2%BFTe%20paso%20el%20link%3F
-```
+| # | Negocio | Ciudad | Teléfono | Giro |
+|---|---------|--------|----------|------|
+| 11 | Rafaella Salon | Monterrey, MX | +528110226671 | Belleza |
+| 12 | Gentlemen's Barber Shop | Monterrey, MX | +528116208450 | Barbería |
+| 13 | Mr. Barber's Club | Monterrey, MX | +528127190953 | Barbería |
+| 14 | *Buscar en Google Maps* | CDMX Condesa | — | Belleza |
+| 15 | *Buscar en Google Maps* | CDMX Polanco | — | Barbería |
+| 16 | *Buscar en Google Maps* | Guadalajara Centro | — | Belleza |
+| 17 | *Buscar en Google Maps* | Querétaro Centro | — | Barbería |
+| 18 | *Buscar en Google Maps* | Puebla Centro | — | Belleza |
+| 19 | *Buscar en Google Maps* | León Gto. | — | Estética |
+| 20 | *Buscar en Google Maps* | Cancún Zona Hotelera | — | Spa |
 
-## Pricing Question Link
-
-```
-https://wa.me/{phone}?text=El%20plan%20Solo%20cuesta%20%2429%20USD%2Fmes%20(para%201%20profesional)%20pero%20con%20el%20descuento%20de%20fundador%20son%20solo%20%2414.50%2Fmes%20los%20primeros%203%20meses%20%2B%2014%20d%C3%ADas%20gratis.%20Menos%20de%20lo%20que%20cobras%20por%20una%20cita.%20%C2%BFTe%20animas%20a%20probar%3F%20https%3A%2F%2Fzenda.bot%2Ffounding
-```
-
-## Second Batch (Prospects 11-20)
-
-| # | Business | City | Phone | Type |
-|---|----------|------|-------|------|
-| 11 | Rafaella Salon | Monterrey, MX | +528110226671 | Beauty |
-| 12 | Gentlemen's Barber Shop | Monterrey, MX | +528116208450 | Barber |
-| 13 | Mr. Barber's Club | Monterrey, MX | +528127190953 | Barber |
-| 14 | Peru Wellbeing | Lima, PE | +51962365535 | Spa |
-| 15 | Huellas Spa | Santiago, CL | +5622288634 | Nails |
-| 16 | Barberia Don Juan | Colombia | +5761945010 | Barber |
-| 17 | La Cueva Peluqueria | Buenos Aires, AR | +541123827938 | Barber |
-| 18 | CERINI Hair System | Buenos Aires, AR | (multi-branch) | Beauty |
-| 19 | Dante Spa For Men | Merida, MX | +529992349251 | Spa |
-| 20 | Daninails Spa | Santiago, CL | N/A | Nails |
+**Tip:** Usa las búsquedas de `outreach-execution-kit.md` Paso 1 para completar las filas 14-20 con negocios reales que encuentres en Google Maps.
 
 ---
 
-## Tracking Template
+## Tabla de Seguimiento
 
-| # | Business | Sent? | Response | Signup? | Notes |
-|---|----------|-------|----------|---------|-------|
-| 1 | Diosas Salon | ⬜ | | | |
-| 2 | Silvia Galvan | ⬜ | | | |
-| 3 | LA BARBERA PERU | ⬜ | | | |
-| 4 | Dental Krebs | ⬜ | | | |
-| 5 | MaquillarteVegetal | ⬜ | | | |
-| 6 | VipMen Barberias | ⬜ | | | |
-| 7 | Anastacia Spa | ⬜ | | | |
-| 8 | NyxSpa | ⬜ | | | |
-| 9 | Spauñas Depilaser | ⬜ | | | |
-| 10 | MAR Franco | ⬜ | | | |
+| # | Negocio | Ciudad | Enviado? | Respuesta | Se registró? | Notas |
+|---|---------|--------|----------|-----------|--------------|-------|
+| 1 | Diosas Salon | Mérida | | | | |
+| 2 | Silvia Galvan | CDMX | | | | |
+| 3 | MaquillarteVegetal | Guadalajara | | | | |
+| 4 | NyxSpa | Cancún | | | | |
+| 5 | MAR Franco | Monterrey | | | | |
+| 6 | Rafaella Salon | Monterrey | | | | |
+| 7 | Gentlemen's Barber | Monterrey | | | | |
+| 8 | Mr. Barber's Club | Monterrey | | | | |
+| 9 | Dante Spa For Men | Mérida | | | | |
+| 10 | *(sucursal SG)* | CDMX | | | | |

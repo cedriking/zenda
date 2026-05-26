@@ -1,256 +1,256 @@
 import type {
   AppointmentStatus,
-  ConversationMode,
-  WhatsAppConnectionStatus,
-  PlanTier,
   BillingPeriod,
+  ConversationMode,
+  Language,
   MessageContentType,
   MessageStatus,
-  SenderType,
   NotificationType,
-  Language,
-} from './enums.js'
+  PlanTier,
+  SenderType,
+  WhatsAppConnectionStatus,
+} from "./enums.js";
 
 // --- Auth DTOs ---
 
 export interface LoginRequest {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface LoginResponse {
-  accessToken: string
-  refreshToken: string
+  accessToken: string;
+  refreshToken: string;
   user: {
-    id: string
-    email: string
-    name: string
-  }
+    id: string;
+    email: string;
+    name: string;
+  };
   workspace: {
-    id: string
-    name: string
-    slug: string
-    planTier: PlanTier
-    onboardingStep: string
-  }
+    id: string;
+    name: string;
+    slug: string;
+    planTier: PlanTier;
+    onboardingStep: string;
+  };
 }
 
 export interface SignupRequest {
-  name: string
-  email: string
-  password: string
-  businessName: string
+  businessName: string;
+  email: string;
+  name: string;
+  password: string;
 }
 
-export type SignupResponse = LoginResponse
+export type SignupResponse = LoginResponse;
 
 export interface RefreshTokenRequest {
-  refreshToken: string
+  refreshToken: string;
 }
 
 export interface RefreshTokenResponse {
-  accessToken: string
-  refreshToken: string
+  accessToken: string;
+  refreshToken: string;
 }
 
 // --- Workspace DTOs ---
 
 export interface UpdateWorkspaceRequest {
-  name?: string
-  timezone?: string
-  country?: string
-  defaultLanguage?: Language
+  country?: string;
+  defaultLanguage?: Language;
+  name?: string;
+  timezone?: string;
 }
 
 // --- Appointment DTOs ---
 
 export interface CreateAppointmentRequest {
-  customerId: string
-  serviceId: string
-  staffMemberId?: string
-  startAt: string
-  timezone: string
-  sourceConversationId?: string
-  createdBy?: 'ai' | 'owner'
+  createdBy?: "ai" | "owner";
+  customerId: string;
+  serviceId: string;
+  sourceConversationId?: string;
+  staffMemberId?: string;
+  startAt: string;
+  timezone: string;
 }
 
 export interface UpdateAppointmentStatusRequest {
-  status: AppointmentStatus
-  notes?: string
+  notes?: string;
+  status: AppointmentStatus;
 }
 
 export interface RescheduleAppointmentRequest {
-  newStartAt: string
-  staffMemberId?: string
+  newStartAt: string;
+  staffMemberId?: string;
 }
 
 // --- Conversation DTOs ---
 
 export interface UpdateConversationModeRequest {
-  mode: ConversationMode
+  mode: ConversationMode;
 }
 
 export interface SendMessageRequest {
-  body: string
-  contentType?: MessageContentType
+  body: string;
+  contentType?: MessageContentType;
 }
 
 // --- Business DTOs ---
 
 export interface UpdateBusinessProfileRequest {
-  name?: string
-  category?: string
-  description?: string
-  location?: string
-  cancellationPolicy?: string
-  refundPolicy?: string
-  priceDisplayPreference?: 'show' | 'hide' | 'on_request'
+  cancellationPolicy?: string;
+  category?: string;
+  description?: string;
+  location?: string;
+  name?: string;
+  priceDisplayPreference?: "show" | "hide" | "on_request";
+  refundPolicy?: string;
 }
 
 export interface UpdateReceptionistProfileRequest {
-  name?: string
-  tone?: string
-  greetingTemplate?: string
+  greetingTemplate?: string;
+  name?: string;
+  tone?: string;
 }
 
 // --- Service DTOs ---
 
 export interface CreateServiceRequest {
-  name: string
-  description?: string
-  durationMinutes: number
-  priceCents?: number
+  description?: string;
+  durationMinutes: number;
+  name: string;
+  priceCents?: number;
 }
 
 export interface UpdateServiceRequest {
-  name?: string
-  description?: string
-  durationMinutes?: number
-  priceCents?: number
-  active?: boolean
+  active?: boolean;
+  description?: string;
+  durationMinutes?: number;
+  name?: string;
+  priceCents?: number;
 }
 
 // --- Staff DTOs ---
 
 export interface CreateStaffMemberRequest {
-  name: string
-  serviceIds?: string[]
+  name: string;
+  serviceIds?: string[];
 }
 
 export interface UpdateStaffMemberRequest {
-  name?: string
-  serviceIds?: string[]
-  active?: boolean
+  active?: boolean;
+  name?: string;
+  serviceIds?: string[];
 }
 
 // --- Availability DTOs ---
 
 export interface CreateAvailabilityRuleRequest {
-  staffMemberId?: string
-  dayOfWeek: number
-  startTime: string
-  endTime: string
-  available: boolean
+  available: boolean;
+  dayOfWeek: number;
+  endTime: string;
+  staffMemberId?: string;
+  startTime: string;
 }
 
 export interface UpdateAvailabilityRuleRequest {
-  startTime?: string
-  endTime?: string
-  available?: boolean
+  available?: boolean;
+  endTime?: string;
+  startTime?: string;
 }
 
 // --- Billing DTOs ---
 
 export interface CreateCheckoutRequest {
-  planTier: PlanTier
-  billingPeriod: BillingPeriod
+  billingPeriod: BillingPeriod;
+  planTier: PlanTier;
 }
 
 export interface CreateCheckoutResponse {
-  checkoutUrl: string
-  sessionId: string
+  checkoutUrl: string;
+  sessionId: string;
 }
 
 // --- Usage DTOs ---
 
 export interface UsageResponse {
-  conversations: { used: number; limit: number; percentage: number }
-  appointments: { used: number; limit: number; percentage: number }
-  voiceMinutes: { used: number; limit: number; percentage: number }
-  staff: { used: number; limit: number }
-  periodStart: string
-  periodEnd: string
+  appointments: { used: number; limit: number; percentage: number };
+  conversations: { used: number; limit: number; percentage: number };
+  periodEnd: string;
+  periodStart: string;
+  staff: { used: number; limit: number };
+  voiceMinutes: { used: number; limit: number; percentage: number };
 }
 
 // --- WebSocket Events ---
 
 export interface WSMessageEvent {
-  type: 'whatsapp.message'
   data: {
-    phoneNumber: string
-    body: string
-    contentType: MessageContentType
-    mediaUrl?: string
-    timestamp: string
-    externalMessageId?: string
-  }
+    phoneNumber: string;
+    body: string;
+    contentType: MessageContentType;
+    mediaUrl?: string;
+    timestamp: string;
+    externalMessageId?: string;
+  };
+  type: "whatsapp.message";
 }
 
 export interface WSStatusEvent {
-  type: 'whatsapp.status'
   data: {
-    status: WhatsAppConnectionStatus
-    phoneNumber?: string
-  }
+    status: WhatsAppConnectionStatus;
+    phoneNumber?: string;
+  };
+  type: "whatsapp.status";
 }
 
 export interface WSResponseEvent {
-  type: 'response.send'
   data: {
-    conversationId: string
+    conversationId: string;
     message: {
-      id: string
-      body: string
-      senderType: SenderType
-      contentType: MessageContentType
-      status: MessageStatus
-      createdAt: string
-    }
-    phoneNumber: string
-  }
+      id: string;
+      body: string;
+      senderType: SenderType;
+      contentType: MessageContentType;
+      status: MessageStatus;
+      createdAt: string;
+    };
+    phoneNumber: string;
+  };
+  type: "response.send";
 }
 
 export interface WSNotificationEvent {
-  type: 'notification'
   data: {
-    id: string
-    type: NotificationType
-    title: string
-    body: string
-    createdAt: string
-  }
+    id: string;
+    type: NotificationType;
+    title: string;
+    body: string;
+    createdAt: string;
+  };
+  type: "notification";
 }
 
 export interface WSConversationUpdateEvent {
-  type: 'conversation.update'
   data: {
-    id: string
-    mode: ConversationMode
-    lastMessageAt: string
-    needsAttentionReason: string | null
-  }
+    id: string;
+    mode: ConversationMode;
+    lastMessageAt: string;
+    needsAttentionReason: string | null;
+  };
+  type: "conversation.update";
 }
 
 export interface WSAppointmentUpdateEvent {
-  type: 'appointment.update'
   data: {
-    id: string
-    status: AppointmentStatus
-    startAt: string
-    endAt: string
-    customerId: string
-    serviceId: string
-  }
+    id: string;
+    status: AppointmentStatus;
+    startAt: string;
+    endAt: string;
+    customerId: string;
+    serviceId: string;
+  };
+  type: "appointment.update";
 }
 
 export type WSEvent =
@@ -259,14 +259,14 @@ export type WSEvent =
   | WSResponseEvent
   | WSNotificationEvent
   | WSConversationUpdateEvent
-  | WSAppointmentUpdateEvent
+  | WSAppointmentUpdateEvent;
 
 // --- Pagination ---
 
 export interface PaginatedResponse<T> {
-  data: T[]
-  total: number
-  page: number
-  pageSize: number
-  hasMore: boolean
+  data: T[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+  total: number;
 }

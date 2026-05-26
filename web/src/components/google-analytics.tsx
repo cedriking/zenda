@@ -4,11 +4,12 @@ import Script from "next/script";
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 const GOOGLE_ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
-const GOOGLE_ADS_SIGNUP_LABEL =
-  process.env.NEXT_PUBLIC_GOOGLE_ADS_SIGNUP_LABEL;
+const GOOGLE_ADS_SIGNUP_LABEL = process.env.NEXT_PUBLIC_GOOGLE_ADS_SIGNUP_LABEL;
 
 export function GoogleAnalytics() {
-  if (!GA_MEASUREMENT_ID) return null;
+  if (!GA_MEASUREMENT_ID) {
+    return null;
+  }
 
   return (
     <>
@@ -32,14 +33,16 @@ export function GoogleAnalytics() {
 }
 
 function trackEvent(action: string, params?: Record<string, string>) {
-  if (typeof window === "undefined" || !GA_MEASUREMENT_ID) return;
+  if (typeof window === "undefined" || !GA_MEASUREMENT_ID) {
+    return;
+  }
   const w = window as unknown as { gtag?: (...args: unknown[]) => void };
   if (w.gtag) {
     w.gtag("event", action, params);
   }
 }
 
-export function trackSignup(method: string = "email") {
+export function trackSignup(method = "email") {
   trackEvent("sign_up", { method });
 }
 
@@ -49,8 +52,9 @@ export function trackAdsConversion() {
     typeof window === "undefined" ||
     !GOOGLE_ADS_ID ||
     !GOOGLE_ADS_SIGNUP_LABEL
-  )
+  ) {
     return;
+  }
   const w = window as unknown as { gtag?: (...args: unknown[]) => void };
   if (w.gtag) {
     w.gtag("event", "conversion", {

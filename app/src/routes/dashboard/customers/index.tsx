@@ -109,7 +109,9 @@ export default function CustomersPage() {
           {t("customer.listingTitle")}
         </h2>
         <span className="text-muted-foreground text-sm">
-          {t("customer.customerCount", "{{count}} customer(s)", { count: filtered.length })}
+          {t("customer.customerCount", "{{count}} customer(s)", {
+            count: filtered.length,
+          })}
         </span>
       </div>
 

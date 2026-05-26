@@ -50,16 +50,29 @@ export default function AppointmentSettingsPage() {
 
   async function handleSave() {
     if (settings.cancellationWindowHours < 0) {
-      setSaveError(t("settings.appointments.errors.cancellationWindow", "Cancellation window must be 0 or more hours"));
+      setSaveError(
+        t(
+          "settings.appointments.errors.cancellationWindow",
+          "Cancellation window must be 0 or more hours"
+        )
+      );
       return;
     }
     if (settings.reschedulingWindowHours < 0) {
-      setSaveError(t("settings.appointments.errors.reschedulingWindow", "Rescheduling window must be 0 or more hours"));
+      setSaveError(
+        t(
+          "settings.appointments.errors.reschedulingWindow",
+          "Rescheduling window must be 0 or more hours"
+        )
+      );
       return;
     }
     if (settings.depositRequired && settings.depositAmountCents <= 0) {
       setSaveError(
-        t("settings.appointments.errors.depositAmount", "Deposit amount must be greater than 0 when deposits are required")
+        t(
+          "settings.appointments.errors.depositAmount",
+          "Deposit amount must be greater than 0 when deposits are required"
+        )
       );
       return;
     }
@@ -127,12 +140,18 @@ export default function AppointmentSettingsPage() {
         {/* Window Settings */}
         <div>
           <h3 className="mb-4 font-semibold text-base text-foreground">
-            {t("settings.appointments.windowsTitle", "Cancellation & Rescheduling Windows")}
+            {t(
+              "settings.appointments.windowsTitle",
+              "Cancellation & Rescheduling Windows"
+            )}
           </h3>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
               <label className="mb-1 block font-medium text-foreground text-sm">
-                {t("settings.appointments.cancellationWindowLabel", "Cancellation window (hours)")}
+                {t(
+                  "settings.appointments.cancellationWindowLabel",
+                  "Cancellation window (hours)"
+                )}
               </label>
               <input
                 className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
@@ -147,13 +166,19 @@ export default function AppointmentSettingsPage() {
                 value={settings.cancellationWindowHours}
               />
               <p className="mt-1 text-muted-foreground text-xs">
-                {t("settings.appointments.cancellationWindowDesc", "Minimum hours before an appointment that cancellation is allowed")}
+                {t(
+                  "settings.appointments.cancellationWindowDesc",
+                  "Minimum hours before an appointment that cancellation is allowed"
+                )}
               </p>
             </div>
 
             <div>
               <label className="mb-1 block font-medium text-foreground text-sm">
-                {t("settings.appointments.reschedulingWindowLabel", "Rescheduling window (hours)")}
+                {t(
+                  "settings.appointments.reschedulingWindowLabel",
+                  "Rescheduling window (hours)"
+                )}
               </label>
               <input
                 className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
@@ -168,7 +193,10 @@ export default function AppointmentSettingsPage() {
                 value={settings.reschedulingWindowHours}
               />
               <p className="mt-1 text-muted-foreground text-xs">
-                {t("settings.appointments.reschedulingWindowDesc", "Minimum hours before an appointment that rescheduling is allowed")}
+                {t(
+                  "settings.appointments.reschedulingWindowDesc",
+                  "Minimum hours before an appointment that rescheduling is allowed"
+                )}
               </p>
             </div>
           </div>
@@ -177,7 +205,10 @@ export default function AppointmentSettingsPage() {
         {/* Policy Strictness */}
         <div>
           <label className="mb-1 block font-medium text-foreground text-sm">
-            {t("settings.appointments.policyStrictnessLabel", "Cancellation policy strictness")}
+            {t(
+              "settings.appointments.policyStrictnessLabel",
+              "Cancellation policy strictness"
+            )}
           </label>
           <select
             className="w-full max-w-xs rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
@@ -189,22 +220,43 @@ export default function AppointmentSettingsPage() {
             }
             value={settings.cancellationPolicyStrictness}
           >
-            <option value="flexible">{t("settings.appointments.flexible", "Flexible")}</option>
-            <option value="moderate">{t("settings.appointments.moderate", "Moderate")}</option>
-            <option value="strict">{t("settings.appointments.strict", "Strict")}</option>
+            <option value="flexible">
+              {t("settings.appointments.flexible", "Flexible")}
+            </option>
+            <option value="moderate">
+              {t("settings.appointments.moderate", "Moderate")}
+            </option>
+            <option value="strict">
+              {t("settings.appointments.strict", "Strict")}
+            </option>
           </select>
           <div className="mt-2 space-y-1 text-muted-foreground text-xs">
             <p>
-              <span className="font-medium text-foreground">{t("settings.appointments.flexible", "Flexible")}:</span>{" "}
-              {t("settings.appointments.flexibleDesc", "Customers can cancel anytime with a full refund")}
+              <span className="font-medium text-foreground">
+                {t("settings.appointments.flexible", "Flexible")}:
+              </span>{" "}
+              {t(
+                "settings.appointments.flexibleDesc",
+                "Customers can cancel anytime with a full refund"
+              )}
             </p>
             <p>
-              <span className="font-medium text-foreground">{t("settings.appointments.moderate", "Moderate")}:</span>{" "}
-              {t("settings.appointments.moderateDesc", "Cancellations within the window may incur a partial charge")}
+              <span className="font-medium text-foreground">
+                {t("settings.appointments.moderate", "Moderate")}:
+              </span>{" "}
+              {t(
+                "settings.appointments.moderateDesc",
+                "Cancellations within the window may incur a partial charge"
+              )}
             </p>
             <p>
-              <span className="font-medium text-foreground">{t("settings.appointments.strict", "Strict")}:</span>{" "}
-              {t("settings.appointments.strictDesc", "No refunds for cancellations within the window")}
+              <span className="font-medium text-foreground">
+                {t("settings.appointments.strict", "Strict")}:
+              </span>{" "}
+              {t(
+                "settings.appointments.strictDesc",
+                "No refunds for cancellations within the window"
+              )}
             </p>
           </div>
         </div>
@@ -217,7 +269,10 @@ export default function AppointmentSettingsPage() {
                 {t("settings.appointments.requireDeposit", "Require deposit")}
               </span>
               <p className="text-muted-foreground text-xs">
-                {t("settings.appointments.requireDepositDesc", "Charge a deposit when customers book appointments")}
+                {t(
+                  "settings.appointments.requireDepositDesc",
+                  "Charge a deposit when customers book appointments"
+                )}
               </p>
             </div>
             <button
@@ -242,7 +297,10 @@ export default function AppointmentSettingsPage() {
           {settings.depositRequired && (
             <div className="pl-4">
               <label className="mb-1 block font-medium text-foreground text-sm">
-                {t("settings.appointments.depositAmountLabel", "Deposit amount ($)")}
+                {t(
+                  "settings.appointments.depositAmountLabel",
+                  "Deposit amount ($)"
+                )}
               </label>
               <input
                 className="w-full max-w-xs rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
@@ -265,42 +323,63 @@ export default function AppointmentSettingsPage() {
         {/* Policy Texts */}
         <div className="space-y-4">
           <h3 className="font-semibold text-base text-foreground">
-            {t("settings.appointments.policyTextTitle", "Customer-Facing Policy Text")}
+            {t(
+              "settings.appointments.policyTextTitle",
+              "Customer-Facing Policy Text"
+            )}
           </h3>
 
           <div>
             <label className="mb-1 block font-medium text-foreground text-sm">
-              {t("settings.appointments.cancellationMessageLabel", "Approved cancellation message")}
+              {t(
+                "settings.appointments.cancellationMessageLabel",
+                "Approved cancellation message"
+              )}
             </label>
             <textarea
               className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
               onChange={(e) =>
                 updateField("approvedCancellationText", e.target.value)
               }
-              placeholder={t("settings.appointments.cancellationMessagePlaceholder", "e.g., Your appointment has been cancelled. We hope to see you again soon!")}
+              placeholder={t(
+                "settings.appointments.cancellationMessagePlaceholder",
+                "e.g., Your appointment has been cancelled. We hope to see you again soon!"
+              )}
               rows={3}
               value={settings.approvedCancellationText}
             />
             <p className="mt-1 text-muted-foreground text-xs">
-              {t("settings.appointments.cancellationMessageDesc", "Message sent to the customer when their cancellation is approved")}
+              {t(
+                "settings.appointments.cancellationMessageDesc",
+                "Message sent to the customer when their cancellation is approved"
+              )}
             </p>
           </div>
 
           <div>
             <label className="mb-1 block font-medium text-foreground text-sm">
-              {t("settings.appointments.refundMessageLabel", "Approved refund message")}
+              {t(
+                "settings.appointments.refundMessageLabel",
+                "Approved refund message"
+              )}
             </label>
             <textarea
               className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
               onChange={(e) =>
                 updateField("approvedRefundText", e.target.value)
               }
-              placeholder={t("settings.appointments.refundMessagePlaceholder", "e.g., A refund of {amount} has been issued and will appear in 3-5 business days.")}
+              placeholder={t(
+                "settings.appointments.refundMessagePlaceholder",
+                "e.g., A refund of {amount} has been issued and will appear in 3-5 business days."
+              )}
               rows={3}
               value={settings.approvedRefundText}
             />
             <p className="mt-1 text-muted-foreground text-xs">
-              {t("settings.appointments.refundMessageDesc", "Message sent when a refund is approved. Use {{amount}} as a placeholder for the refund value")}
+              {t(
+                "settings.appointments.refundMessageDesc",
+                "Message sent when a refund is approved. Use {{amount}} as a placeholder for the refund value"
+              )}
             </p>
           </div>
         </div>

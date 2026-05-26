@@ -695,5 +695,24 @@
     "ctaTitle": "Ready to stop missing appointments?",
     "ctaDesc": "14-day free trial. No credit card. Works with your existing WhatsApp.",
     "ctaButton": "Start free trial"
+  },
+  "Partners": {
+    "formErrorRequired": "Name and email are required",
+    "formErrorGeneric": "Registration failed. Please try again.",
+    "signupSuccessTitle": "Welcome to the partner program",
+    "signupSuccessDescription": "Your referral code is ready. Share it and earn 20% for each customer.",
+    "yourReferralCode": "Your referral code",
+    "yourReferralLink": "Your referral link",
+    "copied": "Copied",
+    "copy": "Copy",
+    "testYourLink": "Test your link",
+    "fieldName": "Name",
+    "fieldNamePlaceholder": "Your full name",
+    "fieldEmail": "Email",
+    "fieldWebsite": "Website or social media",
+    "fieldHowRefer": "How do you plan to refer customers?",
+    "fieldHowReferPlaceholder": "E.g., My network, my agency, my community...",
+    "submitting": "Registering...",
+    "submitCta": "Get my referral code"
   }
 }

@@ -172,7 +172,10 @@ export async function runAgent(
         chatMessages.push({ role: "user", content: msg.body });
       } else if (msg.senderType === "ai") {
         // Include AI messages that may carry tool_calls in their metadata
-        const assistantMsg: Record<string, unknown> = { role: "assistant", content: msg.body };
+        const assistantMsg: Record<string, unknown> = {
+          role: "assistant",
+          content: msg.body,
+        };
         // Reconstruct tool_calls from metadata if present
         const toolCallsData = (msg as Record<string, unknown>).toolCalls;
         if (Array.isArray(toolCallsData)) {
@@ -217,11 +220,16 @@ export async function runAgent(
 
       // Timeout guard: break if the loop has been running too long
       if (Date.now() - loopStartTime > AGENT_LOOP_TIMEOUT_MS) {
-        logger.warn("Agent loop timeout exceeded", { workspaceId, conversationId, iterations });
+        logger.warn("Agent loop timeout exceeded", {
+          workspaceId,
+          conversationId,
+          iterations,
+        });
         return {
-          text: language === "es"
-            ? "Lo siento, estoy tardando demasiado en procesar tu solicitud. Un momento por favor."
-            : "I'm sorry, I'm taking too long to process your request. Please try again shortly.",
+          text:
+            language === "es"
+              ? "Lo siento, estoy tardando demasiado en procesar tu solicitud. Un momento por favor."
+              : "I'm sorry, I'm taking too long to process your request. Please try again shortly.",
           language,
           provider: "system",
           model: "timeout-fallback",
@@ -236,7 +244,10 @@ export async function runAgent(
         chatMessages.length = 0;
         chatMessages.push(systemMsg);
         chatMessages.push(...trimmed);
-        logger.debug("Agent context trimmed", { workspaceId, messageCount: chatMessages.length });
+        logger.debug("Agent context trimmed", {
+          workspaceId,
+          messageCount: chatMessages.length,
+        });
       }
 
       // Add assistant's tool call message with tool_calls for API compatibility

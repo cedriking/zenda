@@ -102,7 +102,7 @@ const pendingAuth = new WeakMap<object, { authenticated: false }>();
 // Prevents non-auth messages from being treated as auth failures.
 const pendingVerification = new WeakMap<object, boolean>();
 
-const AUTH_TIMEOUT_MS = 5_000;
+const AUTH_TIMEOUT_MS = 5000;
 
 async function verifyWsToken(
   token: string
@@ -177,7 +177,9 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
         recordWsAuthFailure(ip);
         logger.warn("WS auth: invalid JSON in first message", { ip });
         pendingAuth.delete(raw);
-        if (authTimer) clearTimeout(authTimer);
+        if (authTimer) {
+          clearTimeout(authTimer);
+        }
         ws.close(4003, "Invalid auth message");
         return;
       }
@@ -190,7 +192,9 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
           type: payload.type,
         });
         pendingAuth.delete(raw);
-        if (authTimer) clearTimeout(authTimer);
+        if (authTimer) {
+          clearTimeout(authTimer);
+        }
         ws.close(4003, "Expected auth message as first message");
         return;
       }
@@ -204,7 +208,7 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
         .then((result) => {
           pendingVerification.delete(raw);
 
-          if (!result?.sub || !result?.workspaceId) {
+          if (!(result?.sub && result?.workspaceId)) {
             recordWsAuthFailure(ip);
             logger.warn("WS auth: token verification failed", {
               ip,
@@ -221,7 +225,9 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
 
           logger.info("WebSocket authenticated", { workspaceId, userId });
           pendingAuth.delete(raw);
-          if (authTimer) clearTimeout(authTimer);
+          if (authTimer) {
+            clearTimeout(authTimer);
+          }
 
           // biome-ignore lint/suspicious/noExplicitAny: Elysia WS types don't expose internal fields
           addConnection(workspaceId, ws as any);
@@ -239,7 +245,9 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
           pendingVerification.delete(raw);
           recordWsAuthFailure(ip);
           pendingAuth.delete(raw);
-          if (authTimer) clearTimeout(authTimer);
+          if (authTimer) {
+            clearTimeout(authTimer);
+          }
           ws.close(4003, "Token verification error");
         });
 
@@ -386,7 +394,9 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
       const authTimer = (raw as Record<string, unknown>).__authTimer as
         | ReturnType<typeof setTimeout>
         | undefined;
-      if (authTimer) clearTimeout(authTimer);
+      if (authTimer) {
+        clearTimeout(authTimer);
+      }
       pendingAuth.delete(raw);
     }
 

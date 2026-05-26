@@ -151,7 +151,12 @@ export default function ConversationDetailPage() {
       await updateMode(id, "human_takeover");
     } catch (err) {
       setModeError(
-        err instanceof Error ? err.message : t("conversation.errors.takeoverFailed", "Failed to take over conversation")
+        err instanceof Error
+          ? err.message
+          : t(
+              "conversation.errors.takeoverFailed",
+              "Failed to take over conversation"
+            )
       );
       if (previousMode) {
         updateMode(id, previousMode).catch(() => {});
@@ -166,7 +171,12 @@ export default function ConversationDetailPage() {
       await updateMode(id, "auto");
     } catch (err) {
       setModeError(
-        err instanceof Error ? err.message : t("conversation.errors.returnToAutoFailed", "Failed to return to auto mode")
+        err instanceof Error
+          ? err.message
+          : t(
+              "conversation.errors.returnToAutoFailed",
+              "Failed to return to auto mode"
+            )
       );
       if (previousMode) {
         updateMode(id, previousMode).catch(() => {});
@@ -220,7 +230,10 @@ export default function ConversationDetailPage() {
               </h3>
               <button
                 aria-expanded={showCustomerInfo}
-                aria-label={t("conversation.toggleCustomerInfo", "Toggle customer information")}
+                aria-label={t(
+                  "conversation.toggleCustomerInfo",
+                  "Toggle customer information"
+                )}
                 className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 onClick={() => setShowCustomerInfo((prev) => !prev)}
               >
@@ -318,7 +331,9 @@ export default function ConversationDetailPage() {
                     ? t("conversations.langSpanish")
                     : (conv?.customerLanguage ?? conv?.language) === "en"
                       ? t("conversations.langEnglish")
-                      : (conv?.customerLanguage ?? conv?.language ?? t("common.unknown", "Unknown"))}
+                      : (conv?.customerLanguage ??
+                        conv?.language ??
+                        t("common.unknown", "Unknown"))}
                 </p>
               </div>
             </div>

@@ -20,5 +20,5 @@ export function detectLanguage(text: string): Language | undefined {
     return "es";
   }
 
-  return undefined;
+  return;
 }

@@ -33,28 +33,25 @@ interface AvailabilityRule {
   closeTime: string;
   dayOfWeek: number;
   enabled: boolean;
+  endTime: string;
   id: string;
   openTime: string;
   slotDurationMinutes: number;
   startTime: string;
-  endTime: string;
 }
 
 export default function SettingsPage() {
   const { t } = useTranslation();
   const [tab, setTab] = useState<TabId>("business");
-  const [businessProfile, setBusinessProfile] = useState<BusinessProfile>(
-    { name: "" }
-  );
-  const [receptionistProfile, setReceptionistProfile] = useState<
-    ReceptionistProfile
-  >({ name: "" });
-  const [lastSavedBusiness, setLastSavedBusiness] = useState<
-    BusinessProfile | null
-  >(null);
-  const [lastSavedReceptionist, setLastSavedReceptionist] = useState<
-    ReceptionistProfile | null
-  >(null);
+  const [businessProfile, setBusinessProfile] = useState<BusinessProfile>({
+    name: "",
+  });
+  const [receptionistProfile, setReceptionistProfile] =
+    useState<ReceptionistProfile>({ name: "" });
+  const [lastSavedBusiness, setLastSavedBusiness] =
+    useState<BusinessProfile | null>(null);
+  const [lastSavedReceptionist, setLastSavedReceptionist] =
+    useState<ReceptionistProfile | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -82,7 +79,10 @@ export default function SettingsPage() {
     // biome-ignore lint: exhaustive-deps - t is stable after init
   }, [t]);
 
-  const handleSave = async (endpoint: string, data: BusinessProfile | ReceptionistProfile) => {
+  const handleSave = async (
+    endpoint: string,
+    data: BusinessProfile | ReceptionistProfile
+  ) => {
     if (endpoint === "/business/profile" && !data.name?.trim()) {
       setSaveError(`${t("settings.businessName")} is required`);
       return;
@@ -538,6 +538,7 @@ function ServicesManager() {
     form.description,
     form.durationMinutes,
     form.priceCents,
+    t,
   ]);
 
   return (

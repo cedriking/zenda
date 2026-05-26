@@ -1,5 +1,8 @@
-import type { MessageSender } from '@zenda/shared'
-import { sendToWorkspace, isWorkspaceConnected } from '../modules/whatsapp/connection-manager.js'
+import type { MessageSender } from "@zenda/shared";
+import {
+  isWorkspaceConnected,
+  sendToWorkspace,
+} from "../modules/whatsapp/connection-manager.js";
 
 /**
  * Concrete MessageSender that delivers events over WebSocket.
@@ -8,10 +11,10 @@ import { sendToWorkspace, isWorkspaceConnected } from '../modules/whatsapp/conne
  */
 export const wsMessageSender: MessageSender = {
   send(workspaceId: string, data: unknown): boolean {
-    return sendToWorkspace(workspaceId, data)
+    return sendToWorkspace(workspaceId, data);
   },
 
   isConnected(workspaceId: string): boolean {
-    return isWorkspaceConnected(workspaceId)
+    return isWorkspaceConnected(workspaceId);
   },
-}
+};

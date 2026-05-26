@@ -11,7 +11,7 @@
  */
 import { describe, expect, test } from "bun:test";
 import { Elysia } from "elysia";
-import { SignJWT, jwtVerify } from "jose";
+import { jwtVerify, SignJWT } from "jose";
 
 const jwtSecret = new TextEncoder().encode("test-jwt-secret-integration");
 
@@ -36,11 +36,17 @@ function connectWs(port: number, path: string): Promise<WebSocket> {
 }
 
 /** Helper to wait for a WebSocket close event */
-function waitForClose(ws: WebSocket): Promise<{ code: number; reason: string }> {
+function waitForClose(
+  ws: WebSocket
+): Promise<{ code: number; reason: string }> {
   return new Promise((resolve) => {
-    ws.addEventListener("close", (ev) => {
-      resolve({ code: ev.code, reason: ev.reason });
-    }, { once: true });
+    ws.addEventListener(
+      "close",
+      (ev) => {
+        resolve({ code: ev.code, reason: ev.reason });
+      },
+      { once: true }
+    );
   });
 }
 
@@ -84,7 +90,10 @@ describe("Elysia WS integration — WeakMap by ws.raw", () => {
   });
 
   test("WeakMap keyed by ws.raw survives across events", async () => {
-    const wsMeta = new WeakMap<object, { workspaceId: string; pongCount: number }>();
+    const wsMeta = new WeakMap<
+      object,
+      { workspaceId: string; pongCount: number }
+    >();
     const messageResults: string[] = [];
 
     const app = new Elysia().ws("/ws", {
@@ -162,7 +171,10 @@ describe("Elysia WS integration — WeakMap by ws.raw", () => {
         }
 
         try {
-          const { payload: jwtPayload } = await jwtVerify(tokenParam, jwtSecret);
+          const { payload: jwtPayload } = await jwtVerify(
+            tokenParam,
+            jwtSecret
+          );
           const workspaceId = jwtPayload.workspaceId as string;
           const userId = jwtPayload.sub as string;
 
@@ -171,7 +183,11 @@ describe("Elysia WS integration — WeakMap by ws.raw", () => {
           wsMeta.set(raw, {
             workspaceId,
             userId,
-            heartbeat: { pong: () => { isAlive = true; } },
+            heartbeat: {
+              pong: () => {
+                isAlive = true;
+              },
+            },
           });
         } catch {
           ws.close(4003, "Invalid token");
@@ -180,7 +196,9 @@ describe("Elysia WS integration — WeakMap by ws.raw", () => {
       message(ws, rawMessage) {
         const raw = (ws as { raw: object }).raw;
         const meta = wsMeta.get(raw);
-        if (!meta) return;
+        if (!meta) {
+          return;
+        }
 
         const parsed = JSON.parse(rawMessage as string);
         if (parsed.type === "pong") {

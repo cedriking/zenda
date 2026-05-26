@@ -51,7 +51,7 @@ export default function CheckoutClient() {
     } else {
       router.replace("/pricing");
     }
-  }, [tier, founding, router]);
+  }, [tier, founding, router, period]);
 
   return (
     <div className="flex min-h-screen flex-col pt-16">

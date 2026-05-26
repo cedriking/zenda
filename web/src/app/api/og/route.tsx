@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
-import { taglines, features, cta } from "@/lib/og-data";
+import { cta, features, taglines } from "@/lib/og-data";
 
 export const runtime = "edge";
 

@@ -289,10 +289,16 @@ export async function processDueReminders(): Promise<number> {
   let sentCount = 0;
   const BATCH_SIZE = 10;
 
-  for (let batchStart = 0; batchStart < dueReminders.length; batchStart += BATCH_SIZE) {
+  for (
+    let batchStart = 0;
+    batchStart < dueReminders.length;
+    batchStart += BATCH_SIZE
+  ) {
     const batch = dueReminders.slice(batchStart, batchStart + BATCH_SIZE);
     const results = await Promise.allSettled(
-      batch.map((reminder: typeof reminders.$inferSelect) => processSingleReminder(reminder))
+      batch.map((reminder: typeof reminders.$inferSelect) =>
+        processSingleReminder(reminder)
+      )
     );
 
     for (const result of results) {
@@ -309,204 +315,203 @@ export async function processDueReminders(): Promise<number> {
  * Process a single reminder. Returns true if sent successfully.
  * On exception, increments retry count; after MAX_RETRIES, marks as failed.
  */
-async function processSingleReminder(reminder: typeof reminders.$inferSelect): Promise<boolean> {
+async function processSingleReminder(
+  reminder: typeof reminders.$inferSelect
+): Promise<boolean> {
   try {
-      // ── 1. Fetch appointment with all related data including consent ──
-      const [appointmentRow] = await db
-        .select({
-          appointment: appointments,
-          customer: customers,
-          service: services,
-          workspace: workspaces,
-          consent: messagingConsent,
-        })
-        .from(appointments)
-        .innerJoin(customers, eq(appointments.customerId, customers.id))
-        .innerJoin(services, eq(appointments.serviceId, services.id))
-        .innerJoin(workspaces, eq(appointments.workspaceId, workspaces.id))
-        .leftJoin(
-          messagingConsent,
-          eq(customers.id, messagingConsent.customerId)
-        )
-        .where(eq(appointments.id, reminder.appointmentId))
-        .limit(1);
+    // ── 1. Fetch appointment with all related data including consent ──
+    const [appointmentRow] = await db
+      .select({
+        appointment: appointments,
+        customer: customers,
+        service: services,
+        workspace: workspaces,
+        consent: messagingConsent,
+      })
+      .from(appointments)
+      .innerJoin(customers, eq(appointments.customerId, customers.id))
+      .innerJoin(services, eq(appointments.serviceId, services.id))
+      .innerJoin(workspaces, eq(appointments.workspaceId, workspaces.id))
+      .leftJoin(messagingConsent, eq(customers.id, messagingConsent.customerId))
+      .where(eq(appointments.id, reminder.appointmentId))
+      .limit(1);
 
-      if (!appointmentRow) {
-        logger.warn(
-          "Reminder references non-existent appointment, marking as failed",
-          {
-            reminderId: reminder.id,
-            appointmentId: reminder.appointmentId,
-          }
-        );
-        await db
-          .update(reminders)
-          .set({ status: "failed" })
-          .where(eq(reminders.id, reminder.id));
-        return false;
-      }
-
-      const {
-        appointment: apt,
-        customer: cust,
-        service: svc,
-        workspace: ws,
-      } = appointmentRow;
-
-      // Skip if appointment is already cancelled
-      if (apt.status === "cancelled") {
-        await db
-          .update(reminders)
-          .set({ status: "failed" })
-          .where(eq(reminders.id, reminder.id));
-        return false;
-      }
-
-      // ── 2. Reminder deduplication guard ──
-      const templateKey = pickTemplateKey(apt.startAt, reminder.scheduledAt);
-      const reminderType = pickReminderType(templateKey);
-
-      const guardResult = await canSendReminder(
-        apt.id,
-        reminderType,
-        apt.workspaceId
+    if (!appointmentRow) {
+      logger.warn(
+        "Reminder references non-existent appointment, marking as failed",
+        {
+          reminderId: reminder.id,
+          appointmentId: reminder.appointmentId,
+        }
       );
-      if (!guardResult.canSend) {
-        logger.info("Reminder blocked by guard", {
-          reminderId: reminder.id,
-          appointmentId: apt.id,
-          reason: guardResult.reason,
-        });
-        await db
-          .update(reminders)
-          .set({ status: "failed" })
-          .where(eq(reminders.id, reminder.id));
-        return false;
-      }
-
-      // ── 3. Sending policy engine check (via policy-gate) ──
-      const policyDecision = await checkSendingPolicy({
-        workspaceId: ws.id,
-        customerId: cust.id,
-        purpose: "appointment_reminder",
-        channel: "whatsapp_ba_bridge",
-        appointmentCancelled: (apt.status as string) === "cancelled",
-        appointmentCompleted: apt.status === "completed",
-        appointmentTimePassed: new Date(apt.startAt) < new Date(),
-        isDuplicate: false,
-        connectorSessionStable: true, // assume stable when processing reminders
-      });
-
-      if (!policyDecision.allowed) {
-        logger.info("Reminder blocked by sending policy", {
-          reminderId: reminder.id,
-          appointmentId: apt.id,
-          reason: policyDecision.reason,
-        });
-        await db
-          .update(reminders)
-          .set({ status: "failed" })
-          .where(eq(reminders.id, reminder.id));
-        return false;
-      }
-
-      // ── 4. Compose message with personality-adaptive templates (S15) ──
-      let personality: PersonalityPreset | null = null;
-      try {
-        const [profile] = await db
-          .select({ personalityPreset: receptionistProfiles.personalityPreset })
-          .from(receptionistProfiles)
-          .where(eq(receptionistProfiles.workspaceId, ws.id))
-          .limit(1);
-        personality = (profile?.personalityPreset as PersonalityPreset) ?? null;
-      } catch {
-        /* fallback to default personality */
-      }
-
-      const template = getTemplateForPersonality(personality, templateKey);
-      const language = (cust.language ?? ws.defaultLanguage) as Language;
-      const customerName = cust.name ?? cust.phoneNumber;
-      const tz = apt.timezone || ws.timezone;
-      const time = formatTime(apt.startAt, tz);
-      const date = formatDate(apt.startAt, tz);
-
-      const title = language === "es" ? template.titleEs : template.titleEn;
-      const body =
-        language === "es"
-          ? template.bodyEs({ customerName, serviceName: svc.name, time, date })
-          : template.bodyEn({
-              customerName,
-              serviceName: svc.name,
-              time,
-              date,
-            });
-
-      // ── 5. Send reminder ──
-      const delivered = wsMessageSender.send(ws.id, {
-        type: "whatsapp.message",
-        data: {
-          phoneNumber: cust.phoneNumber,
-          body,
-          contentType: "text",
-          timestamp: new Date().toISOString(),
-          reminderId: reminder.id,
-          appointmentId: apt.id,
-          title,
-        },
-      });
-
-      // ── 6. Update statuses ──
-      const newStatus = delivered ? "sent" : "failed";
       await db
         .update(reminders)
-        .set({
-          status: newStatus,
-          sentAt: delivered ? new Date() : null,
-        })
+        .set({ status: "failed" })
         .where(eq(reminders.id, reminder.id));
-
-      if (delivered) {
-        await db
-          .update(appointments)
-          .set({ reminderStatus: "sent", updatedAt: new Date() })
-          .where(eq(appointments.id, apt.id));
-
-        // Record in deduplication log and track outbound
-        await recordReminderSent(apt.id, reminderType);
-        await incrementOutbound(ws.id, cust.id, "appointment_reminder");
-      }
-
-      logger.info("Reminder processed", {
-        reminderId: reminder.id,
-        appointmentId: apt.id,
-        workspaceId: ws.id,
-        delivered,
-        language,
-        templateKey,
-      });
-
-      return delivered;
-    } catch (err) {
-      logger.error("Failed to send reminder", {
-        reminderId: reminder.id,
-        error: (err as Error).message,
-      });
-
-      // Increment retry count; mark as failed after MAX_RETRIES
-      const retryCount = (reminderRetryCount.get(reminder.id) ?? 0) + 1;
-      reminderRetryCount.set(reminder.id, retryCount);
-      if (retryCount >= MAX_RETRIES) {
-        await db
-          .update(reminders)
-          .set({ status: "failed" })
-          .where(eq(reminders.id, reminder.id));
-        reminderRetryCount.delete(reminder.id);
-        logger.warn("Reminder exceeded max retries, marking as failed", {
-          reminderId: reminder.id,
-          retryCount,
-        });
-      }
-
       return false;
     }
+
+    const {
+      appointment: apt,
+      customer: cust,
+      service: svc,
+      workspace: ws,
+    } = appointmentRow;
+
+    // Skip if appointment is already cancelled
+    if (apt.status === "cancelled") {
+      await db
+        .update(reminders)
+        .set({ status: "failed" })
+        .where(eq(reminders.id, reminder.id));
+      return false;
+    }
+
+    // ── 2. Reminder deduplication guard ──
+    const templateKey = pickTemplateKey(apt.startAt, reminder.scheduledAt);
+    const reminderType = pickReminderType(templateKey);
+
+    const guardResult = await canSendReminder(
+      apt.id,
+      reminderType,
+      apt.workspaceId
+    );
+    if (!guardResult.canSend) {
+      logger.info("Reminder blocked by guard", {
+        reminderId: reminder.id,
+        appointmentId: apt.id,
+        reason: guardResult.reason,
+      });
+      await db
+        .update(reminders)
+        .set({ status: "failed" })
+        .where(eq(reminders.id, reminder.id));
+      return false;
+    }
+
+    // ── 3. Sending policy engine check (via policy-gate) ──
+    const policyDecision = await checkSendingPolicy({
+      workspaceId: ws.id,
+      customerId: cust.id,
+      purpose: "appointment_reminder",
+      channel: "whatsapp_ba_bridge",
+      appointmentCancelled: (apt.status as string) === "cancelled",
+      appointmentCompleted: apt.status === "completed",
+      appointmentTimePassed: new Date(apt.startAt) < new Date(),
+      isDuplicate: false,
+      connectorSessionStable: true, // assume stable when processing reminders
+    });
+
+    if (!policyDecision.allowed) {
+      logger.info("Reminder blocked by sending policy", {
+        reminderId: reminder.id,
+        appointmentId: apt.id,
+        reason: policyDecision.reason,
+      });
+      await db
+        .update(reminders)
+        .set({ status: "failed" })
+        .where(eq(reminders.id, reminder.id));
+      return false;
+    }
+
+    // ── 4. Compose message with personality-adaptive templates (S15) ──
+    let personality: PersonalityPreset | null = null;
+    try {
+      const [profile] = await db
+        .select({ personalityPreset: receptionistProfiles.personalityPreset })
+        .from(receptionistProfiles)
+        .where(eq(receptionistProfiles.workspaceId, ws.id))
+        .limit(1);
+      personality = (profile?.personalityPreset as PersonalityPreset) ?? null;
+    } catch {
+      /* fallback to default personality */
+    }
+
+    const template = getTemplateForPersonality(personality, templateKey);
+    const language = (cust.language ?? ws.defaultLanguage) as Language;
+    const customerName = cust.name ?? cust.phoneNumber;
+    const tz = apt.timezone || ws.timezone;
+    const time = formatTime(apt.startAt, tz);
+    const date = formatDate(apt.startAt, tz);
+
+    const title = language === "es" ? template.titleEs : template.titleEn;
+    const body =
+      language === "es"
+        ? template.bodyEs({ customerName, serviceName: svc.name, time, date })
+        : template.bodyEn({
+            customerName,
+            serviceName: svc.name,
+            time,
+            date,
+          });
+
+    // ── 5. Send reminder ──
+    const delivered = wsMessageSender.send(ws.id, {
+      type: "whatsapp.message",
+      data: {
+        phoneNumber: cust.phoneNumber,
+        body,
+        contentType: "text",
+        timestamp: new Date().toISOString(),
+        reminderId: reminder.id,
+        appointmentId: apt.id,
+        title,
+      },
+    });
+
+    // ── 6. Update statuses ──
+    const newStatus = delivered ? "sent" : "failed";
+    await db
+      .update(reminders)
+      .set({
+        status: newStatus,
+        sentAt: delivered ? new Date() : null,
+      })
+      .where(eq(reminders.id, reminder.id));
+
+    if (delivered) {
+      await db
+        .update(appointments)
+        .set({ reminderStatus: "sent", updatedAt: new Date() })
+        .where(eq(appointments.id, apt.id));
+
+      // Record in deduplication log and track outbound
+      await recordReminderSent(apt.id, reminderType);
+      await incrementOutbound(ws.id, cust.id, "appointment_reminder");
+    }
+
+    logger.info("Reminder processed", {
+      reminderId: reminder.id,
+      appointmentId: apt.id,
+      workspaceId: ws.id,
+      delivered,
+      language,
+      templateKey,
+    });
+
+    return delivered;
+  } catch (err) {
+    logger.error("Failed to send reminder", {
+      reminderId: reminder.id,
+      error: (err as Error).message,
+    });
+
+    // Increment retry count; mark as failed after MAX_RETRIES
+    const retryCount = (reminderRetryCount.get(reminder.id) ?? 0) + 1;
+    reminderRetryCount.set(reminder.id, retryCount);
+    if (retryCount >= MAX_RETRIES) {
+      await db
+        .update(reminders)
+        .set({ status: "failed" })
+        .where(eq(reminders.id, reminder.id));
+      reminderRetryCount.delete(reminder.id);
+      logger.warn("Reminder exceeded max retries, marking as failed", {
+        reminderId: reminder.id,
+        retryCount,
+      });
+    }
+
+    return false;
+  }
 }

@@ -20,7 +20,6 @@ import { translationModule } from "./modules/ai/translation.js";
 import { analyticsModule } from "./modules/analytics/index.js";
 import { appointmentModule } from "./modules/appointment/index.js";
 import { processDueReminders } from "./modules/appointment/reminder-service.js";
-import { runHealthCheckCycle } from "./modules/monitoring/agent-health-monitor.js";
 import { authModule } from "./modules/auth/index.js";
 import { availabilityModule } from "./modules/availability/index.js";
 import { billingModule } from "./modules/billing/index.js";
@@ -32,10 +31,11 @@ import { conversationModule } from "./modules/conversation/index.js";
 import { composioModule } from "./modules/integrations/composio/index.js";
 import { knowledgeBaseModule } from "./modules/knowledge-base/index.js";
 import { messagingModule } from "./modules/messaging/index.js";
-import { partnersModule } from "./modules/partners/index.js";
+import { runHealthCheckCycle } from "./modules/monitoring/agent-health-monitor.js";
 import { monitoringModule } from "./modules/monitoring/index.js";
 import { notificationModule } from "./modules/notification/index.js";
 import { onboardingModule } from "./modules/onboarding/index.js";
+import { partnersModule } from "./modules/partners/index.js";
 import { queueModule } from "./modules/queue/index.js";
 import { serviceModule } from "./modules/service/index.js";
 import { settingsModule } from "./modules/settings/index.js";
@@ -339,10 +339,12 @@ async function runAgentHealthCycle() {
   try {
     const result = await runHealthCheckCycle();
     if (result.alerts > 0 || result.recovered > 0) {
-      logger.info('Agent health cycle completed', result);
+      logger.info("Agent health cycle completed", result);
     }
   } catch (err) {
-    logger.error('Agent health cycle failed', { error: (err as Error).message });
+    logger.error("Agent health cycle failed", {
+      error: (err as Error).message,
+    });
   }
 }
 

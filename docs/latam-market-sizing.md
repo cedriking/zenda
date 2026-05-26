@@ -1,159 +1,173 @@
-# Zenda LATAM Market Sizing & Go-to-Market Plan
+# Zenda — Tamaño de Mercado México
 
 ## TAM / SAM / SOM
 
 ### Total Addressable Market (TAM)
-- **Global appointment scheduling software:** $6.9B (2024), growing 12% CAGR → $12.2B by 2028
-- **LATAM share:** ~8% = $552M
-- **WhatsApp Business automation market:** $2.1B globally (2024), growing 25% CAGR
+- **Software de agendamiento global:** $6.9B (2024), creciendo 12% CAGR → $12.2B para 2028
+- **Automatización WhatsApp Business:** $2.1B global (2024), creciendo 25% CAGR
+- **Penetración de WhatsApp en México:** 93% de la población (vs 40% open rate de email)
 
-### Serviceable Addressable Market (SAM)
-Appointment-based businesses in LATAM that use WhatsApp:
-- Beauty salons: 2.5M businesses (Mexico 800K, Colombia 400K, Argentina 350K, Chile 200K, Peru 200K, others 550K)
-- Dental clinics: 250K (Mexico 80K, Colombia 35K, Argentina 30K, others 105K)
-- Fitness studios: 500K (gyms, yoga, CrossFit, martial arts)
-- Spas & wellness: 350K
-- Other appointment businesses (veterinary, legal, medical): 2M+
+### Serviceable Addressable Market (SAM) — México
+Negocios basados en citas en México que usan WhatsApp:
 
-**Total SAM: ~5.6M businesses**
-**SAM revenue at $49/mo avg:** $3.3B/year
+| Segmento | Cantidad | Fuente |
+|----------|----------|--------|
+| Salones de belleza / estéticas | 800,000+ | INEGI + datos de industria |
+| Barberías | 150,000+ | Crecimiento acelerado post-pandemia |
+| Spas y centros de bienestar | 50,000+ | AMEE (Asoc. Mex. de Espas) |
+| Clínicas dentales | 80,000+ | Asociación Dental Mexicana |
+| Estudios de uñas | 100,000+ | Mercado emergente de alta demanda |
+| Veterinarias | 30,000+ | Asociaciones veterinarias |
+| **Total SAM México** | **~1.2M negocios** | |
 
-### Serviceable Obtainable Market (SOM) — Year 1
-- **Target:** 1,000 paying customers in 12 months
-- **Revenue at $49/mo avg:** $588K ARR
-- **Market share:** 0.018% of SAM — highly achievable
+**SAM revenue a $49/mes promedio:** $705M USD/año ($12.2B MXN/año)
 
----
-
-## Target Segments (Priority Order)
-
-### Priority 1: Beauty Salons (Mexico + Colombia)
-- **Size:** 1.2M businesses
-- **Avg revenue:** $3,000-8,000 USD/mo
-- **WhatsApp usage:** 95%+ for client communication
-- **Pain level:** HIGH — 20-30% no-show rate, $1,500-4,800 USD/mo lost
-- **Willingness to pay:** $29-89/mo (0.4-1.1% of revenue)
-- **Acquisition channel:** Instagram ads, WhatsApp outreach, referrals
-
-### Priority 2: Dental Clinics (Mexico)
-- **Size:** 80K clinics
-- **Avg revenue:** $10,000-50,000 USD/mo
-- **WhatsApp usage:** 90%+ for appointment management
-- **Pain level:** VERY HIGH — $150-300 USD per no-show, $2,000-5,000/mo lost
-- **Willingness to pay:** $49-149/mo (0.1-0.3% of revenue)
-- **Acquisition channel:** Google Ads, dental conferences, referrals
-
-### Priority 3: Fitness Studios (Mexico + Colombia)
-- **Size:** 200K studios
-- **Avg revenue:** $5,000-20,000 USD/mo
-- **WhatsApp usage:** 85%+
-- **Pain level:** HIGH — class no-shows, member retention
-- **Willingness to pay:** $29-89/mo
-- **Acquisition channel:** Instagram, fitness influencers, referral program
+### Serviceable Obtainable Market (SOM) — Año 1
+- **Meta:** 1,000 clientes pagando en 12 meses
+- **Revenue a $49/mes promedio:** $588K USD ARR
+- **Participación de mercado:** 0.083% del SAM México — altamente alcanzable
 
 ---
 
-## Go-to-Market Channels (Ranked by ROI)
+## Segmentos Objetivo (Prioridad)
 
-### Tier 1: Highest ROI (Month 1-3)
-1. **Direct WhatsApp outreach** (Day 1 playbook already created)
-   - Cost: $0 (time only)
-   - Expected: 5-10 customers from 100 outreach messages
-   - Conversion rate: 5-10%
+### Prioridad 1: Salones de Belleza / Estéticas
+- **Tamaño:** 800K+ negocios en México
+- **Ingreso promedio:** $3,000-8,000 USD/mes ($52K-139K MXN)
+- **Uso de WhatsApp:** 95%+ para comunicación con clientas
+- **Nivel de dolor:** ALTO — 20-30% tasa de no-show, $1,500-4,800 USD/mes perdido
+- **Disposición a pagar:** $29-89/mes (0.4-1.1% de ingresos)
+- **Canal de adquisición:** WhatsApp outreach, Instagram, referidos, grupos de Facebook
+- **Por qué primero:** Mayor volumen, mayor uso de WhatsApp, dueño-operador = decisión rápida
 
-2. **Founding customer referrals**
-   - Cost: $0 or discount on next month
-   - Expected: 2-3 referrals per founding customer
-   - Viral coefficient target: 1.5
+### Prioridad 2: Barberías
+- **Tamaño:** 150K+ en México
+- **Ingreso promedio:** $2,000-5,000 USD/mes ($35K-87K MXN)
+- **Uso de WhatsApp:** 90%+ para agendar citas
+- **Nivel de dolor:** ALTO — cortan pelo y no pueden contestar el celular
+- **Disposición a pagar:** $29-49/mes
+- **Canal de adquisición:** WhatsApp outreach, Google Maps, referidos
+- **Por qué segundo:** Problema muy específico (manos ocupadas) = propuesta de valor clara
 
-3. **SEO content** (10 blog posts already live)
-   - Cost: $0 (already created)
-   - Expected: 500-1,000 organic visits/mo within 3 months
-   - Conversion rate: 2-3% → 10-30 signups/mo
+### Prioridad 3: Clínicas Dentales
+- **Tamaño:** 80K clínicas en México
+- **Ingreso promedio:** $10,000-50,000 USD/mes ($173K-868K MXN)
+- **Uso de WhatsApp:** 90%+ para gestión de citas
+- **Nivel de dolor:** MUY ALTO — $150-300 USD por cita perdida ($2,600-5,200 MXN)
+- **Disposición a pagar:** $49-149/mes (0.1-0.3% de ingresos)
+- **Canal de adquisición:** Google Ads, referidos, LinkedIn
+- **Por qué tercero:** Ticket más alto por cita = ROI más evidente
 
-### Tier 2: Medium ROI (Month 2-4)
-4. **Instagram Ads** ($5-10/day budget)
-   - Target: Beauty salon owners in Mexico City, Guadalajara, Monterrey
-   - Expected: 50-100 clicks/day, 2-5 signups/day
-   - CAC: $5-15 per signup
+### Prioridad 4: Spas / Centros de Bienestar
+- **Tamaño:** 50K+ en México
+- **Ingreso promedio:** $5,000-20,000 USD/mes
+- **Uso de WhatsApp:** 85%+
+- **Nivel de dolor:** ALTO — ticket alto por servicio = no-show muy costoso
+- **Disposición a pagar:** $29-89/mes
+- **Canal de adquisición:** Instagram, WhatsApp outreach, alianzas
 
-5. **Product Hunt launch** (plan already created)
-   - Cost: $0
-   - Expected: 100-500 signups on launch day
-   - Conversion to paid: 5-10%
-
-6. **Google Ads** (intent-based: "automatizar whatsapp negocio")
-   - Target: Business owners searching for WhatsApp automation
-   - Expected: High-intent traffic, 3-5% conversion
-   - CAC: $10-20 per signup
-
-### Tier 3: Longer-term (Month 4-12)
-7. **Dental/Beauty trade shows** (Mexico City)
-8. **YouTube tutorials** (WhatsApp automation for businesses)
-9. **Partnership with WhatsApp Business Solution Providers**
-10. **LinkedIn outreach** to multi-location business owners
-
----
-
-## Conversion Funnel Projections
-
-| Stage | Monthly Volume | Conversion | Notes |
-|-------|---------------|------------|-------|
-| Organic traffic | 1,000 | — | 10 blog posts + SEO |
-| Landing page visits | 800 | 80% | From all channels |
-| Signups (trial) | 40 | 5% | 14-day free trial |
-| Trial activation | 24 | 60% | Connected WhatsApp + added services |
-| Paid conversion | 8 | 33% | Within 14-day trial |
-| **Monthly new customers** | **8** | — | **$392 MRR** |
-
-**12-month projection (with compounding):**
-- Month 1: 8 customers ($392 MRR)
-- Month 6: 80 customers ($3,920 MRR)
-- Month 12: 300 customers ($14,700 MRR, $176K ARR)
+### Prioridad 5: Estudios de Uñas
+- **Tamaño:** 100K+ en México (mercado en rápido crecimiento)
+- **Ingreso promedio:** $2,000-6,000 USD/mes
+- **Uso de WhatsApp:** 95%+
+- **Nivel de dolor:** ALTO — citas repetitivas, clientela fiel, muchas cancelaciones
+- **Disposición a pagar:** $29-49/mes
+- **Canal:** Instagram, referidos
 
 ---
 
-## Revenue Targets
+## Canales de Go-to-Market (Por ROI)
 
-| Milestone | Customers | MRR | ARR | Timeline |
-|-----------|-----------|-----|-----|----------|
-| First 10 paying | 10 | $490 | $5,880 | Month 2 |
-| Product-market fit signal | 50 | $2,450 | $29,400 | Month 4 |
-| Growth phase | 200 | $9,800 | $117,600 | Month 8 |
-| **Year 1 target** | **500** | **$24,500** | **$294,000** | **Month 12** |
-| **Stretch goal** | **1,000** | **$49,000** | **$588,000** | **Month 12** |
+### Tier 1: Mayor ROI (Mes 1-3)
+1. **WhatsApp outreach directo** (Day 1 playbook listo)
+   - Costo: $0 (solo tiempo)
+   - Esperado: 5-10 clientes de 100 mensajes
+   - Tasa de conversión: 5-10%
+
+2. **Referidos de clientes fundadores**
+   - Costo: $0 o descuento en el siguiente mes
+   - Esperado: 2-3 referidos por cliente fundador
+   - Coeficiente viral meta: 1.5
+
+3. **SEO / contenido** (10 blog posts publicados)
+   - Costo: $0 (ya creados)
+   - Esperado: 500-1,000 visitas orgánicas/mes en 3 meses
+   - Tasa de conversión: 2-3% → 10-30 registros/mes
+
+### Tier 2: ROI Medio (Mes 2-4)
+4. **Instagram Ads** ($5-10/día)
+   - Target: Dueños de salones en CDMX, Gdl, MTY
+   - Esperado: 50-100 clics/día, 2-5 registros/día
+   - CAC: $5-15 por registro
+
+5. **Product Hunt** (plan listo)
+   - Costo: $0
+   - Esperado: 100-500 registros en día de lanzamiento
+   - Conversión a pago: 5-10%
+
+6. **Google Ads** (búsquedas con intención)
+   - Keywords: "automatizar whatsapp negocio", "agendar citas whatsapp"
+   - Target: Dueños de negocios en México
+   - Esperado: Tráfico de alta intención, 3-5% conversión
+   - CAC: $10-20 por registro
+
+### Tier 3: Largo plazo (Mes 4-12)
+7. **Grupos de Facebook** de dueños de salones/barberos en México
+8. **YouTube** tutoriales de automatización WhatsApp para negocios
+9. **Alianzas** con proveedores WhatsApp Business Solution en México
+10. **LinkedIn** outreach a dueños de negocios multi-sucursal
 
 ---
 
-## Key Metrics to Track
+## Proyecciones del Embudo
 
-### Acquisition
-- Website traffic (organic, paid, referral)
-- Signup conversion rate
-- Trial activation rate (connected WhatsApp + added services)
+| Etapa | Volumen Mensual | Conversión | Notas |
+|-------|----------------|------------|-------|
+| Tráfico orgánico | 1,000 | — | Blog + SEO |
+| Visitas landing page | 800 | 80% | De todos los canales |
+| Registros (trial) | 40 | 5% | 14 días gratis |
+| Activación de prueba | 24 | 60% | Conectó WhatsApp + agregó servicios |
+| Conversión a pago | 8 | 33% | Dentro de los 14 días de prueba |
+| **Nuevos clientes/mes** | **8** | — | **$392 MRR** |
+
+**Proyección 12 meses (con efecto compuesto):**
+- Mes 1: 8 clientes ($392 MRR)
+- Mes 6: 80 clientes ($3,920 MRR)
+- Mes 12: 300 clientes ($14,700 MRR, $176K ARR)
+
+---
+
+## Metas de Revenue
+
+| Hito | Clientes | MRR | ARR | Timeline |
+|------|-----------|-----|-----|----------|
+| Primeros 10 pagando | 10 | $490 | $5,880 | Mes 2 |
+| Señal de product-market fit | 50 | $2,450 | $29,400 | Mes 4 |
+| Fase de crecimiento | 200 | $9,800 | $117,600 | Mes 8 |
+| **Meta año 1** | **500** | **$24,500** | **$294,000** | **Mes 12** |
+| **Meta stretch** | **1,000** | **$49,000** | **$588,000** | **Mes 12** |
+
+---
+
+## Métricas Clave
+
+### Adquisición
+- Tráfico al sitio (orgánico, pagado, referido)
+- Tasa de conversión de registro
+- Tasa de activación de prueba (conectó WhatsApp + agregó servicios)
 
 ### Engagement
-- Messages handled per business per week
-- Appointments booked through Zenda per week
-- Reminder delivery and confirmation rate
+- Mensajes manejados por negocio por semana
+- Citas agendadas por Zenda por semana
+- Tasa de entrega y confirmación de recordatorios
 
 ### Revenue
 - MRR / ARR
-- Churn rate (target: <5% monthly)
-- Average revenue per customer (target: $49/mo)
-- Customer lifetime value (target: $500+)
+- Tasa de churn (meta: <5% mensual)
+- Ingreso promedio por cliente (meta: $49/mes)
+- LTV (meta: $500+)
 
 ### Unit Economics
-- Customer acquisition cost (CAC target: <$20)
-- Lifetime value to CAC ratio (target: >3:1)
-- Payback period (target: <2 months)
-
----
-
-## Immediate Next Steps (Require Board/Human)
-
-1. **Execute WhatsApp outreach** (ZEN-85) — 20 LATAM prospects with Day 1 playbook
-2. **Create Stripe founding coupon** (ZEN-86) — 50% off 3 months for founding members
-3. **Launch on Product Hunt** (ZEN-84) — needs visual assets only a human can create
-4. **Set up Google Analytics** — track blog post traffic and conversion funnel
-5. **Run first Instagram ads** — $5/day targeting beauty salon owners in CDMX
+- CAC (meta: <$20)
+- LTV:CAC ratio (meta: >3:1)
+- Payback period (meta: <2 meses)

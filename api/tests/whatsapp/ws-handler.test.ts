@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { SignJWT, jwtVerify } from "jose";
+import { jwtVerify, SignJWT } from "jose";
 
 // Must match the app's JWT_SECRET — read from the same env source
 // The test sets it before importing, but since ws-handler imports at module
@@ -33,7 +33,10 @@ function createMockElysiaWS(url: string, raw?: object) {
     } as object);
 
   return {
-    data: { url, query: Object.fromEntries(new URL(url, "http://localhost").searchParams) },
+    data: {
+      url,
+      query: Object.fromEntries(new URL(url, "http://localhost").searchParams),
+    },
     raw: bunSocket,
     send: () => {},
     close: () => {},
@@ -200,14 +203,16 @@ describe("Heartbeat ping/pong flow via WeakMap", () => {
 
     let isAlive = true;
     const heartbeat = {
-      pong: () => { isAlive = true; },
+      pong: () => {
+        isAlive = true;
+      },
       stop: () => {},
     };
 
     interface WsMeta {
-      workspaceId: string;
-      userId: string;
       heartbeat: { pong: () => void; stop: () => void };
+      userId: string;
+      workspaceId: string;
     }
     const meta: WsMeta = {
       workspaceId: "ws-123",

@@ -97,7 +97,7 @@ export function useConversations() {
       setMessages((prev) => ({ ...prev, [conversationId]: reversed }));
       messageCountRef.current[conversationId] = reversed.length;
       if (reversed.length > 0 && reversed.at(-1)!) {
-        lastMessageAtRef.current[conversationId] = reversed.at(-1)!.createdAt;
+        lastMessageAtRef.current[conversationId] = reversed.at(-1)?.createdAt;
       }
     } catch (err) {
       console.error("Failed to load messages:", err);

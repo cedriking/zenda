@@ -8,6 +8,7 @@ import { FadeUp, StaggerChild, StaggerContainer } from "@/components/motion";
 import { useRouter } from "@/i18n/navigation";
 
 interface Plan {
+  annualPrice: number;
   cta: string;
   desc: string;
   features: string[];
@@ -15,7 +16,6 @@ interface Plan {
   name: string;
   originalPrice?: number;
   price: number;
-  annualPrice: number;
   tier: string;
 }
 
@@ -66,20 +66,24 @@ export function PricingAnimations({ plans }: { plans: Plan[] }) {
           {/* Monthly/Annual toggle */}
           <div className="mt-6 inline-flex items-center gap-3 rounded-full bg-slate-100 p-1">
             <button
-              type="button"
-              onClick={() => setIsAnnual(false)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                !isAnnual ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              className={`rounded-full px-4 py-2 font-medium text-sm transition-colors ${
+                isAnnual
+                  ? "text-slate-500 hover:text-slate-700"
+                  : "bg-white text-slate-900 shadow-sm"
               }`}
+              onClick={() => setIsAnnual(false)}
+              type="button"
             >
               {t("monthly")}
             </button>
             <button
-              type="button"
-              onClick={() => setIsAnnual(true)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                isAnnual ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              className={`rounded-full px-4 py-2 font-medium text-sm transition-colors ${
+                isAnnual
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
               }`}
+              onClick={() => setIsAnnual(true)}
+              type="button"
             >
               {t("annual")}
               <span className="ml-1.5 rounded-full bg-emerald-100 px-2 py-0.5 font-semibold text-emerald-700 text-xs">
@@ -134,12 +138,18 @@ export function PricingAnimations({ plans }: { plans: Plan[] }) {
                 <span
                   className={`font-black text-4xl ${plan.highlight ? "text-white" : "text-slate-900"}`}
                 >
-                  {plan.price === 0 ? t("freeLabel") : formatPrice(getPrice(plan), locale)}
+                  {plan.price === 0
+                    ? t("freeLabel")
+                    : formatPrice(getPrice(plan), locale)}
                 </span>
                 <span
                   className={`text-sm ${plan.highlight ? "text-slate-400" : "text-slate-500"}`}
                 >
-                  {plan.price === 0 ? "" : isAnnual ? t("perMonthBilledAnnual") : t("perMonth")}
+                  {plan.price === 0
+                    ? ""
+                    : isAnnual
+                      ? t("perMonthBilledAnnual")
+                      : t("perMonth")}
                 </span>
               </div>
 

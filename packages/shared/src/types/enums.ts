@@ -1,196 +1,215 @@
 // Appointment statuses (state machine states)
 export type AppointmentStatus =
-  | 'requested'
-  | 'pending_confirmation'
-  | 'confirmed'
-  | 'reminder_sent'
-  | 'client_confirmed'
-  | 'reschedule_requested'
-  | 'rescheduled'
-  | 'cancel_requested'
-  | 'cancelled'
-  | 'completed'
-  | 'no_show'
-  | 'needs_attention'
+  | "requested"
+  | "pending_confirmation"
+  | "confirmed"
+  | "reminder_sent"
+  | "client_confirmed"
+  | "reschedule_requested"
+  | "rescheduled"
+  | "cancel_requested"
+  | "cancelled"
+  | "completed"
+  | "no_show"
+  | "needs_attention";
 
 // Conversation modes
 export type ConversationMode =
-  | 'auto'
-  | 'needs_attention'
-  | 'human_takeover'
-  | 'paused'
-  | 'queued_offline'
-  | 'closed'
+  | "auto"
+  | "needs_attention"
+  | "human_takeover"
+  | "paused"
+  | "queued_offline"
+  | "closed";
 
 // WhatsApp connection states
 export type WhatsAppConnectionStatus =
-  | 'connected'
-  | 'connecting'
-  | 'qr_required'
-  | 'disconnected'
-  | 'session_expired'
-  | 'error'
-  | 'rate_limited'
-  | 'maintenance'
+  | "connected"
+  | "connecting"
+  | "qr_required"
+  | "disconnected"
+  | "session_expired"
+  | "error"
+  | "rate_limited"
+  | "maintenance";
 
 // Subscription states (mapped from Stripe)
 export type SubscriptionStatus =
-  | 'trialing'
-  | 'active'
-  | 'past_due'
-  | 'unpaid'
-  | 'canceled'
-  | 'incomplete'
-  | 'paused'
+  | "trialing"
+  | "active"
+  | "past_due"
+  | "unpaid"
+  | "canceled"
+  | "incomplete"
+  | "paused";
 
 // Plan tiers
-export type PlanTier = 'free' | 'local_solo' | 'local_starter' | 'local_pro' | 'local_business'
+export type PlanTier =
+  | "free"
+  | "local_solo"
+  | "local_starter"
+  | "local_pro"
+  | "local_business";
 
 // Setup types
-export type SetupType = 'self_serve' | 'priority' | 'assisted'
+export type SetupType = "self_serve" | "priority" | "assisted";
 
 // Billing period
-export type BillingPeriod = 'monthly' | 'annual'
+export type BillingPeriod = "monthly" | "annual";
 
 // Message sender types
-export type SenderType = 'customer' | 'ai' | 'owner' | 'system'
+export type SenderType = "customer" | "ai" | "owner" | "system";
 
 // Message content types
-export type MessageContentType = 'text' | 'audio' | 'image' | 'file' | 'system'
+export type MessageContentType = "text" | "audio" | "image" | "file" | "system";
 
 // Message delivery statuses
-export type MessageStatus = 'received' | 'queued' | 'sent' | 'failed'
+export type MessageStatus = "received" | "queued" | "sent" | "failed";
 
 // Receptionist tone
-export type ReceptionistTone = 'professional' | 'warm' | 'friendly' | 'elegant' | 'casual'
+export type ReceptionistTone =
+  | "professional"
+  | "warm"
+  | "friendly"
+  | "elegant"
+  | "casual";
 
 // Business categories
 export type BusinessCategory =
-  | 'beauty'
-  | 'wellness'
-  | 'health'
-  | 'coaching'
-  | 'fitness'
-  | 'other'
+  | "beauty"
+  | "wellness"
+  | "health"
+  | "coaching"
+  | "fitness"
+  | "other";
 
 // Supported languages
-export type Language = 'en' | 'es' | 'ar' | 'fr' | 'de' | 'ru' | 'zh' | 'ja' | 'ko'
+export type Language =
+  | "en"
+  | "es"
+  | "ar"
+  | "fr"
+  | "de"
+  | "ru"
+  | "zh"
+  | "ja"
+  | "ko";
 
 // Escalation reasons
 export type EscalationReason =
-  | 'customer_requested_human'
-  | 'unknown_question'
-  | 'discount_request'
-  | 'price_dispute'
-  | 'refund_request'
-  | 'angry_customer'
-  | 'medical_legal_financial'
-  | 'sensitive_info'
-  | 'custom_exception'
-  | 'unlisted_service'
-  | 'outside_rules'
-  | 'unclear_audio'
-  | 'emergency'
-  | 'low_confidence'
-  | 'technology_question'
+  | "customer_requested_human"
+  | "unknown_question"
+  | "discount_request"
+  | "price_dispute"
+  | "refund_request"
+  | "angry_customer"
+  | "medical_legal_financial"
+  | "sensitive_info"
+  | "custom_exception"
+  | "unlisted_service"
+  | "outside_rules"
+  | "unclear_audio"
+  | "emergency"
+  | "low_confidence"
+  | "technology_question";
 
 // Notification types
 export type NotificationType =
-  | 'appointment_booked'
-  | 'appointment_cancelled'
-  | 'appointment_rescheduled'
-  | 'needs_attention'
-  | 'discount_requested'
-  | 'ai_unsure'
-  | 'whatsapp_disconnected'
-  | 'whatsapp_reconnected'
-  | 'usage_warning'
-  | 'usage_limit'
-  | 'payment_failed'
-  | 'subscription_updated'
-  | 'agent_error'
-  | 'agent_recovered'
-  | 'subscription_updated'
+  | "appointment_booked"
+  | "appointment_cancelled"
+  | "appointment_rescheduled"
+  | "needs_attention"
+  | "discount_requested"
+  | "ai_unsure"
+  | "whatsapp_disconnected"
+  | "whatsapp_reconnected"
+  | "usage_warning"
+  | "usage_limit"
+  | "payment_failed"
+  | "subscription_updated"
+  | "agent_error"
+  | "agent_recovered"
+  | "subscription_updated";
 
 // Audit log actor types
-export type ActorType = 'ai' | 'owner' | 'system' | 'customer'
+export type ActorType = "ai" | "owner" | "system" | "customer";
 
 // AI task types for provider routing
 export type AITaskType =
-  | 'intent_detection'
-  | 'language_detection'
-  | 'classification'
-  | 'tool_planning'
-  | 'response_generation'
-  | 'summarization'
-  | 'memory_extraction'
-  | 'transcription'
+  | "intent_detection"
+  | "language_detection"
+  | "classification"
+  | "tool_planning"
+  | "response_generation"
+  | "summarization"
+  | "memory_extraction"
+  | "transcription";
 
 // AI providers
-export type AIProvider = 'zai' | 'openai' | 'ollama' | 'system'
+export type AIProvider = "zai" | "openai" | "ollama" | "system";
 
 // Onboarding steps
 export type OnboardingStep =
-  | 'not_started'
-  | 'whatsapp_connected'
-  | 'business_info'
-  | 'services'
-  | 'availability'
-  | 'policies'
-  | 'receptionist_config'
-  | 'plan_selection'
-  | 'ready'
+  | "not_started"
+  | "whatsapp_connected"
+  | "business_info"
+  | "services"
+  | "availability"
+  | "policies"
+  | "receptionist_config"
+  | "plan_selection"
+  | "ready";
 
 // --- Messaging & Consent (§8, §9, §10) ---
 
 // Messaging consent status per customer
 export type MessagingConsentStatus =
-  | 'unknown'      // No prior interaction or consent not captured
-  | 'allowed'      // Customer has opted in
-  | 'limited'      // Allowed for specific purposes only
-  | 'opted_out'    // Customer explicitly opted out
+  | "unknown" // No prior interaction or consent not captured
+  | "allowed" // Customer has opted in
+  | "limited" // Allowed for specific purposes only
+  | "opted_out"; // Customer explicitly opted out
 
 // How consent was captured (S8.1)
 export type ConsentSource =
-  | 'customer_inbound_message'
-  | 'whatsapp_booking'
-  | 'booking_form'               // Customer consented via an online booking form
-  | 'business_import'            // Business imported existing customer contacts
-  | 'manual_owner_confirmation'  // Owner manually confirmed consent for this customer
-  | 'opt_out_request'
+  | "customer_inbound_message"
+  | "whatsapp_booking"
+  | "booking_form" // Customer consented via an online booking form
+  | "business_import" // Business imported existing customer contacts
+  | "manual_owner_confirmation" // Owner manually confirmed consent for this customer
+  | "opt_out_request";
 
 // Purpose of an outbound message (§10.1)
 export type MessagePurpose =
-  | 'appointment_confirmation'
-  | 'appointment_reminder'
-  | 'appointment_reschedule'
-  | 'appointment_cancellation'
-  | 'booking_follow_up'
-  | 'booking_assistance'
-  | 'booking_confirmation'
-  | 'customer_inquiry_reply'
-  | 'inbound_reply'          // Direct reply to a customer's inbound message
-  | 'business_follow_up'     // Follow-up initiated by the business owner
-  | 'marketing'              // Marketing/promotional — BLOCKED by policy engine
-  | 'unknown'                // Unrecognized purpose — BLOCKED by policy engine
+  | "appointment_confirmation"
+  | "appointment_reminder"
+  | "appointment_reschedule"
+  | "appointment_cancellation"
+  | "booking_follow_up"
+  | "booking_assistance"
+  | "booking_confirmation"
+  | "customer_inquiry_reply"
+  | "inbound_reply" // Direct reply to a customer's inbound message
+  | "business_follow_up" // Follow-up initiated by the business owner
+  | "marketing" // Marketing/promotional — BLOCKED by policy engine
+  | "unknown"; // Unrecognized purpose — BLOCKED by policy engine
 
 // WhatsApp channel types (S10.3)
 export type WhatsAppChannelType =
-  | 'whatsapp_ba_bridge'               // Business App desktop bridge (Baileys-based)
-  | 'whatsapp_waba'                    // Official WhatsApp Business API (future)
-  | 'business_app_coexistence'         // Business App Coexistence mode (S10.4)
-  | 'baileys_internal_adapter'         // Direct Baileys adapter
+  | "whatsapp_ba_bridge" // Business App desktop bridge (Baileys-based)
+  | "whatsapp_waba" // Official WhatsApp Business API (future)
+  | "business_app_coexistence" // Business App Coexistence mode (S10.4)
+  | "baileys_internal_adapter"; // Direct Baileys adapter
 
 // Personality presets (§6.2)
 export type PersonalityPreset =
-  | 'professional'
-  | 'warm'
-  | 'minimal'
-  | 'premium'
-  | 'friendly'
+  | "professional"
+  | "warm"
+  | "minimal"
+  | "premium"
+  | "friendly";
 
 // Cancellation policy strictness
-export type CancellationStrictness = 'lenient' | 'standard' | 'strict'
+export type CancellationStrictness = "lenient" | "standard" | "strict";
 
 // Reminder types for deduplication
-export type ReminderType = 'day_before' | 'same_day'
+export type ReminderType = "day_before" | "same_day";

@@ -28,9 +28,21 @@ function usePlatform() {
   return platform;
 }
 
+function useLatestVersion() {
+  const [version, setVersion] = useState<string | null>(null);
+  useEffect(() => {
+    fetch("/api/download/version")
+      .then((res) => res.json())
+      .then((data) => setVersion(data.version ?? null))
+      .catch(() => setVersion(null));
+  }, []);
+  return version;
+}
+
 export function DownloadPageClient() {
   const t = useTranslations("download");
   const platform = usePlatform();
+  const version = useLatestVersion();
 
   const macOSUrl = "/api/download/macos";
   const windowsUrl = "/api/download/windows";
@@ -44,6 +56,12 @@ export function DownloadPageClient() {
         <div className="max-w-lg text-center">
           <h1 className="mb-4 font-bold text-3xl">{t("title")}</h1>
           <p className="mb-8 text-muted-foreground">{t("desc")}</p>
+
+          {version && (
+            <p className="mb-4 font-medium text-muted-foreground text-sm">
+              v{version}
+            </p>
+          )}
 
           <div className="mx-auto grid max-w-sm grid-cols-2 gap-4">
             <a

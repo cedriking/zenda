@@ -20,6 +20,10 @@
     "db:migrate": "cd packages/db && bunx drizzle-kit migrate",
     "db:studio": "cd packages/db && bunx drizzle-kit studio",
     "db:seed": "cd packages/db && bun run src/seed/index.ts",
+    "release": "bash scripts/release.sh",
+    "release:patch": "bash scripts/release.sh patch",
+    "release:minor": "bash scripts/release.sh minor",
+    "release:major": "bash scripts/release.sh major",
     "prepare": "husky"
   },
   "devDependencies": {

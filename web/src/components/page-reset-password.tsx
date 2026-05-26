@@ -24,10 +24,10 @@ export function ResetPasswordClient() {
         <Nav variant="simple" />
         <main className="flex flex-1 items-center justify-center px-6">
           <div className="w-full max-w-md text-center">
-            <h1 className="mt-6 mb-2 font-bold text-2xl">{t("invalidTitle")}</h1>
-            <p className="mb-6 text-muted-foreground">
-              {t("invalidDesc")}
-            </p>
+            <h1 className="mt-6 mb-2 font-bold text-2xl">
+              {t("invalidTitle")}
+            </h1>
+            <p className="mb-6 text-muted-foreground">{t("invalidDesc")}</p>
             <Link
               className="text-primary hover:underline"
               href="/forgot-password"
@@ -94,13 +94,19 @@ export function ResetPasswordClient() {
           ) : (
             <form className="space-y-4" onSubmit={handleSubmit}>
               {error && (
-                <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-destructive text-sm" role="alert">
+                <div
+                  className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-destructive text-sm"
+                  role="alert"
+                >
                   {error}
                 </div>
               )}
 
               <div>
-                <label className="mb-1.5 block font-medium text-sm" htmlFor="new-password">
+                <label
+                  className="mb-1.5 block font-medium text-sm"
+                  htmlFor="new-password"
+                >
                   {t("newPasswordLabel")}
                 </label>
                 <input
@@ -116,7 +122,10 @@ export function ResetPasswordClient() {
               </div>
 
               <div>
-                <label className="mb-1.5 block font-medium text-sm" htmlFor="confirm-password">
+                <label
+                  className="mb-1.5 block font-medium text-sm"
+                  htmlFor="confirm-password"
+                >
                   {t("confirmPasswordLabel")}
                 </label>
                 <input

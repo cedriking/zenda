@@ -1,14 +1,14 @@
 export {
+  agentHealthEvents,
+  agentHealthStatusEnum,
+} from "./agent-health-events.js";
+export {
   appointmentStatusEnum,
   appointments,
   confirmationStatusEnum,
   createdByEnum,
   reminderStatusEnum as appointmentReminderStatusEnum,
 } from "./appointments.js";
-export {
-  agentHealthEvents,
-  agentHealthStatusEnum,
-} from "./agent-health-events.js";
 export { audioAssets } from "./audio-assets.js";
 export { actorTypeEnum, auditLogs } from "./audit-logs.js";
 export {
@@ -62,8 +62,10 @@ export {
   notifications,
   notificationTypeEnum,
 } from "./notifications.js";
+export { partners } from "./partners.js";
 export { passwordResetTokens } from "./password-reset-tokens.js";
 export { providerUsage } from "./provider-usage.js";
+export { referrals } from "./referrals.js";
 export { reminderStatusEnum, reminders } from "./reminders.js";
 export { revokedTokens } from "./revoked-tokens.js";
 export {

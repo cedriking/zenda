@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { Footer } from "@/components/footer";
 import { JsonLdScript } from "@/components/json-ld";
 import { Nav } from "@/components/nav";
+import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
 interface Props {
@@ -174,9 +174,7 @@ export default async function BlogIndexPage({ params }: Props) {
           <h1 className="mb-4 font-bold text-3xl text-slate-900 md:text-4xl">
             {t("heading")}
           </h1>
-          <p className="text-lg text-slate-600">
-            {t("subheading")}
-          </p>
+          <p className="text-lg text-slate-600">{t("subheading")}</p>
         </header>
 
         <section className="mb-12">
@@ -237,9 +235,7 @@ export default async function BlogIndexPage({ params }: Props) {
           <h2 className="mb-3 font-bold text-2xl text-white">
             {t("ctaTitle")}
           </h2>
-          <p className="mb-6 text-slate-400">
-            {t("ctaDesc")}
-          </p>
+          <p className="mb-6 text-slate-400">{t("ctaDesc")}</p>
           <Link
             className="inline-block rounded-full bg-emerald-500 px-8 py-3 font-semibold text-white transition-colors hover:bg-emerald-600"
             href="/founding"

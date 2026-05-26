@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 
 const CONSENT_KEY = "zenda_cookie_consent";
@@ -38,7 +38,10 @@ export function CookieConsent() {
         <p className="text-center text-slate-600 text-sm md:text-left">
           {t.rich("message", {
             privacy: (chunks: React.ReactNode) => (
-              <Link className="text-primary hover:underline" href="/legal/privacy">
+              <Link
+                className="text-primary hover:underline"
+                href="/legal/privacy"
+              >
                 {chunks}
               </Link>
             ),

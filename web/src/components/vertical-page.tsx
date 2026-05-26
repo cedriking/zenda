@@ -14,7 +14,13 @@ export interface VerticalPageConfig {
   title: string;
 }
 
-export async function VerticalPage({ config, locale }: { config: VerticalPageConfig; locale: string }) {
+export async function VerticalPage({
+  config,
+  locale,
+}: {
+  config: VerticalPageConfig;
+  locale: string;
+}) {
   const t = await getTranslations("verticals");
 
   const serviceLd = {

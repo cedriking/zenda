@@ -140,7 +140,9 @@ export async function processIncomingMessage(
 
     // 1a. Heuristic hint for initial customer creation — the AI agent will
     //     override this via update_customer_info on first contact
-    const detectedLanguage = (detectLanguage(msg.body) ?? workspaceLanguage) as "en" | "es";
+    const detectedLanguage = (detectLanguage(msg.body) ?? workspaceLanguage) as
+      | "en"
+      | "es";
 
     // 2. Find or create customer (using phone number or thread ID)
     const customer = await resolveOrCreateCustomer(
@@ -536,7 +538,7 @@ export async function processIncomingMessage(
       messageBody,
       agentLanguage,
       msg.localTime as string | undefined,
-      msg.localTimezone as string | undefined,
+      msg.localTimezone as string | undefined
     );
 
     if (!aiResponse) {
@@ -908,7 +910,7 @@ async function detectSensitiveTopic(
 
     const lowerMessage = messageBody.toLowerCase();
     for (const topic of topics) {
-      if (new RegExp('\\b' + escapeRegex(topic) + '\\b', 'i').test(lowerMessage)) {
+      if (new RegExp(`\\b${escapeRegex(topic)}\\b`, "i").test(lowerMessage)) {
         return topic;
       }
     }
@@ -926,7 +928,7 @@ async function detectSensitiveTopic(
  * Escape special regex characters in a string for safe use in RegExp.
  */
 function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**

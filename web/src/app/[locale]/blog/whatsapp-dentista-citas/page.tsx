@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { Link } from "@/i18n/navigation";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
+import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
 interface Props {

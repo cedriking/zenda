@@ -111,11 +111,11 @@
   left: 0;
   z-index: 100;
   padding: 0.75rem 1.5rem;
-  background: var(--primary);
-  color: var(--primary-foreground);
-  font-weight: 600;
   font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary-foreground);
   text-decoration: none;
+  background: var(--primary);
   border-radius: 0 0 0.5rem 0;
 }
 .skip-to-content:focus {
@@ -140,27 +140,37 @@ button:focus-visible {
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, oklch(0.6969 0.1701 162.48), oklch(0.5965 0.145 163.41), oklch(0.5067 0.1269 163.94));
-  background-size: 200% 200%;
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(
+    135deg,
+    oklch(0.6969 0.1701 162.48),
+    oklch(0.5965 0.145 163.41),
+    oklch(0.5067 0.1269 163.94)
+  );
   -webkit-background-clip: text;
   background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
   animation: gradient-shift 6s ease infinite;
 }
 
 .dark .gradient-text {
-  background: linear-gradient(135deg, oklch(0.7652 0.1633 163.35), oklch(0.6969 0.1701 162.48), oklch(0.5965 0.145 163.41));
-  background-size: 200% 200%;
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(
+    135deg,
+    oklch(0.7652 0.1633 163.35),
+    oklch(0.6969 0.1701 162.48),
+    oklch(0.5965 0.145 163.41)
+  );
   -webkit-background-clip: text;
   background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
 }
 
 /* Glass effect */
 .glass {
   background: oklch(1 0 0 / 70%);
-  backdrop-filter: blur(20px) saturate(1.8);
   -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  backdrop-filter: blur(20px) saturate(1.8);
 }
 .dark .glass {
   background: oklch(0.145 0 0 / 70%);
@@ -169,10 +179,10 @@ button:focus-visible {
 /* Gradient orb decorations */
 .gradient-orb {
   position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.4;
   pointer-events: none;
+  border-radius: 50%;
+  opacity: 0.4;
+  filter: blur(80px);
 }
 .dark .gradient-orb {
   opacity: 0.2;
@@ -185,33 +195,56 @@ button:focus-visible {
   border-radius: var(--radius);
 }
 .gradient-border::before {
-  content: '';
   position: absolute;
   inset: -1px;
-  border-radius: calc(var(--radius) + 1px);
-  background: linear-gradient(135deg, oklch(0.5534 0.2107 267 / 30%), transparent 60%);
   z-index: -1;
+  content: "";
+  background: linear-gradient(
+    135deg,
+    oklch(0.5534 0.2107 267 / 30%),
+    transparent 60%
+  );
+  border-radius: calc(var(--radius) + 1px);
 }
 
 /* Keyframes */
 @keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 @keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Smooth scroll */

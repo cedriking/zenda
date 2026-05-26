@@ -43,13 +43,19 @@ export function LoginPageClient() {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-destructive text-sm" role="alert">
+              <div
+                className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-destructive text-sm"
+                role="alert"
+              >
                 {error}
               </div>
             )}
 
             <div>
-              <label className="mb-1.5 block font-medium text-sm" htmlFor="email">
+              <label
+                className="mb-1.5 block font-medium text-sm"
+                htmlFor="email"
+              >
                 {t("emailLabel")}
               </label>
               <input
@@ -64,7 +70,10 @@ export function LoginPageClient() {
             </div>
 
             <div>
-              <label className="mb-1.5 block font-medium text-sm" htmlFor="password">
+              <label
+                className="mb-1.5 block font-medium text-sm"
+                htmlFor="password"
+              >
                 {t("passwordLabel")}
               </label>
               <input

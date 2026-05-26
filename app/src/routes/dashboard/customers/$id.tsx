@@ -73,7 +73,10 @@ export default function CustomerProfilePage() {
             <div className="mb-4 h-6 w-32 animate-pulse rounded bg-muted" />
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div className="h-16 animate-pulse rounded-lg bg-muted" key={i} />
+                <div
+                  className="h-16 animate-pulse rounded-lg bg-muted"
+                  key={i}
+                />
               ))}
             </div>
           </div>
@@ -138,7 +141,10 @@ export default function CustomerProfilePage() {
                 </span>
                 <span className="flex items-center gap-1">
                   <Globe size={14} />
-                  {t(`customer.lang.${customer.language}`, customer.language.toUpperCase())}
+                  {t(
+                    `customer.lang.${customer.language}`,
+                    customer.language.toUpperCase()
+                  )}
                 </span>
               </div>
             </div>

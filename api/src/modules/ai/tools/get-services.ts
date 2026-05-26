@@ -6,9 +6,9 @@
  * - Nothing is invented or hardcoded.
  * - Sending policy is enforced at the agent layer, not bypassed here.
  */
-import { db } from '@zenda/db/client'
-import { services } from '@zenda/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { db } from "@zenda/db/client";
+import { services } from "@zenda/db/schema";
+import { and, eq } from "drizzle-orm";
 
 export async function getServices(workspaceId: string) {
   const list = await db
@@ -20,19 +20,21 @@ export async function getServices(workspaceId: string) {
       priceCents: services.priceCents,
     })
     .from(services)
-    .where(and(eq(services.workspaceId, workspaceId), eq(services.active, true)))
+    .where(
+      and(eq(services.workspaceId, workspaceId), eq(services.active, true))
+    );
 
-  return list
+  return list;
 }
 
 export const getServicesToolDef = {
-  type: 'function' as const,
+  type: "function" as const,
   function: {
-    name: 'get_services',
-    description: 'Get list of all active services offered by the business.',
+    name: "get_services",
+    description: "Get list of all active services offered by the business.",
     parameters: {
-      type: 'object',
+      type: "object",
       properties: {},
     },
   },
-}
+};

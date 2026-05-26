@@ -21,22 +21,7 @@ const config: ForgeConfig = {
       ["win32"]
     ),
   ],
-  publishers: [
-    {
-      name: "@electron-forge/publisher-s3",
-      config: {
-        endPoint:
-          process.env.S3_DOWNLOADS_ENDPOINT ??
-          "https://xxx.r2.cloudflarestorage.com",
-        accessKey: process.env.S3_DOWNLOADS_ACCESS_KEY_ID ?? "",
-        secretKey: process.env.S3_DOWNLOADS_SECRET_ACCESS_KEY ?? "",
-        bucket: process.env.S3_DOWNLOADS_BUCKET ?? "zenda-downloads",
-        path: "{{artifactName}}",
-        region: "auto",
-        public: true,
-      },
-    },
-  ],
+  publishers: [],
   plugins: [
     new VitePlugin({
       build: [

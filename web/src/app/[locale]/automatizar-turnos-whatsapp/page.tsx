@@ -1,4 +1,4 @@
-import { Check, Clock, Calendar, ArrowRight, MessageSquare } from "lucide-react";
+import { Calendar, Check, Clock, MessageSquare } from "lucide-react";
 import type { Metadata } from "next";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
@@ -20,29 +20,70 @@ export function generateMetadata(): Metadata {
     },
     openGraph: {
       title: "Automatizar Turnos por WhatsApp — Argentina",
-      description: "Automatiza turnos por WhatsApp para tu negocio en Argentina. IA que agenda, confirma y envía recordatorios. Prueba gratis.",
+      description:
+        "Automatiza turnos por WhatsApp para tu negocio en Argentina. IA que agenda, confirma y envía recordatorios. Prueba gratis.",
       url: "https://zenda.bot/es/automatizar-turnos-whatsapp",
       type: "website",
-      images: [{ url: "https://zenda.bot/api/og?locale=es", width: 1200, height: 630, alt: "Zenda — Automatizar Turnos WhatsApp Argentina" }],
+      images: [
+        {
+          url: "https://zenda.bot/api/og?locale=es",
+          width: 1200,
+          height: 630,
+          alt: "Zenda — Automatizar Turnos WhatsApp Argentina",
+        },
+      ],
     },
   };
 }
 
 const FEATURES = [
-  { title: "Gestión de turnos automática", desc: "El cliente pide un turno por WhatsApp y la IA verifica disponibilidad, agenda y confirma — todo en segundos." },
-  { title: "Recordatorios para reducir ausentismo", desc: "WhatsApp envía recordatorios automáticos. Reducí las inasistencias hasta un 40% sin llamar por teléfono." },
-  { title: "Reagenda y cancela por WhatsApp", desc: "Si el cliente no puede venir, la IA ofrece nuevos horarios y actualiza la agenda automáticamente." },
-  { title: "Múltiples profesionales", desc: "Cada profesional con su propia agenda. La IA asigna el turno según disponibilidad y especialidad." },
-  { title: "Funciona en español argentino", desc: "Entiende 'turno', 'reservar', 'che, ¿tenés hora?' y más expresiones locales. También disponible en portugués e inglés." },
-  { title: "Sin inversión en software", desc: "No necesitás contratar un desarrollador ni comprar software caro. Empezá gratis con hasta 25 turnos mensuales." },
+  {
+    title: "Gestión de turnos automática",
+    desc: "El cliente pide un turno por WhatsApp y la IA verifica disponibilidad, agenda y confirma — todo en segundos.",
+  },
+  {
+    title: "Recordatorios para reducir ausentismo",
+    desc: "WhatsApp envía recordatorios automáticos. Reducí las inasistencias hasta un 40% sin llamar por teléfono.",
+  },
+  {
+    title: "Reagenda y cancela por WhatsApp",
+    desc: "Si el cliente no puede venir, la IA ofrece nuevos horarios y actualiza la agenda automáticamente.",
+  },
+  {
+    title: "Múltiples profesionales",
+    desc: "Cada profesional con su propia agenda. La IA asigna el turno según disponibilidad y especialidad.",
+  },
+  {
+    title: "Funciona en español argentino",
+    desc: "Entiende 'turno', 'reservar', 'che, ¿tenés hora?' y más expresiones locales. También disponible en portugués e inglés.",
+  },
+  {
+    title: "Sin inversión en software",
+    desc: "No necesitás contratar un desarrollador ni comprar software caro. Empezá gratis con hasta 25 turnos mensuales.",
+  },
 ];
 
 const FAQS = [
-  { q: "¿Qué significa automatizar turnos por WhatsApp?", a: "Significa que cuando un cliente te pide un turno por WhatsApp, la inteligencia artificial responde automáticamente, verifica disponibilidad en tu agenda, confirma el turno y envía recordatorios — sin que tengas que hacer nada." },
-  { q: "¿Funciona para negocios en Argentina?", a: "Sí. Zenda funciona perfectamente en Argentina con WhatsApp Business. Entiende expresiones argentinas como 'turno', 'che', 'reservar', y maneja horarios y zonas horarias locales." },
-  { q: "¿Puedo usarlo con mi WhatsApp Business actual?", a: "Sí. Conectás tu número de WhatsApp Business existente. No necesitás un número nuevo ni cambiar nada en tu operación actual." },
-  { q: "¿Cuánto cuesta en Argentina?", a: "El plan gratis incluye hasta 25 turnos mensuales. Los planes pagados arrancan desde $29 USD/mes por local. Ofrecemos 50% de descuento a los primeros negocios argentinos." },
-  { q: "¿Qué tipos de negocios lo usan?", a: "Clínicas médicas y dentales, peluquerías y barberías, talleres mecánicos, gimnasios, estudios de yoga, veterinarias, y cualquier negocio que trabaje con turnos en Argentina." },
+  {
+    q: "¿Qué significa automatizar turnos por WhatsApp?",
+    a: "Significa que cuando un cliente te pide un turno por WhatsApp, la inteligencia artificial responde automáticamente, verifica disponibilidad en tu agenda, confirma el turno y envía recordatorios — sin que tengas que hacer nada.",
+  },
+  {
+    q: "¿Funciona para negocios en Argentina?",
+    a: "Sí. Zenda funciona perfectamente en Argentina con WhatsApp Business. Entiende expresiones argentinas como 'turno', 'che', 'reservar', y maneja horarios y zonas horarias locales.",
+  },
+  {
+    q: "¿Puedo usarlo con mi WhatsApp Business actual?",
+    a: "Sí. Conectás tu número de WhatsApp Business existente. No necesitás un número nuevo ni cambiar nada en tu operación actual.",
+  },
+  {
+    q: "¿Cuánto cuesta en Argentina?",
+    a: "El plan gratis incluye hasta 25 turnos mensuales. Los planes pagados arrancan desde $29 USD/mes por local. Ofrecemos 50% de descuento a los primeros negocios argentinos.",
+  },
+  {
+    q: "¿Qué tipos de negocios lo usan?",
+    a: "Clínicas médicas y dentales, peluquerías y barberías, talleres mecánicos, gimnasios, estudios de yoga, veterinarias, y cualquier negocio que trabaje con turnos en Argentina.",
+  },
 ];
 
 export default function AutomatizarTurnosPage() {
@@ -58,16 +99,30 @@ export default function AutomatizarTurnosPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <script dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} type="application/ld+json" />
-      <script dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        name: "Zenda — Automatizar Turnos WhatsApp",
-        applicationCategory: "BusinessApplication",
-        operatingSystem: "WhatsApp",
-        description: "Automatizá la gestión de turnos por WhatsApp con IA. Agenda, confirma y envía recordatorios.",
-        offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "Plan gratuito disponible" },
-      }) }} type="application/ld+json" />
+      <script
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        type="application/ld+json"
+      />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "Zenda — Automatizar Turnos WhatsApp",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "WhatsApp",
+            description:
+              "Automatizá la gestión de turnos por WhatsApp con IA. Agenda, confirma y envía recordatorios.",
+            offers: {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "USD",
+              description: "Plan gratuito disponible",
+            },
+          }),
+        }}
+        type="application/ld+json"
+      />
       <Nav variant="simple" />
 
       {/* Hero */}
@@ -76,10 +131,13 @@ export default function AutomatizarTurnosPage() {
           Automatizar Turnos por WhatsApp
         </p>
         <h1 className="mb-6 font-bold text-4xl text-slate-900 leading-tight md:text-5xl">
-          Dejá de perder turnos por <span className="text-emerald-600">no contestar a tiempo</span>
+          Dejá de perder turnos por{" "}
+          <span className="text-emerald-600">no contestar a tiempo</span>
         </h1>
         <p className="mx-auto mb-8 max-w-2xl text-lg text-slate-600">
-          Automatizá la gestión de turnos por WhatsApp. Tu negocio responde en segundos, agenda automáticamente y envía recordatorios — sin contratar personal.
+          Automatizá la gestión de turnos por WhatsApp. Tu negocio responde en
+          segundos, agenda automáticamente y envía recordatorios — sin contratar
+          personal.
         </p>
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Link href="/founding">
@@ -103,7 +161,9 @@ export default function AutomatizarTurnosPage() {
             { value: "24/7", label: "disponibilidad" },
           ].map((stat) => (
             <div className="text-center" key={stat.label}>
-              <p className="font-bold text-2xl text-emerald-600">{stat.value}</p>
+              <p className="font-bold text-2xl text-emerald-600">
+                {stat.value}
+              </p>
               <p className="text-slate-500 text-sm">{stat.label}</p>
             </div>
           ))}
@@ -118,7 +178,10 @@ export default function AutomatizarTurnosPage() {
           </h2>
           <div className="grid gap-6 md:grid-cols-2">
             {FEATURES.map((f) => (
-              <div className="rounded-xl border border-slate-200 bg-white p-6" key={f.title}>
+              <div
+                className="rounded-xl border border-slate-200 bg-white p-6"
+                key={f.title}
+              >
                 <div className="mb-2 flex items-center gap-2">
                   <Check className="h-5 w-5 text-emerald-500" />
                   <h3 className="font-semibold text-slate-900">{f.title}</h3>
@@ -138,9 +201,21 @@ export default function AutomatizarTurnosPage() {
           </h2>
           <div className="grid gap-8 md:grid-cols-3">
             {[
-              { icon: MessageSquare, title: "Cliente escribe por WhatsApp", desc: "Un cliente te pide un turno por WhatsApp. La IA recibe el mensaje al instante." },
-              { icon: Calendar, title: "IA verifica y agenda", desc: "La IA consulta disponibilidad, propone horarios y confirma el turno automáticamente." },
-              { icon: Clock, title: "Recordatorios automáticos", desc: "WhatsApp envía recordatorios y el cliente puede confirmar o reagenda con un mensaje." },
+              {
+                icon: MessageSquare,
+                title: "Cliente escribe por WhatsApp",
+                desc: "Un cliente te pide un turno por WhatsApp. La IA recibe el mensaje al instante.",
+              },
+              {
+                icon: Calendar,
+                title: "IA verifica y agenda",
+                desc: "La IA consulta disponibilidad, propone horarios y confirma el turno automáticamente.",
+              },
+              {
+                icon: Clock,
+                title: "Recordatorios automáticos",
+                desc: "WhatsApp envía recordatorios y el cliente puede confirmar o reagenda con un mensaje.",
+              },
             ].map((s) => (
               <div className="text-center" key={s.title}>
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
@@ -161,10 +236,14 @@ export default function AutomatizarTurnosPage() {
             Planes desde $0 para tu negocio
           </h2>
           <p className="mb-6 text-slate-500">
-            Empezá gratis con hasta 25 contactos. Planes completos desde $29 USD/mes.
+            Empezá gratis con hasta 25 contactos. Planes completos desde $29
+            USD/mes.
           </p>
           <Link href="/pricing">
-            <Button className="rounded-full border border-emerald-600 bg-white px-6 py-2 text-emerald-600 hover:bg-emerald-50" variant="outline">
+            <Button
+              className="rounded-full border border-emerald-600 bg-white px-6 py-2 text-emerald-600 hover:bg-emerald-50"
+              variant="outline"
+            >
               Ver planes y precios →
             </Button>
           </Link>
@@ -181,7 +260,9 @@ export default function AutomatizarTurnosPage() {
             {FAQS.map((faq) => (
               <div key={faq.q}>
                 <h3 className="mb-2 font-semibold text-slate-900">{faq.q}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{faq.a}</p>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  {faq.a}
+                </p>
               </div>
             ))}
           </div>

@@ -220,6 +220,90 @@ The assistant should sound like a capable receptionist, not like a command-line 
 
 ---
 
+## 5.5 Mexico Market Localization
+
+Zenda's primary launch market is Mexico. The assistant must handle Mexican Spanish conversation patterns natively.
+
+### Voice Messages (Notas de Voz)
+
+In Mexico, WhatsApp voice messages are the default communication style for many customers. The assistant should:
+
+- Transcribe and understand voice messages in Mexican Spanish.
+- Respond in text (never send voice messages).
+- Acknowledge the content of voice messages naturally ("Perfecto, te agendo para el martes").
+
+### Mexican Spanish Natural Language Examples
+
+The assistant should understand these common Mexican phrasings:
+
+| Customer says | Intent |
+|---|---|
+| "¿A qué hora me pueden atender?" | Asking for availability |
+| "¿Tienen lugar hoy?" | Asking for same-day availability |
+| "Necesito mover mi cita" | Rescheduling request |
+| "No voy a poder ir mañana" | Cancellation intent |
+| "¿Cuánto cuesta el corte?" | Price inquiry |
+| "¿Dónde quedan?" | Location inquiry |
+| "¿A qué hora abren?" | Business hours inquiry |
+| "Me lo confirmas porfa" | Confirmation request |
+| "Oye, ¿puedo cambiar mi hora?" | Rescheduling (informal) |
+| "Buenos días, quiero una cita" | Booking request |
+| "¿Me das un turno para el viernes?" | Booking request (regional) |
+| "Páseme con alguien" | Human escalation request |
+| "Ya no ocupo la cita" | Cancellation (regional) |
+| "¿Hacen depilación también?" | Service inquiry |
+
+### Cultural Considerations for Mexico
+
+- **Greetings:** Always greet with time-appropriate salutation ("Buenos días", "Buenas tardes"). Mexicans expect this courtesy.
+- **"Usted" vs "tú":** Default to "tú" for beauty salons, barberías, and spas. Use "usted" for dental clinics and premium services unless the customer uses "tú" first.
+- **Informal abbreviations:** Understand common WhatsApp abbreviations: "xfa" (por favor), "bn" (bien), "ntc" (no te preocupes), "q" (que), "k" (que), "tb" (también).
+- **Regional time format:** Use 12-hour format (no 24-hour). "3 de la tarde" not "15:00".
+- **Currency:** Always quote in MXN pesos. "$500" means $500 MXN, not USD.
+- **Dates:** Use "lunes 26 de mayo" format, not "May 26" or "26/05".
+- **No-show sensitivity:** In Mexico, no-show rates for salons can reach 30-40%. The assistant should send reminders 24h before and 2h before without being pushy.
+- **WhatsApp as default:** Email is rarely used for appointment confirmations in Mexico. WhatsApp is the channel.
+
+### Mexican Spanish Conversation Examples
+
+**Booking:**
+
+```text
+¡Buenos días! Con gusto te ayudo. ¿Para qué día y hora te gustaría agendar tu cita?
+```
+
+**Confirmation:**
+
+```text
+Listo, tu cita queda agendada para el martes 27 de mayo a las 11:00 de la mañana. Te envío un recordatorio el día anterior. ¡Nos vemos!
+```
+
+**Rescheduling:**
+
+```text
+Claro, sin problema. Déjame ver qué horarios tenemos disponibles. ¿Te queda mejor por la mañana o por la tarde?
+```
+
+**Cancellation:**
+
+```text
+Entiendo. Cancelo tu cita del jueves. Si necesitas reagendar después, con gusto te ayudo. ¡Que tengas buen día!
+```
+
+**Reminder (24h before):**
+
+```text
+¡Hola! Te recordamos que tienes cita mañana a las 3:00 de la tarde. Si necesitas cambiar la hora, avísame por aquí.
+```
+
+**Voice message response:**
+
+```text
+Perfecto, escuché tu mensaje. Te agendo para el viernes a las 10:00 de la mañana. ¿Está bien?
+```
+
+---
+
 ## 6. Client-Configurable Assistant Personality
 
 Clients should be allowed to customize the assistant’s behavior, but only within safe service-oriented boundaries.

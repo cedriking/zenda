@@ -1,165 +1,180 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { Link } from '@/i18n/navigation'
-import { useTranslations } from 'next-intl'
-import { Card, CardContent } from '@/components/ui/card'
-import { FadeUp, StaggerContainer, StaggerChild, AccordionItem } from '@/components/motion'
+import { useTranslations } from "next-intl";
+import React from "react";
+import {
+  AccordionItem,
+  FadeUp,
+  StaggerChild,
+  StaggerContainer,
+} from "@/components/motion";
+import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "@/i18n/navigation";
 
-function Section({ title, items }: { title: string; items: { title: string; content: React.ReactNode }[] }) {
+function Section({
+  title,
+  items,
+}: {
+  title: string;
+  items: { title: string; content: React.ReactNode }[];
+}) {
   return (
     <section className="mb-16">
       <FadeUp>
-        <h2 className="text-2xl font-bold mb-8">{title}</h2>
+        <h2 className="mb-8 font-bold text-2xl">{title}</h2>
       </FadeUp>
       <div className="space-y-8">
-        {items.map(item => (
+        {items.map((item) => (
           <FadeUp key={item.title}>
             <div>
-              <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+              <h3 className="mb-2 font-semibold text-lg">{item.title}</h3>
               {item.content}
             </div>
           </FadeUp>
         ))}
       </div>
     </section>
-  )
+  );
 }
 
 export function DocsAnimations() {
-  const t = useTranslations('docs')
+  const t = useTranslations("docs");
 
   const GETTING_STARTED = [
     {
-      title: t('step1Title'),
+      title: t("step1Title"),
       content: (
         <>
-          <p className="text-muted-foreground mb-3">
-            {t.rich('step1P1', {
-              link: (chunk: React.ReactNode) => <Link href="/signup" className="text-primary underline">{chunk}</Link>,
+          <p className="mb-3 text-muted-foreground">
+            {t.rich("step1P1", {
+              link: (chunk: React.ReactNode) => (
+                <Link className="text-primary underline" href="/signup">
+                  {chunk}
+                </Link>
+              ),
             })}
           </p>
-          <p className="text-muted-foreground">{t('step1P2')}</p>
+          <p className="text-muted-foreground">{t("step1P2")}</p>
         </>
       ),
     },
     {
-      title: t('step2Title'),
+      title: t("step2Title"),
       content: (
         <>
-          <p className="text-muted-foreground mb-3">{t('step2P1')}</p>
-          <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
-            <li>{t('step2Li1')}</li>
+          <p className="mb-3 text-muted-foreground">{t("step2P1")}</p>
+          <ol className="list-inside list-decimal space-y-2 text-muted-foreground">
+            <li>{t("step2Li1")}</li>
             <li>
-              {t.rich('step2Li2', {
+              {t.rich("step2Li2", {
                 strong: (chunk: React.ReactNode) => <strong>{chunk}</strong>,
               })}
             </li>
-            <li>{t('step2Li3')}</li>
-            <li>{t('step2Li4')}</li>
+            <li>{t("step2Li3")}</li>
+            <li>{t("step2Li4")}</li>
           </ol>
-          <p className="text-muted-foreground mt-3">{t('step2P2')}</p>
+          <p className="mt-3 text-muted-foreground">{t("step2P2")}</p>
         </>
       ),
     },
     {
-      title: t('step3Title'),
+      title: t("step3Title"),
       content: (
         <>
-          <p className="text-muted-foreground mb-3">{t('step3P1')}</p>
-          <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+          <p className="mb-3 text-muted-foreground">{t("step3P1")}</p>
+          <ul className="list-inside list-disc space-y-1 text-muted-foreground">
             <li>
-              {t.rich('step3Li1', {
+              {t.rich("step3Li1", {
                 strong: (chunk: React.ReactNode) => <strong>{chunk}</strong>,
               })}
             </li>
             <li>
-              {t.rich('step3Li2', {
+              {t.rich("step3Li2", {
                 strong: (chunk: React.ReactNode) => <strong>{chunk}</strong>,
               })}
             </li>
             <li>
-              {t.rich('step3Li3', {
+              {t.rich("step3Li3", {
                 strong: (chunk: React.ReactNode) => <strong>{chunk}</strong>,
               })}
             </li>
             <li>
-              {t.rich('step3Li4', {
+              {t.rich("step3Li4", {
                 strong: (chunk: React.ReactNode) => <strong>{chunk}</strong>,
               })}
             </li>
             <li>
-              {t.rich('step3Li5', {
+              {t.rich("step3Li5", {
                 strong: (chunk: React.ReactNode) => <strong>{chunk}</strong>,
               })}
             </li>
           </ul>
-          <p className="text-muted-foreground mt-3">{t('step3P2')}</p>
+          <p className="mt-3 text-muted-foreground">{t("step3P2")}</p>
         </>
       ),
     },
     {
-      title: t('step4Title'),
-      content: (
-        <p className="text-muted-foreground">{t('step4P1')}</p>
-      ),
+      title: t("step4Title"),
+      content: <p className="text-muted-foreground">{t("step4P1")}</p>,
     },
-  ]
+  ];
 
   const CONVERSATIONS = [
     {
-      title: t('convAutoTitle'),
+      title: t("convAutoTitle"),
       content: (
         <p className="text-muted-foreground">
-          {t.rich('convAutoDesc', {
+          {t.rich("convAutoDesc", {
             strong: (chunk: React.ReactNode) => <strong>{chunk}</strong>,
           })}
         </p>
       ),
     },
     {
-      title: t('convTakeoverTitle'),
+      title: t("convTakeoverTitle"),
       content: (
         <>
-          <p className="text-muted-foreground mb-3">
-            {t.rich('convTakeoverP1', {
+          <p className="mb-3 text-muted-foreground">
+            {t.rich("convTakeoverP1", {
               strong: (chunk: React.ReactNode) => <strong>{chunk}</strong>,
               strong2: (chunk: React.ReactNode) => <strong>{chunk}</strong>,
             })}
           </p>
-          <p className="text-muted-foreground">{t('convTakeoverP2')}</p>
+          <p className="text-muted-foreground">{t("convTakeoverP2")}</p>
         </>
       ),
     },
     {
-      title: t('convAttentionTitle'),
-      content: <p className="text-muted-foreground">{t('convAttentionDesc')}</p>,
+      title: t("convAttentionTitle"),
+      content: (
+        <p className="text-muted-foreground">{t("convAttentionDesc")}</p>
+      ),
     },
-  ]
+  ];
 
   const CUSTOMIZATION = [
     {
-      title: t('customReceptionistTitle'),
+      title: t("customReceptionistTitle"),
       content: (
         <>
           <p className="text-muted-foreground">
-            {t.rich('customReceptionistP1', {
+            {t.rich("customReceptionistP1", {
               strong: (chunk: React.ReactNode) => <strong>{chunk}</strong>,
             })}
           </p>
-          <ul className="list-disc list-inside space-y-1 text-muted-foreground mt-2">
+          <ul className="mt-2 list-inside list-disc space-y-1 text-muted-foreground">
             <li>
-              {t.rich('customReceptionistLi1', {
+              {t.rich("customReceptionistLi1", {
                 strong: (chunk: React.ReactNode) => <strong>{chunk}</strong>,
               })}
             </li>
             <li>
-              {t.rich('customReceptionistLi2', {
+              {t.rich("customReceptionistLi2", {
                 strong: (chunk: React.ReactNode) => <strong>{chunk}</strong>,
               })}
             </li>
             <li>
-              {t.rich('customReceptionistLi3', {
+              {t.rich("customReceptionistLi3", {
                 strong: (chunk: React.ReactNode) => <strong>{chunk}</strong>,
               })}
             </li>
@@ -168,91 +183,106 @@ export function DocsAnimations() {
       ),
     },
     {
-      title: t('customKbTitle'),
+      title: t("customKbTitle"),
       content: (
         <>
-          <p className="text-muted-foreground mb-3">
-            {t.rich('customKbP1', {
+          <p className="mb-3 text-muted-foreground">
+            {t.rich("customKbP1", {
               strong: (chunk: React.ReactNode) => <strong>{chunk}</strong>,
             })}
           </p>
-          <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-            <li>{t('customKbLi1')}</li>
-            <li>{t('customKbLi2')}</li>
-            <li>{t('customKbLi3')}</li>
+          <ul className="list-inside list-disc space-y-1 text-muted-foreground">
+            <li>{t("customKbLi1")}</li>
+            <li>{t("customKbLi2")}</li>
+            <li>{t("customKbLi3")}</li>
           </ul>
-          <p className="text-muted-foreground mt-3">{t('customKbP2')}</p>
+          <p className="mt-3 text-muted-foreground">{t("customKbP2")}</p>
         </>
       ),
     },
-  ]
+  ];
 
   const FAQ_ITEMS = [
-    { q: t('faq1Q'), a: t('faq1A') },
-    { q: t('faq2Q'), a: t('faq2A') },
-    { q: t('faq3Q'), a: t('faq3A') },
-    { q: t('faq4Q'), a: t('faq4A') },
-  ]
+    { q: t("faq1Q"), a: t("faq1A") },
+    { q: t("faq2Q"), a: t("faq2A") },
+    { q: t("faq3Q"), a: t("faq3A") },
+    { q: t("faq4Q"), a: t("faq4A") },
+  ];
 
-  const [openFaq, setOpenFaq] = React.useState<number | null>(null)
+  const [openFaq, setOpenFaq] = React.useState<number | null>(null);
 
   return (
     <div className="relative">
       <FadeUp>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('title')}</h1>
-        <p className="text-lg text-muted-foreground mb-12">{t('desc')}</p>
+        <h1 className="mb-4 font-bold text-4xl md:text-5xl">{t("title")}</h1>
+        <p className="mb-12 text-lg text-muted-foreground">{t("desc")}</p>
       </FadeUp>
 
-      <Section title={t('gettingStarted')} items={GETTING_STARTED} />
-      <Section title={t('conversations')} items={CONVERSATIONS} />
-      <Section title={t('customization')} items={CUSTOMIZATION} />
+      <Section items={GETTING_STARTED} title={t("gettingStarted")} />
+      <Section items={CONVERSATIONS} title={t("conversations")} />
+      <Section items={CUSTOMIZATION} title={t("customization")} />
 
       {/* Billing */}
       <section className="mb-16">
         <FadeUp>
-          <h2 className="text-2xl font-bold mb-8">{t('billing')}</h2>
+          <h2 className="mb-8 font-bold text-2xl">{t("billing")}</h2>
         </FadeUp>
         <FadeUp>
-          <p className="text-muted-foreground mb-4">{t('billingTrial')}</p>
+          <p className="mb-4 text-muted-foreground">{t("billingTrial")}</p>
         </FadeUp>
-        <StaggerContainer className="grid md:grid-cols-4 gap-4 mb-4" stagger={0.1}>
+        <StaggerContainer
+          className="mb-4 grid gap-4 md:grid-cols-4"
+          stagger={0.1}
+        >
           <StaggerChild>
             <Card>
               <CardContent>
-                <h4 className="font-semibold">{t('billingSolo')}</h4>
-                <p className="text-sm text-muted-foreground mt-1">{t('billingSoloDesc')}</p>
+                <h4 className="font-semibold">{t("billingSolo")}</h4>
+                <p className="mt-1 text-muted-foreground text-sm">
+                  {t("billingSoloDesc")}
+                </p>
               </CardContent>
             </Card>
           </StaggerChild>
           <StaggerChild>
             <Card className="ring-2 ring-primary">
               <CardContent>
-                <h4 className="font-semibold">{t('billingStarter')}</h4>
-                <p className="text-sm text-muted-foreground mt-1">{t('billingStarterDesc')}</p>
+                <h4 className="font-semibold">{t("billingStarter")}</h4>
+                <p className="mt-1 text-muted-foreground text-sm">
+                  {t("billingStarterDesc")}
+                </p>
               </CardContent>
             </Card>
           </StaggerChild>
           <StaggerChild>
             <Card>
               <CardContent>
-                <h4 className="font-semibold">{t('billingPro')}</h4>
-                <p className="text-sm text-muted-foreground mt-1">{t('billingProDesc')}</p>
+                <h4 className="font-semibold">{t("billingPro")}</h4>
+                <p className="mt-1 text-muted-foreground text-sm">
+                  {t("billingProDesc")}
+                </p>
               </CardContent>
             </Card>
           </StaggerChild>
           <StaggerChild>
             <Card>
               <CardContent>
-                <h4 className="font-semibold">{t('billingBusiness')}</h4>
-                <p className="text-sm text-muted-foreground mt-1">{t('billingBusinessDesc')}</p>
+                <h4 className="font-semibold">{t("billingBusiness")}</h4>
+                <p className="mt-1 text-muted-foreground text-sm">
+                  {t("billingBusinessDesc")}
+                </p>
               </CardContent>
             </Card>
           </StaggerChild>
         </StaggerContainer>
         <FadeUp>
           <p className="text-muted-foreground">
-            {t.rich('billingCancel', {
-              link: (chunk: React.ReactNode) => <Link href="/pricing" className="text-primary underline">{chunk}</Link>,
+            {t.rich("billingCancel", {
+              link: (chunk: React.ReactNode) => (
+                <Link className="text-primary underline" href="/pricing">
+                  {chunk}
+                </Link>
+              ),
             })}
           </p>
         </FadeUp>
@@ -261,20 +291,20 @@ export function DocsAnimations() {
       {/* FAQ */}
       <section>
         <FadeUp>
-          <h2 className="text-2xl font-bold mb-8">{t('commonQuestions')}</h2>
+          <h2 className="mb-8 font-bold text-2xl">{t("commonQuestions")}</h2>
         </FadeUp>
         <div className="space-y-3">
           {FAQ_ITEMS.map((item, i) => (
             <AccordionItem
-              key={item.q}
-              question={item.q}
               answer={item.a}
               isOpen={openFaq === i}
+              key={item.q}
               onToggle={() => setOpenFaq(openFaq === i ? null : i)}
+              question={item.q}
             />
           ))}
         </div>
       </section>
     </div>
-  )
+  );
 }

@@ -1,7 +1,7 @@
-import type { PlanTier } from "@zenda/shared";
-import { PLANS } from "@zenda/shared";
 import { db } from "@zenda/db/client";
 import { subscriptions } from "@zenda/db/schema";
+import type { PlanTier } from "@zenda/shared";
+import { PLANS } from "@zenda/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
@@ -18,10 +18,10 @@ import { handleWebhook } from "./webhooks.js";
  * Removed typedContext to avoid runtime decoration overwriting derived auth values.
  * The global derive in index.ts provides userId/workspaceId at runtime.
  */
-type AuthContext = {
+interface AuthContext {
   userId: string | null;
   workspaceId: string | null;
-};
+}
 
 export const billingModule = new Elysia({ prefix: "/billing" })
   // Public: list available plans (no auth required)
@@ -76,7 +76,9 @@ export const billingModule = new Elysia({ prefix: "/billing" })
           });
           if (existing) {
             // Already has a subscription — let them use the existing one
-            return { url: `${process.env.APP_URL ?? "http://localhost:5173"}/dashboard?billing=free` };
+            return {
+              url: `${process.env.APP_URL ?? "http://localhost:5173"}/dashboard?billing=free`,
+            };
           }
           await db.insert(subscriptions).values({
             workspaceId: workspaceId as string,
@@ -88,9 +90,13 @@ export const billingModule = new Elysia({ prefix: "/billing" })
             currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           });
           logger.info("Activated free tier", { workspaceId });
-          return { url: `${process.env.APP_URL ?? "http://localhost:5173"}/dashboard?billing=free` };
+          return {
+            url: `${process.env.APP_URL ?? "http://localhost:5173"}/dashboard?billing=free`,
+          };
         } catch (err) {
-          logger.error("Free tier activation error", { error: (err as Error).message });
+          logger.error("Free tier activation error", {
+            error: (err as Error).message,
+          });
           return serverError(set, "Failed to activate free tier");
         }
       }
@@ -101,7 +107,9 @@ export const billingModule = new Elysia({ prefix: "/billing" })
           data.email,
           (data.tier ?? "local_solo") as PlanTier,
           data.founding === "true",
-          (data.billingPeriod === "annual" ? "annual" : "monthly") as "monthly" | "annual"
+          (data.billingPeriod === "annual" ? "annual" : "monthly") as
+            | "monthly"
+            | "annual"
         );
         return session;
       } catch (err) {

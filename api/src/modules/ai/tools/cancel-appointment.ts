@@ -16,42 +16,48 @@
  * - No data is invented; all fields come from the DB result.
  * - On failure the agent receives a structured error it can relay honestly.
  */
-import { db } from '@zenda/db/client'
-import { appointments, services, staffMembers, businessProfiles, receptionistProfiles } from '@zenda/db/schema'
-import { eq, and } from 'drizzle-orm'
-import { APPOINTMENT_TRANSITIONS } from '@zenda/shared'
-import type { CancellationStrictness, Language } from '@zenda/shared'
-import { logAppointmentAudit } from '../../audit/logger.js'
+import { db } from "@zenda/db/client";
+import {
+  appointments,
+  businessProfiles,
+  receptionistProfiles,
+  services,
+  staffMembers,
+} from "@zenda/db/schema";
+import type { CancellationStrictness, Language } from "@zenda/shared";
+import { APPOINTMENT_TRANSITIONS } from "@zenda/shared";
+import { and, eq } from "drizzle-orm";
+import { logAppointmentAudit } from "../../audit/logger.js";
 
 interface ToolInput {
-  appointmentId: string
-  reason?: string
+  appointmentId: string;
+  reason?: string;
 }
 
 interface CancelBlockedResult {
-  cancelled: false
-  blocked: true
-  reason: string
-  message: string
+  blocked: true;
+  cancelled: false;
+  message: string;
+  reason: string;
 }
 
 interface CancelSuccessResult {
-  cancelled: true
-  appointmentId: string
-  status: string
-  message: string
-  depositNote?: string
-  ownerNotified: boolean
+  appointmentId: string;
+  cancelled: true;
+  depositNote?: string;
+  message: string;
+  ownerNotified: boolean;
+  status: string;
 }
 
-type CancelResult = CancelBlockedResult | CancelSuccessResult
+type CancelResult = CancelBlockedResult | CancelSuccessResult;
 
 export async function cancelAppointment(
   workspaceId: string,
   input: ToolInput,
-  _language?: Language,
+  _language?: Language
 ): Promise<CancelResult> {
-  const lang = _language ?? 'en'
+  const lang = _language ?? "en";
 
   // Fetch appointment with service, staff, and business config
   const [row] = await db
@@ -65,94 +71,121 @@ export async function cancelAppointment(
     .from(appointments)
     .innerJoin(services, eq(appointments.serviceId, services.id))
     .leftJoin(staffMembers, eq(appointments.staffMemberId, staffMembers.id))
-    .innerJoin(businessProfiles, eq(appointments.workspaceId, businessProfiles.workspaceId))
-    .innerJoin(receptionistProfiles, eq(appointments.workspaceId, receptionistProfiles.workspaceId))
-    .where(and(
-      eq(appointments.id, input.appointmentId),
-      eq(appointments.workspaceId, workspaceId),
-    ))
-    .limit(1)
+    .innerJoin(
+      businessProfiles,
+      eq(appointments.workspaceId, businessProfiles.workspaceId)
+    )
+    .innerJoin(
+      receptionistProfiles,
+      eq(appointments.workspaceId, receptionistProfiles.workspaceId)
+    )
+    .where(
+      and(
+        eq(appointments.id, input.appointmentId),
+        eq(appointments.workspaceId, workspaceId)
+      )
+    )
+    .limit(1);
 
-  if (!row) throw new Error('Appointment not found')
+  if (!row) {
+    throw new Error("Appointment not found");
+  }
 
-  const { appointment: apt, service: svc, staff, business: biz, receptionist: recep } = row
+  const {
+    appointment: apt,
+    service: svc,
+    staff,
+    business: biz,
+    receptionist: recep,
+  } = row;
 
   // Validate status transition
-  const validNext = APPOINTMENT_TRANSITIONS[apt.status as keyof typeof APPOINTMENT_TRANSITIONS]
-  if (!validNext?.includes('cancelled')) {
-    throw new Error(`Cannot cancel appointment in status: ${apt.status}`)
+  const validNext =
+    APPOINTMENT_TRANSITIONS[apt.status as keyof typeof APPOINTMENT_TRANSITIONS];
+  if (!validNext?.includes("cancelled")) {
+    throw new Error(`Cannot cancel appointment in status: ${apt.status}`);
   }
 
   // ── Compute time remaining ──
-  const hoursUntilAppointment = (new Date(apt.startAt).getTime() - Date.now()) / 3_600_000
-  const windowHours = biz.cancellationWindowHours ?? 24
-  const withinWindow = hoursUntilAppointment < windowHours
-  const strictness: CancellationStrictness = recep.cancellationPolicyStrictness ?? 'standard'
+  const hoursUntilAppointment =
+    (new Date(apt.startAt).getTime() - Date.now()) / 3_600_000;
+  const windowHours = biz.cancellationWindowHours ?? 24;
+  const withinWindow = hoursUntilAppointment < windowHours;
+  const strictness: CancellationStrictness =
+    recep.cancellationPolicyStrictness ?? "standard";
 
   // ── Apply cancellation policy ──
-  if (withinWindow && strictness === 'strict') {
-    const msg = lang === 'es'
-      ? `Lo siento, de acuerdo con la politica del negocio no es posible cancelar la cita con menos de ${windowHours} horas de anticipacion. Te gustaria que te comunique con alguien del equipo?`
-      : `I'm sorry, per the business policy cancellations are not allowed within ${windowHours} hours of the appointment. Would you like me to connect you with someone on the team?`
+  if (withinWindow && strictness === "strict") {
+    const msg =
+      lang === "es"
+        ? `Lo siento, de acuerdo con la politica del negocio no es posible cancelar la cita con menos de ${windowHours} horas de anticipacion. Te gustaria que te comunique con alguien del equipo?`
+        : `I'm sorry, per the business policy cancellations are not allowed within ${windowHours} hours of the appointment. Would you like me to connect you with someone on the team?`;
 
     return {
       cancelled: false,
       blocked: true,
       reason: `strict_policy_window (${windowHours}h)`,
       message: msg,
-    }
+    };
   }
 
   // For 'standard' within window: warn but allow
-  let warning: string | null = null
-  if (withinWindow && strictness === 'standard') {
-    warning = lang === 'es'
-      ? `Nota: estas cancelando con menos de ${windowHours} horas de anticipacion.`
-      : `Note: you are cancelling within ${windowHours} hours of the appointment.`
+  let warning: string | null = null;
+  if (withinWindow && strictness === "standard") {
+    warning =
+      lang === "es"
+        ? `Nota: estas cancelando con menos de ${windowHours} horas de anticipacion.`
+        : `Note: you are cancelling within ${windowHours} hours of the appointment.`;
   }
 
   // ── Perform cancellation ──
   const [updated] = await db
     .update(appointments)
     .set({
-      status: 'cancelled',
+      status: "cancelled",
       cancelledAt: new Date(),
       updatedAt: new Date(),
-      notes: input.reason ? `${apt.notes ?? ''}\nCancel reason: ${input.reason}`.trim() : apt.notes,
+      notes: input.reason
+        ? `${apt.notes ?? ""}\nCancel reason: ${input.reason}`.trim()
+        : apt.notes,
     })
     .where(eq(appointments.id, apt.id))
-    .returning()
+    .returning();
 
-  logAppointmentAudit(workspaceId, updated.id, 'appointment_cancelled', {
-    channel: 'whatsapp',
-    channelProvider: 'baileys',
+  logAppointmentAudit(workspaceId, updated.id, "appointment_cancelled", {
+    channel: "whatsapp",
+    channelProvider: "baileys",
     customerId: apt.customerId,
     serviceId: svc.id,
-  }).catch(() => {})
+  }).catch(() => {});
 
   // ── Deposit note ──
-  let depositNote: string | undefined
+  let depositNote: string | undefined;
   if (biz.depositRequired) {
-    depositNote = lang === 'es'
-      ? 'Ten en cuenta que se aplicara la politica de depositos del negocio.'
-      : 'Please note the business deposit policy will apply.'
+    depositNote =
+      lang === "es"
+        ? "Ten en cuenta que se aplicara la politica de depositos del negocio."
+        : "Please note the business deposit policy will apply.";
   }
 
   // ── Notify owner if within cancellation window ──
-  const ownerNotified = withinWindow
+  const ownerNotified = withinWindow;
 
-  const staffName = staff?.name ?? null
-  const dateStr = new Date(apt.startAt).toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  })
+  const staffName = staff?.name ?? null;
+  const dateStr = new Date(apt.startAt).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
 
-  let msg = lang === 'es'
-    ? `Tu cita de ${svc.name}${staffName ? ` con ${staffName}` : ''} del ${dateStr} ha sido cancelada.`
-    : `Your ${svc.name} appointment${staffName ? ` with ${staffName}` : ''} on ${dateStr} has been cancelled.`
+  let msg =
+    lang === "es"
+      ? `Tu cita de ${svc.name}${staffName ? ` con ${staffName}` : ""} del ${dateStr} ha sido cancelada.`
+      : `Your ${svc.name} appointment${staffName ? ` with ${staffName}` : ""} on ${dateStr} has been cancelled.`;
 
-  if (warning) msg = `${warning} ${msg}`
+  if (warning) {
+    msg = `${warning} ${msg}`;
+  }
 
   return {
     cancelled: true,
@@ -161,22 +194,25 @@ export async function cancelAppointment(
     message: msg,
     depositNote,
     ownerNotified,
-  }
+  };
 }
 
 export const cancelAppointmentToolDef = {
-  type: 'function' as const,
+  type: "function" as const,
   function: {
-    name: 'cancel_appointment',
+    name: "cancel_appointment",
     description:
       'Cancel an existing appointment. Applies the business cancellation window and strictness policy. May block cancellation for "strict" policies within the window.',
     parameters: {
-      type: 'object',
+      type: "object",
       properties: {
-        appointmentId: { type: 'string', description: 'The appointment ID to cancel' },
-        reason: { type: 'string', description: 'Optional cancellation reason' },
+        appointmentId: {
+          type: "string",
+          description: "The appointment ID to cancel",
+        },
+        reason: { type: "string", description: "Optional cancellation reason" },
       },
-      required: ['appointmentId'],
+      required: ["appointmentId"],
     },
   },
-}
+};

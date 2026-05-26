@@ -2,11 +2,13 @@
 
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { trackAdsConversion, trackSignup } from "@/components/google-analytics";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Link, useRouter } from "@/i18n/navigation";
 import { signup } from "@/lib/api-client";
+import { captureUtmParams } from "@/lib/tracking";
 
 const HAS_UPPER = /[A-Z]/;
 const HAS_LOWER = /[a-z]/;
@@ -48,6 +50,12 @@ export function SignupPageClient() {
   const searchParams = useSearchParams();
   const checkoutTier = searchParams.get("checkout");
   const isFounding = searchParams.get("founding") === "true";
+
+  // Capture UTM params on mount
+  useEffect(() => {
+    captureUtmParams(searchParams);
+  }, [searchParams]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -98,6 +106,11 @@ export function SignupPageClient() {
 
     try {
       await signup({ email, password, name, businessName });
+
+      // Fire conversion tracking
+      trackSignup("email");
+      trackAdsConversion();
+
       if (checkoutTier) {
         const params = new URLSearchParams({ tier: checkoutTier });
         if (isFounding) {

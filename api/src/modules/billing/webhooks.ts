@@ -10,8 +10,8 @@ import { eq } from "drizzle-orm";
 import type Stripe from "stripe";
 import { logger } from "../../infra/logger.js";
 import { resetUsageOnPlanChange } from "../usage/enforcement.js";
-import { STRIPE_WEBHOOK_SECRET, stripe } from "./stripe.js";
 import { tierFromPriceId } from "./products.js";
+import { STRIPE_WEBHOOK_SECRET, stripe } from "./stripe.js";
 
 type PlanTier = (typeof planTierEnum.enumValues)[number];
 type BillingPeriod = (typeof billingPeriodEnum.enumValues)[number];

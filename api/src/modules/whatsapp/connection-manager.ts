@@ -19,7 +19,10 @@ interface AuthenticatedWS extends WSConnection {
 }
 
 // Track active connections: workspaceId -> { ws, generation }
-const connections = new Map<string, { ws: AuthenticatedWS; generation: number }>();
+const connections = new Map<
+  string,
+  { ws: AuthenticatedWS; generation: number }
+>();
 let globalGeneration = 0;
 
 export function addConnection(workspaceId: string, ws: AuthenticatedWS) {
@@ -40,7 +43,9 @@ export function removeConnection(workspaceId: string, ws?: unknown) {
   // This prevents a stale close handler from evicting a newer connection.
   if (ws) {
     const entry = connections.get(workspaceId);
-    if (entry && entry.ws !== ws) return;
+    if (entry && entry.ws !== ws) {
+      return;
+    }
   }
   connections.delete(workspaceId);
 }

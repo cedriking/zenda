@@ -1,86 +1,133 @@
-# Zenda Founding Customer Outreach Package
+# Zenda Paquete de Prospección — Negocios Fundadores (México)
 
-**Date:** May 25, 2026
-**Goal:** Close 10 paying customers in 4 weeks
-**Author:** CEO Agent
-
----
-
-## 1. Founding Customer Offer
-
-### What they get
-- 14-day free trial (no credit card required)
-- 50% off first 3 months (founding customer discount)
-- Direct WhatsApp support line to the Zenda founding team
-- Priority feature requests — we build what they need first
-
-### Target customer profile
-- **Industry:** Beauty salons, barbershops, spas, nail studios, dental clinics, veterinary clinics
-- **Region:** LATAM (Mexico, Colombia, Argentina, Chile, Peru) — Spanish-speaking first
-- **Size:** Solo owner-operator or 1-5 staff
-- **Current pain:** Missing WhatsApp messages = lost appointments = lost revenue
-- **Tech comfort:** Uses WhatsApp daily, has a smartphone, comfortable downloading a desktop app
-
-### Why they should switch
-- **No more missed messages:** AI answers instantly 24/7, even when they're with a client
-- **Books appointments automatically:** Customers just say "I want an appointment" and Zenda handles the rest
-- **Sends reminders automatically:** Reduces no-shows by 40-60%
-- **WhatsApp-native:** No new app for their customers — everything happens in WhatsApp
-- **Under $1/day:** Solo plan is $29/month — cheaper than a part-time receptionist's first hour
+**Fecha:** 25 mayo 2026
+**Objetivo:** Cerrar 10 clientes pagando en 4 semanas
+**Mercado primario:** México (CDMX, Guadalajara, Monterrey, Mérida, Cancún, Querétaro, Puebla, León)
+**Moneda de referencia:** $29 USD ≈ $500 MXN (tipo de cambio ~$17.35)
+**Propósito:** Copiar, pegar, enviar. Todo listo para ejecutar.
+**Meta medible:** 100 contactos → 15 registros → 10 clientes pagando
 
 ---
 
-## 2. Outreach Channels & Templates
+## 1. Oferta para Negocios Fundadores
 
-### Channel 1: WhatsApp Direct Outreach (highest conversion)
+### Qué reciben
+- 14 días de prueba gratis (sin tarjeta de crédito)
+- 50% de descuento los primeros 3 meses (precio de fundador)
+- Línea directa de soporte por WhatsApp con el equipo fundador
+- Peticiones de features prioritarias — construimos lo que necesitan
 
-**Target:** 60 businesses in weeks 1-2
+### Perfil del cliente ideal
+- **Giro:** Salones de belleza, barberías, spas, uñas, clínicas dentales, veterinarias
+- **Región:** México (CDMX, Gdl, MTY, Mérida, Cancún, Qro, Puebla, León)
+- **Tamaño:** Dueño-operador solo o con 1-5 empleados
+- **Dolor actual:** Mensajes de WhatsApp sin contestar = citas perdidas = dinero tirado
+- **Comodidad tecnológica:** Usa WhatsApp diario, tiene smartphone, puede descargar una app de escritorio
 
-**Template (Spanish):**
+### Por qué vale la pena
+- **Cero mensajes perdidos:** La IA contesta al instante 24/7, incluso cuando están con un cliente
+- **Agenda citas automáticamente:** El cliente dice "quiero una cita" y Zenda hace todo
+- **Manda recordatorios solito:** Reduce las citas fallidas (no-shows) hasta un 40-60%
+- **Funciona en tu WhatsApp:** Tus clientes no necesitan descargar nada nuevo
+- **Menos de $1 al día:** El plan Solo cuesta $29 USD/mes (~$500 MXN) — menos de lo que cobras por una cita
+- **Sin comisiones por cita:** Precio fijo mensual, sin sorpresas
+
+---
+
+## 2. Canales y Templates de Prospección
+
+### Canal 1: WhatsApp Directo (mayor conversión)
+
+**Objetivo:** 60 negocios en las semanas 1-2
+**Ciudades prioridad:** CDMX, Guadalajara, Monterrey, Mérida, Cancún
+
+**Template 1 — Salones de belleza / estéticas:**
 ```
-Hola [Nombre]! Soy [Tu nombre] de Zenda.
+Hola! Soy [tu nombre] de Zenda.
+
+Vi que [nombre del negocio] agenda citas por WhatsApp — ¿cuántas citas se les escapan al día porque no pueden contestar rápido?
+
+Creamos una asistente que responde en segundos, agenda automáticamente y manda recordatorios. Todo desde su WhatsApp actual.
+
+Estamos buscando 10 negocios fundadores: 14 días gratis + 50% de descuento 3 meses (~$250 MXN/mes).
+
+¿Les interesa? Se configura en 5 minutos: zenda.bot/founding
+```
+
+**Template 2 — Barberías:**
+```
+Hola! Soy [tu nombre] de Zenda.
+
+Barberías como [nombre del negocio] pierden clientes cada día porque no pueden contestar WhatsApp mientras están cortando el pelo.
+
+Zenda responde por ti en segundos, agenda la cita y manda recordatorios — todo automático.
+
+14 días gratis + 50% de descuento para los primeros 10 negocios (~$250 MXN/mes): zenda.bot/founding
+```
+
+**Template 3 — Spas / centros estéticos:**
+```
+Hola! Soy [tu nombre] de Zenda.
+
+Los spas pierden hasta 30% de citas potenciales por respuestas lentas en WhatsApp.
+
+Zenda es una asistente virtual que contesta en segundos, confirma citas y envía recordatorios — sus clientas nunca esperan.
+
+Oferta fundador: prueba gratis de 14 días + 50% off (~$250 MXN/mes): zenda.bot/founding
+```
+
+**Template 4 — Clínicas dentales:**
+```
+Hola! Soy [tu nombre] de Zenda.
+
+Una cita dental no contestada = $1,500-3,000 MXN perdidos. ¿Cuántas citas se les caen al mes?
+
+Zenda contesta WhatsApp automáticamente, agenda citas y manda recordatorios. Todo desde su WhatsApp actual.
+
+14 días gratis + descuento fundador: zenda.bot/founding
+```
+
+**Template genérico (cualquier giro):**
+```
+Hola! Soy [tu nombre] de Zenda.
 
 Vi que [nombre del negocio] toma citas por WhatsApp. Creamos una asistente virtual que contesta automáticamente, agenda citas y manda recordatorios — todo desde tu WhatsApp.
 
-Estamos buscando 10 negocios fundadores para probar gratis por 14 días + 50% de descuento los primeros 3 meses.
+Estamos buscando 10 negocios fundadores: 14 días gratis + 50% de descuento los primeros 3 meses.
 
-¿Te interesa probarlo? Solo toma 5 minutos configurarlo.
+¿Te interesa probarlo? Solo toma 5 minutos: zenda.bot/founding
 ```
 
-**Template (English):**
+### Canal 2: Grupos de Facebook (dueños de negocios en México)
+
+**Objetivo:** Publicar en 20 grupos de negocios mexicanos
+
+**Grupos objetivo:**
+- "Dueños de Salones de Belleza México"
+- "Barberos México"
+- "Negocios Mérida Yucatán"
+- "Emprendedores Guadalajara"
+- "PYME Monterrey"
+- "Salones de Belleza CDMX"
+- "Negocios Cancún"
+
+**Template para grupo:**
 ```
-Hi [Name]! I'm [Your name] from Zenda.
-
-I noticed [Business name] takes appointments via WhatsApp. We built an AI receptionist that answers automatically, books appointments, and sends reminders — all through your WhatsApp.
-
-We're looking for 10 founding businesses to try it free for 14 days + 50% off the first 3 months.
-
-Would you like to try it? Setup takes just 5 minutes.
-```
-
-### Channel 2: Facebook/Instagram Groups
-
-**Target:** Post in 20 LATAM small business groups
-
-**Template:**
-```
-[Spanish]
-Saloneros/barberos/spa owners: ¿Cuántas citas pierden al día porque no pueden contestar WhatsApp mientras están con un cliente?
+Compañeros saloneros/barberos: ¿Cuántas citas pierden al día porque no pueden contestar WhatsApp mientras están con un cliente?
 
 Acabamos de lanzar Zenda — una asistente de IA que contesta sus mensajes de WhatsApp, agenda citas y envía recordatorios automáticamente.
 
-Prueben gratis: zenda.bot
+Todo desde su WhatsApp actual. Sus clientas no necesitan descargar nada.
 
-Los primeros 10 negocios obtienen 50% de descuento los primeros 3 meses.
+Prueben gratis 14 días: zenda.bot
+Los primeros 10 negocios obtienen 50% de descuento 3 meses (~$250 MXN/mes).
 ```
 
-### Channel 3: Cold Email (lower priority)
-
-**Target:** 30 businesses found via Google Maps / social media
+### Canal 3: Cold Email (prioridad baja)
 
 **Template:**
 ```
-Subject: Nunca más pierdas una cita por no contestar WhatsApp
+Asunto: Nunca más pierdas una cita por no contestar WhatsApp
 
 Hola [Nombre],
 
@@ -92,163 +139,138 @@ Zenda es una asistente virtual que conecta con tu WhatsApp y:
 - Envía recordatorios para reducir cancelaciones
 - Escala mensajes complicados directamente a ti
 
-Plan Solo: $29 USD/mes (menos de $1 al día)
+Plan Solo: $29 USD/mes (~$500 MXN — menos de $1 al día)
 
 Prueba gratis por 14 días: https://zenda.bot
 
-Somos un equipo pequeño y estamos buscando negocios fundadores. Tendrás soporte directo por WhatsApp con nosotros.
+Somos un equipo pequeño y estamos buscando negocios fundadores en México. Tendrás soporte directo por WhatsApp con nosotros. Sin letra chiquita.
 
 ¿Te animas a probar?
 
 Saludos,
-[Tu nombre]
+[tu nombre]
 Equipo Zenda
 ```
 
 ---
 
-## 3. Sales Objection Handling
+## 3. Manejo de Objeciones (México)
 
-| Objection | Response |
+| Objeción | Respuesta |
 |-----------|----------|
-| "Ya tengo secretary/asistente" | "Zenda complementa a tu equipo — contesta fuera de horario y cuando están ocupados. No reemplaza, amplía." |
-| "Es muy caro" | "A $29/mes es menos de $1 al día. Una sola cita recuperada ya pagó el mes completo." |
-| "No soy tecnológico" | "Se configura en 5 minutos. Solo descarga la app, conecta tu WhatsApp, y listo. Te ayudamos por WhatsApp si necesitas." |
-| "Mis clientes prefieren hablar conmigo" | "Zenda escala los mensajes importantes directo a ti. Solo maneja lo rutinario (horarios, citas, precios)." |
-| "No necesito IA" | "No es IA por ser fancy — es para que no pierdas clientes. Cada mensaje sin contestar es una cita que se va a la competencia." |
-| "Puedo contestar yo mismo" | "¿A las 10pm? ¿En tu hora de almuerzo? ¿Cuando estás con un cliente? Zenda nunca duerme." |
+| "Ya tengo asistente/secretaria" | "Zenda complementa a tu equipo — contesta fuera de horario y cuando están ocupados con un cliente. No reemplaza, amplía." |
+| "Está muy caro" | "A $29 dólares al mes (~$500 pesos) es menos de $17 pesos al día. Una sola cita recuperada ya pagó el mes completo. ¿Cuánto cobras por un corte?" |
+| "No soy tecnológico / No entiendo de computadoras" | "Se configura en 5 minutos. Solo descarga la app, conecta tu WhatsApp, y listo. Te ayudo por WhatsApp si necesitas — estamos para eso." |
+| "Mis clientes prefieren hablar conmigo" | "Zenda escala los mensajes importantes directo a ti. Solo maneja lo rutinario (horarios, citas, precios). Tú sigues teniendo el toque personal." |
+| "No necesito IA / Esas cosas no funcionan" | "No es IA por moda — es para que no pierdas clientes. Cada mensaje sin contestar es una cita que se va a la competencia de la otra cuadra." |
+| "Yo mismo contesto" | "¿A las 10 de la noche? ¿En tu hora de comer? ¿Cuando estás con un cliente en la silla? Zenda nunca duerme." |
+| "¿Es seguro? / ¿Me van a hackear?" | "Tus datos se quedan en tu computadora. No almacenamos tus mensajes. Es como usar WhatsApp normal, pero con un asistente que te ayuda." |
+| "¿Y si no funciona para mi tipo de negocio?" | "Por eso los 14 días gratis. Si no te convence, no pagas nada. Sin compromiso." |
+| "¿Puedo pagar en pesos / en OXXO?" | "El cobro es en dólares por Stripe, pero se carga a tu tarjeta automáticamente. Muchos negocios ya pagan Netflix o Spotify igual." |
 
 ---
 
-## 4. Success Metrics (4-week plan)
+## 4. Métricas de Éxito (Plan de 4 semanas)
 
-| Week | Action | Target |
-|------|--------|--------|
-| 1 | WhatsApp outreach to 30 businesses | 10 signups, 5 active trials |
-| 2 | Follow up + 30 more businesses | 15 total signups, 10 active trials |
-| 3 | Convert trials + Facebook groups | 7 paid subscriptions |
-| 4 | Close remaining + referrals | 10 paid subscriptions |
+| Semana | Acción | Objetivo |
+|--------|--------|----------|
+| 1 | Prospección WhatsApp a 30 negocios (CDMX, Gdl, MTY) | 10 registros, 5 pruebas activas |
+| 2 | Seguimiento + 30 negocios más (Mérida, Cancún, Qro) | 15 registros totales, 10 pruebas activas |
+| 3 | Convertir pruebas + grupos de Facebook | 7 suscripciones pagadas |
+| 4 | Cerrar pendientes + referidos | 10 suscripciones pagadas |
 
-**Conversion targets:**
-- Outreach → Signup: 15% (90 contacted → 15 signups)
-- Signup → Trial: 70% (15 signups → 10 active trials)
-- Trial → Paid: 100% of active trials with founding offer (10 → 10 paid)
-
----
-
-## 5. First 10 Target Niches (by priority)
-
-1. **Beauty salons** (highest volume, highest WhatsApp usage)
-2. **Barbershops** (high message volume, easy scheduling)
-3. **Nail studios** (repetitive appointment patterns)
-4. **Spas / massage clinics** (higher ticket, care about no-shows)
-5. **Dental clinics** (formal scheduling needs, lower volume)
-6. **Veterinary clinics** (emergency + appointment mix)
-7. **Personal trainers** (recurring appointments)
-8. **Yoga/pilates studios** (class + individual booking)
-9. **Auto mechanic shops** (service appointments)
-10. **Photography studios** (session scheduling)
+**Objetivos de conversión:**
+- Prospección → Registro: 15% (100 contactados → 15 registros)
+- Registro → Prueba activa: 70% (15 registros → 10 pruebas activas)
+- Prueba → Pago: 100% con oferta fundador (10 → 10 pagados)
 
 ---
 
-## 6. Ready-to-Execute Prospect List (First 20)
+## 5. Primeros 10 Giros Objetivo (por prioridad México)
 
-### How to Find Prospects
-1. Open Google Maps
-2. Search: "salón de belleza [city]" or "barbería [city]" or "spa [city]"
-3. Filter: businesses with WhatsApp in their contact info
-4. Open their WhatsApp and send the template below
-
-### Batch 1: Mexico City (CDMX) — Beauty Salons
-Find via: `Google Maps → "salón de belleza CDMX" → filter by rating 4.0+`
-
-| # | Search Query | Niche | Expected Conversion |
-|---|-------------|-------|-------------------|
-| 1 | "salón de belleza Condesa" | Beauty salon | High |
-| 2 | "salón de belleza Roma Norte" | Beauty salon | High |
-| 3 | "barbería Polanco" | Barbershop | High |
-| 4 | "barbería Del Valle" | Barbershop | Medium |
-| 5 | "spa CDMX" | Spa/massage | Medium |
-| 6 | "uñas CDMX" | Nail studio | High |
-| 7 | "estética CDMX" | Beauty salon | High |
-
-### Batch 2: Bogotá — Beauty Salons
-Find via: `Google Maps → "salón de belleza Bogotá" → filter by rating 4.0+`
-
-| # | Search Query | Niche | Expected Conversion |
-|---|-------------|-------|-------------------|
-| 8 | "salón de belleza Zona Rosa Bogotá" | Beauty salon | High |
-| 9 | "peluquería Chapinero" | Hair salon | High |
-| 10 | "barbería Bogotá" | Barbershop | Medium |
-
-### Batch 3: Buenos Aires — Beauty & Wellness
-Find via: `Google Maps → "peluquería Buenos Aires" → filter by rating 4.0+`
-
-| # | Search Query | Niche | Expected Conversion |
-|---|-------------|-------|-------------------|
-| 11 | "peluquería Palermo" | Hair salon | High |
-| 12 | "centro de estética Buenos Aires" | Beauty center | High |
-| 13 | "barbería Buenos Aires" | Barbershop | Medium |
-
-### Batch 4: Santiago de Chile + Lima
-| # | Search Query | Niche | Expected Conversion |
-|---|-------------|-------|-------------------|
-| 14 | "salón de belleza Santiago" | Beauty salon | Medium |
-| 15 | "centro estético Lima" | Beauty center | Medium |
-| 16 | "barbería Santiago" | Barbershop | Medium |
-| 17 | "spa Lima" | Spa | Low |
-
-### Batch 5: Monterrey + Guadalajara (high-income MX cities)
-| # | Search Query | Niche | Expected Conversion |
-|---|-------------|-------|-------------------|
-| 18 | "salón de belleza Monterrey" | Beauty salon | High |
-| 19 | "barbería Guadalajara" | Barbershop | High |
-| 20 | "spa Monterrey" | Spa | Medium |
-
-### WhatsApp Outreach Template (Copy-Paste Ready)
-```
-Hola! Soy de Zenda.
-
-Vi que toman citas por WhatsApp. Creamos una asistente virtual que contesta automáticamente, agenda citas y manda recordatorios — todo desde tu WhatsApp actual.
-
-Estamos buscando 10 negocios fundadores: 14 días gratis + 50% de descuento 3 meses.
-
-¿Te interesa? En 5 minutos lo configuras: zenda.bot
-```
-
-### What to Do When They Say Yes
-1. Send them: "Genial! Entra a zenda.bot y créa tu cuenta. Es gratis por 14 días."
-2. They sign up at https://zenda.bot/es/signup
-3. They download the desktop app at https://zenda.bot/download
-4. They connect their WhatsApp by scanning the QR code
-5. Zenda starts answering their customers automatically
-6. Follow up in 3 days: "¿Cómo va? ¿Tienes dudas?"
+1. **Salones de belleza / estéticas** (mayor volumen, mayor uso de WhatsApp)
+2. **Barberías** (alto volumen de mensajes, agendamiento fácil)
+3. **Studios de uñas** (citas repetitivas, clientela fiel)
+4. **Spas / centros de masaje** (ticket más alto, les importa el no-show)
+5. **Clínicas dentales** (agendamiento formal, alto valor por cita)
+6. **Veterinarias** (mezcla emergencia + citas)
+7. **Entrenadores personales** (citas recurrentes)
+8. **Studios de yoga/pilates** (clases + citas individuales)
+9. **Talleres mecánicos** (citas de servicio)
+10. **Estudios fotográficos** (sesiones)
 
 ---
 
-## 7. Quick Links for Outreach
+## 6. Lista de Prospección — Primero 20 (México Only)
 
-- **Signup page (ES):** https://zenda.bot/es/signup
-- **Pricing page (ES):** https://zenda.bot/es/pricing
-- **Download page:** https://zenda.bot/en/download
-- **Getting started:** https://zenda.bot/en/getting-started
-- **Industry - Beauty:** https://zenda.bot/es/beauty
-- **Industry - Wellness:** https://zenda.bot/en/wellness
+### Cómo encontrar prospectos
+1. Abre Google Maps
+2. Busca: "salón de belleza [ciudad]" o "barbería [ciudad]" o "spa [ciudad]"
+3. Filtra: negocios con WhatsApp en su info de contacto
+4. Abre su WhatsApp y envía el template correspondiente
+
+### Lote 1: CDMX — Salones y Barberías
+Buscar en: `Google Maps → "salón de belleza CDMX" → filtrar por rating 4.0+`
+
+| # | Búsqueda Google Maps | Giro | Conversión esperada |
+|---|---------------------|------|-------------------|
+| 1 | "salón de belleza Condesa" | Belleza | Alta |
+| 2 | "salón de belleza Roma Norte" | Belleza | Alta |
+| 3 | "barbería Polanco" | Barbería | Alta |
+| 4 | "barbería Del Valle" | Barbería | Media |
+| 5 | "uñas Condesa" | Uñas | Alta |
+| 6 | "estética Coyoacán" | Belleza | Alta |
+| 7 | "spa Condesa" | Spa | Media |
+
+### Lote 2: Guadalajara + Monterrey
+| # | Búsqueda Google Maps | Giro | Conversión esperada |
+|---|---------------------|------|-------------------|
+| 8 | "salón de belleza Guadalajara" | Belleza | Alta |
+| 9 | "barbería Guadalajara" | Barbería | Alta |
+| 10 | "estética Monterrey" | Belleza | Alta |
+| 11 | "barbería Monterrey" | Barbería | Alta |
+| 12 | "spa Monterrey" | Spa | Media |
+
+### Lote 3: Mérida, Cancún, Querétaro, Puebla
+| # | Búsqueda Google Maps | Giro | Conversión esperada |
+|---|---------------------|------|-------------------|
+| 13 | "salón de belleza Mérida" | Belleza | Alta |
+| 14 | "spa Cancún" | Spa | Alta |
+| 15 | "barbería Querétaro" | Barbería | Media |
+| 16 | "estética Puebla" | Belleza | Media |
+| 17 | "uñas León Guanajuato" | Uñas | Media |
+| 18 | "salón de belleza Cancún" | Belleza | Alta |
+
+### Lote 4: Especialidades (clínicas, fitness)
+| # | Búsqueda Google Maps | Giro | Conversión esperada |
+|---|---------------------|------|-------------------|
+| 19 | "clínica dental CDMX" | Dental | Media |
+| 20 | "yoga pilates Monterrey" | Fitness | Baja |
 
 ---
 
-## 8. CEO Decision: Outreach Approach
+## 7. Links Rápidos para Prospección
 
-**Decision:** Board executes outreach manually. No CMO agent needed for first 10 customers.
+- **Página fundador (ES):** https://zenda.bot/es/founding
+- **Registro:** https://zenda.bot/es/signup
+- **Precios:** https://zenda.bot/es/pricing
+- **Descarga app:** https://zenda.bot/download
+- **Industria - Belleza:** https://zenda.bot/es/beauty
+- **Industria - Bienestar:** https://zenda.bot/en/wellness
 
-**Rationale:**
-- Outreach requires real WhatsApp messages to real businesses — this must be human-executed
-- For 10 customers, manual outreach (20 contacts/week) is sufficient
-- Agent-driven outreach can be considered after we validate the product with real customers
-- The CEO has prepared all materials: templates, prospect targets, objection handling
+---
 
-**Board action items:**
-1. Use Google Maps to find 20 businesses from the prospect list above
-2. Send the WhatsApp template to each business
-3. Follow up within 48 hours on any that respond
-4. Report back results so CEO can adjust messaging
+## 8. Nota de Ejecución
+
+**Decisión:** El equipo ejecuta la prospección manualmente.
+
+**Razón:**
+- La prospección requiere mensajes reales de WhatsApp a negocios reales — debe ejecutarse por una persona
+- Para 10 clientes, la prospección manual (20-25 contactos/semana) es suficiente
+- Todo el material está listo: templates, objetivos, manejo de objeciones
+
+**Acciones del equipo:**
+1. Usar Google Maps para encontrar 25 negocios de la lista de arriba
+2. Enviar el template de WhatsApp correspondiente a cada negocio
+3. Dar seguimiento en 48 horas a los que respondan
+4. Reportar resultados para ajustar el messaging

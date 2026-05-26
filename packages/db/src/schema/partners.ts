@@ -1,10 +1,10 @@
 import {
   pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
   uuid,
   varchar,
-  timestamp,
-  text,
-  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const partners = pgTable(
@@ -16,9 +16,7 @@ export const partners = pgTable(
     website: varchar("website", { length: 500 }),
     referralCode: varchar("referral_code", { length: 20 }).notNull(),
     howRefer: text("how_refer"),
-    status: varchar("status", { length: 20 })
-      .notNull()
-      .default("pending"),
+    status: varchar("status", { length: 20 }).notNull().default("pending"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -26,5 +24,5 @@ export const partners = pgTable(
   (table) => [
     uniqueIndex("partners_email_unique").on(table.email),
     uniqueIndex("partners_referral_code_unique").on(table.referralCode),
-  ],
+  ]
 );

@@ -10,11 +10,11 @@ import { appointments, customers } from "@zenda/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 import { wsMessageSender } from "../../infra/message-sender.js";
+import { logMessageSent } from "../audit/logger.js";
 import { getConsent } from "../messaging/consent-service.js";
 import { getOutboundCount } from "../messaging/outbound-tracker.js";
 import { canSendOutboundMessage } from "../messaging/sending-policy.js";
 import { shouldRestrictProactive } from "../usage/tracker.js";
-import { logMessageSent } from "../audit/logger.js";
 import { dequeueNext, markFailed, markSent } from "./persistent-queue.js";
 
 let processingInterval: ReturnType<typeof setInterval> | null = null;
@@ -243,7 +243,12 @@ async function processOne(): Promise<boolean> {
     await markSent(msg.id);
     recordWorkspaceSend(msg.workspaceId);
     if (msg.conversationId) {
-      await logMessageSent(msg.workspaceId, msg.conversationId, msg.contentType, 'queue_send');
+      await logMessageSent(
+        msg.workspaceId,
+        msg.conversationId,
+        msg.contentType,
+        "queue_send"
+      );
     }
     logger.info("Queued message sent", {
       queueId: msg.id,
@@ -300,7 +305,9 @@ export async function processQueue(
 /**
  * Start the queue processor on an interval.
  */
-export async function startProcessor(intervalMs = DEFAULT_INTERVAL_MS): Promise<void> {
+export async function startProcessor(
+  intervalMs = DEFAULT_INTERVAL_MS
+): Promise<void> {
   if (processingInterval) {
     return;
   }

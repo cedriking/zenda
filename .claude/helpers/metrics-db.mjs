@@ -1,20 +1,27 @@
 #!/usr/bin/env node
+
 /**
  * Claude Flow V3 - Metrics Database Manager
  * Uses sql.js for cross-platform SQLite storage
  * Single .db file with multiple tables
  */
 
-import initSqlJs from 'sql.js';
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs';
-import { dirname, join, basename } from 'path';
-import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
+import { execSync } from "node:child_process";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
+import { basename, dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import initSqlJs from "sql.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = join(__dirname, '../..');
-const V3_DIR = join(PROJECT_ROOT, 'v3');
-const DB_PATH = join(PROJECT_ROOT, '.claude-flow', 'metrics.db');
+const PROJECT_ROOT = join(__dirname, "../..");
+const V3_DIR = join(PROJECT_ROOT, "v3");
+const DB_PATH = join(PROJECT_ROOT, ".claude-flow", "metrics.db");
 
 // Ensure directory exists
 const dbDir = dirname(DB_PATH);
@@ -144,28 +151,30 @@ function persist() {
 /**
  * Count files and lines in a directory
  */
-function countFilesAndLines(dir, ext = '.ts') {
+function countFilesAndLines(dir, ext = ".ts") {
   let files = 0;
   let lines = 0;
 
   function walk(currentDir) {
-    if (!existsSync(currentDir)) return;
+    if (!existsSync(currentDir)) {
+      return;
+    }
 
     try {
       const entries = readdirSync(currentDir, { withFileTypes: true });
       for (const entry of entries) {
         const fullPath = join(currentDir, entry.name);
-        if (entry.isDirectory() && !entry.name.includes('node_modules')) {
+        if (entry.isDirectory() && !entry.name.includes("node_modules")) {
           walk(fullPath);
         } else if (entry.isFile() && entry.name.endsWith(ext)) {
           files++;
           try {
-            const content = readFileSync(fullPath, 'utf-8');
-            lines += content.split('\n').length;
-          } catch (e) {}
+            const content = readFileSync(fullPath, "utf-8");
+            lines += content.split("\n").length;
+          } catch {}
         }
       }
-    } catch (e) {}
+    } catch {}
   }
 
   walk(dir);
@@ -178,12 +187,24 @@ function countFilesAndLines(dir, ext = '.ts') {
  * as their services ARE the application layer (DDD by design)
  */
 const UTILITY_PACKAGES = new Set([
-  'cli', 'hooks', 'mcp', 'shared', 'testing', 'agents', 'integration',
-  'embeddings', 'deployment', 'performance', 'plugins', 'providers'
+  "cli",
+  "hooks",
+  "mcp",
+  "shared",
+  "testing",
+  "agents",
+  "integration",
+  "embeddings",
+  "deployment",
+  "performance",
+  "plugins",
+  "providers",
 ]);
 
 function calculateModuleProgress(moduleDir) {
-  if (!existsSync(moduleDir)) return 0;
+  if (!existsSync(moduleDir)) {
+    return 0;
+  }
 
   const moduleName = basename(moduleDir);
 
@@ -195,12 +216,30 @@ function calculateModuleProgress(moduleDir) {
   let progress = 0;
 
   // Check for DDD structure
-  if (existsSync(join(moduleDir, 'src/domain'))) progress += 30;
-  if (existsSync(join(moduleDir, 'src/application'))) progress += 30;
-  if (existsSync(join(moduleDir, 'src'))) progress += 10;
-  if (existsSync(join(moduleDir, 'src/index.ts')) || existsSync(join(moduleDir, 'index.ts'))) progress += 10;
-  if (existsSync(join(moduleDir, '__tests__')) || existsSync(join(moduleDir, 'tests'))) progress += 10;
-  if (existsSync(join(moduleDir, 'package.json'))) progress += 10;
+  if (existsSync(join(moduleDir, "src/domain"))) {
+    progress += 30;
+  }
+  if (existsSync(join(moduleDir, "src/application"))) {
+    progress += 30;
+  }
+  if (existsSync(join(moduleDir, "src"))) {
+    progress += 10;
+  }
+  if (
+    existsSync(join(moduleDir, "src/index.ts")) ||
+    existsSync(join(moduleDir, "index.ts"))
+  ) {
+    progress += 10;
+  }
+  if (
+    existsSync(join(moduleDir, "__tests__")) ||
+    existsSync(join(moduleDir, "tests"))
+  ) {
+    progress += 10;
+  }
+  if (existsSync(join(moduleDir, "package.json"))) {
+    progress += 10;
+  }
 
   return Math.min(progress, 100);
 }
@@ -209,13 +248,15 @@ function calculateModuleProgress(moduleDir) {
  * Check security file status
  */
 function checkSecurityFile(filename, minLines = 100) {
-  const filePath = join(V3_DIR, '@claude-flow/security/src', filename);
-  if (!existsSync(filePath)) return false;
+  const filePath = join(V3_DIR, "@claude-flow/security/src", filename);
+  if (!existsSync(filePath)) {
+    return false;
+  }
 
   try {
-    const content = readFileSync(filePath, 'utf-8');
-    return content.split('\n').length > minLines;
-  } catch (e) {
+    const content = readFileSync(filePath, "utf-8");
+    return content.split("\n").length > minLines;
+  } catch {
     return false;
   }
 }
@@ -225,7 +266,7 @@ function checkSecurityFile(filename, minLines = 100) {
  */
 function countProcesses() {
   try {
-    const ps = execSync('ps aux 2>/dev/null || echo ""', { encoding: 'utf-8' });
+    const ps = execSync('ps aux 2>/dev/null || echo ""', { encoding: "utf-8" });
 
     const agenticFlow = (ps.match(/agentic-flow/g) || []).length;
     const mcp = (ps.match(/mcp.*start/g) || []).length;
@@ -234,9 +275,9 @@ function countProcesses() {
     return {
       agenticFlow: Math.max(0, agenticFlow - 1), // Exclude grep itself
       mcp,
-      agents: Math.max(0, agents - 1)
+      agents: Math.max(0, agents - 1),
     };
-  } catch (e) {
+  } catch {
     return { agenticFlow: 0, mcp: 0, agents: 0 };
   }
 }
@@ -248,15 +289,15 @@ async function syncMetrics() {
   const now = new Date().toISOString();
 
   // Count V3 modules
-  const modulesDir = join(V3_DIR, '@claude-flow');
-  let modules = [];
+  const modulesDir = join(V3_DIR, "@claude-flow");
+  const modules = [];
   let totalProgress = 0;
 
   if (existsSync(modulesDir)) {
     const entries = readdirSync(modulesDir, { withFileTypes: true });
     for (const entry of entries) {
       // Skip hidden directories (like .agentic-flow, .claude-flow)
-      if (entry.isDirectory() && !entry.name.startsWith('.')) {
+      if (entry.isDirectory() && !entry.name.startsWith(".")) {
         const moduleDir = join(modulesDir, entry.name);
         const { files, lines } = countFilesAndLines(moduleDir);
         const progress = calculateModuleProgress(moduleDir);
@@ -265,33 +306,44 @@ async function syncMetrics() {
         totalProgress += progress;
 
         // Update module_status table
-        db.run(`
+        db.run(
+          `
           INSERT OR REPLACE INTO module_status (name, files, lines, progress, has_src, has_tests, last_updated)
           VALUES (?, ?, ?, ?, ?, ?, ?)
-        `, [
-          entry.name,
-          files,
-          lines,
-          progress,
-          existsSync(join(moduleDir, 'src')) ? 1 : 0,
-          existsSync(join(moduleDir, '__tests__')) ? 1 : 0,
-          now
-        ]);
+        `,
+          [
+            entry.name,
+            files,
+            lines,
+            progress,
+            existsSync(join(moduleDir, "src")) ? 1 : 0,
+            existsSync(join(moduleDir, "__tests__")) ? 1 : 0,
+            now,
+          ]
+        );
       }
     }
   }
 
-  const avgProgress = modules.length > 0 ? Math.round(totalProgress / modules.length) : 0;
+  const avgProgress =
+    modules.length > 0 ? Math.round(totalProgress / modules.length) : 0;
   const totalStats = countFilesAndLines(V3_DIR);
 
   // Count completed domains (mapped to modules)
-  const domainModules = ['swarm', 'memory', 'performance', 'cli', 'integration'];
-  const domainsCompleted = domainModules.filter(m =>
-    modules.some(mod => mod.name === m && mod.progress >= 50)
+  const domainModules = [
+    "swarm",
+    "memory",
+    "performance",
+    "cli",
+    "integration",
+  ];
+  const domainsCompleted = domainModules.filter((m) =>
+    modules.some((mod) => mod.name === m && mod.progress >= 50)
   ).length;
 
   // Update v3_progress
-  db.run(`
+  db.run(
+    `
     UPDATE v3_progress SET
       domains_completed = ?,
       ddd_progress = ?,
@@ -300,34 +352,59 @@ async function syncMetrics() {
       total_lines = ?,
       last_updated = ?
     WHERE id = 1
-  `, [domainsCompleted, avgProgress, modules.length, totalStats.files, totalStats.lines, now]);
+  `,
+    [
+      domainsCompleted,
+      avgProgress,
+      modules.length,
+      totalStats.files,
+      totalStats.lines,
+      now,
+    ]
+  );
 
   // Check security CVEs
-  const cve1Fixed = checkSecurityFile('input-validator.ts');
-  const cve2Fixed = checkSecurityFile('path-validator.ts');
-  const cve3Fixed = checkSecurityFile('safe-executor.ts');
+  const cve1Fixed = checkSecurityFile("input-validator.ts");
+  const cve2Fixed = checkSecurityFile("path-validator.ts");
+  const cve3Fixed = checkSecurityFile("safe-executor.ts");
   const cvesFixed = [cve1Fixed, cve2Fixed, cve3Fixed].filter(Boolean).length;
 
-  let securityStatus = 'PENDING';
-  if (cvesFixed === 3) securityStatus = 'CLEAN';
-  else if (cvesFixed > 0) securityStatus = 'IN_PROGRESS';
+  let securityStatus = "PENDING";
+  if (cvesFixed === 3) {
+    securityStatus = "CLEAN";
+  } else if (cvesFixed > 0) {
+    securityStatus = "IN_PROGRESS";
+  }
 
-  db.run(`
+  db.run(
+    `
     UPDATE security_audit SET
       status = ?,
       cves_fixed = ?,
       last_audit = ?
     WHERE id = 1
-  `, [securityStatus, cvesFixed, now]);
+  `,
+    [securityStatus, cvesFixed, now]
+  );
 
   // Update individual CVE status
-  db.run("UPDATE cve_status SET status = ?, last_updated = ? WHERE id = 'CVE-1'", [cve1Fixed ? 'fixed' : 'pending', now]);
-  db.run("UPDATE cve_status SET status = ?, last_updated = ? WHERE id = 'CVE-2'", [cve2Fixed ? 'fixed' : 'pending', now]);
-  db.run("UPDATE cve_status SET status = ?, last_updated = ? WHERE id = 'CVE-3'", [cve3Fixed ? 'fixed' : 'pending', now]);
+  db.run(
+    "UPDATE cve_status SET status = ?, last_updated = ? WHERE id = 'CVE-1'",
+    [cve1Fixed ? "fixed" : "pending", now]
+  );
+  db.run(
+    "UPDATE cve_status SET status = ?, last_updated = ? WHERE id = 'CVE-2'",
+    [cve2Fixed ? "fixed" : "pending", now]
+  );
+  db.run(
+    "UPDATE cve_status SET status = ?, last_updated = ? WHERE id = 'CVE-3'",
+    [cve3Fixed ? "fixed" : "pending", now]
+  );
 
   // Update swarm activity
   const processes = countProcesses();
-  db.run(`
+  db.run(
+    `
     UPDATE swarm_activity SET
       agentic_flow_processes = ?,
       mcp_server_processes = ?,
@@ -336,14 +413,16 @@ async function syncMetrics() {
       coordination_active = ?,
       last_updated = ?
     WHERE id = 1
-  `, [
-    processes.agenticFlow,
-    processes.mcp,
-    processes.agents,
-    processes.agents > 0 ? 1 : 0,
-    processes.agenticFlow > 0 ? 1 : 0,
-    now
-  ]);
+  `,
+    [
+      processes.agenticFlow,
+      processes.mcp,
+      processes.agents,
+      processes.agents > 0 ? 1 : 0,
+      processes.agenticFlow > 0 ? 1 : 0,
+      now,
+    ]
+  );
 
   persist();
 
@@ -354,7 +433,7 @@ async function syncMetrics() {
     cvesFixed,
     securityStatus,
     files: totalStats.files,
-    lines: totalStats.lines
+    lines: totalStats.lines,
   };
 }
 
@@ -369,7 +448,9 @@ function getMetricsJSON() {
 
   // Map column names to values
   const mapRow = (result) => {
-    if (!result) return {};
+    if (!result) {
+      return {};
+    }
     const cols = result.columns;
     const vals = result.values[0];
     return Object.fromEntries(cols.map((c, i) => [c, vals[i]]));
@@ -379,7 +460,7 @@ function getMetricsJSON() {
     v3Progress: mapRow(progress),
     securityAudit: mapRow(security),
     swarmActivity: mapRow(swarm),
-    performanceMetrics: mapRow(perf)
+    performanceMetrics: mapRow(perf),
   };
 }
 
@@ -388,85 +469,112 @@ function getMetricsJSON() {
  */
 function exportToJSON() {
   const metrics = getMetricsJSON();
-  const metricsDir = join(PROJECT_ROOT, '.claude-flow/metrics');
-  const securityDir = join(PROJECT_ROOT, '.claude-flow/security');
+  const metricsDir = join(PROJECT_ROOT, ".claude-flow/metrics");
+  const securityDir = join(PROJECT_ROOT, ".claude-flow/security");
 
-  if (!existsSync(metricsDir)) mkdirSync(metricsDir, { recursive: true });
-  if (!existsSync(securityDir)) mkdirSync(securityDir, { recursive: true });
+  if (!existsSync(metricsDir)) {
+    mkdirSync(metricsDir, { recursive: true });
+  }
+  if (!existsSync(securityDir)) {
+    mkdirSync(securityDir, { recursive: true });
+  }
 
   // v3-progress.json
-  writeFileSync(join(metricsDir, 'v3-progress.json'), JSON.stringify({
-    domains: {
-      completed: metrics.v3Progress.domains_completed,
-      total: metrics.v3Progress.domains_total
-    },
-    ddd: {
-      progress: metrics.v3Progress.ddd_progress,
-      modules: metrics.v3Progress.total_modules,
-      totalFiles: metrics.v3Progress.total_files,
-      totalLines: metrics.v3Progress.total_lines
-    },
-    swarm: {
-      activeAgents: metrics.swarmActivity.estimated_agents,
-      totalAgents: 15
-    },
-    lastUpdated: metrics.v3Progress.last_updated,
-    source: 'metrics.db'
-  }, null, 2));
+  writeFileSync(
+    join(metricsDir, "v3-progress.json"),
+    JSON.stringify(
+      {
+        domains: {
+          completed: metrics.v3Progress.domains_completed,
+          total: metrics.v3Progress.domains_total,
+        },
+        ddd: {
+          progress: metrics.v3Progress.ddd_progress,
+          modules: metrics.v3Progress.total_modules,
+          totalFiles: metrics.v3Progress.total_files,
+          totalLines: metrics.v3Progress.total_lines,
+        },
+        swarm: {
+          activeAgents: metrics.swarmActivity.estimated_agents,
+          totalAgents: 15,
+        },
+        lastUpdated: metrics.v3Progress.last_updated,
+        source: "metrics.db",
+      },
+      null,
+      2
+    )
+  );
 
   // security/audit-status.json
-  writeFileSync(join(securityDir, 'audit-status.json'), JSON.stringify({
-    status: metrics.securityAudit.status,
-    cvesFixed: metrics.securityAudit.cves_fixed,
-    totalCves: metrics.securityAudit.total_cves,
-    lastAudit: metrics.securityAudit.last_audit,
-    source: 'metrics.db'
-  }, null, 2));
+  writeFileSync(
+    join(securityDir, "audit-status.json"),
+    JSON.stringify(
+      {
+        status: metrics.securityAudit.status,
+        cvesFixed: metrics.securityAudit.cves_fixed,
+        totalCves: metrics.securityAudit.total_cves,
+        lastAudit: metrics.securityAudit.last_audit,
+        source: "metrics.db",
+      },
+      null,
+      2
+    )
+  );
 
   // swarm-activity.json
-  writeFileSync(join(metricsDir, 'swarm-activity.json'), JSON.stringify({
-    timestamp: metrics.swarmActivity.last_updated,
-    processes: {
-      agentic_flow: metrics.swarmActivity.agentic_flow_processes,
-      mcp_server: metrics.swarmActivity.mcp_server_processes,
-      estimated_agents: metrics.swarmActivity.estimated_agents
-    },
-    swarm: {
-      active: metrics.swarmActivity.swarm_active === 1,
-      agent_count: metrics.swarmActivity.estimated_agents,
-      coordination_active: metrics.swarmActivity.coordination_active === 1
-    },
-    source: 'metrics.db'
-  }, null, 2));
+  writeFileSync(
+    join(metricsDir, "swarm-activity.json"),
+    JSON.stringify(
+      {
+        timestamp: metrics.swarmActivity.last_updated,
+        processes: {
+          agentic_flow: metrics.swarmActivity.agentic_flow_processes,
+          mcp_server: metrics.swarmActivity.mcp_server_processes,
+          estimated_agents: metrics.swarmActivity.estimated_agents,
+        },
+        swarm: {
+          active: metrics.swarmActivity.swarm_active === 1,
+          agent_count: metrics.swarmActivity.estimated_agents,
+          coordination_active: metrics.swarmActivity.coordination_active === 1,
+        },
+        source: "metrics.db",
+      },
+      null,
+      2
+    )
+  );
 }
 
 /**
  * Main entry point
  */
 async function main() {
-  const command = process.argv[2] || 'sync';
+  const command = process.argv[2] || "sync";
 
   await initDatabase();
 
   switch (command) {
-    case 'sync':
+    case "sync": {
       const result = await syncMetrics();
       exportToJSON();
       console.log(JSON.stringify(result));
       break;
+    }
 
-    case 'export':
+    case "export":
       exportToJSON();
-      console.log('Exported to JSON files');
+      console.log("Exported to JSON files");
       break;
 
-    case 'status':
+    case "status": {
       const metrics = getMetricsJSON();
       console.log(JSON.stringify(metrics, null, 2));
       break;
+    }
 
-    case 'daemon':
-      const interval = parseInt(process.argv[3]) || 30;
+    case "daemon": {
+      const interval = Number.parseInt(process.argv[3], 10) || 30;
       console.log(`Starting metrics daemon (interval: ${interval}s)`);
 
       // Initial sync
@@ -479,9 +587,12 @@ async function main() {
         exportToJSON();
       }, interval * 1000);
       break;
+    }
 
     default:
-      console.log('Usage: metrics-db.mjs [sync|export|status|daemon [interval]]');
+      console.log(
+        "Usage: metrics-db.mjs [sync|export|status|daemon [interval]]"
+      );
   }
 }
 

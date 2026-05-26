@@ -193,26 +193,47 @@ export default function ReceptionistSettingsPage() {
         <div className="space-y-3">
           <ToggleField
             checked={settings.useEmoji}
-            description={t("settings.toggles.useEmojiDesc", "Allow the receptionist to include emoji for a friendlier tone")}
+            description={t(
+              "settings.toggles.useEmojiDesc",
+              "Allow the receptionist to include emoji for a friendlier tone"
+            )}
             label={t("settings.toggles.useEmoji", "Use emoji in messages")}
             onChange={(v) => updateField("useEmoji", v)}
           />
           <ToggleField
             checked={settings.speaksAsBusiness}
-            description={t("settings.toggles.speaksAsBusinessDesc", "Use 'we' instead of 'I' to represent the business collectively")}
-            label={t("settings.toggles.speaksAsBusiness", "Speak as the business")}
+            description={t(
+              "settings.toggles.speaksAsBusinessDesc",
+              "Use 'we' instead of 'I' to represent the business collectively"
+            )}
+            label={t(
+              "settings.toggles.speaksAsBusiness",
+              "Speak as the business"
+            )}
             onChange={(v) => updateField("speaksAsBusiness", v)}
           />
           <ToggleField
             checked={settings.proactivelySuggestTimes}
-            description={t("settings.toggles.proactiveSuggestDesc", "Offer available time slots without waiting for the customer to ask")}
-            label={t("settings.toggles.proactiveSuggest", "Proactively suggest times")}
+            description={t(
+              "settings.toggles.proactiveSuggestDesc",
+              "Offer available time slots without waiting for the customer to ask"
+            )}
+            label={t(
+              "settings.toggles.proactiveSuggest",
+              "Proactively suggest times"
+            )}
             onChange={(v) => updateField("proactivelySuggestTimes", v)}
           />
           <ToggleField
             checked={settings.confirmsBeforeBooking}
-            description={t("settings.toggles.confirmBeforeDesc", "Always ask for explicit confirmation before finalizing an appointment")}
-            label={t("settings.toggles.confirmBefore", "Confirm before booking")}
+            description={t(
+              "settings.toggles.confirmBeforeDesc",
+              "Always ask for explicit confirmation before finalizing an appointment"
+            )}
+            label={t(
+              "settings.toggles.confirmBefore",
+              "Confirm before booking"
+            )}
             onChange={(v) => updateField("confirmsBeforeBooking", v)}
           />
         </div>
@@ -230,7 +251,10 @@ export default function ReceptionistSettingsPage() {
             value={settings.greetingStyle}
           />
           <p className="mt-1 text-muted-foreground text-xs">
-            {t("settings.greetingPlaceholderHint", "Use {{business}} and {{name}} as placeholders for your business and receptionist name")}
+            {t(
+              "settings.greetingPlaceholderHint",
+              "Use {{business}} and {{name}} as placeholders for your business and receptionist name"
+            )}
           </p>
         </div>
 

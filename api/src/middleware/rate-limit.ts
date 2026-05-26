@@ -6,7 +6,10 @@ const WINDOW_S = 60; // 1 minute
 const DEFAULT_MAX = 100;
 
 const TRUSTED_PROXIES = new Set(
-  (process.env.TRUSTED_PROXIES ?? "").split(",").map((s) => s.trim()).filter(Boolean)
+  (process.env.TRUSTED_PROXIES ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
 );
 
 function getKey(identifier: string, path: string): string {
@@ -15,7 +18,10 @@ function getKey(identifier: string, path: string): string {
 
 // In-memory fallback limiter for when Redis is unavailable
 class InMemoryLimiter {
-  private counts = new Map<string, { count: number; expiresAt: number }>();
+  private readonly counts = new Map<
+    string,
+    { count: number; expiresAt: number }
+  >();
 
   increment(key: string): number {
     const now = Date.now();

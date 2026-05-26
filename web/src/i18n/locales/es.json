@@ -653,5 +653,24 @@
     "ctaTitle": "Listo para dejar de perder citas?",
     "ctaDesc": "14 dias gratis. Sin tarjeta de credito. Funciona con tu WhatsApp actual.",
     "ctaButton": "Comenzar prueba gratis"
+  },
+  "Partners": {
+    "formErrorRequired": "Nombre y email son obligatorios",
+    "formErrorGeneric": "Error al registrar. Intenta de nuevo.",
+    "signupSuccessTitle": "Bienvenido al programa de partners",
+    "signupSuccessDescription": "Tu código de referido está listo. Compártelo y gana un 20% por cada cliente.",
+    "yourReferralCode": "Tu código de referido",
+    "yourReferralLink": "Tu enlace de referido",
+    "copied": "Copiado",
+    "copy": "Copiar",
+    "testYourLink": "Probar enlace",
+    "fieldName": "Nombre",
+    "fieldNamePlaceholder": "Tu nombre completo",
+    "fieldEmail": "Email",
+    "fieldWebsite": "Sitio web o red social",
+    "fieldHowRefer": "¿Cómo planeas referir clientes?",
+    "fieldHowReferPlaceholder": "Ej: Mi red de contactos, mi agencia, mi comunidad...",
+    "submitting": "Registrando...",
+    "submitCta": "Obtener mi código de referido"
   }
 }

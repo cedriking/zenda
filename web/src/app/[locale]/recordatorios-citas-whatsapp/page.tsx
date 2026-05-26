@@ -1,4 +1,4 @@
-import { Bell, Check, Clock, MessageSquare, Send, Users } from "lucide-react";
+import { Bell, Check, MessageSquare, Send } from "lucide-react";
 import type { Metadata } from "next";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
@@ -20,18 +20,38 @@ export function generateMetadata(): Metadata {
     },
     openGraph: {
       title: "Recordatorios de Citas por WhatsApp — Reduce Inasistencias 40%",
-      description: "Recordatorios automáticos por WhatsApp que reducen inasistencias. Confirmación y reagenda automática. Prueba gratis 14 días.",
+      description:
+        "Recordatorios automáticos por WhatsApp que reducen inasistencias. Confirmación y reagenda automática. Prueba gratis 14 días.",
       url: "https://zenda.bot/es/recordatorios-citas-whatsapp",
       type: "website",
-      images: [{ url: "https://zenda.bot/api/og?locale=es", width: 1200, height: 630, alt: "Zenda — Recordatorios de Citas WhatsApp" }],
+      images: [
+        {
+          url: "https://zenda.bot/api/og?locale=es",
+          width: 1200,
+          height: 630,
+          alt: "Zenda — Recordatorios de Citas WhatsApp",
+        },
+      ],
     },
   };
 }
 
 const STEPS = [
-  { icon: MessageSquare, title: "Cliente agenda una cita", desc: "El cliente agenda por WhatsApp, teléfono o en persona. La cita se registra automáticamente." },
-  { icon: Bell, title: "Recordatorios automáticos", desc: "WhatsApp envía recordatorios 24h y 2h antes de la cita. El cliente confirma con un solo mensaje." },
-  { icon: Send, title: "Reagenda si no puede asistir", desc: "Si el cliente necesita cambiar la cita, la IA propone nuevos horarios disponibles al instante." },
+  {
+    icon: MessageSquare,
+    title: "Cliente agenda una cita",
+    desc: "El cliente agenda por WhatsApp, teléfono o en persona. La cita se registra automáticamente.",
+  },
+  {
+    icon: Bell,
+    title: "Recordatorios automáticos",
+    desc: "WhatsApp envía recordatorios 24h y 2h antes de la cita. El cliente confirma con un solo mensaje.",
+  },
+  {
+    icon: Send,
+    title: "Reagenda si no puede asistir",
+    desc: "Si el cliente necesita cambiar la cita, la IA propone nuevos horarios disponibles al instante.",
+  },
 ];
 
 const RESULTS = [
@@ -44,11 +64,26 @@ const RESULTS = [
 ];
 
 const FAQS = [
-  { q: "¿Cómo funcionan los recordatorios por WhatsApp?", a: "Cuando un cliente agenda una cita, Zenda envía automáticamente recordatorios por WhatsApp 24 horas y 2 horas antes. El cliente puede confirmar, cancelar o reagenda directamente desde el chat." },
-  { q: "¿Cuánto reducen las inasistencias?", a: "Los negocios que implementan recordatorios automáticos por WhatsApp reducen las inasistencias entre un 30% y un 40% en promedio." },
-  { q: "¿El cliente necesita instalar algo?", a: "No. Los recordatorios llegan como mensajes normales de WhatsApp. El cliente solo necesita responder para confirmar o reagenda." },
-  { q: "¿Puedo personalizar los mensajes de recordatorio?", a: "Sí. Puedes personalizar el tono, la frecuencia y el contenido de los recordatorios. Usar el nombre del cliente, el servicio agendado y la hora." },
-  { q: "¿Qué pasa si el cliente no responde al recordatorio?", a: "Puedes configurar un segundo recordatorio o una llamada de seguimiento automática. También recibirás una notificación si el cliente no confirma." },
+  {
+    q: "¿Cómo funcionan los recordatorios por WhatsApp?",
+    a: "Cuando un cliente agenda una cita, Zenda envía automáticamente recordatorios por WhatsApp 24 horas y 2 horas antes. El cliente puede confirmar, cancelar o reagenda directamente desde el chat.",
+  },
+  {
+    q: "¿Cuánto reducen las inasistencias?",
+    a: "Los negocios que implementan recordatorios automáticos por WhatsApp reducen las inasistencias entre un 30% y un 40% en promedio.",
+  },
+  {
+    q: "¿El cliente necesita instalar algo?",
+    a: "No. Los recordatorios llegan como mensajes normales de WhatsApp. El cliente solo necesita responder para confirmar o reagenda.",
+  },
+  {
+    q: "¿Puedo personalizar los mensajes de recordatorio?",
+    a: "Sí. Puedes personalizar el tono, la frecuencia y el contenido de los recordatorios. Usar el nombre del cliente, el servicio agendado y la hora.",
+  },
+  {
+    q: "¿Qué pasa si el cliente no responde al recordatorio?",
+    a: "Puedes configurar un segundo recordatorio o una llamada de seguimiento automática. También recibirás una notificación si el cliente no confirma.",
+  },
 ];
 
 export default function RecordatoriosCitasPage() {
@@ -64,16 +99,30 @@ export default function RecordatoriosCitasPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <script dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} type="application/ld+json" />
-      <script dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        name: "Zenda — Recordatorios de Citas WhatsApp",
-        applicationCategory: "BusinessApplication",
-        operatingSystem: "WhatsApp",
-        description: "Recordatorios automáticos de citas por WhatsApp. Reduce inasistencias hasta un 40%.",
-        offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "Plan gratuito disponible" },
-      }) }} type="application/ld+json" />
+      <script
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        type="application/ld+json"
+      />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "Zenda — Recordatorios de Citas WhatsApp",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "WhatsApp",
+            description:
+              "Recordatorios automáticos de citas por WhatsApp. Reduce inasistencias hasta un 40%.",
+            offers: {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "USD",
+              description: "Plan gratuito disponible",
+            },
+          }),
+        }}
+        type="application/ld+json"
+      />
       <Nav variant="simple" />
 
       {/* Hero */}
@@ -82,10 +131,14 @@ export default function RecordatoriosCitasPage() {
           Recordatorios de Citas por WhatsApp
         </p>
         <h1 className="mb-6 font-bold text-4xl text-slate-900 leading-tight md:text-5xl">
-          Reduce inasistencias con <span className="text-emerald-600">recordatorios automáticos</span> por WhatsApp
+          Reduce inasistencias con{" "}
+          <span className="text-emerald-600">recordatorios automáticos</span>{" "}
+          por WhatsApp
         </h1>
         <p className="mx-auto mb-8 max-w-2xl text-lg text-slate-600">
-          Envía recordatorios 24h y 2h antes de cada cita. El cliente confirma, cancela o reagenda directamente en WhatsApp. Sin llamadas, sin complicaciones.
+          Envía recordatorios 24h y 2h antes de cada cita. El cliente confirma,
+          cancela o reagenda directamente en WhatsApp. Sin llamadas, sin
+          complicaciones.
         </p>
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Link href="/founding">
@@ -111,7 +164,9 @@ export default function RecordatoriosCitasPage() {
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
                   <step.icon className="h-6 w-6 text-emerald-600" />
                 </div>
-                <h3 className="mb-2 font-semibold text-slate-900">{step.title}</h3>
+                <h3 className="mb-2 font-semibold text-slate-900">
+                  {step.title}
+                </h3>
                 <p className="text-slate-500 text-sm">{step.desc}</p>
               </div>
             ))}
@@ -127,7 +182,10 @@ export default function RecordatoriosCitasPage() {
           </h2>
           <div className="grid gap-4 md:grid-cols-2">
             {RESULTS.map((r) => (
-              <div className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-4" key={r}>
+              <div
+                className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-4"
+                key={r}
+              >
                 <Check className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
                 <p className="text-slate-700 text-sm">{r}</p>
               </div>
@@ -146,7 +204,9 @@ export default function RecordatoriosCitasPage() {
             { value: "0", label: "llamadas manuales" },
           ].map((stat) => (
             <div className="text-center" key={stat.label}>
-              <p className="font-bold text-2xl text-emerald-600">{stat.value}</p>
+              <p className="font-bold text-2xl text-emerald-600">
+                {stat.value}
+              </p>
               <p className="text-slate-500 text-sm">{stat.label}</p>
             </div>
           ))}
@@ -160,10 +220,14 @@ export default function RecordatoriosCitasPage() {
             Recordatorios incluidos desde el plan gratis
           </h2>
           <p className="mb-6 text-slate-500">
-            Empieza con hasta 25 contactos gratis. Para más volumen, planes desde $29 USD/mes.
+            Empieza con hasta 25 contactos gratis. Para más volumen, planes
+            desde $29 USD/mes.
           </p>
           <Link href="/pricing">
-            <Button className="rounded-full border border-emerald-600 bg-white px-6 py-2 text-emerald-600 hover:bg-emerald-50" variant="outline">
+            <Button
+              className="rounded-full border border-emerald-600 bg-white px-6 py-2 text-emerald-600 hover:bg-emerald-50"
+              variant="outline"
+            >
               Ver planes y precios →
             </Button>
           </Link>
@@ -180,7 +244,9 @@ export default function RecordatoriosCitasPage() {
             {FAQS.map((faq) => (
               <div key={faq.q}>
                 <h3 className="mb-2 font-semibold text-slate-900">{faq.q}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{faq.a}</p>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  {faq.a}
+                </p>
               </div>
             ))}
           </div>
@@ -194,7 +260,8 @@ export default function RecordatoriosCitasPage() {
             Deja de perder citas por inasistencias
           </h2>
           <p className="mb-8 text-emerald-100">
-            Los recordatorios automáticos por WhatsApp reducen inasistencias hasta un 40%. Empieza gratis.
+            Los recordatorios automáticos por WhatsApp reducen inasistencias
+            hasta un 40%. Empieza gratis.
           </p>
           <Link href="/founding">
             <Button className="rounded-full bg-white px-8 py-3 font-semibold text-base text-emerald-700 hover:bg-emerald-50">

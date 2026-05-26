@@ -1,133 +1,137 @@
-# Platform-Specific Job Postings
+# Zenda en Plataformas Freelance — Listings para Lead Gen
 
-Ready to copy-paste. Board needs to create accounts and post these.
+**Estado:** Listo para publicar
+**Objetivo:** Atraer dueños de negocios de belleza que necesiten un asistente virtual de WhatsApp
+**Mercado:** México y LATAM
 
 ---
 
-## 1. Workana (Spanish — Primary Platform)
+## 1. Fiverr — Servicio de Asistente Virtual WhatsApp
 
-**Título:** Asistente de Ventas por WhatsApp — Trabajo Remoto (LATAM)
+**Gig Title:** I will set up a WhatsApp virtual assistant for your beauty salon or barbershop
 
-**Categoría:** Ventas / Telemarketing
+**Category:** Digital Marketing > Social Media Marketing
 
-**Presupuesto:** $300-500 USD/mes (por proyecto)
+**Price:** Starter $49 | Standard $89 | Premium $149
+
+**Gig Description:**
+
+Are you losing clients because you can't answer WhatsApp bookings fast enough?
+
+I'll set up **Zenda**, a WhatsApp virtual receptionist that works 24/7 for your beauty salon, barbershop, spa, or clinic.
+
+**What you get:**
+- WhatsApp bot that answers booking requests automatically (in Spanish)
+- Appointment scheduling — your clients book without you touching your phone
+- Automatic reminders to reduce no-shows
+- Works with your existing WhatsApp Business number
+
+**How it works:**
+1. Tell me your business type and hours
+2. I configure Zenda for your services and pricing
+3. Your clients start booking through WhatsApp automatically
+
+**Packages:**
+- **Starter ($49):** Basic setup — 1 service menu, auto-reply to booking requests, business hours
+- **Standard ($89):** Full setup — up to 10 services, smart scheduling, appointment reminders, multi-language (Spanish/English). Most popular!
+- **Premium ($149):** Everything in Standard plus custom responses, integration with your Google Calendar, priority support, and monthly performance report
+
+**Ideal for:** Beauty salons, barbershops, spas, nail studios, dental clinics, massage therapists in Mexico and LATAM.
+
+**Note:** This uses Zenda (zenda.bot) — the #1 WhatsApp receptionist for appointment-based businesses.
+
+---
+
+## 2. Workana — Servicio para Negocios
+
+**Título del Proyecto:** Configuro asistente virtual de WhatsApp para tu negocio de belleza
+
+**Categoría:** Marketing Digital / Atención al Cliente
+
+**Presupuesto:** $49-149 USD (una vez)
+
+**Tipo:** Por proyecto
 
 **Descripción:**
 
-Buscamos una persona proactiva para realizar ventas por WhatsApp a negocios de belleza en Latinoamérica (México, Colombia, Perú, Argentina, Chile).
+¿Pierdes clientes porque no respondes rápido en WhatsApp?
 
-**Qué harás:**
-- Buscar negocios (salones de belleza, barberías, spas) en Google Maps
-- Enviar mensajes de WhatsApp usando nuestros templates probados (solo copiar y pegar)
-- Dar seguimiento a prospectos interesados
-- Reportar resultados semanales en Google Sheets
+Te configuro **Zenda**, un asistente virtual de WhatsApp que trabaja 24/7 para tu negocio de belleza, barbería, spa o clínica.
 
-**Requisitos:**
-- Español nativo/fluido (escrito)
-- WhatsApp en tu teléfono
-- Conocimiento de cultura de negocios LATAM
-- 5-10 horas por semana
-- Motivación para trabajar de forma independiente
+**Qué incluye:**
+- Bot de WhatsApp que responde solicitudes de cita automáticamente
+- Agendamiento inteligente — tus clientes reservan sin que toques el teléfono
+- Recordatorios automáticos para reducir ausencias
+- Funciona con tu número de WhatsApp Business actual
 
-**Pago:**
-- Base: $300 USD/mes (5-10 hrs/semana)
-- Bonus: $20 USD por cada cliente que pruebe gratis
-- Bonus: $30 USD por cada cliente que pague después del trial
+**Paquetes:**
+- **Básico ($49 USD):** Configuración simple — 1 menú de servicios, auto-respuesta, horario comercial
+- **Estándar ($89 USD):** Configuración completa — hasta 10 servicios, agendamiento inteligente, recordatorios. ¡El más popular!
+- **Premium ($149 USD):** Todo lo anterior + respuestas personalizadas, integración con Google Calendar, soporte prioritario
 
-**Ejemplo de buen mes:** $300 base + $100 (5 signups) + $90 (3 paying) = $490 USD
+**Ideal para:** Salones de belleza, barberías, spas, estudios de uñas, clínicas dentales, masajistas en México y LATAM.
 
-**Qué proveemos:**
-- Templates de mensajes listos para copiar y pegar
-- Lista de 20 negocios verificados con WhatsApp
-- Scripts de manejo de objeciones
-- Capacitación completa
-
-**Para aplicar, envía un email a hello@zenda.bot con asunto "Zenda Outreach - [Tu País]":**
-1. Tu nombre y país
-2. 1-2 oraciones sobre tu experiencia en ventas
-3. Un mensaje de WhatsApp de ejemplo vendiendo un software de agendamiento a un salón de belleza (en español)
+**Plazo de entrega:** 1-3 días hábiles
 
 ---
 
-## 2. Upwork (English — Secondary Platform)
+## 3. Upwork — Servicio Profesional
 
-**Job Title:** Spanish WhatsApp Sales Outreach — Beauty Salons in LATAM
+**Project Title:** WhatsApp Virtual Receptionist Setup for Beauty & Wellness Businesses
 
-**Category:** Sales & Marketing > Telemarketing
+**Category:** Customer Service / IT & Admin
 
-**Budget:** $300-500/month (fixed price)
+**Budget:** $49-149 fixed price
 
 **Description:**
 
-We're hiring a part-time Spanish-speaking sales contractor to do WhatsApp outreach to beauty salons, barbershops, and spas in Latin America.
+I help beauty salons, barbershops, spas, and wellness clinics stop losing clients to unanswered WhatsApp messages.
 
-**What you'll do:**
-- Find businesses on Google Maps (beauty salons, barbershops, spas in Mexico, Colombia, Peru, Argentina, Chile)
-- Send WhatsApp cold messages using our proven Spanish-language templates (copy-paste)
-- Follow up with interested prospects
-- Track results in Google Sheets
-- Report weekly
+Using **Zenda** (zenda.bot), I'll set up a 24/7 WhatsApp virtual receptionist that:
+- Answers booking requests automatically (Spanish & English)
+- Schedules appointments without you touching your phone
+- Sends automatic reminders to reduce no-shows by up to 40%
+- Works with your existing WhatsApp Business number
 
-**Requirements:**
-- Native/fluent written Spanish
-- WhatsApp on your phone
-- Familiarity with LATAM business culture
-- 5-10 hours/week availability
-- Self-motivated, independent worker
+**Packages:**
+- **Starter ($49):** Basic setup — 1 service menu, auto-reply, business hours configuration
+- **Standard ($89):** Full setup — up to 10 services, smart scheduling, appointment reminders, bilingual support
+- **Premium ($149):** Complete solution — custom responses, Google Calendar sync, priority support, monthly analytics report
 
-**Compensation:**
-- Base: $300/month for 5-10 hrs/week
-- $20 bonus per free trial signup
-- $30 bonus per paying customer (after trial)
+**Perfect for:** Businesses in Mexico and LATAM that get booking requests through WhatsApp and want to automate scheduling.
 
-We provide all materials: message templates, prospect lists with WhatsApp numbers, objection handling scripts, and full training.
-
-**To apply:** Send an email to hello@zenda.bot with subject "Zenda Outreach - [Your Country]" including your name, country, sales experience, and a sample cold WhatsApp message selling Zenda to a beauty salon (in Spanish).
+**Delivery:** 1-3 business days. Ongoing support available.
 
 ---
 
-## 3. Fiverr (Buyer Request)
+## Instrucciones de Publicación
 
-**Title:** Need Spanish WhatsApp Outreach for Beauty Salons
+### Fiverr (Prioridad 1 — más tráfico de SMBs)
+1. Crear cuenta en fiverr.com como vendedor
+2. Crear un nuevo Gig con la copia de arriba
+3. Tags: "whatsapp bot", "virtual assistant", "appointment scheduling", "beauty salon", "auto reply"
+4. Precio: Starter $49 / Standard $89 / Premium $149
+5. Agregar imagen/gig de muestra profesional
 
-**Category:** Digital Marketing > Outreach
+### Workana (Prioridad 2 — público LATAM)
+1. Crear cuenta en workana.com como freelancer
+2. Crear perfil de servicio con la descripción de arriba
+3. Postularse activamente a proyectos de "whatsapp", "atención al cliente", "automatización"
+4. Presupuesto: $49-149 USD por proyecto
 
-**Budget:** $300-500/month
-
-**Description:**
-
-Looking for a Spanish-speaking freelancer to send WhatsApp messages to beauty salons in Latin America. We provide all templates, prospect lists, and training. 5-10 hours/week, ongoing. Base pay + performance bonuses. Must have WhatsApp and be fluent in Spanish.
+### Upwork (Prioridad 3 — público global)
+1. Crear cuenta freelancer en upwork.com
+2. Configurar perfil: especialista en automatización WhatsApp para negocios
+3. Crear proyecto fijo con la descripción de arriba
+4. Tags: "WhatsApp", "automation", "customer service", "beauty salon", "scheduling"
+5. Presupuesto: $49-149 USD
 
 ---
 
-## Posting Instructions for Board
+## Timeline
 
-1. **Workana** (highest priority — LATAM-native platform):
-   - Create account at workana.com as "Cliente"
-   - Post project using the Spanish posting above
-   - Budget: $300-500 USD/month
-   - Set deadline for proposals: 3 days
-
-2. **Upwork**:
-   - Create client account at upwork.com
-   - Post job using the English posting above
-   - Add skill tags: "Spanish", "WhatsApp Marketing", "Telemarketing", "LATAM"
-   - Set as ongoing/fixed-price
-
-3. **Fiverr**:
-   - Post as buyer request at fiverr.com
-   - Use the short description above
-   - Budget: $300-500
-
-4. **Application channel**:
-   - Applicants send email to hello@zenda.bot with subject "Zenda Outreach - [Country]"
-   - No WhatsApp setup needed — email handles all applications
-
-**Timeline:**
-- Day 1: Post on all 3 platforms
-- Day 2-3: Review applications (look for native Spanish, WhatsApp experience, professional sample messages)
-- Day 4: Trial task — send 5 messages, evaluate quality
-- Day 5: Hire and onboard
-- Day 7: Contractor sends first 10 messages
-- Day 14: First signups expected
-- Day 30: 5+ paying customers target
+- **Día 0:** Crear cuentas en las 3 plataformas (1 hora)
+- **Día 0:** Publicar listings con la copia de arriba (30 minutos)
+- **Día 1-7:** Optimizar perfiles, agregar portfolio, responder a primeras consultas
+- **Día 7-14:** Primeras leads esperadas (negocios interesados en automatizar WhatsApp)
+- **Día 30+:** Pipeline de leads constante desde las 3 plataformas

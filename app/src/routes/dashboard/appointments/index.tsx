@@ -421,7 +421,10 @@ function CalendarWeekView({
 
   return (
     <div className="overflow-auto rounded-lg border border-border bg-card">
-      <table aria-label={t("calendar.aria.weeklyCalendar", "Weekly calendar")} className="w-full min-w-[700px]">
+      <table
+        aria-label={t("calendar.aria.weeklyCalendar", "Weekly calendar")}
+        className="w-full min-w-[700px]"
+      >
         <thead>
           <tr className="border-border border-b">
             <th
@@ -774,7 +777,8 @@ function CreateAppointmentModal({
               <option value="">{t("calendar.servicePlaceholder")}</option>
               {services.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.name} ({s.durationMinutes} {t("calendar.minutesShort", "min")})
+                  {s.name} ({s.durationMinutes}{" "}
+                  {t("calendar.minutesShort", "min")})
                 </option>
               ))}
             </select>

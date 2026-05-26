@@ -4,54 +4,57 @@
  * Database-backed outbound message queue that survives restarts.
  * Uses PostgreSQL FOR UPDATE SKIP LOCKED for safe concurrent dequeuing.
  */
-import { db } from '@zenda/db/client'
-import { outboundQueue, appointments } from '@zenda/db/schema'
-import { eq, and, lte, isNull, sql, desc, count } from 'drizzle-orm'
-import type { MessagePurpose } from '@zenda/shared'
-import { logger } from '../../infra/logger.js'
-import { MAX_QUEUE_DEPTH_PER_WORKSPACE } from '../../config/env.js'
+import { db } from "@zenda/db/client";
+import { appointments, outboundQueue } from "@zenda/db/schema";
+import type { MessagePurpose } from "@zenda/shared";
+import { and, count, desc, eq, sql } from "drizzle-orm";
+import { MAX_QUEUE_DEPTH_PER_WORKSPACE } from "../../config/env.js";
+import { logger } from "../../infra/logger.js";
 
-export type QueuePriority = 'emergency' | 'reminder' | 'notification' | 'low'
+export type QueuePriority = "emergency" | "reminder" | "notification" | "low";
 
 export interface EnqueueInput {
-  workspaceId: string
-  customerId: string
-  conversationId?: string
-  purpose: MessagePurpose
-  content: string
-  contentType?: string
-  appointmentId?: string
-  priority?: QueuePriority
-  metadata?: Record<string, unknown>
+  appointmentId?: string;
+  content: string;
+  contentType?: string;
+  conversationId?: string;
+  customerId: string;
+  metadata?: Record<string, unknown>;
+  priority?: QueuePriority;
+  purpose: MessagePurpose;
+  workspaceId: string;
 }
 
 export interface QueuedMessage {
-  id: string
-  workspaceId: string
-  customerId: string
-  conversationId: string | null
-  purpose: MessagePurpose
-  content: string
-  contentType: string
-  status: 'pending' | 'processing' | 'sent' | 'failed' | 'dead_letter'
-  priority: QueuePriority
-  attempts: number
-  maxAttempts: number
-  nextRetryAt: Date | null
-  sentAt: Date | null
-  failureReason: string | null
-  appointmentId: string | null
-  metadata: Record<string, unknown> | null
-  createdAt: Date
-  updatedAt: Date
+  appointmentId: string | null;
+  attempts: number;
+  content: string;
+  contentType: string;
+  conversationId: string | null;
+  createdAt: Date;
+  customerId: string;
+  failureReason: string | null;
+  id: string;
+  maxAttempts: number;
+  metadata: Record<string, unknown> | null;
+  nextRetryAt: Date | null;
+  priority: QueuePriority;
+  purpose: MessagePurpose;
+  sentAt: Date | null;
+  status: "pending" | "processing" | "sent" | "failed" | "dead_letter";
+  updatedAt: Date;
+  workspaceId: string;
 }
 
-const BASE_RETRY_DELAY_MS = 1000 // 1 second
-const MAX_RETRY_DELAY_MS = 60_000 // 1 minute
+const BASE_RETRY_DELAY_MS = 1000; // 1 second
+const MAX_RETRY_DELAY_MS = 60_000; // 1 minute
 
 function calculateNextRetry(attempts: number): Date {
-  const delay = Math.min(BASE_RETRY_DELAY_MS * Math.pow(2, attempts), MAX_RETRY_DELAY_MS)
-  return new Date(Date.now() + delay)
+  const delay = Math.min(
+    BASE_RETRY_DELAY_MS * 2 ** attempts,
+    MAX_RETRY_DELAY_MS
+  );
+  return new Date(Date.now() + delay);
 }
 
 /**
@@ -59,10 +62,10 @@ function calculateNextRetry(attempts: number): Date {
  * Messages for appointments in these states are rejected at enqueue time.
  */
 const BLOCKED_APPOINTMENT_STATUSES = new Set([
-  'cancelled',
-  'completed',
-  'no_show',
-])
+  "cancelled",
+  "completed",
+  "no_show",
+]);
 
 /**
  * Insert a new message into the outbound queue.
@@ -71,7 +74,9 @@ const BLOCKED_APPOINTMENT_STATUSES = new Set([
  * 1. Per-workspace queue depth does not exceed configurable limit
  * 2. If an appointmentId is provided, the appointment is still active
  */
-export async function enqueueMessage(input: EnqueueInput): Promise<QueuedMessage> {
+export async function enqueueMessage(
+  input: EnqueueInput
+): Promise<QueuedMessage> {
   // --- Per-workspace queue depth check ---
   const [depthRow] = await db
     .select({ count: count() })
@@ -79,16 +84,16 @@ export async function enqueueMessage(input: EnqueueInput): Promise<QueuedMessage
     .where(
       and(
         eq(outboundQueue.workspaceId, input.workspaceId),
-        eq(outboundQueue.status, 'pending'),
-      ),
-    )
+        eq(outboundQueue.status, "pending")
+      )
+    );
 
-  const currentDepth = depthRow?.count ?? 0
+  const currentDepth = depthRow?.count ?? 0;
   if (currentDepth >= MAX_QUEUE_DEPTH_PER_WORKSPACE) {
     throw new Error(
       `Queue depth limit exceeded for workspace ${input.workspaceId}: ` +
-      `${currentDepth} pending messages (max ${MAX_QUEUE_DEPTH_PER_WORKSPACE})`,
-    )
+        `${currentDepth} pending messages (max ${MAX_QUEUE_DEPTH_PER_WORKSPACE})`
+    );
   }
 
   // --- Appointment validity check ---
@@ -100,25 +105,25 @@ export async function enqueueMessage(input: EnqueueInput): Promise<QueuedMessage
       })
       .from(appointments)
       .where(eq(appointments.id, input.appointmentId))
-      .limit(1)
+      .limit(1);
 
     if (!appt) {
-      throw new Error(`Appointment ${input.appointmentId} not found`)
+      throw new Error(`Appointment ${input.appointmentId} not found`);
     }
 
     if (BLOCKED_APPOINTMENT_STATUSES.has(appt.status)) {
       throw new Error(
         `Cannot enqueue message for appointment ${input.appointmentId}: ` +
-        `status is '${appt.status}'`,
-      )
+          `status is '${appt.status}'`
+      );
     }
 
     // Reject messages for appointments that are already in the past
     if (appt.startAt < new Date()) {
       throw new Error(
         `Cannot enqueue message for appointment ${input.appointmentId}: ` +
-        `start time ${appt.startAt.toISOString()} is in the past`,
-      )
+          `start time ${appt.startAt.toISOString()} is in the past`
+      );
     }
   }
 
@@ -130,22 +135,22 @@ export async function enqueueMessage(input: EnqueueInput): Promise<QueuedMessage
       conversationId: input.conversationId ?? null,
       purpose: input.purpose,
       content: input.content,
-      contentType: input.contentType ?? 'text',
+      contentType: input.contentType ?? "text",
       appointmentId: input.appointmentId ?? null,
-      priority: input.priority ?? 'notification',
+      priority: input.priority ?? "notification",
       metadata: input.metadata ?? {},
-      status: 'pending',
+      status: "pending",
     })
-    .returning()
+    .returning();
 
-  logger.info('Message enqueued', {
+  logger.info("Message enqueued", {
     queueId: row.id,
     workspaceId: input.workspaceId,
     customerId: input.customerId,
     purpose: input.purpose,
-  })
+  });
 
-  return row as QueuedMessage
+  return row as QueuedMessage;
 }
 
 /**
@@ -153,15 +158,17 @@ export async function enqueueMessage(input: EnqueueInput): Promise<QueuedMessage
  * Uses FOR UPDATE SKIP LOCKED for safe concurrent access.
  */
 export async function dequeueNext(): Promise<QueuedMessage | null> {
-  const now = new Date()
+  const now = new Date();
 
   const rows = await db
     .select()
     .from(outboundQueue)
-    .where(and(
-      eq(outboundQueue.status, 'pending'),
-      sql`(${outboundQueue.nextRetryAt} IS NULL OR ${outboundQueue.nextRetryAt} <= ${now})`,
-    ))
+    .where(
+      and(
+        eq(outboundQueue.status, "pending"),
+        sql`(${outboundQueue.nextRetryAt} IS NULL OR ${outboundQueue.nextRetryAt} <= ${now})`
+      )
+    )
     .orderBy(
       sql`CASE ${outboundQueue.priority}
         WHEN 'emergency' THEN 0
@@ -170,22 +177,24 @@ export async function dequeueNext(): Promise<QueuedMessage | null> {
         WHEN 'low' THEN 3
         ELSE 2
       END`,
-      outboundQueue.createdAt,
+      outboundQueue.createdAt
     )
     .limit(1)
-    .for('update', { skipLocked: true })
+    .for("update", { skipLocked: true });
 
-  if (rows.length === 0) return null
+  if (rows.length === 0) {
+    return null;
+  }
 
-  const row = rows[0]
+  const row = rows[0];
 
   // Mark as processing to prevent other workers from picking it up
   await db
     .update(outboundQueue)
-    .set({ status: 'processing', updatedAt: new Date() })
-    .where(eq(outboundQueue.id, row.id))
+    .set({ status: "processing", updatedAt: new Date() })
+    .where(eq(outboundQueue.id, row.id));
 
-  return row as QueuedMessage
+  return row as QueuedMessage;
 }
 
 /**
@@ -195,11 +204,11 @@ export async function markSent(id: string): Promise<void> {
   await db
     .update(outboundQueue)
     .set({
-      status: 'sent',
+      status: "sent",
       sentAt: new Date(),
       updatedAt: new Date(),
     })
-    .where(eq(outboundQueue.id, id))
+    .where(eq(outboundQueue.id, id));
 }
 
 /**
@@ -211,37 +220,39 @@ export async function markFailed(id: string, reason: string): Promise<void> {
     .select()
     .from(outboundQueue)
     .where(eq(outboundQueue.id, id))
-    .limit(1)
+    .limit(1);
 
-  if (!row) return
+  if (!row) {
+    return;
+  }
 
-  const newAttempts = row.attempts + 1
-  const isDead = newAttempts >= row.maxAttempts
+  const newAttempts = row.attempts + 1;
+  const isDead = newAttempts >= row.maxAttempts;
 
   await db
     .update(outboundQueue)
     .set({
-      status: isDead ? 'dead_letter' : 'pending',
+      status: isDead ? "dead_letter" : "pending",
       attempts: newAttempts,
       failureReason: reason,
       nextRetryAt: isDead ? null : calculateNextRetry(newAttempts),
       updatedAt: new Date(),
     })
-    .where(eq(outboundQueue.id, id))
+    .where(eq(outboundQueue.id, id));
 
   if (isDead) {
-    logger.error('Message moved to dead letter queue', {
+    logger.error("Message moved to dead letter queue", {
       queueId: id,
       attempts: newAttempts,
       reason,
-    })
+    });
   } else {
-    logger.warn('Message retry scheduled', {
+    logger.warn("Message retry scheduled", {
       queueId: id,
       attempts: newAttempts,
       nextRetryAt: calculateNextRetry(newAttempts),
       reason,
-    })
+    });
   }
 }
 
@@ -249,7 +260,7 @@ export async function markFailed(id: string, reason: string): Promise<void> {
  * Get queue statistics for a workspace, grouped by status.
  */
 export async function getQueueStats(
-  workspaceId: string,
+  workspaceId: string
 ): Promise<Record<string, number>> {
   const rows = await db
     .select({
@@ -258,7 +269,7 @@ export async function getQueueStats(
     })
     .from(outboundQueue)
     .where(eq(outboundQueue.workspaceId, workspaceId))
-    .groupBy(outboundQueue.status)
+    .groupBy(outboundQueue.status);
 
   const stats: Record<string, number> = {
     pending: 0,
@@ -266,13 +277,13 @@ export async function getQueueStats(
     sent: 0,
     failed: 0,
     dead_letter: 0,
-  }
+  };
 
   for (const row of rows) {
-    stats[row.status] = row.count
+    stats[row.status] = row.count;
   }
 
-  return stats
+  return stats;
 }
 
 /**
@@ -280,61 +291,66 @@ export async function getQueueStats(
  */
 export async function getDeadLetters(
   workspaceId: string,
-  limit = 50,
+  limit = 50
 ): Promise<QueuedMessage[]> {
   const rows = await db
     .select()
     .from(outboundQueue)
-    .where(and(
-      eq(outboundQueue.workspaceId, workspaceId),
-      eq(outboundQueue.status, 'dead_letter'),
-    ))
+    .where(
+      and(
+        eq(outboundQueue.workspaceId, workspaceId),
+        eq(outboundQueue.status, "dead_letter")
+      )
+    )
     .orderBy(desc(outboundQueue.updatedAt))
-    .limit(limit)
+    .limit(limit);
 
-  return rows as QueuedMessage[]
+  return rows as QueuedMessage[];
 }
 
 /**
  * Get all pending messages for a workspace (used for revalidation on reconnect).
  */
 export async function getPendingMessages(
-  workspaceId: string,
+  workspaceId: string
 ): Promise<QueuedMessage[]> {
   const rows = await db
     .select()
     .from(outboundQueue)
-    .where(and(
-      eq(outboundQueue.workspaceId, workspaceId),
-      eq(outboundQueue.status, 'pending'),
-    ))
-    .orderBy(outboundQueue.createdAt)
+    .where(
+      and(
+        eq(outboundQueue.workspaceId, workspaceId),
+        eq(outboundQueue.status, "pending")
+      )
+    )
+    .orderBy(outboundQueue.createdAt);
 
-  return rows as QueuedMessage[]
+  return rows as QueuedMessage[];
 }
 
 /**
  * Retry a dead letter message by resetting it to pending.
  */
-export async function retryDeadLetter(id: string): Promise<QueuedMessage | null> {
+export async function retryDeadLetter(
+  id: string
+): Promise<QueuedMessage | null> {
   const [row] = await db
     .update(outboundQueue)
     .set({
-      status: 'pending',
+      status: "pending",
       attempts: 0,
       failureReason: null,
       nextRetryAt: null,
       updatedAt: new Date(),
     })
-    .where(and(
-      eq(outboundQueue.id, id),
-      eq(outboundQueue.status, 'dead_letter'),
-    ))
-    .returning()
+    .where(
+      and(eq(outboundQueue.id, id), eq(outboundQueue.status, "dead_letter"))
+    )
+    .returning();
 
   if (row) {
-    logger.info('Dead letter message retried', { queueId: id })
+    logger.info("Dead letter message retried", { queueId: id });
   }
 
-  return (row as QueuedMessage) ?? null
+  return (row as QueuedMessage) ?? null;
 }

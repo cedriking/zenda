@@ -2,9 +2,10 @@ import { db } from "@zenda/db/client";
 import { appointments, customers, services } from "@zenda/db/schema";
 import {
   createAppointmentSchema,
+  TERMINAL_STATUSES,
   updateAppointmentStatusSchema,
 } from "@zenda/shared";
-import { and, desc, eq, gte, inArray, lte, lt, gt, sql, ne } from "drizzle-orm";
+import { and, desc, eq, gt, gte, inArray, lt, lte, ne, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -16,7 +17,6 @@ import {
 } from "../../utils/errors.js";
 import { getAvailableSlots } from "./availability-engine.js";
 import { validateTransition } from "./state-machine.js";
-import { TERMINAL_STATUSES } from "@zenda/shared";
 
 export const appointmentModule = new Elysia({ prefix: "/appointments" })
   .use(typedContext)
@@ -36,7 +36,10 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
 
       const conditions = [eq(appointments.workspaceId, workspaceId!)];
       if (status) {
-        const statuses = status.split(",").map((s) => s.trim()).filter(Boolean);
+        const statuses = status
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
         if (statuses.length === 1) {
           conditions.push(eq(appointments.status, statuses[0] as any));
         } else if (statuses.length > 1) {
@@ -45,13 +48,13 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
       }
       if (from) {
         const fromDate = new Date(from);
-        if (!isNaN(fromDate.getTime())) {
+        if (!Number.isNaN(fromDate.getTime())) {
           conditions.push(gte(appointments.startAt, fromDate));
         }
       }
       if (to) {
         const toDate = new Date(to);
-        if (!isNaN(toDate.getTime())) {
+        if (!Number.isNaN(toDate.getTime())) {
           conditions.push(lte(appointments.startAt, toDate));
         }
       }
@@ -148,7 +151,9 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
         const durationMinutes =
           ((body as Record<string, unknown>).durationMinutes as number) ?? 60;
         const startAtDate = new Date(startAt);
-        const endAtDate = new Date(startAtDate.getTime() + durationMinutes * 60_000);
+        const endAtDate = new Date(
+          startAtDate.getTime() + durationMinutes * 60_000
+        );
 
         // Use a transaction with pessimistic lock to prevent double-booking.
         // SELECT FOR UPDATE acquires a lock on overlapping rows so concurrent
@@ -165,7 +170,9 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
           ];
 
           if (staffMemberId) {
-            overlapConditions.push(eq(appointments.staffMemberId, staffMemberId));
+            overlapConditions.push(
+              eq(appointments.staffMemberId, staffMemberId)
+            );
           } else {
             overlapConditions.push(sql`${appointments.staffMemberId} IS NULL`);
           }
@@ -194,7 +201,8 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
               timezone,
               sourceConversationId: sourceConversationId ?? null,
               createdBy: createdBy ?? "owner",
-              notes: ((body as Record<string, unknown>).notes as string) ?? null,
+              notes:
+                ((body as Record<string, unknown>).notes as string) ?? null,
             })
             .returning();
 

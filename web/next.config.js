@@ -1,30 +1,24 @@
-const createNextIntlPlugin = require('next-intl/plugin')
+const createNextIntlPlugin = require("next-intl/plugin");
 
-const withNextIntl = createNextIntlPlugin()
+const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-  async rewrites() {
-    const r2PublicUrl = process.env.R2_UPDATES_PUBLIC_URL || 'https://pub-xxx.r2.dev';
-    return [
-      {
-        source: '/updates/:path*',
-        destination: `${r2PublicUrl}/updates/:path*`,
-      },
-    ];
-  },
+  output: "standalone",
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
-          { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           {
-            key: 'Content-Security-Policy',
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+          {
+            key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
@@ -36,14 +30,17 @@ const nextConfig = {
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
-            ].join('; '),
+            ].join("; "),
           },
-          { key: 'X-DNS-Prefetch-Control', value: 'on' },
-          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          { key: "X-DNS-Prefetch-Control", value: "on" },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
         ],
       },
     ];
   },
-}
+};
 
-module.exports = withNextIntl(nextConfig)
+module.exports = withNextIntl(nextConfig);

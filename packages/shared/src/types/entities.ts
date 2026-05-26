@@ -1,449 +1,448 @@
 import type {
-  AppointmentStatus,
-  ConversationMode,
-  WhatsAppConnectionStatus,
-  SubscriptionStatus,
-  PlanTier,
-  SetupType,
-  BillingPeriod,
-  SenderType,
-  MessageContentType,
-  MessageStatus,
-  ReceptionistTone,
-  BusinessCategory,
-  Language,
-  EscalationReason,
-  NotificationType,
   ActorType,
-  OnboardingStep,
-  MessagingConsentStatus,
-  ConsentSource,
-  MessagePurpose,
-  WhatsAppChannelType,
-  PersonalityPreset,
+  AppointmentStatus,
+  BillingPeriod,
+  BusinessCategory,
   CancellationStrictness,
+  ConsentSource,
+  ConversationMode,
+  EscalationReason,
+  Language,
+  MessageContentType,
+  MessagePurpose,
+  MessageStatus,
+  MessagingConsentStatus,
+  NotificationType,
+  OnboardingStep,
+  PersonalityPreset,
+  PlanTier,
+  ReceptionistTone,
   ReminderType,
-} from './enums.js'
+  SenderType,
+  SetupType,
+  SubscriptionStatus,
+  WhatsAppConnectionStatus,
+} from "./enums.js";
 
 // --- Auth & Users ---
 
 export interface User {
-  id: string
-  email: string
-  name: string
-  passwordHash: string
-  createdAt: Date
-  updatedAt: Date
+  createdAt: Date;
+  email: string;
+  id: string;
+  name: string;
+  passwordHash: string;
+  updatedAt: Date;
 }
 
 export interface Workspace {
-  id: string
-  name: string
-  slug: string
-  timezone: string
-  country: string
-  defaultLanguage: Language
-  onboardingStep: OnboardingStep
-  onboardingCompletedAt: Date | null
-  createdAt: Date
-  updatedAt: Date
+  country: string;
+  createdAt: Date;
+  defaultLanguage: Language;
+  id: string;
+  name: string;
+  onboardingCompletedAt: Date | null;
+  onboardingStep: OnboardingStep;
+  slug: string;
+  timezone: string;
+  updatedAt: Date;
 }
 
 export interface WorkspaceMember {
-  id: string
-  workspaceId: string
-  userId: string
-  role: 'owner'
-  createdAt: Date
+  createdAt: Date;
+  id: string;
+  role: "owner";
+  userId: string;
+  workspaceId: string;
 }
 
 // --- Billing ---
 
 export interface Plan {
-  id: string
-  tier: PlanTier
-  name: string
-  monthlyPriceCents: number
-  activeContactsLimit: number
-  calendarsStaffLimit: number
-  locationsLimit: number
-  setupType: SetupType
-  retentionDays: number
+  activeContactsLimit: number;
+  calendarsStaffLimit: number;
+  id: string;
+  locationsLimit: number;
+  monthlyPriceCents: number;
+  name: string;
+  retentionDays: number;
+  setupType: SetupType;
+  tier: PlanTier;
 }
 
 export interface Subscription {
-  id: string
-  workspaceId: string
-  stripeCustomerId: string
-  stripeSubscriptionId: string
-  planTier: PlanTier
-  billingPeriod: BillingPeriod
-  status: SubscriptionStatus
-  currentPeriodStart: Date
-  currentPeriodEnd: Date
-  cancelAtPeriodEnd: boolean
-  createdAt: Date
-  updatedAt: Date
+  billingPeriod: BillingPeriod;
+  cancelAtPeriodEnd: boolean;
+  createdAt: Date;
+  currentPeriodEnd: Date;
+  currentPeriodStart: Date;
+  id: string;
+  planTier: PlanTier;
+  status: SubscriptionStatus;
+  stripeCustomerId: string;
+  stripeSubscriptionId: string;
+  updatedAt: Date;
+  workspaceId: string;
 }
 
 export interface UsageRecord {
-  id: string
-  workspaceId: string
-  metric: string
-  value: number
-  periodStart: Date
-  periodEnd: Date
-  createdAt: Date
+  createdAt: Date;
+  id: string;
+  metric: string;
+  periodEnd: Date;
+  periodStart: Date;
+  value: number;
+  workspaceId: string;
 }
 
 // --- WhatsApp ---
 
 export interface WhatsAppConnection {
-  id: string
-  workspaceId: string
-  status: WhatsAppConnectionStatus
-  phoneNumber: string | null
-  sessionData: string | null // encrypted
-  lastConnectedAt: Date | null
-  lastDisconnectedAt: Date | null
-  createdAt: Date
-  updatedAt: Date
+  createdAt: Date;
+  id: string;
+  lastConnectedAt: Date | null;
+  lastDisconnectedAt: Date | null;
+  phoneNumber: string | null;
+  sessionData: string | null; // encrypted
+  status: WhatsAppConnectionStatus;
+  updatedAt: Date;
+  workspaceId: string;
 }
 
 // --- Business Profile ---
 
 export interface BusinessProfile {
-  id: string
-  workspaceId: string
-  name: string
-  category: BusinessCategory
-  description: string | null
-  location: string | null
-  cancellationPolicy: string | null
-  refundPolicy: string | null
-  priceDisplayPreference: 'show' | 'hide' | 'on_request'
-  cancellationWindowHours: number
-  reschedulingWindowHours: number
-  depositRequired: boolean
-  depositAmountCents: number | null
-  approvedCancellationText: string | null
-  approvedRefundText: string | null
-  approvedDiscountText: string | null
-  emergencyEscalationInstructions: string | null
-  sensitiveTopics: string[]
-  createdAt: Date
-  updatedAt: Date
+  approvedCancellationText: string | null;
+  approvedDiscountText: string | null;
+  approvedRefundText: string | null;
+  cancellationPolicy: string | null;
+  cancellationWindowHours: number;
+  category: BusinessCategory;
+  createdAt: Date;
+  depositAmountCents: number | null;
+  depositRequired: boolean;
+  description: string | null;
+  emergencyEscalationInstructions: string | null;
+  id: string;
+  location: string | null;
+  name: string;
+  priceDisplayPreference: "show" | "hide" | "on_request";
+  refundPolicy: string | null;
+  reschedulingWindowHours: number;
+  sensitiveTopics: string[];
+  updatedAt: Date;
+  workspaceId: string;
 }
 
 export interface ReceptionistProfile {
-  id: string
-  workspaceId: string
-  name: string
-  tone: ReceptionistTone
-  greetingTemplate: string | null
-  escalationRules: EscalationRule[]
-  personalityPreset: PersonalityPreset
-  greetingStyle: string | null
-  formalityLevel: number       // 1-5
-  concisenessLevel: number     // 1-5
-  warmthLevel: number          // 1-5
-  useEmoji: boolean
-  speaksAsBusiness: boolean    // false = first person, true = "we"
-  proactivelySuggestTimes: boolean
-  confirmsBeforeBooking: boolean
-  notifyOwnerEveryAppointment: boolean
-  cancellationPolicyStrictness: CancellationStrictness
-  refundHandlingMode: string | null
-  discountHandlingMode: string | null
-  depositHandlingMode: string | null
-  createdAt: Date
-  updatedAt: Date
+  cancellationPolicyStrictness: CancellationStrictness;
+  concisenessLevel: number; // 1-5
+  confirmsBeforeBooking: boolean;
+  createdAt: Date;
+  depositHandlingMode: string | null;
+  discountHandlingMode: string | null;
+  escalationRules: EscalationRule[];
+  formalityLevel: number; // 1-5
+  greetingStyle: string | null;
+  greetingTemplate: string | null;
+  id: string;
+  name: string;
+  notifyOwnerEveryAppointment: boolean;
+  personalityPreset: PersonalityPreset;
+  proactivelySuggestTimes: boolean;
+  refundHandlingMode: string | null;
+  speaksAsBusiness: boolean; // false = first person, true = "we"
+  tone: ReceptionistTone;
+  updatedAt: Date;
+  useEmoji: boolean;
+  warmthLevel: number; // 1-5
+  workspaceId: string;
 }
 
 export interface EscalationRule {
-  reason: EscalationReason
-  action: 'escalate' | 'clarify_first'
+  action: "escalate" | "clarify_first";
+  reason: EscalationReason;
 }
 
 // --- Services & Staff ---
 
 export interface Service {
-  id: string
-  workspaceId: string
-  name: string
-  description: string | null
-  durationMinutes: number
-  priceCents: number | null
-  active: boolean
-  createdAt: Date
-  updatedAt: Date
+  active: boolean;
+  createdAt: Date;
+  description: string | null;
+  durationMinutes: number;
+  id: string;
+  name: string;
+  priceCents: number | null;
+  updatedAt: Date;
+  workspaceId: string;
 }
 
 export interface StaffMember {
-  id: string
-  workspaceId: string
-  name: string
-  serviceIds: string[]
-  active: boolean
-  createdAt: Date
-  updatedAt: Date
+  active: boolean;
+  createdAt: Date;
+  id: string;
+  name: string;
+  serviceIds: string[];
+  updatedAt: Date;
+  workspaceId: string;
 }
 
 export interface AvailabilityRule {
-  id: string
-  workspaceId: string
-  staffMemberId: string | null
-  dayOfWeek: number // 0 = Sunday, 6 = Saturday
-  startTime: string // HH:mm
-  endTime: string // HH:mm
-  available: boolean
-  createdAt: Date
-  updatedAt: Date
+  available: boolean;
+  createdAt: Date;
+  dayOfWeek: number; // 0 = Sunday, 6 = Saturday
+  endTime: string; // HH:mm
+  id: string;
+  staffMemberId: string | null;
+  startTime: string; // HH:mm
+  updatedAt: Date;
+  workspaceId: string;
 }
 
 // --- Appointments ---
 
 export interface Appointment {
-  id: string
-  workspaceId: string
-  customerId: string
-  staffMemberId: string | null
-  serviceId: string
-  status: AppointmentStatus
-  startAt: Date
-  endAt: Date
-  timezone: string
-  sourceConversationId: string | null
-  createdBy: 'ai' | 'owner' | 'system'
-  confirmationStatus: 'pending' | 'confirmed' | 'expired'
-  reminderStatus: 'none' | 'scheduled' | 'sent' | 'confirmed'
-  notes: string | null
-  createdAt: Date
-  updatedAt: Date
-  cancelledAt: Date | null
-  completedAt: Date | null
+  cancelledAt: Date | null;
+  completedAt: Date | null;
+  confirmationStatus: "pending" | "confirmed" | "expired";
+  createdAt: Date;
+  createdBy: "ai" | "owner" | "system";
+  customerId: string;
+  endAt: Date;
+  id: string;
+  notes: string | null;
+  reminderStatus: "none" | "scheduled" | "sent" | "confirmed";
+  serviceId: string;
+  sourceConversationId: string | null;
+  staffMemberId: string | null;
+  startAt: Date;
+  status: AppointmentStatus;
+  timezone: string;
+  updatedAt: Date;
+  workspaceId: string;
 }
 
 // --- Customers ---
 
 export interface Customer {
-  id: string
-  workspaceId: string
-  phoneNumber: string
-  name: string | null
-  language: Language
-  notes: string | null
-  createdAt: Date
-  updatedAt: Date
+  createdAt: Date;
+  id: string;
+  language: Language;
+  name: string | null;
+  notes: string | null;
+  phoneNumber: string;
+  updatedAt: Date;
+  workspaceId: string;
 }
 
 // --- Conversations & Messages ---
 
 export interface Conversation {
-  id: string
-  workspaceId: string
-  customerId: string
-  channel: 'whatsapp'
-  mode: ConversationMode
-  lastMessageAt: Date
-  language: Language
-  assignedToOwner: boolean
-  needsAttentionReason: string | null
-  summary: string | null
-  createdAt: Date
-  updatedAt: Date
+  assignedToOwner: boolean;
+  channel: "whatsapp";
+  createdAt: Date;
+  customerId: string;
+  id: string;
+  language: Language;
+  lastMessageAt: Date;
+  mode: ConversationMode;
+  needsAttentionReason: string | null;
+  summary: string | null;
+  updatedAt: Date;
+  workspaceId: string;
 }
 
 export interface Message {
-  id: string
-  conversationId: string
-  workspaceId: string
-  externalMessageId: string | null
-  senderType: SenderType
-  contentType: MessageContentType
-  body: string
-  language: Language | null
-  aiProvider: string | null
-  aiModel: string | null
-  toolCalls: unknown[] | null
-  status: MessageStatus
-  createdAt: Date
-  sentAt: Date | null
+  aiModel: string | null;
+  aiProvider: string | null;
+  body: string;
+  contentType: MessageContentType;
+  conversationId: string;
+  createdAt: Date;
+  externalMessageId: string | null;
+  id: string;
+  language: Language | null;
+  senderType: SenderType;
+  sentAt: Date | null;
+  status: MessageStatus;
+  toolCalls: unknown[] | null;
+  workspaceId: string;
 }
 
 export interface ConversationSummary {
-  id: string
-  conversationId: string
-  summary: string
-  keyTopics: string[]
-  extractedPreferences: Record<string, string>
-  createdAt: Date
+  conversationId: string;
+  createdAt: Date;
+  extractedPreferences: Record<string, string>;
+  id: string;
+  keyTopics: string[];
+  summary: string;
 }
 
 // --- AI & Memory ---
 
 export interface AgentMemory {
-  id: string
-  workspaceId: string
-  customerId: string | null
-  key: string
-  value: string
-  source: 'ai_extraction' | 'owner_note' | 'system'
-  createdAt: Date
-  updatedAt: Date
+  createdAt: Date;
+  customerId: string | null;
+  id: string;
+  key: string;
+  source: "ai_extraction" | "owner_note" | "system";
+  updatedAt: Date;
+  value: string;
+  workspaceId: string;
 }
 
 export interface KnowledgeBaseItem {
-  id: string
-  workspaceId: string
-  category: string
-  question: string
-  answer: string
-  language: Language
-  createdAt: Date
-  updatedAt: Date
+  answer: string;
+  category: string;
+  createdAt: Date;
+  id: string;
+  language: Language;
+  question: string;
+  updatedAt: Date;
+  workspaceId: string;
 }
 
 // --- Reminders & Escalations ---
 
 export interface Reminder {
-  id: string
-  appointmentId: string
-  scheduledAt: Date
-  sentAt: Date | null
-  status: 'pending' | 'sent' | 'delivered' | 'failed'
-  createdAt: Date
+  appointmentId: string;
+  createdAt: Date;
+  id: string;
+  scheduledAt: Date;
+  sentAt: Date | null;
+  status: "pending" | "sent" | "delivered" | "failed";
 }
 
 export interface Escalation {
-  id: string
-  conversationId: string
-  workspaceId: string
-  reason: EscalationReason
-  status: 'open' | 'resolved'
-  createdAt: Date
-  resolvedAt: Date | null
+  conversationId: string;
+  createdAt: Date;
+  id: string;
+  reason: EscalationReason;
+  resolvedAt: Date | null;
+  status: "open" | "resolved";
+  workspaceId: string;
 }
 
 // --- Notifications ---
 
 export interface Notification {
-  id: string
-  workspaceId: string
-  userId: string
-  type: NotificationType
-  title: string
-  body: string
-  readAt: Date | null
-  createdAt: Date
+  body: string;
+  createdAt: Date;
+  id: string;
+  readAt: Date | null;
+  title: string;
+  type: NotificationType;
+  userId: string;
+  workspaceId: string;
 }
 
 // --- Audit ---
 
 export interface AuditLog {
-  id: string
-  workspaceId: string
-  actorType: ActorType
-  actorId: string | null
-  action: string
-  entityType: string
-  entityId: string | null
-  metadata: Record<string, unknown> | null
-  createdAt: Date
+  action: string;
+  actorId: string | null;
+  actorType: ActorType;
+  createdAt: Date;
+  entityId: string | null;
+  entityType: string;
+  id: string;
+  metadata: Record<string, unknown> | null;
+  workspaceId: string;
 }
 
 // --- Provider Usage ---
 
 export interface ProviderUsage {
-  id: string
-  workspaceId: string
-  provider: string
-  model: string
-  inputTokens: number
-  outputTokens: number
-  costCents: number
-  createdAt: Date
+  costCents: number;
+  createdAt: Date;
+  id: string;
+  inputTokens: number;
+  model: string;
+  outputTokens: number;
+  provider: string;
+  workspaceId: string;
 }
 
 // --- Audio ---
 
 export interface AudioAsset {
-  id: string
-  messageId: string | null
-  workspaceId: string
-  storageKey: string
-  durationSeconds: number | null
-  transcript: string | null
-  language: Language | null
-  confidence: number | null
-  createdAt: Date
+  confidence: number | null;
+  createdAt: Date;
+  durationSeconds: number | null;
+  id: string;
+  language: Language | null;
+  messageId: string | null;
+  storageKey: string;
+  transcript: string | null;
+  workspaceId: string;
 }
 
 // --- Messaging & Consent (§8, §9, §10) ---
 
 export interface MessagingConsent {
-  id: string
-  workspaceId: string
-  customerId: string
-  phoneNumber: string
-  status: MessagingConsentStatus
-  source: ConsentSource
-  allowedPurposes: MessagePurpose[]
-  capturedAt: Date
-  lastInboundMessageAt: Date | null
-  lastOutboundMessageAt: Date | null
-  notes: string | null
-  createdAt: Date
-  updatedAt: Date
+  allowedPurposes: MessagePurpose[];
+  capturedAt: Date;
+  createdAt: Date;
+  customerId: string;
+  id: string;
+  lastInboundMessageAt: Date | null;
+  lastOutboundMessageAt: Date | null;
+  notes: string | null;
+  phoneNumber: string;
+  source: ConsentSource;
+  status: MessagingConsentStatus;
+  updatedAt: Date;
+  workspaceId: string;
 }
 
 export interface OutboundMessageLog {
-  id: string
-  workspaceId: string
-  customerId: string
-  conversationId: string | null
-  outboundSinceLastInbound: number
-  lastInboundAt: Date | null
-  lastOutboundAt: Date | null
-  purposeOfLastOutbound: MessagePurpose | null
-  createdAt: Date
-  updatedAt: Date
+  conversationId: string | null;
+  createdAt: Date;
+  customerId: string;
+  id: string;
+  lastInboundAt: Date | null;
+  lastOutboundAt: Date | null;
+  outboundSinceLastInbound: number;
+  purposeOfLastOutbound: MessagePurpose | null;
+  updatedAt: Date;
+  workspaceId: string;
 }
 
 export interface SentReminderLog {
-  id: string
-  appointmentId: string
-  reminderType: ReminderType
-  sentAt: Date
-  createdAt: Date
+  appointmentId: string;
+  createdAt: Date;
+  id: string;
+  reminderType: ReminderType;
+  sentAt: Date;
 }
 
 // --- Sending Policy Engine (§10) ---
 
 export interface SendDecision {
-  allowed: boolean
-  reason?: string
+  allowed: boolean;
   details?: {
-    consentStatus: MessagingConsentStatus
-    outboundCount: number
-    maxOutbound: number
-    purposeAllowed: boolean
-    duplicateBlocked: boolean
-    appointmentValid: boolean
-  }
+    consentStatus: MessagingConsentStatus;
+    outboundCount: number;
+    maxOutbound: number;
+    purposeAllowed: boolean;
+    duplicateBlocked: boolean;
+    appointmentValid: boolean;
+  };
+  reason?: string;
 }
 
 export interface AppointmentAuditEvent {
-  id: string
-  workspaceId: string
-  appointmentId: string
-  actorType: ActorType
-  actorId: string | null
-  action: string
-  channel: string
-  channelProvider: string
-  metadata: Record<string, unknown> | null
-  createdAt: Date
+  action: string;
+  actorId: string | null;
+  actorType: ActorType;
+  appointmentId: string;
+  channel: string;
+  channelProvider: string;
+  createdAt: Date;
+  id: string;
+  metadata: Record<string, unknown> | null;
+  workspaceId: string;
 }
 
 // --- Message Sender Interface (ZEN-11) ---
@@ -455,15 +454,14 @@ export interface AppointmentAuditEvent {
  */
 export interface MessageSender {
   /**
+   * Check whether a workspace is currently reachable.
+   */
+  isConnected(workspaceId: string): boolean;
+  /**
    * Send an event payload to a connected workspace.
    * @returns true if delivered, false if workspace not connected
    */
-  send(workspaceId: string, data: unknown): boolean
-
-  /**
-   * Check whether a workspace is currently reachable.
-   */
-  isConnected(workspaceId: string): boolean
+  send(workspaceId: string, data: unknown): boolean;
 }
 
 // --- Outbound limits (§9) ---
@@ -475,4 +473,4 @@ export const OUTBOUND_LIMITS = {
   FOLLOW_UP_DELAY_MS: 30 * 60 * 1000, // 30 minutes
   REMINDER_24H_BEFORE_MS: 24 * 60 * 60 * 1000,
   REMINDER_2H_BEFORE_MS: 2 * 60 * 60 * 1000,
-} as const
+} as const;

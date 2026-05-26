@@ -37,11 +37,7 @@ export const adminModule = new Elysia({ prefix: "/admin" })
   .use(authBase)
   .use(typedContext)
   .onBeforeHandle(
-    ({
-      headers,
-    }: {
-      headers: Record<string, string | undefined>;
-    }) => {
+    ({ headers }: { headers: Record<string, string | undefined> }) => {
       const secret = headers["x-admin-secret"];
       if (!(ADMIN_SECRET && secret && safeCompare(secret, ADMIN_SECRET))) {
         return forbiddenRes;
@@ -134,14 +130,17 @@ export const adminModule = new Elysia({ prefix: "/admin" })
   .post("/workspaces/:id/override-plan", async ({ params, body, set }) => {
     try {
       const data = body as Record<string, string>;
-      if (!data.planTier || !VALID_PLAN_TIERS.has(data.planTier)) {
-        return badRequest(set, `Invalid planTier. Must be one of: ${planTierEnum.enumValues.join(", ")}`);
+      if (!(data.planTier && VALID_PLAN_TIERS.has(data.planTier))) {
+        return badRequest(
+          set,
+          `Invalid planTier. Must be one of: ${planTierEnum.enumValues.join(", ")}`
+        );
       }
       await db
         .update(subscriptions)
         .set({
           // biome-ignore lint/suspicious/noExplicitAny: planTier is a pgEnum that doesn't accept string directly
-          planTier: data.planTier as typeof planTierEnum.enumValues[number],
+          planTier: data.planTier as (typeof planTierEnum.enumValues)[number],
           status: "active",
           updatedAt: new Date(),
         })

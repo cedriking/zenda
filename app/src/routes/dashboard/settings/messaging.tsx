@@ -58,14 +58,24 @@ export default function MessagingSettingsPage() {
       settings.maxOutboundWithoutReply < 1 ||
       settings.maxOutboundWithoutReply > 10
     ) {
-      setSaveError(t("settings.messaging.errors.maxOutbound", "Max outbound messages must be between 1 and 10"));
+      setSaveError(
+        t(
+          "settings.messaging.errors.maxOutbound",
+          "Max outbound messages must be between 1 and 10"
+        )
+      );
       return;
     }
     if (
       settings.maxRemindersPerAppointment < 0 ||
       settings.maxRemindersPerAppointment > 5
     ) {
-      setSaveError(t("settings.messaging.errors.maxReminders", "Max reminders must be between 0 and 5"));
+      setSaveError(
+        t(
+          "settings.messaging.errors.maxReminders",
+          "Max reminders must be between 0 and 5"
+        )
+      );
       return;
     }
 
@@ -137,7 +147,10 @@ export default function MessagingSettingsPage() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
             <label className="mb-1 block font-medium text-foreground text-sm">
-              {t("settings.messaging.maxOutboundLabel", "Max outbound messages without reply")}
+              {t(
+                "settings.messaging.maxOutboundLabel",
+                "Max outbound messages without reply"
+              )}
             </label>
             <input
               className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
@@ -153,13 +166,19 @@ export default function MessagingSettingsPage() {
               value={settings.maxOutboundWithoutReply}
             />
             <p className="mt-1 text-muted-foreground text-xs">
-              {t("settings.messaging.maxOutboundDesc", "Stop sending messages after this many unanswered outbound messages")}
+              {t(
+                "settings.messaging.maxOutboundDesc",
+                "Stop sending messages after this many unanswered outbound messages"
+              )}
             </p>
           </div>
 
           <div>
             <label className="mb-1 block font-medium text-foreground text-sm">
-              {t("settings.messaging.maxRemindersLabel", "Max reminders per appointment")}
+              {t(
+                "settings.messaging.maxRemindersLabel",
+                "Max reminders per appointment"
+              )}
             </label>
             <input
               className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
@@ -175,7 +194,10 @@ export default function MessagingSettingsPage() {
               value={settings.maxRemindersPerAppointment}
             />
             <p className="mt-1 text-muted-foreground text-xs">
-              {t("settings.messaging.maxRemindersDesc", "Maximum reminder messages sent for each upcoming appointment")}
+              {t(
+                "settings.messaging.maxRemindersDesc",
+                "Maximum reminder messages sent for each upcoming appointment"
+              )}
             </p>
           </div>
         </div>
@@ -200,12 +222,18 @@ export default function MessagingSettingsPage() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-border border-b">
-                <th className="pb-3 font-medium text-foreground">{t("settings.messaging.tableCustomer", "Customer")}</th>
-                <th className="pb-3 font-medium text-foreground">{t("settings.messaging.tablePhone", "Phone")}</th>
+                <th className="pb-3 font-medium text-foreground">
+                  {t("settings.messaging.tableCustomer", "Customer")}
+                </th>
+                <th className="pb-3 font-medium text-foreground">
+                  {t("settings.messaging.tablePhone", "Phone")}
+                </th>
                 <th className="pb-3 font-medium text-foreground">
                   {t("receptionist.status")}
                 </th>
-                <th className="pb-3 font-medium text-foreground">{t("settings.messaging.tableDate", "Date")}</th>
+                <th className="pb-3 font-medium text-foreground">
+                  {t("settings.messaging.tableDate", "Date")}
+                </th>
               </tr>
             </thead>
             <tbody>

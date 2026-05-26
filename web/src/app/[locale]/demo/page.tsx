@@ -15,7 +15,8 @@ export function generateMetadata(): Metadata {
     },
     openGraph: {
       title: "Ver Zenda en Acción — Demo por WhatsApp",
-      description: "Mira cómo la IA de Zenda agenda citas por WhatsApp automáticamente.",
+      description:
+        "Mira cómo la IA de Zenda agenda citas por WhatsApp automáticamente.",
       url: "https://zenda.bot/es/demo",
       type: "website",
     },
@@ -23,14 +24,38 @@ export function generateMetadata(): Metadata {
 }
 
 const CHAT_MESSAGES = [
-  { from: "client", text: "Hola! Quisiera una cita para un corte de pelo", time: "10:32 AM" },
-  { from: "zenda", text: "¡Hola María! 👋 Te atiendo enseguida.\n\nPara un corte de pelo, tenemos disponibilidad:\n\n📅 Hoy a las 3:00 PM con Carlos\n📅 Mañana a las 11:00 AM con Laura\n📅 Jueves a las 5:00 PM con Carlos\n\n¿Cuál prefieres?", time: "10:32 AM" },
-  { from: "client", text: "Hoy a las 3 con Carlos por favor", time: "10:33 AM" },
-  { from: "zenda", text: "✅ ¡Listo! Tu cita está agendada:\n\n💇 Corte de pelo\n👤 Carlos\n📅 Hoy, 3:00 PM\n📍 Salón Beauty Studio\n\nTe enviaré un recordatorio 2 horas antes. ¿Necesitas algo más?", time: "10:33 AM" },
+  {
+    from: "client",
+    text: "Hola! Quisiera una cita para un corte de pelo",
+    time: "10:32 AM",
+  },
+  {
+    from: "zenda",
+    text: "¡Hola María! 👋 Te atiendo enseguida.\n\nPara un corte de pelo, tenemos disponibilidad:\n\n📅 Hoy a las 3:00 PM con Carlos\n📅 Mañana a las 11:00 AM con Laura\n📅 Jueves a las 5:00 PM con Carlos\n\n¿Cuál prefieres?",
+    time: "10:32 AM",
+  },
+  {
+    from: "client",
+    text: "Hoy a las 3 con Carlos por favor",
+    time: "10:33 AM",
+  },
+  {
+    from: "zenda",
+    text: "✅ ¡Listo! Tu cita está agendada:\n\n💇 Corte de pelo\n👤 Carlos\n📅 Hoy, 3:00 PM\n📍 Salón Beauty Studio\n\nTe enviaré un recordatorio 2 horas antes. ¿Necesitas algo más?",
+    time: "10:33 AM",
+  },
   { from: "client", text: "Cuánto cuesta?", time: "10:33 AM" },
-  { from: "zenda", text: "El corte de pelo con Carlos cuesta $250 MXN.\n\nTambién tenemos estos servicios:\n✂️ Corte + barba — $350\n💇 Corte + lavado — $300\n💆 Corte + tratamiento — $500\n\n¿Te gustaría agregar algo?", time: "10:34 AM" },
+  {
+    from: "zenda",
+    text: "El corte de pelo con Carlos cuesta $250 MXN.\n\nTambién tenemos estos servicios:\n✂️ Corte + barba — $350\n💇 Corte + lavado — $300\n💆 Corte + tratamiento — $500\n\n¿Te gustaría agregar algo?",
+    time: "10:34 AM",
+  },
   { from: "client", text: "No, solo el corte. Gracias!", time: "10:34 AM" },
-  { from: "zenda", text: "¡Perfecto! Te esperamos hoy a las 3:00 PM. 😊\n\nSi necesitas cambiar tu cita, escríbeme y te ayudo.", time: "10:34 AM" },
+  {
+    from: "zenda",
+    text: "¡Perfecto! Te esperamos hoy a las 3:00 PM. 😊\n\nSi necesitas cambiar tu cita, escríbeme y te ayudo.",
+    time: "10:34 AM",
+  },
 ];
 
 export default function DemoPage() {
@@ -47,7 +72,8 @@ export default function DemoPage() {
           Así funciona Zenda por WhatsApp
         </h1>
         <p className="mx-auto mb-6 max-w-xl text-slate-600">
-          Mira cómo un cliente agenda una cita en menos de 2 minutos — sin que nadie del salón toque el teléfono.
+          Mira cómo un cliente agenda una cita en menos de 2 minutos — sin que
+          nadie del salón toque el teléfono.
         </p>
       </section>
 
@@ -66,11 +92,17 @@ export default function DemoPage() {
           </div>
 
           {/* Chat messages */}
-          <div className="space-y-2 bg-[#e5ddd5] px-3 py-4" style={{ backgroundImage: "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect fill=\"%23e5ddd5\" width=\"100\" height=\"100\"/></svg>')" }}>
+          <div
+            className="space-y-2 bg-[#e5ddd5] px-3 py-4"
+            style={{
+              backgroundImage:
+                'url(\'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23e5ddd5" width="100" height="100"/></svg>\')',
+            }}
+          >
             {CHAT_MESSAGES.map((msg, i) => (
               <div
-                key={i}
                 className={`flex ${msg.from === "client" ? "justify-end" : "justify-start"}`}
+                key={i}
               >
                 <div
                   className={`max-w-[85%] rounded-lg px-3 py-2 shadow-sm ${
@@ -79,8 +111,12 @@ export default function DemoPage() {
                       : "rounded-tl-none bg-white"
                   }`}
                 >
-                  <p className="text-sm text-slate-800 whitespace-pre-line">{msg.text}</p>
-                  <p className={`mt-1 text-right text-[10px] ${msg.from === "client" ? "text-green-700" : "text-slate-400"}`}>
+                  <p className="whitespace-pre-line text-slate-800 text-sm">
+                    {msg.text}
+                  </p>
+                  <p
+                    className={`mt-1 text-right text-[10px] ${msg.from === "client" ? "text-green-700" : "text-slate-400"}`}
+                  >
                     {msg.time} {msg.from === "client" && "✓✓"}
                   </p>
                 </div>
@@ -106,20 +142,37 @@ export default function DemoPage() {
       {/* What just happened */}
       <section className="bg-slate-50 py-12">
         <div className="mx-auto max-w-3xl px-6">
-          <h2 className="mb-8 text-center font-bold text-xl text-slate-900">
+          <h2 className="mb-8 text-center font-bold text-slate-900 text-xl">
             Lo que acaba de pasar — en 2 minutos
           </h2>
           <div className="grid gap-4 md:grid-cols-3">
             {[
-              { icon: MessageCircle, title: "Cliente escribe", desc: "Un cliente escribe por WhatsApp como siempre." },
-              { icon: Smartphone, title: "Zenda responde", desc: "La IA entiende, consulta la agenda y propone horarios." },
-              { icon: Check, title: "Cita agendada", desc: "Confirmación automática + recordatorio programado." },
+              {
+                icon: MessageCircle,
+                title: "Cliente escribe",
+                desc: "Un cliente escribe por WhatsApp como siempre.",
+              },
+              {
+                icon: Smartphone,
+                title: "Zenda responde",
+                desc: "La IA entiende, consulta la agenda y propone horarios.",
+              },
+              {
+                icon: Check,
+                title: "Cita agendada",
+                desc: "Confirmación automática + recordatorio programado.",
+              },
             ].map((step) => (
-              <div className="rounded-xl border border-slate-200 bg-white p-4 text-center" key={step.title}>
+              <div
+                className="rounded-xl border border-slate-200 bg-white p-4 text-center"
+                key={step.title}
+              >
                 <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
                   <step.icon className="h-5 w-5 text-emerald-600" />
                 </div>
-                <h3 className="mb-1 font-semibold text-slate-900 text-sm">{step.title}</h3>
+                <h3 className="mb-1 font-semibold text-slate-900 text-sm">
+                  {step.title}
+                </h3>
                 <p className="text-slate-500 text-xs">{step.desc}</p>
               </div>
             ))}

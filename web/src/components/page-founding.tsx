@@ -2,10 +2,16 @@
 
 import { CheckCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { trackAdsConversion, trackSignup } from "@/components/google-analytics";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
 import { apiFetch } from "@/lib/api-client";
+import {
+  captureUtmParams,
+  getStoredReferralCode,
+  getStoredUtmParams,
+} from "@/lib/tracking";
 
 export function FoundingPageClient({ locale }: { locale: string }) {
   const t = useTranslations("founding");
@@ -17,6 +23,13 @@ export function FoundingPageClient({ locale }: { locale: string }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [step, setStep] = useState<"form" | "success">("form");
+
+  // Capture UTM params on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      captureUtmParams(new URLSearchParams(window.location.search));
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,6 +43,9 @@ export function FoundingPageClient({ locale }: { locale: string }) {
     setLoading(true);
 
     try {
+      const utm = getStoredUtmParams();
+      const referralCode = getStoredReferralCode();
+
       await apiFetch("/auth/signup", {
         method: "POST",
         body: JSON.stringify({
@@ -39,8 +55,15 @@ export function FoundingPageClient({ locale }: { locale: string }) {
           businessName,
           language: locale,
           source: "founding",
+          ...utm,
+          ...(referralCode ? { referralCode } : {}),
         }),
       });
+
+      // Fire conversion tracking
+      trackSignup("email");
+      trackAdsConversion();
+
       setStep("success");
     } catch (err) {
       setError((err as Error).message);
@@ -170,10 +193,24 @@ export function FoundingPageClient({ locale }: { locale: string }) {
           <div className="mx-auto max-w-sm overflow-hidden rounded-2xl border border-green-200 bg-green-50 shadow-lg">
             <div className="flex items-center gap-3 bg-green-600 px-4 py-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                <svg
+                  className="h-5 w-5 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                  />
+                </svg>
               </div>
               <div>
-                <p className="font-semibold text-sm text-white">{t("demoBusiness")}</p>
+                <p className="font-semibold text-sm text-white">
+                  {t("demoBusiness")}
+                </p>
                 <p className="text-green-100 text-xs">{t("demoOnline")}</p>
               </div>
             </div>
@@ -181,29 +218,41 @@ export function FoundingPageClient({ locale }: { locale: string }) {
               {/* Client message */}
               <div className="flex justify-end">
                 <div className="max-w-[80%] rounded-lg rounded-tr-none bg-green-100 px-3 py-2 shadow-sm">
-                  <p className="text-sm text-slate-800">{t("demoMsg1")}</p>
-                  <p className="mt-1 text-right text-[10px] text-green-700">10:32 ✓✓</p>
+                  <p className="text-slate-800 text-sm">{t("demoMsg1")}</p>
+                  <p className="mt-1 text-right text-[10px] text-green-700">
+                    10:32 ✓✓
+                  </p>
                 </div>
               </div>
               {/* Zenda response */}
               <div className="flex justify-start">
                 <div className="max-w-[85%] rounded-lg rounded-tl-none bg-white px-3 py-2 shadow-sm">
-                  <p className="text-sm text-slate-800 whitespace-pre-line">{t("demoMsg2")}</p>
-                  <p className="mt-1 text-right text-[10px] text-slate-400">10:32</p>
+                  <p className="whitespace-pre-line text-slate-800 text-sm">
+                    {t("demoMsg2")}
+                  </p>
+                  <p className="mt-1 text-right text-[10px] text-slate-400">
+                    10:32
+                  </p>
                 </div>
               </div>
               {/* Client reply */}
               <div className="flex justify-end">
                 <div className="max-w-[80%] rounded-lg rounded-tr-none bg-green-100 px-3 py-2 shadow-sm">
-                  <p className="text-sm text-slate-800">{t("demoMsg3")}</p>
-                  <p className="mt-1 text-right text-[10px] text-green-700">10:33 ✓✓</p>
+                  <p className="text-slate-800 text-sm">{t("demoMsg3")}</p>
+                  <p className="mt-1 text-right text-[10px] text-green-700">
+                    10:33 ✓✓
+                  </p>
                 </div>
               </div>
               {/* Zenda confirmation */}
               <div className="flex justify-start">
                 <div className="max-w-[85%] rounded-lg rounded-tl-none bg-white px-3 py-2 shadow-sm">
-                  <p className="text-sm text-slate-800 whitespace-pre-line">{t("demoMsg4")}</p>
-                  <p className="mt-1 text-right text-[10px] text-slate-400">10:33</p>
+                  <p className="whitespace-pre-line text-slate-800 text-sm">
+                    {t("demoMsg4")}
+                  </p>
+                  <p className="mt-1 text-right text-[10px] text-slate-400">
+                    10:33
+                  </p>
                 </div>
               </div>
             </div>
@@ -212,7 +261,19 @@ export function FoundingPageClient({ locale }: { locale: string }) {
                 {t("demoPlaceholder")}
               </div>
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-600">
-                <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                <svg
+                  className="h-4 w-4 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                  />
+                </svg>
               </div>
             </div>
           </div>

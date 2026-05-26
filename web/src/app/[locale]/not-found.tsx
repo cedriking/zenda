@@ -1,9 +1,9 @@
-import { useTranslations } from 'next-intl'
-import { Link } from '@/i18n/navigation'
-import { Nav } from '@/components/nav'
+import { useTranslations } from "next-intl";
+import { Nav } from "@/components/nav";
+import { Link } from "@/i18n/navigation";
 
 export default function NotFound() {
-  const t = useTranslations('notFound')
+  const t = useTranslations("notFound");
 
   return (
     <div className="flex min-h-screen flex-col pt-16">
@@ -14,20 +14,18 @@ export default function NotFound() {
           <p className="mb-2 font-semibold text-emerald-500 text-sm uppercase tracking-wide">
             404
           </p>
-          <h1 className="mb-4 font-bold text-4xl tracking-tight text-slate-900">
-            {t('title')}
+          <h1 className="mb-4 font-bold text-4xl text-slate-900 tracking-tight">
+            {t("title")}
           </h1>
-          <p className="mb-8 text-lg text-slate-500">
-            {t('description')}
-          </p>
+          <p className="mb-8 text-lg text-slate-500">{t("description")}</p>
           <Link
+            className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-3 font-semibold text-sm text-white shadow-emerald-500/20 shadow-lg transition-colors hover:bg-emerald-600"
             href="/"
-            className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20"
           >
-            {t('backHome')}
+            {t("backHome")}
           </Link>
         </div>
       </main>
     </div>
-  )
+  );
 }

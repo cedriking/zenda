@@ -11,20 +11,41 @@ describe("debug: ws.raw inspection", () => {
       open(ws) {
         const raw = (ws as any).raw;
         openRaw.push({ type: typeof raw, value: raw });
-        console.log("OPEN ws.raw type:", typeof raw, "is null:", raw === null, "is undefined:", raw === undefined);
+        console.log(
+          "OPEN ws.raw type:",
+          typeof raw,
+          "is null:",
+          raw === null,
+          "is undefined:",
+          raw === undefined
+        );
         console.log("OPEN ws.raw:", raw);
         console.log("OPEN ws keys:", Object.getOwnPropertyNames(ws));
       },
-      message(ws, msg) {
+      message(ws, _msg) {
         const raw = (ws as any).raw;
         msgRaw.push({ type: typeof raw, value: raw });
-        console.log("MSG ws.raw type:", typeof raw, "is null:", raw === null, "is undefined:", raw === undefined);
+        console.log(
+          "MSG ws.raw type:",
+          typeof raw,
+          "is null:",
+          raw === null,
+          "is undefined:",
+          raw === undefined
+        );
         console.log("MSG ws keys:", Object.getOwnPropertyNames(ws));
       },
       close(ws) {
         const raw = (ws as any).raw;
         closeRaw.push({ type: typeof raw, value: raw });
-        console.log("CLOSE ws.raw type:", typeof raw, "is null:", raw === null, "is undefined:", raw === undefined);
+        console.log(
+          "CLOSE ws.raw type:",
+          typeof raw,
+          "is null:",
+          raw === null,
+          "is undefined:",
+          raw === undefined
+        );
       },
     });
 
@@ -32,7 +53,9 @@ describe("debug: ws.raw inspection", () => {
     const port = (server.server as any).port;
 
     const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`);
-    await new Promise<void>((r) => ws.addEventListener("open", () => r(), { once: true }));
+    await new Promise<void>((r) =>
+      ws.addEventListener("open", () => r(), { once: true })
+    );
     ws.send("hello");
     await new Promise((r) => setTimeout(r, 100));
     ws.close();

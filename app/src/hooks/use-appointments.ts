@@ -74,7 +74,7 @@ export function useAppointments() {
       setIsLoadingMore(false);
     }
     // selectedDate dep causes recreation so the useEffect below re-fires
-  }, [selectedDate]);
+  }, []);
 
   const loadMore = useCallback(
     async (status?: string) => {

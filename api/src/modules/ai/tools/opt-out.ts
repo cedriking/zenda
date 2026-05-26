@@ -7,8 +7,9 @@
  * The AI calls this when a customer explicitly requests to stop receiving messages,
  * unsubscribe, or be removed from the contact list.
  */
-import { optOut } from "../../messaging/consent-service.js";
+
 import type { Language } from "@zenda/shared";
+import { optOut } from "../../messaging/consent-service.js";
 
 interface ToolInput {
   /** The reason the customer gave for opting out (for audit logging) */
@@ -19,7 +20,7 @@ export async function optOutCustomer(
   workspaceId: string,
   customerId: string,
   _input: ToolInput,
-  language?: Language,
+  language?: Language
 ) {
   const confirmationText = await optOut(workspaceId, customerId);
 

@@ -2,7 +2,7 @@ import { db } from "@zenda/db/client";
 import { subscriptions } from "@zenda/db/schema";
 import type { PlanTier } from "@zenda/shared";
 import { eq } from "drizzle-orm";
-import { getPriceId, type BillingPeriod } from "./products.js";
+import { type BillingPeriod, getPriceId } from "./products.js";
 import { stripe } from "./stripe.js";
 
 const FOUNDING_COUPON_ID = process.env.STRIPE_FOUNDING_COUPON_ID ?? "";
@@ -49,7 +49,12 @@ export async function createCheckoutSession(
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${process.env.APP_URL ?? "http://localhost:5173"}/dashboard?billing=success`,
     cancel_url: `${process.env.APP_URL ?? "http://localhost:5173"}/dashboard/settings?billing=cancel`,
-    metadata: { workspaceId, tier, founding: founding ? "true" : "false", billingPeriod },
+    metadata: {
+      workspaceId,
+      tier,
+      founding: founding ? "true" : "false",
+      billingPeriod,
+    },
     discounts:
       founding && FOUNDING_COUPON_ID
         ? [{ coupon: FOUNDING_COUPON_ID }]

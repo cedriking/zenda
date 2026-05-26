@@ -1,4 +1,11 @@
-import { AlertCircle, BookOpen, Loader2, Plus, Search, Trash2 } from "lucide-react";
+import {
+  AlertCircle,
+  BookOpen,
+  Loader2,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../services/api-client";
@@ -67,8 +74,10 @@ export default function KnowledgeBasePage() {
     const sanitizedQuestion = form.question.trim().slice(0, 500);
     const sanitizedAnswer = form.answer.trim().slice(0, 2000);
 
-    if (!sanitizedQuestion || !sanitizedAnswer) {
-      setSaveError(t("knowledgeBase.errorEmptyFields", "Question and answer are required."));
+    if (!(sanitizedQuestion && sanitizedAnswer)) {
+      setSaveError(
+        t("knowledgeBase.errorEmptyFields", "Question and answer are required.")
+      );
       return;
     }
 
@@ -257,32 +266,35 @@ export default function KnowledgeBasePage() {
             <p>{t("knowledgeBase.empty")}</p>
           </div>
         )}
-        {!loading && items.map((item) => (
-          <div
-            className="rounded-lg border border-border bg-card p-4"
-            key={item.id}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="rounded bg-muted px-2 py-0.5 text-muted-foreground text-xs">
-                    {item.category}
-                  </span>
+        {!loading &&
+          items.map((item) => (
+            <div
+              className="rounded-lg border border-border bg-card p-4"
+              key={item.id}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="mb-1 flex items-center gap-2">
+                    <span className="rounded bg-muted px-2 py-0.5 text-muted-foreground text-xs">
+                      {item.category}
+                    </span>
+                  </div>
+                  <h4 className="font-medium text-foreground">
+                    {item.question}
+                  </h4>
+                  <p className="mt-1 line-clamp-2 text-muted-foreground text-sm">
+                    {item.answer}
+                  </p>
                 </div>
-                <h4 className="font-medium text-foreground">{item.question}</h4>
-                <p className="mt-1 line-clamp-2 text-muted-foreground text-sm">
-                  {item.answer}
-                </p>
+                <button
+                  className="p-1 text-muted-foreground hover:text-destructive"
+                  onClick={() => handleDelete(item.id)}
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
-              <button
-                className="p-1 text-muted-foreground hover:text-destructive"
-                onClick={() => handleDelete(item.id)}
-              >
-                <Trash2 size={16} />
-              </button>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
     </div>
   );

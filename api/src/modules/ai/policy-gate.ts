@@ -5,25 +5,35 @@
  * can get a SendDecision with a single async call instead of
  * fetching workspace config, consent, and outbound counts manually.
  */
-import { db } from '@zenda/db/client'
-import { messagingConsent, outboundMessageLog, workspaces } from '@zenda/db/schema'
-import { eq, and } from 'drizzle-orm'
-import { canSendOutboundMessage } from '../messaging/sending-policy.js'
-import type { MessagePurpose, MessagingConsentStatus, SendDecision } from '@zenda/shared'
+import { db } from "@zenda/db/client";
+import {
+  messagingConsent,
+  outboundMessageLog,
+  workspaces,
+} from "@zenda/db/schema";
+import type {
+  MessagePurpose,
+  MessagingConsentStatus,
+  SendDecision,
+} from "@zenda/shared";
+import { and, eq } from "drizzle-orm";
+import { canSendOutboundMessage } from "../messaging/sending-policy.js";
 
 interface PolicyGateInput {
-  workspaceId: string
-  customerId: string
-  purpose: MessagePurpose
-  channel: 'whatsapp_ba_bridge' | 'whatsapp_waba'
-  appointmentCancelled?: boolean
-  appointmentCompleted?: boolean
-  appointmentTimePassed?: boolean
-  isDuplicate?: boolean
-  connectorSessionStable?: boolean
+  appointmentCancelled?: boolean;
+  appointmentCompleted?: boolean;
+  appointmentTimePassed?: boolean;
+  channel: "whatsapp_ba_bridge" | "whatsapp_waba";
+  connectorSessionStable?: boolean;
+  customerId: string;
+  isDuplicate?: boolean;
+  purpose: MessagePurpose;
+  workspaceId: string;
 }
 
-export async function checkSendingPolicy(input: PolicyGateInput): Promise<SendDecision> {
+export async function checkSendingPolicy(
+  input: PolicyGateInput
+): Promise<SendDecision> {
   // Fetch workspace config, consent, and outbound log in parallel
   const [ws, consent, log] = await Promise.all([
     db
@@ -37,25 +47,33 @@ export async function checkSendingPolicy(input: PolicyGateInput): Promise<SendDe
         allowedPurposes: messagingConsent.allowedPurposes,
       })
       .from(messagingConsent)
-      .where(and(
-        eq(messagingConsent.workspaceId, input.workspaceId),
-        eq(messagingConsent.customerId, input.customerId),
-      ))
+      .where(
+        and(
+          eq(messagingConsent.workspaceId, input.workspaceId),
+          eq(messagingConsent.customerId, input.customerId)
+        )
+      )
       .limit(1),
     db
-      .select({ outboundSinceLastInbound: outboundMessageLog.outboundSinceLastInbound })
+      .select({
+        outboundSinceLastInbound: outboundMessageLog.outboundSinceLastInbound,
+      })
       .from(outboundMessageLog)
-      .where(and(
-        eq(outboundMessageLog.workspaceId, input.workspaceId),
-        eq(outboundMessageLog.customerId, input.customerId),
-      ))
+      .where(
+        and(
+          eq(outboundMessageLog.workspaceId, input.workspaceId),
+          eq(outboundMessageLog.customerId, input.customerId)
+        )
+      )
       .limit(1),
-  ])
+  ]);
 
-  const maxOutbound = ws[0]?.maxOutboundWithoutReply ?? 3
-  const consentStatus: MessagingConsentStatus = consent[0]?.status ?? 'unknown'
-  const allowedPurposes = consent[0]?.allowedPurposes as MessagePurpose[] | undefined
-  const outboundCount = log[0]?.outboundSinceLastInbound ?? 0
+  const maxOutbound = ws[0]?.maxOutboundWithoutReply ?? 3;
+  const consentStatus: MessagingConsentStatus = consent[0]?.status ?? "unknown";
+  const allowedPurposes = consent[0]?.allowedPurposes as
+    | MessagePurpose[]
+    | undefined;
+  const outboundCount = log[0]?.outboundSinceLastInbound ?? 0;
 
   return canSendOutboundMessage({
     channel: input.channel,
@@ -69,5 +87,5 @@ export async function checkSendingPolicy(input: PolicyGateInput): Promise<SendDe
     appointmentCompleted: input.appointmentCompleted ?? false,
     appointmentTimePassed: input.appointmentTimePassed ?? false,
     connectorSessionStable: input.connectorSessionStable ?? true,
-  })
+  });
 }

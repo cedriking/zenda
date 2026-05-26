@@ -183,7 +183,10 @@ export async function touchInboundTimestamp(
     return;
   }
 
-  const updates: Record<string, unknown> = { lastInboundMessageAt: new Date(), updatedAt: new Date() };
+  const updates: Record<string, unknown> = {
+    lastInboundMessageAt: new Date(),
+    updatedAt: new Date(),
+  };
 
   // An inbound message from an opted-out customer means they want to re-engage.
   // Reset consent to 'unknown' so reactive purposes (booking replies, etc.) work.

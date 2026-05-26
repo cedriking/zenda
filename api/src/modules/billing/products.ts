@@ -66,12 +66,15 @@ export function tierFromPriceId(priceId: string): PlanTier | null {
   return null;
 }
 
-export function getPriceId(tier: PlanTier, period: BillingPeriod = "monthly"): string {
+export function getPriceId(
+  tier: PlanTier,
+  period: BillingPeriod = "monthly"
+): string {
   if (tier === "free") {
     throw new Error("Free tier does not require a Stripe checkout session.");
   }
   const priceId = STRIPE_PRICES[tier]?.[period];
-  if (!priceId || !STRIPE_PRICE_ID_RE.test(priceId)) {
+  if (!(priceId && STRIPE_PRICE_ID_RE.test(priceId))) {
     throw new Error(
       `Stripe price ID for tier "${tier}" period "${period}" is not configured.`
     );
@@ -85,7 +88,9 @@ export async function ensureStripeProducts(): Promise<void> {
   }
   for (const [tier, config] of Object.entries(PLANS)) {
     // Free tier has no Stripe product
-    if (tier === "free") continue;
+    if (tier === "free") {
+      continue;
+    }
     try {
       const products = await stripe.products.list({ limit: 100 });
       const existing = products.data.find(
@@ -128,11 +133,11 @@ export async function ensureStripeProducts(): Promise<void> {
       }
 
       // Find or create the annual price (20% discount)
-      const annualCents = Math.round(config.monthlyPriceCents * 12 * ANNUAL_DISCOUNT);
+      const annualCents = Math.round(
+        config.monthlyPriceCents * 12 * ANNUAL_DISCOUNT
+      );
       let annualPrice = prices.data.find(
-        (p) =>
-          p.recurring?.interval === "year" &&
-          p.unit_amount === annualCents
+        (p) => p.recurring?.interval === "year" && p.unit_amount === annualCents
       );
       if (!annualPrice) {
         annualPrice = await stripe.prices.create({
@@ -142,11 +147,17 @@ export async function ensureStripeProducts(): Promise<void> {
           recurring: { interval: "year" },
           metadata: { tier, period: "annual" },
         });
-        logger.info("Created Stripe annual price", { tier, priceId: annualPrice.id });
+        logger.info("Created Stripe annual price", {
+          tier,
+          priceId: annualPrice.id,
+        });
       }
 
       // Update the runtime price maps
-      STRIPE_PRICES[tier] = { monthly: monthlyPrice.id, annual: annualPrice.id };
+      STRIPE_PRICES[tier] = {
+        monthly: monthlyPrice.id,
+        annual: annualPrice.id,
+      };
     } catch (err) {
       logger.error("Failed to ensure Stripe product", {
         tier,
