@@ -8,7 +8,9 @@
       "!**/.next",
       "!**/.vite",
       "!**/migrations",
-      "!**/src/components/ui"
+      "!**/src/components/ui",
+      "!**/.agents",
+      "!**/.claude"
     ]
   },
   "javascript": {
