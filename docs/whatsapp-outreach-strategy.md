@@ -18,14 +18,26 @@ Zenda IS a WhatsApp product — we should use WhatsApp to sell it.
 
 ---
 
+## Key Links
+
+- **Demo page** (send this in WhatsApp): https://zenda.bot/es/demo
+- **Signup with free tier**: https://zenda.bot/signup?coupon=aRgf7NZC
+- **Pricing**: https://zenda.bot/es/pricing
+
+---
+
 ## Outreach Script (Spanish)
 
-### Opening message
+### Opening message (use wa.me link)
 ```
 Hola! Soy Diego, creador de Zenda. Hice un asistente virtual por WhatsApp que agenda citas automáticamente para negocios como el tuyo.
 
-¿Te molesta si te envío un enlace para que lo pruebes gratis? Es literalmente 1 minuto.
+Mira cómo funciona en 1 minuto: https://zenda.bot/es/demo
+
+¿Te gustaría probarlo gratis?
 ```
+
+**wa.me link format:** `https://wa.me/52XXXXXXXXXX?text=Hola!%20Soy%20Diego%2C%20creador%20de%20Zenda.%20Hice%20un%20asistente%20virtual%20por%20WhatsApp%20que%20agenda%20citas%20autom%C3%A1ticamente%20para%20negocios%20como%20el%20tuyo.%20Mira%20c%C3%B3mo%20funciona%3A%20https%3A%2F%2Fzenda.bot%2Fes%2Fdemo`
 
 ### If they respond positively
 ```
