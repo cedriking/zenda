@@ -13,6 +13,9 @@ const spanishSlugs = [
   "/blog/whatsapp-dentista-citas",
   "/blog/whatsapp-salon-belleza",
   "/blog/whatsapp-spa-citas",
+  "/blog/whatsapp-agente-inmobiliario",
+  "/blog/whatsapp-sesiones-fotograficas",
+  "/blog/whatsapp-personal-trainer",
 ];
 
 const englishSlugs = [
