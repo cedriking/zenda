@@ -45,12 +45,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy standalone output (server.js is at web/server.js)
+# Copy standalone output
 COPY --from=build --chown=nextjs:nodejs /app/web/.next/standalone ./
-# Copy static assets to where the server expects them (web/.next/static/)
-COPY --from=build --chown=nextjs:nodejs /app/web/.next/static ./web/.next/static
-# Copy public directory
-COPY --from=build /app/web/public ./web/public
+COPY --from=build --chown=nextjs:nodejs /app/web/.next/static ./.next/static
+COPY --from=build /app/web/public ./public
 
 # Copy node_modules for monorepo dependencies that standalone doesn't trace
 COPY --from=build /app/node_modules ./node_modules
@@ -61,4 +59,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "web/server.js"]
+CMD ["node", "server.js"]
