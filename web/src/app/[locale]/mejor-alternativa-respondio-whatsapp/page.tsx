@@ -16,6 +16,13 @@ export function generateMetadata(): Metadata {
       languages: {
         es: "https://zenda.bot/es/mejor-alternativa-respondio-whatsapp",
         en: "https://zenda.bot/en/mejor-alternativa-respondio-whatsapp",
+        ar: "https://zenda.bot/ar/mejor-alternativa-respondio-whatsapp",
+        fr: "https://zenda.bot/fr/mejor-alternativa-respondio-whatsapp",
+        de: "https://zenda.bot/de/mejor-alternativa-respondio-whatsapp",
+        ru: "https://zenda.bot/ru/mejor-alternativa-respondio-whatsapp",
+        zh: "https://zenda.bot/zh/mejor-alternativa-respondio-whatsapp",
+        ja: "https://zenda.bot/ja/mejor-alternativa-respondio-whatsapp",
+        ko: "https://zenda.bot/ko/mejor-alternativa-respondio-whatsapp",
         "x-default":
           "https://zenda.bot/es/mejor-alternativa-respondio-whatsapp",
       },

@@ -16,6 +16,13 @@ export function generateMetadata(): Metadata {
       languages: {
         es: "https://zenda.bot/es/mejor-alternativa-freshchat-whatsapp",
         en: "https://zenda.bot/en/mejor-alternativa-freshchat-whatsapp",
+        ar: "https://zenda.bot/ar/mejor-alternativa-freshchat-whatsapp",
+        fr: "https://zenda.bot/fr/mejor-alternativa-freshchat-whatsapp",
+        de: "https://zenda.bot/de/mejor-alternativa-freshchat-whatsapp",
+        ru: "https://zenda.bot/ru/mejor-alternativa-freshchat-whatsapp",
+        zh: "https://zenda.bot/zh/mejor-alternativa-freshchat-whatsapp",
+        ja: "https://zenda.bot/ja/mejor-alternativa-freshchat-whatsapp",
+        ko: "https://zenda.bot/ko/mejor-alternativa-freshchat-whatsapp",
         "x-default":
           "https://zenda.bot/es/mejor-alternativa-freshchat-whatsapp",
       },

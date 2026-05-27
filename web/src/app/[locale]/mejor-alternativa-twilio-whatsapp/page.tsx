@@ -16,6 +16,13 @@ export function generateMetadata(): Metadata {
       languages: {
         es: "https://zenda.bot/es/mejor-alternativa-twilio-whatsapp",
         en: "https://zenda.bot/en/mejor-alternativa-twilio-whatsapp",
+        ar: "https://zenda.bot/ar/mejor-alternativa-twilio-whatsapp",
+        fr: "https://zenda.bot/fr/mejor-alternativa-twilio-whatsapp",
+        de: "https://zenda.bot/de/mejor-alternativa-twilio-whatsapp",
+        ru: "https://zenda.bot/ru/mejor-alternativa-twilio-whatsapp",
+        zh: "https://zenda.bot/zh/mejor-alternativa-twilio-whatsapp",
+        ja: "https://zenda.bot/ja/mejor-alternativa-twilio-whatsapp",
+        ko: "https://zenda.bot/ko/mejor-alternativa-twilio-whatsapp",
         "x-default": "https://zenda.bot/es/mejor-alternativa-twilio-whatsapp",
       },
     },
