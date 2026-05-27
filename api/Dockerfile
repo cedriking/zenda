@@ -36,4 +36,5 @@ COPY api/ ./api/
 EXPOSE 3001
 
 # Run migrations using Prisma Migrate, then start API.
-CMD ["sh", "-c", "echo '[startup] Running DB migrations...' && cd packages/db && bunx prisma migrate deploy && echo '[startup] Migrations complete. Starting API...' && cd /app && exec bun run api/src/index.ts"]
+# Resolve any previously failed migrations before deploying new ones.
+CMD ["sh", "-c", "echo '[startup] Running DB migrations...' && cd packages/db && bunx prisma migrate resolve --rolled-back 0000_short_crusher_hogan 2>/dev/null; bunx prisma migrate deploy && echo '[startup] Migrations complete. Starting API...' && cd /app && exec bun run api/src/index.ts"]
