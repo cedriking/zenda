@@ -24,7 +24,9 @@ RUN bun run --filter @zenda/db build
 # Production stage — run API source directly with Bun
 FROM oven/bun:1 AS runner
 WORKDIR /app
+ARG DATABASE_URL
 ENV NODE_ENV=production
+ENV DATABASE_URL=$DATABASE_URL
 RUN echo "Build $(date +%s)" > /buildinfo
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build-shared /app/packages/shared ./packages/shared
