@@ -128,6 +128,57 @@ If no WhatsApp button on Google Maps, try the business's Facebook page or Instag
 
 ---
 
+## Priority 3.5: Verified WhatsApp Prospects (22 confirmed WhatsApp numbers)
+
+These businesses have confirmed WhatsApp numbers from web research (May 2026). Open in Google Maps, click the WhatsApp button, and send the appropriate opener.
+
+### Mexico (15)
+
+| # | Business | City | Type | WhatsApp |
+|---|----------|------|------|----------|
+| 1 | Nova Arts Salon | CDMX Roma Norte | Salon | +52 55 4140 3367 |
+| 2 | Punto 3 Hair Studio | CDMX Condesa | Salon | (55) 1202 11 64 |
+| 3 | Paloma Rosa Salon Belleza | Guadalajara | Salon | 331 601 1757 |
+| 4 | Jean Louis David | CDMX Polanco | Salon | WhatsApp booking |
+| 5 | TBS Roma Norte | CDMX Roma Norte | Barber | WhatsApp available |
+| 6 | Dental Miis | CDMX | Dental | 55 1816 9988 |
+| 7 | Dra. Fatima de Freitas | CDMX | Dental | +52 56 3180 2803 |
+| 8 | Dental Perfect | CDMX Cuauhtemoc | Dental | 55 55412623 |
+| 9 | Dental Inn San Angel | CDMX San Angel | Dental | 55 3441 0219 |
+| 10 | Patio Pedregal Spa | CDMX Coyoacan | Spa | 5215515873832 |
+| 11 | Patio Spa Miramontes | CDMX Coyoacan | Spa | 525538168168 |
+| 12 | Simple Spa | CDMX Cuauhtemoc | Spa | 55 7457 3935 |
+| 13 | Veterinaria Can-Can | Monterrey | Vet | 81 2123 0452 |
+| 14 | Veterinaria Monterrey | Monterrey | Vet | (81) 25-97-66-86 |
+| 15 | Denisse Mathieu Beauty Lab | Zapopan/GDL | Salon | 01 33 3628 6469 |
+
+### Argentina (8)
+
+| # | Business | City | Type | WhatsApp |
+|---|----------|------|------|----------|
+| 1 | Ezeangel Peluqueria | BA Congreso | Salon | +5411 6852 6534 |
+| 2 | Vipeluqueria's | BA Caballito | Salon | 11 5409-1348 |
+| 3 | Milena Marin Beauty Studio | BA Palermo Soho | Salon | +5491138961610 |
+| 4 | Llongueras Argentina | BA Colegiales | Salon | +5491151481428 |
+| 5 | Dental Total | BA | Dental | 11 2599-1391 |
+| 6 | Clinica Dental DAS Group | BA CABA | Dental | +54911 3229 5596 |
+| 7 | Buenos Aires SPA | BA San Telmo | Spa | +54 9 11 4412-9300 |
+| 8 | Red Veterinaria | BA CABA | Vet | 1171020829 |
+
+### Colombia (7)
+
+| # | Business | City | Type | WhatsApp |
+|---|----------|------|------|----------|
+| 1 | DentiSalud Odontologia | Bogota (multi) | Dental | 3007386701 |
+| 2 | SONRIA Clinicas Odontologicas | Bogota (nationwide) | Dental | 601 314 4300 |
+| 3 | Clinicas Dentales Colsanitas | Bogota (nationwide) | Dental | +57 310 3107676 |
+| 4 | La Clinica Dental Country | Bogota Chapinero | Dental | 576019182220 |
+| 5 | Milagros Beauty Spa | Medellin | Spa | 315 051 5505 |
+| 6 | Animal Center (Sede Galerias) | Bogota | Vet | 320 337 92 06 |
+| 7 | Clinica Veterinaria Alfonso Lopez 24h | Medellin | Vet | 3193998471 |
+
+---
+
 ## Priority 4: Chile & Peru (New Targets Only)
 
 ### Chile
@@ -170,4 +221,4 @@ If no WhatsApp button on Google Maps, try the business's Facebook page or Instag
 - Focus on hot leads from weeks 1-3
 - Expand with fresh Google Maps prospects
 
-**Target:** 50 businesses contacted in 30 days → 15-25 responses → 5-8 demos → 2-4 signups
+**Target:** 80+ businesses contacted in 30 days → 24-40 responses → 8-15 demos → 3-6 signups
