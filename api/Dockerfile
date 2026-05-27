@@ -18,7 +18,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY packages/shared/ ./packages/shared/
 COPY packages/db/ ./packages/db/
 RUN bun run --filter @zenda/shared build
-RUN cd packages/db && npx prisma generate
+RUN cd packages/db && bunx prisma generate
 RUN bun run --filter @zenda/db build
 
 # Production stage — run API source directly with Bun
@@ -34,4 +34,4 @@ COPY api/ ./api/
 EXPOSE 3001
 
 # Run migrations using Prisma Migrate, then start API.
-CMD ["sh", "-c", "echo '[startup] Running DB migrations...' && cd packages/db && npx prisma migrate deploy && echo '[startup] Migrations complete. Starting API...' && cd /app && exec bun run api/src/index.ts"]
+CMD ["sh", "-c", "echo '[startup] Running DB migrations...' && cd packages/db && bunx prisma migrate deploy && echo '[startup] Migrations complete. Starting API...' && cd /app && exec bun run api/src/index.ts"]
