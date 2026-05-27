@@ -4,6 +4,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/db/package.json ./packages/db/
+COPY packages/db/prisma/ ./packages/db/prisma/
+COPY packages/db/prisma.config.ts ./packages/db/
 COPY api/package.json ./api/
 COPY app/package.json ./app/
 COPY web/package.json ./web/
