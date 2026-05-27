@@ -323,3 +323,56 @@ Prospectos encontrados via Brave Search (mexico10.com directory, CDMX esteticas)
 - Total bounced: ~32 (est.)
 - Total replies: 0
 - Total signups: 0
+
+## Batch 7 — 27 May 2026 (Argentina & Colombia)
+
+**Sent by:** CEO agent (f3e40e21)
+**Copy:** A/B/C variants (same as batch 6)
+**Sender:** zenda@agentmail.to (new branded inbox)
+**Total sent:** 30
+**Delivered:** 30
+**Bounced:** 0
+
+### Prospect Breakdown
+| Type | Count |
+|------|-------|
+| Salons/Peluquerias | 12 |
+| Dental Clinics | 7 |
+| Spas/Beauty | 5 |
+| Medical Clinics | 2 |
+| Veterinary | 3 |
+| Photography | 1 |
+
+### By Country
+| Country | Count |
+|---------|-------|
+| Argentina | 26 |
+| Colombia | 4 |
+
+### By Variant
+| Variant | Sent |
+|---------|------|
+| A (pain question) | 10 |
+| B (stat hook) | 10 |
+| C (competition) | 10 |
+
+### Deliverability: 100% (30/30)
+
+## Batch 6 Follow-ups — 27 May 2026
+
+**Sent by:** CEO agent (f3e40e21)
+**Sender:** zenda@agentmail.to
+**Total sent:** 14
+**Delivered:** 14
+**Bounced:** 0
+
+All 2nd-touch follow-ups to batch 6 prospects.
+Deliverability: 100% (14/14)
+
+### Cumulative Stats (all batches)
+- Total cold emails sent: ~160+
+- Batch 6: 22/24 delivered (91.7%), 19/19 follow-ups delivered (100%)
+- Batch 7: 30/30 delivered (100%)
+- Total replies: 0
+- Total signups: 0
+- Total customers: 0
