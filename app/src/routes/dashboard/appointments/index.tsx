@@ -618,19 +618,31 @@ function CreateAppointmentModal({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!form.serviceId) {
+      setError(t("calendar.serviceRequired", "Please select a service"));
+      return;
+    }
+    if (!form.customerPhone) {
+      setError(t("calendar.phoneRequired", "Phone number is required"));
+      return;
+    }
     setSaving(true);
     setError(null);
 
     const startAt = new Date(`${form.date}T${form.startTime}:00`).toISOString();
+
+    // Pick duration from selected service, fallback to 60 min
+    const selectedService = services.find((s) => s.id === form.serviceId);
 
     try {
       await apiFetch("/appointments", {
         method: "POST",
         body: {
           customerName: form.customerName,
-          customerPhone: form.customerPhone || undefined,
-          serviceId: form.serviceId || undefined,
+          customerPhone: form.customerPhone,
+          serviceId: form.serviceId,
           startAt,
+          durationMinutes: selectedService?.durationMinutes ?? 60,
           notes: form.notes || undefined,
         },
       });
@@ -721,6 +733,7 @@ function CreateAppointmentModal({
                 setForm({ ...form, customerPhone: e.target.value })
               }
               placeholder={t("calendar.phonePlaceholder")}
+              required
               type="tel"
               value={form.customerPhone}
             />

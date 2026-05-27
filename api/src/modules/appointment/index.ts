@@ -1,5 +1,10 @@
 import { db } from "@zenda/db/client";
-import { appointments, customers, services } from "@zenda/db/schema";
+import {
+  appointments,
+  customers,
+  services,
+  workspaces,
+} from "@zenda/db/schema";
 import {
   createAppointmentSchema,
   TERMINAL_STATUSES,
@@ -17,6 +22,51 @@ import {
 } from "../../utils/errors.js";
 import { getAvailableSlots } from "./availability-engine.js";
 import { validateTransition } from "./state-machine.js";
+
+/**
+ * Resolve a customer by phone number within a workspace.
+ * Creates the customer if not found.
+ */
+async function resolveCustomer(
+  workspaceId: string,
+  name: string,
+  phone: string
+): Promise<string> {
+  const normalized = phone.replace(/[\s()-]/g, "");
+  const [existing] = await db
+    .select({ id: customers.id })
+    .from(customers)
+    .where(
+      and(
+        eq(customers.workspaceId, workspaceId),
+        eq(customers.phoneNumber, normalized)
+      )
+    )
+    .limit(1);
+
+  if (existing) {
+    // Update name if provided and currently null
+    if (name) {
+      await db
+        .update(customers)
+        .set({ name, updatedAt: new Date() })
+        .where(
+          and(eq(customers.id, existing.id), sql`${customers.name} IS NULL`)
+        );
+    }
+    return existing.id;
+  }
+
+  const [created] = await db
+    .insert(customers)
+    .values({
+      workspaceId,
+      phoneNumber: normalized,
+      name: name || null,
+    })
+    .returning();
+  return created.id;
+}
 
 export const appointmentModule = new Elysia({ prefix: "/appointments" })
   .use(typedContext)
@@ -129,7 +179,47 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
     "/",
     async ({ workspaceId, body, set }) => {
       try {
-        const parsed = createAppointmentSchema.safeParse(body);
+        const raw = body as Record<string, unknown>;
+
+        // Resolve customerId: either provided directly, or via customerName+customerPhone
+        let customerId = raw.customerId as string | undefined;
+        let timezone = raw.timezone as string | undefined;
+
+        if (!customerId) {
+          const customerName = raw.customerName as string | undefined;
+          const customerPhone = raw.customerPhone as string | undefined;
+          if (!customerPhone) {
+            return badRequest(
+              set,
+              "Either customerId or customerPhone is required"
+            );
+          }
+          customerId = await resolveCustomer(
+            // biome-ignore lint/style/noNonNullAssertion: validated by middleware
+            workspaceId!,
+            customerName ?? "",
+            customerPhone
+          );
+        }
+
+        // Derive timezone from workspace settings if not provided
+        if (!timezone) {
+          const [ws] = await db
+            .select({ timezone: workspaces.timezone })
+            .from(workspaces)
+            // biome-ignore lint/style/noNonNullAssertion: validated by middleware
+            .where(eq(workspaces.id, workspaceId!))
+            .limit(1);
+          timezone = ws?.timezone || "UTC";
+        }
+
+        const payload = {
+          ...raw,
+          customerId,
+          timezone,
+        };
+
+        const parsed = createAppointmentSchema.safeParse(payload);
         if (!parsed.success) {
           return badRequest(
             set,
@@ -139,17 +229,14 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
         }
 
         const {
-          customerId,
           serviceId,
           staffMemberId,
           startAt,
-          timezone,
           sourceConversationId,
           createdBy,
         } = parsed.data;
 
-        const durationMinutes =
-          ((body as Record<string, unknown>).durationMinutes as number) ?? 60;
+        const durationMinutes = (raw.durationMinutes as number) ?? 60;
         const startAtDate = new Date(startAt);
         const endAtDate = new Date(
           startAtDate.getTime() + durationMinutes * 60_000
@@ -163,7 +250,8 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
           // Two ranges [A_start, A_end) and [B_start, B_end) overlap when:
           //   A_start < B_end AND B_start < A_end
           const overlapConditions = [
-            eq(appointments.workspaceId, workspaceId!), // biome-ignore lint/style/noNonNullAssertion: validated by middleware
+            // biome-ignore lint/style/noNonNullAssertion: validated by middleware
+            eq(appointments.workspaceId, workspaceId!),
             lt(appointments.startAt, endAtDate),
             gt(appointments.endAt, startAtDate),
             ...TERMINAL_STATUSES.map((s) => ne(appointments.status, s)),
@@ -191,7 +279,8 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
           const [inserted] = await tx
             .insert(appointments)
             .values({
-              workspaceId: workspaceId!, // biome-ignore lint/style/noNonNullAssertion: validated by middleware
+              // biome-ignore lint/style/noNonNullAssertion: validated by middleware
+              workspaceId: workspaceId!,
               customerId,
               serviceId,
               staffMemberId: staffMemberId ?? null,
@@ -244,10 +333,12 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
     },
     {
       body: t.Object({
-        customerId: t.String(),
+        customerId: t.Optional(t.String()),
+        customerName: t.Optional(t.String()),
+        customerPhone: t.Optional(t.String()),
         serviceId: t.String(),
         startAt: t.String(),
-        timezone: t.String(),
+        timezone: t.Optional(t.String()),
         staffMemberId: t.Optional(t.String()),
         sourceConversationId: t.Optional(t.String()),
         createdBy: t.Optional(t.String()),
