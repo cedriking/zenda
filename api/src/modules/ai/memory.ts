@@ -1,6 +1,4 @@
 import { db } from "@zenda/db/client";
-import { agentMemory, customers } from "@zenda/db/schema";
-import { and, eq } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 
 // Module-level regex constants (biome lint/performance/useTopLevelRegex)
@@ -38,23 +36,26 @@ export async function storeMemory(
   entries: MemoryEntry[]
 ): Promise<void> {
   for (const entry of entries) {
-    await db
-      .insert(agentMemory)
-      .values({
+    await db.agentMemory.upsert({
+      where: {
+        workspaceId_customerId_key: {
+          workspaceId,
+          customerId,
+          key: entry.key,
+        },
+      },
+      create: {
         workspaceId,
         customerId,
         key: entry.key,
         value: entry.value,
         source: entry.source,
-      })
-      .onConflictDoUpdate({
-        target: [
-          agentMemory.workspaceId,
-          agentMemory.customerId,
-          agentMemory.key,
-        ],
-        set: { value: entry.value, updatedAt: new Date() },
-      });
+      },
+      update: {
+        value: entry.value,
+        updatedAt: new Date(),
+      },
+    });
   }
 }
 
@@ -62,15 +63,12 @@ export async function getMemoryForCustomer(
   workspaceId: string,
   customerId: string
 ): Promise<Array<{ key: string; value: string; source: string }>> {
-  const records = await db
-    .select()
-    .from(agentMemory)
-    .where(
-      and(
-        eq(agentMemory.workspaceId, workspaceId),
-        eq(agentMemory.customerId, customerId)
-      )
-    );
+  const records = await db.agentMemory.findMany({
+    where: {
+      workspaceId,
+      customerId,
+    },
+  });
 
   return records.map((r) => ({
     key: r.key,
@@ -153,15 +151,13 @@ export async function extractMemoryFromConversation(
       }
       // Update customer name directly on the customers table
       try {
-        await db
-          .update(customers)
-          .set({ name: extractedName, updatedAt: new Date() })
-          .where(
-            and(
-              eq(customers.id, customerId),
-              eq(customers.workspaceId, workspaceId)
-            )
-          );
+        await db.customer.updateMany({
+          where: {
+            id: customerId,
+            workspaceId,
+          },
+          data: { name: extractedName, updatedAt: new Date() },
+        });
         preferences.push({
           key: "name_extracted",
           value: extractedName,

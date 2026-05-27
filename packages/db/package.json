@@ -3,29 +3,31 @@
   "version": "0.1.1",
   "private": true,
   "type": "module",
-  "main": "./src/client.ts",
-  "types": "./src/client.ts",
+  "main": "./src/prisma-client.ts",
+  "types": "./src/prisma-client.ts",
   "exports": {
-    ".": "./src/client.ts",
+    ".": "./src/prisma-client.ts",
     "./client": "./src/client.ts",
-    "./schema": "./src/schema/index.ts"
+    "./prisma": "./src/prisma-client.ts",
+    "./schema": "./src/prisma-client.ts"
   },
   "scripts": {
     "build": "tsc",
     "check": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "generate": "drizzle-kit generate",
-    "migrate": "bun run src/run-migrations.ts",
-    "studio": "drizzle-kit studio",
-    "seed": "bun run src/seed/index.ts"
+    "generate": "prisma generate",
+    "migrate": "prisma migrate deploy",
+    "migrate:dev": "prisma migrate dev",
+    "studio": "prisma studio",
+    "seed": "bun run src/seed/index.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@prisma/client": "^7.8.0",
     "@zenda/shared": "*",
-    "drizzle-orm": "^0.44.2",
-    "postgres": "^3.4.5"
+    "prisma": "^7.8.0"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.4",
     "typescript": "^5.9.3"
   }
 }

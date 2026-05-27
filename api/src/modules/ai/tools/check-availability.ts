@@ -8,9 +8,7 @@
  * - On failure the agent receives a structured error it can relay honestly.
  */
 import { db } from "@zenda/db/client";
-import { appointments, availabilityRules, services } from "@zenda/db/schema";
 import type { Language } from "@zenda/shared";
-import { and, eq, gte, lte } from "drizzle-orm";
 
 interface ToolInput {
   date: string; // YYYY-MM-DD
@@ -30,16 +28,12 @@ export async function checkAvailability(
   _language: Language
 ): Promise<{ slots: TimeSlot[]; serviceName: string; date: string }> {
   // Get service details for duration
-  const [service] = await db
-    .select()
-    .from(services)
-    .where(
-      and(
-        eq(services.id, input.serviceId),
-        eq(services.workspaceId, workspaceId)
-      )
-    )
-    .limit(1);
+  const service = await db.services.findFirst({
+    where: {
+      id: input.serviceId,
+      workspaceId,
+    },
+  });
 
   if (!service) {
     throw new Error("Service not found");
@@ -49,16 +43,13 @@ export async function checkAvailability(
   const dayOfWeek = dateObj.getDay();
 
   // Get availability rules for this day
-  const rules = await db
-    .select()
-    .from(availabilityRules)
-    .where(
-      and(
-        eq(availabilityRules.workspaceId, workspaceId),
-        eq(availabilityRules.dayOfWeek, dayOfWeek),
-        eq(availabilityRules.available, true)
-      )
-    );
+  const rules = await db.availabilityRule.findMany({
+    where: {
+      workspaceId,
+      dayOfWeek,
+      available: true,
+    },
+  });
 
   if (!rules.length) {
     return { slots: [], serviceName: service.name, date: input.date };
@@ -90,16 +81,12 @@ export async function checkAvailability(
   const dayStart = new Date(`${input.date}T00:00:00Z`);
   const dayEnd = new Date(`${input.date}T23:59:59Z`);
 
-  const existingAppts = await db
-    .select()
-    .from(appointments)
-    .where(
-      and(
-        eq(appointments.workspaceId, workspaceId),
-        gte(appointments.startAt, dayStart),
-        lte(appointments.startAt, dayEnd)
-      )
-    );
+  const existingAppts = await db.appointment.findMany({
+    where: {
+      workspaceId,
+      startAt: { gte: dayStart, lte: dayEnd },
+    },
+  });
 
   // Mark overlapping slots as unavailable
   for (const appt of existingAppts) {

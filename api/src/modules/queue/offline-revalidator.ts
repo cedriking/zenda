@@ -6,8 +6,6 @@
  * no longer valid (appointment cancelled, time passed, customer opted out, etc.).
  */
 import { db } from "@zenda/db/client";
-import { appointments, messagingConsent } from "@zenda/db/schema";
-import { and, eq } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 import { createNotification } from "../notification/service.js";
 import {
@@ -104,11 +102,9 @@ async function validateMessage(
 ): Promise<{ valid: boolean; reason?: string }> {
   // 1. Check appointment not cancelled / time not passed
   if (msg.appointmentId) {
-    const [appt] = await db
-      .select()
-      .from(appointments)
-      .where(eq(appointments.id, msg.appointmentId))
-      .limit(1);
+    const appt = await db.appointment.findFirst({
+      where: { id: msg.appointmentId },
+    });
 
     if (!appt) {
       return { valid: false, reason: "appointment_not_found" };
@@ -124,16 +120,12 @@ async function validateMessage(
   }
 
   // 2. Check customer not opted out
-  const [consent] = await db
-    .select()
-    .from(messagingConsent)
-    .where(
-      and(
-        eq(messagingConsent.workspaceId, msg.workspaceId),
-        eq(messagingConsent.customerId, msg.customerId)
-      )
-    )
-    .limit(1);
+  const consent = await db.messagingConsent.findFirst({
+    where: {
+      workspaceId: msg.workspaceId,
+      customerId: msg.customerId,
+    },
+  });
 
   if (consent?.status === "opted_out") {
     return { valid: false, reason: "customer_opted_out" };
@@ -142,28 +134,23 @@ async function validateMessage(
   // 3. Check for duplicates (same content, same customer, already sent)
   if (msg.metadata?.dedupeKey) {
     // Check outbound_queue for already-sent messages with same purpose/customer/appointment
-    const { outboundQueue } = await import("@zenda/db/schema");
-    const { and: and_, eq: eq_, isNull } = await import("drizzle-orm");
-    const dedupeConditions = [
-      eq_(outboundQueue.customerId, msg.customerId),
-      eq_(outboundQueue.workspaceId, msg.workspaceId),
-      eq_(outboundQueue.purpose, msg.purpose),
-      eq_(outboundQueue.status, "sent"),
-    ];
+    const dedupWhere: Record<string, unknown> = {
+      customerId: msg.customerId,
+      workspaceId: msg.workspaceId,
+      purpose: msg.purpose,
+      status: "sent",
+    };
     if (msg.appointmentId) {
-      dedupeConditions.push(
-        eq_(outboundQueue.appointmentId, msg.appointmentId)
-      );
+      dedupWhere.appointmentId = msg.appointmentId;
     } else {
-      dedupeConditions.push(isNull(outboundQueue.appointmentId));
+      dedupWhere.appointmentId = null;
     }
-    const duplicates = await db
-      .select()
-      .from(outboundQueue)
-      .where(and_(...dedupeConditions))
-      .limit(1);
 
-    if (duplicates.length > 0) {
+    const duplicates = await db.outboundQueue.findFirst({
+      where: dedupWhere,
+    });
+
+    if (duplicates) {
       return { valid: false, reason: "duplicate_message" };
     }
   }

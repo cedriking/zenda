@@ -1,15 +1,5 @@
 import { db } from "@zenda/db/client";
-import {
-  appointments,
-  customers,
-  messagingConsent,
-  receptionistProfiles,
-  reminders,
-  services,
-  workspaces,
-} from "@zenda/db/schema";
 import type { Language, PersonalityPreset, ReminderType } from "@zenda/shared";
-import { and, eq, lte } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 import { wsMessageSender } from "../../infra/message-sender.js";
 import { checkSendingPolicy } from "../ai/policy-gate.js";
@@ -228,10 +218,12 @@ export async function scheduleReminder(
   appointmentId: string,
   scheduledAt: Date
 ): Promise<void> {
-  await db.insert(reminders).values({
-    appointmentId,
-    scheduledAt,
-    status: "pending",
+  await db.reminder.create({
+    data: {
+      appointmentId,
+      scheduledAt,
+      status: "pending",
+    },
   });
 }
 
@@ -261,26 +253,26 @@ export async function scheduleAllReminders(
     return;
   }
 
-  await db.insert(reminders).values(
-    toSchedule.map((entry) => ({
+  await db.reminder.createMany({
+    data: toSchedule.map((entry) => ({
       appointmentId,
       scheduledAt: entry.scheduledAt,
       status: "pending" as const,
-    }))
-  );
+    })),
+  });
 }
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex reminder processing with many conditions
 export async function processDueReminders(): Promise<number> {
   const now = new Date();
 
-  const dueReminders = await db
-    .select()
-    .from(reminders)
-    .where(
-      and(eq(reminders.status, "pending"), lte(reminders.scheduledAt, now))
-    )
-    .limit(100);
+  const dueReminders = await db.reminder.findMany({
+    where: {
+      status: "pending",
+      scheduledAt: { lte: now },
+    },
+    take: 100,
+  });
 
   if (dueReminders.length === 0) {
     return 0;
@@ -296,9 +288,7 @@ export async function processDueReminders(): Promise<number> {
   ) {
     const batch = dueReminders.slice(batchStart, batchStart + BATCH_SIZE);
     const results = await Promise.allSettled(
-      batch.map((reminder: typeof reminders.$inferSelect) =>
-        processSingleReminder(reminder)
-      )
+      batch.map((reminder) => processSingleReminder(reminder))
     );
 
     for (const result of results) {
@@ -315,26 +305,22 @@ export async function processDueReminders(): Promise<number> {
  * Process a single reminder. Returns true if sent successfully.
  * On exception, increments retry count; after MAX_RETRIES, marks as failed.
  */
-async function processSingleReminder(
-  reminder: typeof reminders.$inferSelect
-): Promise<boolean> {
+async function processSingleReminder(reminder: {
+  id: string;
+  appointmentId: string;
+  scheduledAt: Date;
+  status: string;
+}): Promise<boolean> {
   try {
     // ── 1. Fetch appointment with all related data including consent ──
-    const [appointmentRow] = await db
-      .select({
-        appointment: appointments,
-        customer: customers,
-        service: services,
-        workspace: workspaces,
-        consent: messagingConsent,
-      })
-      .from(appointments)
-      .innerJoin(customers, eq(appointments.customerId, customers.id))
-      .innerJoin(services, eq(appointments.serviceId, services.id))
-      .innerJoin(workspaces, eq(appointments.workspaceId, workspaces.id))
-      .leftJoin(messagingConsent, eq(customers.id, messagingConsent.customerId))
-      .where(eq(appointments.id, reminder.appointmentId))
-      .limit(1);
+    const appointmentRow = await db.appointment.findFirst({
+      where: { id: reminder.appointmentId },
+      include: {
+        customer: true,
+        service: true,
+        workspace: true,
+      },
+    });
 
     if (!appointmentRow) {
       logger.warn(
@@ -344,26 +330,24 @@ async function processSingleReminder(
           appointmentId: reminder.appointmentId,
         }
       );
-      await db
-        .update(reminders)
-        .set({ status: "failed" })
-        .where(eq(reminders.id, reminder.id));
+      await db.reminder.update({
+        where: { id: reminder.id },
+        data: { status: "failed" },
+      });
       return false;
     }
 
-    const {
-      appointment: apt,
-      customer: cust,
-      service: svc,
-      workspace: ws,
-    } = appointmentRow;
+    const apt = appointmentRow;
+    const cust = appointmentRow.customer;
+    const svc = appointmentRow.service;
+    const ws = appointmentRow.workspace;
 
     // Skip if appointment is already cancelled
     if (apt.status === "cancelled") {
-      await db
-        .update(reminders)
-        .set({ status: "failed" })
-        .where(eq(reminders.id, reminder.id));
+      await db.reminder.update({
+        where: { id: reminder.id },
+        data: { status: "failed" },
+      });
       return false;
     }
 
@@ -382,10 +366,10 @@ async function processSingleReminder(
         appointmentId: apt.id,
         reason: guardResult.reason,
       });
-      await db
-        .update(reminders)
-        .set({ status: "failed" })
-        .where(eq(reminders.id, reminder.id));
+      await db.reminder.update({
+        where: { id: reminder.id },
+        data: { status: "failed" },
+      });
       return false;
     }
 
@@ -408,21 +392,20 @@ async function processSingleReminder(
         appointmentId: apt.id,
         reason: policyDecision.reason,
       });
-      await db
-        .update(reminders)
-        .set({ status: "failed" })
-        .where(eq(reminders.id, reminder.id));
+      await db.reminder.update({
+        where: { id: reminder.id },
+        data: { status: "failed" },
+      });
       return false;
     }
 
     // ── 4. Compose message with personality-adaptive templates (S15) ──
     let personality: PersonalityPreset | null = null;
     try {
-      const [profile] = await db
-        .select({ personalityPreset: receptionistProfiles.personalityPreset })
-        .from(receptionistProfiles)
-        .where(eq(receptionistProfiles.workspaceId, ws.id))
-        .limit(1);
+      const profile = await db.receptionistProfile.findFirst({
+        where: { workspaceId: ws.id },
+        select: { personalityPreset: true },
+      });
       personality = (profile?.personalityPreset as PersonalityPreset) ?? null;
     } catch {
       /* fallback to default personality */
@@ -462,19 +445,19 @@ async function processSingleReminder(
 
     // ── 6. Update statuses ──
     const newStatus = delivered ? "sent" : "failed";
-    await db
-      .update(reminders)
-      .set({
+    await db.reminder.update({
+      where: { id: reminder.id },
+      data: {
         status: newStatus,
         sentAt: delivered ? new Date() : null,
-      })
-      .where(eq(reminders.id, reminder.id));
+      },
+    });
 
     if (delivered) {
-      await db
-        .update(appointments)
-        .set({ reminderStatus: "sent", updatedAt: new Date() })
-        .where(eq(appointments.id, apt.id));
+      await db.appointment.update({
+        where: { id: apt.id },
+        data: { reminderStatus: "sent", updatedAt: new Date() },
+      });
 
       // Record in deduplication log and track outbound
       await recordReminderSent(apt.id, reminderType);
@@ -501,10 +484,10 @@ async function processSingleReminder(
     const retryCount = (reminderRetryCount.get(reminder.id) ?? 0) + 1;
     reminderRetryCount.set(reminder.id, retryCount);
     if (retryCount >= MAX_RETRIES) {
-      await db
-        .update(reminders)
-        .set({ status: "failed" })
-        .where(eq(reminders.id, reminder.id));
+      await db.reminder.update({
+        where: { id: reminder.id },
+        data: { status: "failed" },
+      });
       reminderRetryCount.delete(reminder.id);
       logger.warn("Reminder exceeded max retries, marking as failed", {
         reminderId: reminder.id,

@@ -1,0 +1,1024 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────────
+// Values must EXACTLY match the PostgreSQL enum types in the database.
+// Source: Drizzle schemas @ commit 7b2be59 + migration SQL files.
+
+enum OnboardingStep {
+  not_started
+  whatsapp_connected
+  business_info
+  services
+  availability
+  policies
+  receptionist_config
+  plan_selection
+  ready
+}
+
+enum Language {
+  en
+  es
+  ar
+  fr
+  de
+  ru
+  zh
+  ja
+  ko
+}
+
+enum AppointmentStatus {
+  requested
+  pending_confirmation
+  confirmed
+  reminder_sent
+  client_confirmed
+  reschedule_requested
+  rescheduled
+  cancel_requested
+  cancelled
+  completed
+  no_show
+  needs_attention
+}
+
+enum ConfirmationStatus {
+  pending
+  confirmed
+  expired
+}
+
+enum AppointmentReminderStatus {
+  none
+  scheduled
+  sent
+  confirmed
+}
+
+enum CreatedBy {
+  ai
+  owner
+  system
+}
+
+enum ConversationMode {
+  auto
+  needs_attention
+  human_takeover
+  paused
+  queued_offline
+  closed
+}
+
+enum SenderType {
+  customer
+  ai
+  owner
+  system
+}
+
+enum MessageContentType {
+  text
+  audio
+  image
+  file
+  system
+}
+
+enum MessageStatus {
+  received
+  queued
+  sent
+  failed
+}
+
+enum PlanTier {
+  free
+  local_solo
+  local_starter
+  local_pro
+  local_business
+}
+
+enum BillingPeriod {
+  monthly
+  annual
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  unpaid
+  canceled
+  incomplete
+  paused
+}
+
+enum MessagingConsentStatus {
+  unknown
+  allowed
+  limited
+  opted_out
+}
+
+enum ConsentSource {
+  customer_inbound_message
+  whatsapp_booking
+  booking_form
+  business_import
+  manual_owner_confirmation
+  opt_out_request
+}
+
+enum MessagePurpose {
+  appointment_confirmation
+  appointment_reminder
+  appointment_reschedule
+  appointment_cancellation
+  booking_follow_up
+  booking_assistance
+  booking_confirmation
+  customer_inquiry_reply
+  inbound_reply
+  business_follow_up
+  marketing
+  unknown
+}
+
+enum ReminderType {
+  day_before
+  same_day
+}
+
+enum QueueStatus {
+  pending
+  processing
+  sent
+  failed
+  dead_letter
+}
+
+enum QueuePriority {
+  emergency
+  reminder
+  notification
+  low
+}
+
+enum NotificationType {
+  appointment_booked
+  appointment_cancelled
+  appointment_rescheduled
+  needs_attention
+  discount_requested
+  ai_unsure
+  whatsapp_disconnected
+  whatsapp_reconnected
+  usage_warning
+  usage_limit
+  payment_failed
+  subscription_updated
+  agent_error
+  agent_recovered
+}
+
+enum BusinessCategory {
+  beauty
+  wellness
+  health
+  coaching
+  fitness
+  other
+}
+
+enum PriceDisplay {
+  show
+  hide
+  on_request
+}
+
+enum CancellationStrictness {
+  lenient
+  standard
+  strict
+}
+
+enum PersonalityPreset {
+  professional
+  warm
+  minimal
+  premium
+  friendly
+}
+
+enum StaffAssignmentMode {
+  auto_assign
+  customer_chooses
+  manual_only
+}
+
+enum ReceptionistTone {
+  professional
+  warm
+  friendly
+  elegant
+  casual
+}
+
+enum EscalationReason {
+  customer_requested_human
+  unknown_question
+  discount_request
+  price_dispute
+  refund_request
+  angry_customer
+  medical_legal_financial
+  sensitive_info
+  custom_exception
+  unlisted_service
+  outside_rules
+  unclear_audio
+  emergency
+  low_confidence
+  technology_question
+}
+
+enum EscalationStatus {
+  open
+  resolved
+}
+
+enum IntegrationType {
+  whatsapp
+  instagram
+  telegram
+  google_calendar
+  google_mail
+  stripe
+  other
+}
+
+enum IntegrationProvider {
+  composio
+  stripe
+  custom
+  other
+}
+
+enum IntegrationStatus {
+  active
+  inactive
+  error
+  pending
+}
+
+enum AgentHealthStatus {
+  healthy
+  degraded
+  error
+  unknown
+}
+
+enum ActorType {
+  ai
+  owner
+  system
+  customer
+}
+
+enum ReminderStatusEnum {
+  pending
+  sent
+  delivered
+  failed
+}
+
+enum MemorySource {
+  ai_extraction
+  owner_note
+  system
+}
+
+enum WhatsappConnectionStatus {
+  connected
+  connecting
+  qr_required
+  disconnected
+  session_expired
+  error
+  rate_limited
+  maintenance
+}
+
+// ─── Models ─────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique @db.VarChar(255)
+  name         String    @db.VarChar(100)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspaceMembers       WorkspaceMember[]
+  notifications          Notification[]
+  passwordResetTokens    PasswordResetToken[]
+
+  @@map("users")
+}
+
+model Workspace {
+  id                          String    @id @default(uuid())
+  name                        String    @db.VarChar(100)
+  slug                        String    @unique @db.VarChar(100)
+  timezone                    String    @default("America/Mexico_City") @db.VarChar(50)
+  country                     String    @default("MX") @db.VarChar(2)
+  defaultLanguage             Language  @default(en) @map("default_language")
+  onboardingStep              OnboardingStep @default(not_started) @map("onboarding_step")
+  onboardingCompletedAt       DateTime? @map("onboarding_completed_at") @db.Timestamptz
+  composioAccountId           String?   @map("composio_account_id") @db.VarChar(255)
+  composioCalendarId          String?   @map("composio_calendar_id") @db.VarChar(255)
+  composioConnectedAt         DateTime? @map("composio_connected_at") @db.Timestamptz
+  maxRemindersPerAppointment  Int       @default(2) @map("max_reminders_per_appointment")
+  maxOutboundWithoutReply     Int       @default(3) @map("max_outbound_without_reply")
+  outboundLimitsConfig        Json?     @map("outbound_limits_config")
+  reminderSchedule            Json?     @map("reminder_schedule")
+  createdAt                   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  members             WorkspaceMember[]
+  customers           Customer[]
+  services            Service[]
+  staffMembers        StaffMember[]
+  conversations       Conversation[]
+  appointments        Appointment[]
+  businessProfile     BusinessProfile[]
+  integrations        Integration[]
+  subscriptions       Subscription[]
+  availabilityRules   AvailabilityRule[]
+  messagingConsents   MessagingConsent[]
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+  agentMemories       AgentMemory[]
+  knowledgeBaseItems  KnowledgeBaseItem[]
+  whatsappConnections WhatsappConnection[]
+  usageRecords        UsageRecord[]
+  outboundMessageLogs OutboundMessageLog[]
+  outboundQueues      OutboundQueue[]
+  providerUsages      ProviderUsage[]
+  agentHealthEvents    AgentHealthEvent[]
+  audioAssets          AudioAsset[]
+  activeContactDedups  ActiveContactDedup[]
+  messages             Message[]
+  escalations          Escalation[]
+  receptionistProfiles ReceptionistProfile[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String   @id @default(uuid())
+  workspaceId String   @map("workspace_id")
+  userId      String   @map("user_id")
+  role        String   @default("owner") @db.VarChar(20)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+model Customer {
+  id          String    @id @default(uuid())
+  workspaceId String    @map("workspace_id")
+  phoneNumber String    @map("phone_number") @db.VarChar(20)
+  name        String?   @db.VarChar(100)
+  language    Language  @default(en)
+  notes       String?
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace           Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  appointments        Appointment[]
+  conversations       Conversation[]
+  messagingConsents   MessagingConsent[]
+  agentMemories       AgentMemory[]
+  outboundMessageLogs OutboundMessageLog[]
+  outboundQueues      OutboundQueue[]
+
+  @@unique([workspaceId, phoneNumber])
+  @@map("customers")
+}
+
+model Service {
+  id               String    @id @default(uuid())
+  workspaceId      String    @map("workspace_id")
+  name             String    @db.VarChar(100)
+  description      String?
+  durationMinutes  Int       @map("duration_minutes")
+  priceCents       Int?      @map("price_cents")
+  active           Boolean   @default(true)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+
+  @@map("services")
+}
+
+model StaffMember {
+  id          String                @id @default(uuid())
+  workspaceId String                @map("workspace_id")
+  name        String                @db.VarChar(100)
+  serviceIds  Unsupported("uuid[]") @default(dbgenerated("'{}'::uuid[]")) @map("service_ids")
+  active      Boolean               @default(true)
+  createdAt   DateTime              @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace         Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  availabilityRules AvailabilityRule[]
+  appointments      Appointment[]
+
+  @@map("staff_members")
+}
+
+model AvailabilityRule {
+  id           String   @id @default(uuid())
+  workspaceId  String   @map("workspace_id")
+  staffMemberId String? @map("staff_member_id")
+  dayOfWeek    Int      @map("day_of_week")
+  startTime    String   @map("start_time") @db.VarChar(5)
+  endTime      String   @map("end_time") @db.VarChar(5)
+  available    Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  staffMember StaffMember? @relation(fields: [staffMemberId], references: [id], onDelete: Cascade)
+
+  @@map("availability_rules")
+}
+
+model Appointment {
+  id                   String                  @id @default(uuid())
+  workspaceId          String                  @map("workspace_id")
+  customerId           String                  @map("customer_id")
+  staffMemberId        String?                 @map("staff_member_id")
+  serviceId            String                  @map("service_id")
+  status               AppointmentStatus       @default(requested)
+  startAt              DateTime                @map("start_at") @db.Timestamptz
+  endAt                DateTime                @map("end_at") @db.Timestamptz
+  timezone             String                  @db.VarChar(50)
+  sourceConversationId String?                 @map("source_conversation_id")
+  createdBy            CreatedBy               @default(owner) @map("created_by")
+  confirmationStatus   ConfirmationStatus      @default(pending) @map("confirmation_status")
+  reminderStatus       AppointmentReminderStatus @default(none) @map("reminder_status")
+  notes                String?                 @db.VarChar(500)
+  createdAt            DateTime                @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  cancelledAt          DateTime?               @map("cancelled_at") @db.Timestamptz
+  completedAt          DateTime?               @map("completed_at") @db.Timestamptz
+
+  workspace           Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer            Customer      @relation(fields: [customerId], references: [id])
+  staffMember         StaffMember?  @relation(fields: [staffMemberId], references: [id])
+  service             Service       @relation(fields: [serviceId], references: [id])
+  sourceConversation  Conversation? @relation(fields: [sourceConversationId], references: [id])
+  reminders           Reminder[]
+  sentReminderLogs    SentReminderLog[]
+
+  @@map("appointments")
+}
+
+model Conversation {
+  id                   String            @id @default(uuid())
+  workspaceId          String            @map("workspace_id")
+  customerId           String            @map("customer_id")
+  channel              String            @default("whatsapp") @db.VarChar(20)
+  mode                 ConversationMode  @default(auto)
+  lastMessageAt        DateTime          @default(now()) @map("last_message_at") @db.Timestamptz
+  language             Language          @default(en)
+  assignedToOwner      DateTime?         @map("assigned_to_owner") @db.Timestamptz
+  needsAttentionReason String?           @map("needs_attention_reason") @db.VarChar(200)
+  summary              String?
+  createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace           Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer            Customer             @relation(fields: [customerId], references: [id])
+  messages            Message[]
+  escalations         Escalation[]
+  conversationSummaries ConversationSummary[]
+  sourceAppointments  Appointment[]
+  outboundMessageLogs OutboundMessageLog[]
+  outboundQueues      OutboundQueue[]
+
+  @@unique([workspaceId, customerId, channel])
+  @@map("conversations")
+}
+
+model Message {
+  id                String             @id @default(uuid())
+  conversationId    String             @map("conversation_id")
+  workspaceId       String             @map("workspace_id")
+  externalMessageId String?            @map("external_message_id") @db.VarChar(255)
+  senderType        SenderType         @map("sender_type")
+  contentType       MessageContentType @default(text) @map("content_type")
+  body              String
+  language          Language?
+  aiProvider        String?            @map("ai_provider") @db.VarChar(50)
+  aiModel           String?            @map("ai_model") @db.VarChar(100)
+  toolCalls         Json?              @map("tool_calls")
+  status            MessageStatus      @default(received)
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  sentAt            DateTime?          @map("sent_at") @db.Timestamptz
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  audioAsset   AudioAsset?
+
+  @@map("messages")
+}
+
+model ConversationSummary {
+  id                 String    @id @default(uuid())
+  conversationId     String    @map("conversation_id")
+  summary            String
+  keyTopics          Unsupported("varchar(200)[]") @default(dbgenerated("'{}'::varchar(200)[]")) @map("key_topics")
+  extractedPreferences Json?   @map("extracted_preferences")
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("conversation_summaries")
+}
+
+model Escalation {
+  id             String            @id @default(uuid())
+  conversationId String            @map("conversation_id")
+  workspaceId    String            @map("workspace_id")
+  reason         EscalationReason
+  status         EscalationStatus  @default(open)
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  resolvedAt     DateTime?         @map("resolved_at") @db.Timestamptz
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("escalations")
+}
+
+model BusinessProfile {
+  id                              String                @id @default(uuid())
+  workspaceId                     String                @map("workspace_id")
+  name                            String                @db.VarChar(100)
+  category                        BusinessCategory?     @default(other)
+  description                     String?
+  descriptionEs                   String?               @map("description_es")
+  location                        String?               @db.VarChar(300)
+  cancellationPolicy              String?               @map("cancellation_policy")
+  cancellationPolicyEs            String?               @map("cancellation_policy_es")
+  refundPolicy                    String?               @map("refund_policy")
+  priceDisplayPreference          PriceDisplay          @default(show) @map("price_display_preference")
+  cancellationWindowHours         Int                   @default(24) @map("cancellation_window_hours")
+  reschedulingWindowHours         Int                   @default(2) @map("rescheduling_window_hours")
+  minimumNoticeHours              Int                   @default(2) @map("minimum_notice_hours")
+  maximumBookingWindowDays        Int                   @default(30) @map("maximum_booking_window_days")
+  depositRequired                 Boolean               @default(false) @map("deposit_required")
+  depositAmountCents              Int?                  @map("deposit_amount_cents")
+  staffAssignmentMode             StaffAssignmentMode   @default(auto_assign) @map("staff_assignment_mode")
+  approvedCancellationText        String?               @map("approved_cancellation_text")
+  approvedRefundText              String?               @map("approved_refund_text")
+  approvedDiscountText            String?               @map("approved_discount_text")
+  emergencyEscalationInstructions String?              @map("emergency_escalation_instructions")
+  sensitiveTopics                 Unsupported("text[]") @default(dbgenerated("'{}'::text[]")) @map("sensitive_topics")
+  escalationBehavior              Json?                 @default("{\"autoPauseAi\":true,\"notificationChannel\":\"dashboard\",\"responseSlaMinutes\":30}") @map("escalation_behavior")
+  ownerNotificationPreferences    Json?                 @default("{\"appointmentBooked\":true,\"appointmentCancelled\":true,\"escalationCreated\":true,\"optOut\":true}") @map("owner_notification_preferences")
+  createdAt                       DateTime              @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                       DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace           Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("business_profiles")
+}
+
+model ReceptionistProfile {
+  id                              String                @id @default(uuid())
+  workspaceId                     String                @map("workspace_id")
+  name                            String                @default("Noa") @db.VarChar(50)
+  tone                            ReceptionistTone      @default(professional)
+  greetingTemplate                String?               @map("greeting_template")
+  greetingTemplateEs              String?               @map("greeting_template_es")
+  personalityPreset               PersonalityPreset     @default(professional) @map("personality_preset")
+  greetingStyle                   String?               @map("greeting_style")
+  formalityLevel                  Int                   @default(3) @map("formality_level")
+  concisenessLevel                Int                   @default(3) @map("conciseness_level")
+  warmthLevel                     Int                   @default(3) @map("warmth_level")
+  useEmoji                        Boolean               @default(false) @map("use_emoji")
+  speaksAsBusiness                Boolean               @default(false) @map("speaks_as_business")
+  proactivelySuggestTimes         Boolean               @default(true) @map("proactively_suggest_times")
+  confirmsBeforeBooking           Boolean               @default(true) @map("confirms_before_booking")
+  notifyOwnerEveryAppointment     Boolean               @default(true) @map("notify_owner_every_appointment")
+  cancellationPolicyStrictness    CancellationStrictness @default(standard) @map("cancellation_policy_strictness")
+  refundHandlingMode              String?               @map("refund_handling_mode") @db.VarChar(50)
+  discountHandlingMode            String?               @map("discount_handling_mode") @db.VarChar(50)
+  depositHandlingMode             String?               @map("deposit_handling_mode") @db.VarChar(50)
+  createdAt                       DateTime              @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                       DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("receptionist_profiles")
+}
+
+model Plan {
+  id                    String    @id @default(uuid())
+  tier                  PlanTier  @unique
+  name                  String    @db.VarChar(50)
+  monthlyPriceCents     Int       @map("monthly_price_cents")
+  activeContactsLimit   Int       @map("active_contacts_limit")
+  calendarsStaffLimit   Int       @map("calendars_staff_limit")
+  locationsLimit        Int       @map("locations_limit")
+  setupType             String    @map("setup_type") @db.VarChar(20)
+  retentionDays         Int       @map("retention_days")
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                    String              @id @default(uuid())
+  workspaceId           String              @map("workspace_id")
+  stripeCustomerId      String?             @map("stripe_customer_id") @db.VarChar(255)
+  stripeSubscriptionId  String?             @map("stripe_subscription_id") @db.VarChar(255)
+  planTier              PlanTier            @default(free) @map("plan_tier")
+  billingPeriod         BillingPeriod       @default(monthly) @map("billing_period")
+  status                SubscriptionStatus  @default(active)
+  currentPeriodStart    DateTime            @map("current_period_start") @db.Timestamptz
+  currentPeriodEnd      DateTime            @map("current_period_end") @db.Timestamptz
+  cancelAtPeriodEnd     Boolean             @default(false) @map("cancel_at_period_end")
+  createdAt             DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Integration {
+  id           String              @id @default(uuid())
+  workspaceId  String              @map("workspace_id")
+  type         IntegrationType
+  provider     IntegrationProvider
+  config       String?
+  status       IntegrationStatus   @default(pending)
+  credentials  String?
+  lastSyncAt   DateTime?           @map("last_sync_at") @db.Timestamptz
+  createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("integrations")
+}
+
+model MessagingConsent {
+  id                       String                  @id @default(uuid())
+  workspaceId              String                  @map("workspace_id")
+  customerId               String                  @map("customer_id")
+  phoneNumber              String                  @map("phone_number") @db.VarChar(30)
+  status                   MessagingConsentStatus  @default(unknown)
+  source                   ConsentSource?
+  allowedPurposes          Unsupported("message_purpose[]") @default(dbgenerated("'{}'::message_purpose[]")) @map("allowed_purposes")
+  capturedAt               DateTime?               @map("captured_at") @db.Timestamptz
+  lastInboundMessageAt     DateTime?               @map("last_inbound_message_at") @db.Timestamptz
+  lastOutboundMessageAt    DateTime?               @map("last_outbound_message_at") @db.Timestamptz
+  notes                    String?
+  createdAt                DateTime                @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                DateTime                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer  Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, customerId])
+  @@map("messaging_consent")
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  workspaceId String           @map("workspace_id")
+  userId      String           @map("user_id")
+  type        NotificationType
+  title       String           @db.VarChar(200)
+  body        String           @db.VarChar(500)
+  relatedId   String?          @map("related_id")
+  read        DateTime?        @map("read_at") @db.Timestamptz
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model Reminder {
+  id            String             @id @default(uuid())
+  appointmentId String             @map("appointment_id")
+  scheduledAt   DateTime           @map("scheduled_at") @db.Timestamptz
+  sentAt        DateTime?          @map("sent_at") @db.Timestamptz
+  status        ReminderStatusEnum @default(pending)
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@map("reminders")
+}
+
+model SentReminderLog {
+  id            String       @id @default(uuid())
+  appointmentId String       @map("appointment_id")
+  reminderType  ReminderType @map("reminder_type")
+  sentAt        DateTime     @default(now()) @map("sent_at") @db.Timestamptz
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@unique([appointmentId, reminderType])
+  @@map("sent_reminder_log")
+}
+
+model OutboundMessageLog {
+  id                         String          @id @default(uuid())
+  workspaceId                String          @map("workspace_id")
+  customerId                 String          @map("customer_id")
+  conversationId             String?         @map("conversation_id")
+  outboundSinceLastInbound   Int             @default(0) @map("outbound_since_last_inbound")
+  lastInboundAt              DateTime?       @map("last_inbound_at") @db.Timestamptz
+  lastOutboundAt             DateTime?       @map("last_outbound_at") @db.Timestamptz
+  purposeOfLastOutbound      MessagePurpose? @map("purpose_of_last_outbound")
+  createdAt                  DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                  DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, customerId])
+  @@map("outbound_message_log")
+}
+
+model OutboundQueue {
+  id              String          @id @default(uuid())
+  workspaceId     String          @map("workspace_id")
+  customerId      String          @map("customer_id")
+  conversationId  String?         @map("conversation_id")
+  purpose         MessagePurpose
+  content         String
+  contentType     String          @default("text") @map("content_type") @db.VarChar(20)
+  status          QueueStatus     @default(pending)
+  priority        QueuePriority   @default(notification)
+  attempts        Int             @default(0)
+  maxAttempts     Int             @default(5) @map("max_attempts")
+  nextRetryAt     DateTime?       @map("next_retry_at") @db.Timestamptz
+  sentAt          DateTime?       @map("sent_at") @db.Timestamptz
+  failureReason   String?         @map("failure_reason")
+  appointmentId   String?         @map("appointment_id")
+  metadata        Json?           @default("{}")
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  @@map("outbound_queue")
+}
+
+model AuditLog {
+  id              String    @id @default(uuid())
+  workspaceId     String    @map("workspace_id")
+  actorType       ActorType @map("actor_type")
+  actorId         String?   @map("actor_id")
+  action          String    @db.VarChar(100)
+  entityType      String    @map("entity_type") @db.VarChar(50)
+  entityId        String?   @map("entity_id")
+  channel         String?   @db.VarChar(50)
+  channelProvider String?   @map("channel_provider") @db.VarChar(50)
+  metadata        Json?
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("audit_logs")
+}
+
+model AgentMemory {
+  id          String       @id @default(uuid())
+  workspaceId String       @map("workspace_id")
+  customerId  String?      @map("customer_id")
+  key         String       @db.VarChar(100)
+  value       String
+  source      MemorySource @default(ai_extraction)
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer  Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("agent_memory")
+}
+
+model KnowledgeBaseItem {
+  id          String   @id @default(uuid())
+  workspaceId String   @map("workspace_id")
+  category    String   @default("general") @db.VarChar(50)
+  question    String   @db.VarChar(300)
+  answer      String
+  language    Language @default(es)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("knowledge_base_items")
+}
+
+model WhatsappConnection {
+  id                   String                    @id @default(uuid())
+  workspaceId          String                    @map("workspace_id")
+  status               WhatsappConnectionStatus  @default(disconnected)
+  phoneNumber          String?                   @map("phone_number") @db.VarChar(20)
+  sessionData          String?                   @map("session_data")
+  lastConnectedAt      DateTime?                 @map("last_connected_at") @db.Timestamptz
+  lastDisconnectedAt   DateTime?                 @map("last_disconnected_at") @db.Timestamptz
+  createdAt            DateTime                  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime                  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("whatsapp_connections")
+}
+
+model UsageRecord {
+  id          String    @id @default(uuid())
+  workspaceId String    @map("workspace_id")
+  metric      String    @db.VarChar(50)
+  value       Int       @default(0)
+  periodStart DateTime  @map("period_start") @db.Timestamptz
+  periodEnd   DateTime  @map("period_end") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("usage_records")
+}
+
+model ActiveContactDedup {
+  workspaceId      String   @map("workspace_id")
+  customerPhone    String   @map("customer_phone") @db.VarChar(50)
+  periodStart      DateTime @map("period_start") @db.Timestamptz
+  periodEnd        DateTime @map("period_end") @db.Timestamptz
+  firstActionAt    DateTime @default(now()) @map("first_action_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@id([workspaceId, customerPhone, periodStart])
+  @@map("active_contact_dedup")
+}
+
+model ProcessedStripeEvent {
+  id        String   @id @default(uuid())
+  eventId   String   @unique @map("event_id") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("processed_stripe_events")
+}
+
+model RevokedToken {
+  id         String   @id @default(uuid())
+  tokenJti   String   @unique @map("token_jti") @db.VarChar(36)
+  userId     String   @map("user_id") @db.VarChar(36)
+  revokedAt  DateTime @default(now()) @map("revoked_at") @db.Timestamptz
+
+  @@map("revoked_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  token     String    @unique @db.VarChar(255)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz
+  usedAt    DateTime? @map("used_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+model WaitlistEntry {
+  id          String   @id @default(uuid())
+  email       String   @unique @db.VarChar(255)
+  name        String?  @db.VarChar(200)
+  businessType String? @map("business_type") @db.VarChar(100)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("waitlist_entries")
+}
+
+model SystemSetting {
+  key       String    @id @db.VarChar(100)
+  value     String
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("system_settings")
+}
+
+model AudioAsset {
+  id               String    @id @default(uuid())
+  messageId        String?   @unique @map("message_id")
+  workspaceId      String    @map("workspace_id")
+  storageKey       String    @map("storage_key") @db.VarChar(500)
+  durationSeconds  Int?      @map("duration_seconds")
+  transcript       String?   @db.VarChar(2000)
+  language         Language?
+  confidence       Float?
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  message   Message?   @relation(fields: [messageId], references: [id], onDelete: SetNull)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("audio_assets")
+}
+
+model ProviderUsage {
+  id           String   @id @default(uuid())
+  workspaceId  String   @map("workspace_id")
+  provider     String   @db.VarChar(50)
+  model        String   @db.VarChar(100)
+  inputTokens  Int      @default(0) @map("input_tokens")
+  outputTokens Int      @default(0) @map("output_tokens")
+  costCents    Int      @default(0) @map("cost_cents")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("provider_usage")
+}
+
+model Partner {
+  id           String   @id @default(uuid())
+  name         String   @db.VarChar(200)
+  email        String   @unique @db.VarChar(255)
+  website      String?  @db.VarChar(500)
+  referralCode String   @unique @map("referral_code") @db.VarChar(20)
+  howRefer     String?  @map("how_refer")
+  status       String   @default("pending") @db.VarChar(20)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  referrals Referral[]
+
+  @@map("partners")
+}
+
+model Referral {
+  id              String   @id @default(uuid())
+  partnerId       String   @map("partner_id")
+  referredEmail   String   @map("referred_email") @db.VarChar(255)
+  status          String   @default("signed_up") @db.VarChar(20)
+  revenueCents    Int      @default(0) @map("revenue_cents")
+  commissionCents Int      @default(0) @map("commission_cents")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  partner Partner @relation(fields: [partnerId], references: [id])
+
+  @@map("referrals")
+}
+
+model AgentHealthEvent {
+  id             String            @id @default(uuid())
+  agentName      String            @map("agent_name") @db.VarChar(100)
+  workspaceId    String?           @map("workspace_id")
+  status         AgentHealthStatus
+  previousStatus AgentHealthStatus? @map("previous_status")
+  details        Json?
+  latencyMs      Int?              @map("latency_ms")
+  error          String?           @db.VarChar(500)
+  recoveredAt    DateTime?         @map("recovered_at") @db.Timestamptz
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz
+
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("agent_health_events")
+}

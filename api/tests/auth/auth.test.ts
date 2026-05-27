@@ -3,123 +3,73 @@ import { describe, expect, mock, test } from "bun:test";
 // Auth module is an Elysia app — we test the core logic by mocking
 // the DB, JWT, and password functions, then calling the route handlers.
 
-// Mock DB
-const mockDbSelect = mock(() => Promise.resolve([]));
-const mockDbInsert = mock(() => ({
-  values: mock(() => ({
-    returning: mock(() =>
-      Promise.resolve([{ id: "user-1", email: "test@test.com", name: "Test" }])
-    ),
-  })),
-}));
-const _mockTxInsert = mock(() => ({
-  values: mock(() => ({
-    returning: mock(() =>
-      Promise.resolve([
-        { id: "user-new", email: "new@test.com", name: "New User" },
-      ])
-    ),
-  })),
-}));
+// Mock DB with Prisma-style client
+const mockDbUserFindFirst = mock(() => Promise.resolve(null));
+const mockDbUserCreate = mock(() =>
+  Promise.resolve({ id: "user-new", email: "new@test.com", name: "New User", passwordHash: "hash" })
+);
+const mockDbWorkspaceCreate = mock(() =>
+  Promise.resolve({ id: "ws-new", name: "Test Biz", slug: "test-biz", onboardingStep: "not_started" })
+);
+const mockDbWorkspaceMemberCreate = mock(() => Promise.resolve({}));
+const mockDbBusinessProfileCreate = mock(() => Promise.resolve({}));
+const mockDbReceptionistProfileCreate = mock(() => Promise.resolve({}));
+const mockDbRevokedTokenUpsert = mock(() => Promise.resolve({}));
+const mockDbPasswordResetTokenFindFirst = mock(() => Promise.resolve(null));
+const mockDbPasswordResetTokenUpdateMany = mock(() => Promise.resolve({ count: 0 }));
 
-// biome-ignore lint/complexity/noBannedTypes: Function type needed for mock
+// biome-ignore lint/complexity/noBannedFunctions: Function type needed for mock
 const mockDbTransaction = mock((fn: Function) => {
   const tx = {
-    insert: mockDbInsert,
-    select: mockDbSelect,
-    update: mock(() => ({
-      set: mock(() => ({
-        where: mock(() => Promise.resolve()),
-      })),
-    })),
+    user: {
+      create: mockDbUserCreate,
+      findFirst: mockDbUserFindFirst,
+    },
+    workspace: {
+      create: mockDbWorkspaceCreate,
+      findFirst: mock(() => Promise.resolve(null)),
+    },
+    workspaceMember: {
+      create: mockDbWorkspaceMemberCreate,
+    },
+    businessProfile: {
+      create: mockDbBusinessProfileCreate,
+    },
+    receptionistProfile: {
+      create: mockDbReceptionistProfileCreate,
+    },
   };
-  // For the transaction, override insert to return workspace and members
-  let callCount = 0;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (tx as any).insert = mock((): any => {
-    callCount++;
-    if (callCount === 1) {
-      // users insert
-      return {
-        values: mock(() => ({
-          returning: mock(() =>
-            Promise.resolve([
-              {
-                id: "user-new",
-                email: "new@test.com",
-                name: "New User",
-                passwordHash: "hash",
-              },
-            ])
-          ),
-        })),
-      };
-    }
-    if (callCount === 2) {
-      // workspaces insert
-      return {
-        values: mock(() => ({
-          returning: mock(() =>
-            Promise.resolve([
-              {
-                id: "ws-new",
-                name: "Test Biz",
-                slug: "test-biz",
-                onboardingStep: "not_started",
-              },
-            ])
-          ),
-        })),
-      };
-    }
-    // workspaceMembers, businessProfiles, receptionistProfiles
-    return {
-      values: mock(() => Promise.resolve()),
-    };
-  });
   return fn(tx);
 });
 
 mock.module("@zenda/db/client", () => ({
   db: {
-    select: () => ({
-      from: mockDbSelect,
-    }),
-    insert: mockDbInsert,
-    update: mock(() => ({
-      set: mock(() => ({
-        where: mock(() => Promise.resolve()),
-      })),
-    })),
-    transaction: mockDbTransaction,
+    user: {
+      findFirst: mockDbUserFindFirst,
+      create: mockDbUserCreate,
+      update: mock(() => Promise.resolve({})),
+    },
+    workspace: {
+      create: mockDbWorkspaceCreate,
+    },
+    workspaceMember: {
+      create: mockDbWorkspaceMemberCreate,
+    },
+    businessProfile: {
+      create: mockDbBusinessProfileCreate,
+    },
+    receptionistProfile: {
+      create: mockDbReceptionistProfileCreate,
+    },
+    revokedToken: {
+      upsert: mockDbRevokedTokenUpsert,
+    },
+    passwordResetToken: {
+      findFirst: mockDbPasswordResetTokenFindFirst,
+      updateMany: mockDbPasswordResetTokenUpdateMany,
+    },
+    $transaction: mockDbTransaction,
   },
-}));
-
-mock.module("@zenda/db/schema", () => ({
-  users: { email: "email", id: "id", passwordHash: "passwordHash" },
-  workspaces: {
-    id: "id",
-    name: "name",
-    slug: "slug",
-    defaultLanguage: "defaultLanguage",
-    onboardingStep: "onboardingStep",
-  },
-  workspaceMembers: {
-    workspaceId: "workspaceId",
-    userId: "userId",
-    role: "role",
-  },
-  businessProfiles: { workspaceId: "workspaceId", name: "name" },
-  receptionistProfiles: {
-    workspaceId: "workspaceId",
-    name: "name",
-    tone: "tone",
-  },
-  revokedTokens: { id: "id", tokenJti: "tokenJti", userId: "userId" },
-}));
-
-mock.module("drizzle-orm", () => ({
-  eq: (_col: string, _val: string) => "eq_mock",
 }));
 
 // Mock the shared validation schemas
@@ -154,7 +104,7 @@ mock.module("elysia", () => {
       use() {
         return this;
       }
-      // biome-ignore lint/complexity/noBannedTypes: Function type needed for mock handler
+      // biome-ignore lint/complexity/noBannedFunctions: Function type needed for mock handler
       post(_path: string, handler: Function) {
         this._handler = handler;
         return this;

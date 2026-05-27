@@ -1,7 +1,5 @@
 import { db } from "@zenda/db/client";
-import { messages, subscriptions } from "@zenda/db/schema";
 import type { AIProvider, Language, PlanTier } from "@zenda/shared";
-import { desc, eq } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 import { redis } from "../../infra/redis.js";
 import { logInputSanitized, logToolFailure } from "../audit/logger.js";
@@ -152,12 +150,11 @@ export async function runAgent(
     }
 
     // 4. Load recent conversation history
-    const history = await db
-      .select()
-      .from(messages)
-      .where(eq(messages.conversationId, conversationId))
-      .orderBy(desc(messages.createdAt))
-      .limit(20);
+    const history = await db.message.findMany({
+      where: { conversationId },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    });
 
     const chatMessages: Array<{
       role: "system" | "user" | "assistant" | "tool";
@@ -190,11 +187,10 @@ export async function runAgent(
     chatMessages.push({ role: "user", content: sanitized });
 
     // 6. Get workspace plan and select model for response generation
-    const [sub] = await db
-      .select({ planTier: subscriptions.planTier })
-      .from(subscriptions)
-      .where(eq(subscriptions.workspaceId, workspaceId))
-      .limit(1);
+    const sub = await db.subscription.findFirst({
+      where: { workspaceId },
+      select: { planTier: true },
+    });
     const planTier: PlanTier = (sub?.planTier as PlanTier) ?? "local_solo";
 
     const modelConfig = selectModel({

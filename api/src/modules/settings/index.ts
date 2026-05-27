@@ -1,12 +1,4 @@
 import { db } from "@zenda/db/client";
-import {
-  businessProfiles,
-  escalations,
-  messagingConsent,
-  receptionistProfiles,
-  systemSettings,
-} from "@zenda/db/schema";
-import { desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -17,11 +9,10 @@ async function getWorkspaceSetting(
   workspaceId: string,
   key: string
 ): Promise<string | null> {
-  const [row] = await db
-    .select({ value: systemSettings.value })
-    .from(systemSettings)
-    .where(eq(systemSettings.key, `ws:${workspaceId}:${key}`))
-    .limit(1);
+  const row = await db.systemSetting.findUnique({
+    where: { key: `ws:${workspaceId}:${key}` },
+    select: { value: true },
+  });
   return row?.value ?? null;
 }
 
@@ -30,13 +21,11 @@ async function setWorkspaceSetting(
   key: string,
   value: string
 ): Promise<void> {
-  await db
-    .insert(systemSettings)
-    .values({ key: `ws:${workspaceId}:${key}`, value, updatedAt: new Date() })
-    .onConflictDoUpdate({
-      target: systemSettings.key,
-      set: { value, updatedAt: new Date() },
-    });
+  await db.systemSetting.upsert({
+    where: { key: `ws:${workspaceId}:${key}` },
+    update: { value, updatedAt: new Date() },
+    create: { key: `ws:${workspaceId}:${key}`, value, updatedAt: new Date() },
+  });
 }
 
 export const settingsModule = new Elysia({ prefix: "/settings" })
@@ -45,21 +34,20 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
   // ── Receptionist settings ────────────────────────────────────────
   .get("/receptionist", async ({ workspaceId, set }) => {
     try {
-      const [profile] = await db
-        .select({
-          personalityPreset: receptionistProfiles.personalityPreset,
-          formalityLevel: receptionistProfiles.formalityLevel,
-          concisenessLevel: receptionistProfiles.concisenessLevel,
-          warmthLevel: receptionistProfiles.warmthLevel,
-          useEmoji: receptionistProfiles.useEmoji,
-          speaksAsBusiness: receptionistProfiles.speaksAsBusiness,
-          proactivelySuggestTimes: receptionistProfiles.proactivelySuggestTimes,
-          confirmsBeforeBooking: receptionistProfiles.confirmsBeforeBooking,
-          greetingStyle: receptionistProfiles.greetingStyle,
-        })
-        .from(receptionistProfiles)
-        .where(eq(receptionistProfiles.workspaceId, workspaceId!))
-        .limit(1);
+      const profile = await db.receptionistProfile.findFirst({
+        where: { workspaceId: workspaceId! },
+        select: {
+          personalityPreset: true,
+          formalityLevel: true,
+          concisenessLevel: true,
+          warmthLevel: true,
+          useEmoji: true,
+          speaksAsBusiness: true,
+          proactivelySuggestTimes: true,
+          confirmsBeforeBooking: true,
+          greetingStyle: true,
+        },
+      });
       if (!profile) {
         return notFound(set, "Receptionist profile not found");
       }
@@ -95,25 +83,29 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
             updateData[field] = data[field];
           }
         }
-        const [updated] = await db
-          .update(receptionistProfiles)
-          .set(updateData)
-          .where(eq(receptionistProfiles.workspaceId, workspaceId!))
-          .returning();
-        if (!updated) {
+        const updated = await db.receptionistProfile.updateMany({
+          where: { workspaceId: workspaceId! },
+          data: updateData,
+        });
+        if (updated.count === 0) {
           return notFound(set, "Receptionist profile not found");
         }
-        return {
-          personalityPreset: updated.personalityPreset,
-          formalityLevel: updated.formalityLevel,
-          concisenessLevel: updated.concisenessLevel,
-          warmthLevel: updated.warmthLevel,
-          useEmoji: updated.useEmoji,
-          speaksAsBusiness: updated.speaksAsBusiness,
-          proactivelySuggestTimes: updated.proactivelySuggestTimes,
-          confirmsBeforeBooking: updated.confirmsBeforeBooking,
-          greetingStyle: updated.greetingStyle,
-        };
+        // Fetch back the updated record to return selected fields
+        const refreshed = await db.receptionistProfile.findFirst({
+          where: { workspaceId: workspaceId! },
+          select: {
+            personalityPreset: true,
+            formalityLevel: true,
+            concisenessLevel: true,
+            warmthLevel: true,
+            useEmoji: true,
+            speaksAsBusiness: true,
+            proactivelySuggestTimes: true,
+            confirmsBeforeBooking: true,
+            greetingStyle: true,
+          },
+        });
+        return refreshed;
       } catch (err) {
         logger.error("Failed to update receptionist settings", {
           error: (err as Error).message,
@@ -139,28 +131,36 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
   // ── Appointment settings ─────────────────────────────────────────
   .get("/appointments", async ({ workspaceId, set }) => {
     try {
-      const [profile] = await db
-        .select({
-          cancellationWindowHours: businessProfiles.cancellationWindowHours,
-          reschedulingWindowHours: businessProfiles.reschedulingWindowHours,
-          cancellationPolicyStrictness:
-            receptionistProfiles.cancellationPolicyStrictness,
-          depositRequired: businessProfiles.depositRequired,
-          depositAmountCents: businessProfiles.depositAmountCents,
-          approvedCancellationText: businessProfiles.approvedCancellationText,
-          approvedRefundText: businessProfiles.approvedRefundText,
-        })
-        .from(businessProfiles)
-        .leftJoin(
-          receptionistProfiles,
-          eq(receptionistProfiles.workspaceId, businessProfiles.workspaceId)
-        )
-        .where(eq(businessProfiles.workspaceId, workspaceId!))
-        .limit(1);
+      const profile = await db.businessProfile.findFirst({
+        where: { workspaceId: workspaceId! },
+        select: {
+          cancellationWindowHours: true,
+          reschedulingWindowHours: true,
+          depositRequired: true,
+          depositAmountCents: true,
+          approvedCancellationText: true,
+          approvedRefundText: true,
+          receptionistProfile: {
+            select: {
+              cancellationPolicyStrictness: true,
+            },
+          },
+        },
+      });
       if (!profile) {
         return notFound(set, "Business profile not found");
       }
-      return profile;
+      // Flatten to match the original response shape
+      return {
+        cancellationWindowHours: profile.cancellationWindowHours,
+        reschedulingWindowHours: profile.reschedulingWindowHours,
+        cancellationPolicyStrictness:
+          profile.receptionistProfile?.cancellationPolicyStrictness ?? null,
+        depositRequired: profile.depositRequired,
+        depositAmountCents: profile.depositAmountCents,
+        approvedCancellationText: profile.approvedCancellationText,
+        approvedRefundText: profile.approvedRefundText,
+      };
     } catch (err) {
       logger.error("Failed to get appointment settings", {
         error: (err as Error).message,
@@ -206,22 +206,21 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
         let result: Record<string, unknown> = {};
 
         if (Object.keys(businessFields).length > 0) {
-          const [updated] = await db
-            .update(businessProfiles)
-            .set({ ...businessFields, updatedAt: new Date() })
-            .where(eq(businessProfiles.workspaceId, workspaceId!))
-            .returning();
-          if (!updated) {
+          const updated = await db.businessProfile.updateMany({
+            where: { workspaceId: workspaceId! },
+            data: { ...businessFields, updatedAt: new Date() },
+          });
+          if (updated.count === 0) {
             return notFound(set, "Business profile not found");
           }
           result = { ...result, ...businessFields };
         }
 
         if (Object.keys(receptionistFields).length > 0) {
-          await db
-            .update(receptionistProfiles)
-            .set({ ...receptionistFields, updatedAt: new Date() })
-            .where(eq(receptionistProfiles.workspaceId, workspaceId!));
+          await db.receptionistProfile.updateMany({
+            where: { workspaceId: workspaceId! },
+            data: { ...receptionistFields, updatedAt: new Date() },
+          });
           result = { ...result, ...receptionistFields };
         }
 
@@ -249,15 +248,13 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
   // ── Safety settings ──────────────────────────────────────────────
   .get("/safety", async ({ workspaceId, set }) => {
     try {
-      const [profile] = await db
-        .select({
-          sensitiveTopics: businessProfiles.sensitiveTopics,
-          emergencyEscalationInstructions:
-            businessProfiles.emergencyEscalationInstructions,
-        })
-        .from(businessProfiles)
-        .where(eq(businessProfiles.workspaceId, workspaceId!))
-        .limit(1);
+      const profile = await db.businessProfile.findFirst({
+        where: { workspaceId: workspaceId! },
+        select: {
+          sensitiveTopics: true,
+          emergencyEscalationInstructions: true,
+        },
+      });
       if (!profile) {
         return notFound(set, "Business profile not found");
       }
@@ -284,24 +281,27 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
             .filter(Boolean);
         }
 
-        const [updated] = await db
-          .update(businessProfiles)
-          .set({
+        const updated = await db.businessProfile.updateMany({
+          where: { workspaceId: workspaceId! },
+          data: {
             sensitiveTopics: data.sensitiveTopics as string[] | undefined,
             emergencyEscalationInstructions:
               data.emergencyEscalationInstructions as string | undefined,
             updatedAt: new Date(),
-          })
-          .where(eq(businessProfiles.workspaceId, workspaceId!))
-          .returning({
-            sensitiveTopics: businessProfiles.sensitiveTopics,
-            emergencyEscalationInstructions:
-              businessProfiles.emergencyEscalationInstructions,
-          });
-        if (!updated) {
+          },
+        });
+        if (updated.count === 0) {
           return notFound(set, "Business profile not found");
         }
-        return updated;
+        // Fetch back the updated record to return selected fields
+        const refreshed = await db.businessProfile.findFirst({
+          where: { workspaceId: workspaceId! },
+          select: {
+            sensitiveTopics: true,
+            emergencyEscalationInstructions: true,
+          },
+        });
+        return refreshed;
       } catch (err) {
         logger.error("Failed to update safety settings", {
           error: (err as Error).message,
@@ -323,19 +323,19 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
       const parsedLimit = Math.max(1, Math.min(200, Number(limit) || 50));
       const parsedOffset = Math.max(0, Number(offset) || 0);
 
-      return db
-        .select({
-          id: escalations.id,
-          reason: escalations.reason,
-          status: escalations.status,
-          escalatedAt: escalations.createdAt,
-          resolvedAt: escalations.resolvedAt,
-        })
-        .from(escalations)
-        .where(eq(escalations.workspaceId, workspaceId!))
-        .orderBy(desc(escalations.createdAt))
-        .limit(parsedLimit)
-        .offset(parsedOffset);
+      return db.escalation.findMany({
+        where: { workspaceId: workspaceId! },
+        select: {
+          id: true,
+          reason: true,
+          status: true,
+          createdAt: true,
+          resolvedAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+        take: parsedLimit,
+        skip: parsedOffset,
+      });
     } catch (err) {
       logger.error("Failed to get escalations", {
         error: (err as Error).message,
@@ -421,18 +421,18 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
       const parsedLimit = Math.max(1, Math.min(200, Number(limit) || 50));
       const parsedOffset = Math.max(0, Number(offset) || 0);
 
-      return db
-        .select({
-          id: messagingConsent.id,
-          customerPhone: messagingConsent.phoneNumber,
-          status: messagingConsent.status,
-          consentedAt: messagingConsent.capturedAt,
-        })
-        .from(messagingConsent)
-        .where(eq(messagingConsent.workspaceId, workspaceId!))
-        .orderBy(desc(messagingConsent.updatedAt))
-        .limit(parsedLimit)
-        .offset(parsedOffset);
+      return db.messagingConsent.findMany({
+        where: { workspaceId: workspaceId! },
+        select: {
+          id: true,
+          phoneNumber: true,
+          status: true,
+          capturedAt: true,
+        },
+        orderBy: { updatedAt: "desc" },
+        take: parsedLimit,
+        skip: parsedOffset,
+      });
     } catch (err) {
       logger.error("Failed to get messaging consent", {
         error: (err as Error).message,

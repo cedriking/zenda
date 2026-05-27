@@ -1,10 +1,8 @@
 import { db } from "@zenda/db/client";
-import { staffMembers } from "@zenda/db/schema";
 import {
   createStaffMemberSchema,
   updateStaffMemberSchema,
 } from "@zenda/shared";
-import { and, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -15,10 +13,9 @@ export const staffModule = new Elysia({ prefix: "/staff" })
 
   .get("/", async ({ workspaceId, set }) => {
     try {
-      return db
-        .select()
-        .from(staffMembers)
-        .where(eq(staffMembers.workspaceId, workspaceId!));
+      return db.staffMember.findMany({
+        where: { workspaceId: workspaceId! },
+      });
     } catch (err) {
       logger.error("Failed to list staff", { error: (err as Error).message });
       return serverError(set, "Failed to list staff");
@@ -38,14 +35,13 @@ export const staffModule = new Elysia({ prefix: "/staff" })
         }
 
         const { name, serviceIds } = parsed.data;
-        const [member] = await db
-          .insert(staffMembers)
-          .values({
+        const member = await db.staffMember.create({
+          data: {
             workspaceId: workspaceId!,
             name,
             serviceIds: serviceIds ?? [],
-          })
-          .returning();
+          },
+        });
         return member;
       } catch (err) {
         logger.error("Failed to create staff member", {
@@ -74,21 +70,15 @@ export const staffModule = new Elysia({ prefix: "/staff" })
           );
         }
 
-        const [updated] = await db
-          .update(staffMembers)
-          .set({ ...parsed.data, updatedAt: new Date() })
-          .where(
-            and(
-              eq(staffMembers.id, params.id),
-              eq(staffMembers.workspaceId, workspaceId!)
-            )
-          )
-          .returning();
-        if (!updated) {
-          return notFound(set, "Staff member not found");
-        }
+        const updated = await db.staffMember.update({
+          where: { id: params.id, workspaceId: workspaceId! },
+          data: { ...parsed.data, updatedAt: new Date() },
+        });
         return updated;
       } catch (err) {
+        if ((err as any)?.code === "P2025") {
+          return notFound(set, "Staff member not found");
+        }
         logger.error("Failed to update staff member", {
           error: (err as Error).message,
         });
@@ -106,17 +96,14 @@ export const staffModule = new Elysia({ prefix: "/staff" })
 
   .delete("/:id", async ({ workspaceId, params, set }) => {
     try {
-      const result = await db
-        .delete(staffMembers)
-        .where(
-          and(
-            eq(staffMembers.id, params.id),
-            eq(staffMembers.workspaceId, workspaceId!)
-          )
-        )
-        .returning();
-      return { deleted: result.length > 0 };
+      await db.staffMember.delete({
+        where: { id: params.id, workspaceId: workspaceId! },
+      });
+      return { deleted: true };
     } catch (err) {
+      if ((err as any)?.code === "P2025") {
+        return { deleted: false };
+      }
       logger.error("Failed to delete staff member", {
         error: (err as Error).message,
       });

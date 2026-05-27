@@ -1,7 +1,5 @@
 import { db } from "@zenda/db/client";
-import { subscriptions } from "@zenda/db/schema";
 import type { PlanTier } from "@zenda/shared";
-import { eq } from "drizzle-orm";
 import { type BillingPeriod, getPriceId } from "./products.js";
 import { stripe } from "./stripe.js";
 
@@ -74,11 +72,9 @@ export async function createPortalSession(
   if (!stripe) {
     throw new Error("Stripe is not configured");
   }
-  const [sub] = await db
-    .select()
-    .from(subscriptions)
-    .where(eq(subscriptions.workspaceId, workspaceId))
-    .limit(1);
+  const sub = await db.subscription.findFirst({
+    where: { workspaceId },
+  });
 
   if (!sub?.stripeCustomerId) {
     throw new Error("No Stripe customer found for this workspace");
@@ -93,11 +89,9 @@ export async function createPortalSession(
 }
 
 export async function getSubscription(workspaceId: string) {
-  const [sub] = await db
-    .select()
-    .from(subscriptions)
-    .where(eq(subscriptions.workspaceId, workspaceId))
-    .limit(1);
+  const sub = await db.subscription.findFirst({
+    where: { workspaceId },
+  });
 
   return sub ?? null;
 }

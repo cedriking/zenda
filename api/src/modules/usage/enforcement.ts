@@ -1,8 +1,6 @@
 import { db } from "@zenda/db/client";
-import { subscriptions, usageRecords } from "@zenda/db/schema";
 import type { PlanTier } from "@zenda/shared";
 import { PLANS, USAGE_WARNING_THRESHOLDS } from "@zenda/shared";
-import { and, eq, gte, lte } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 
 export type UsageMetric =
@@ -40,11 +38,9 @@ export async function enforceLimit(
   );
 
   // Get current subscription / plan
-  const [sub] = await db
-    .select()
-    .from(subscriptions)
-    .where(eq(subscriptions.workspaceId, workspaceId))
-    .limit(1);
+  const sub = await db.subscription.findFirst({
+    where: { workspaceId },
+  });
 
   const tier: PlanTier =
     sub?.status === "active" || sub?.status === "trialing"
@@ -56,18 +52,14 @@ export async function enforceLimit(
   // Get current usage — graceful fallback if table doesn't exist yet
   let currentUsage = 0;
   try {
-    const [record] = await db
-      .select()
-      .from(usageRecords)
-      .where(
-        and(
-          eq(usageRecords.workspaceId, workspaceId),
-          eq(usageRecords.metric, "active_appointment_contacts"),
-          gte(usageRecords.periodStart, periodStart),
-          lte(usageRecords.periodEnd, periodEnd)
-        )
-      )
-      .limit(1);
+    const record = await db.usageRecord.findFirst({
+      where: {
+        workspaceId,
+        metric: "active_appointment_contacts",
+        periodStart: { gte: periodStart },
+        periodEnd: { lte: periodEnd },
+      },
+    });
 
     currentUsage = record?.value ?? 0;
   } catch (err) {
@@ -125,15 +117,13 @@ export async function resetUsageOnPlanChange(
     59
   );
 
-  await db
-    .delete(usageRecords)
-    .where(
-      and(
-        eq(usageRecords.workspaceId, workspaceId),
-        gte(usageRecords.periodStart, periodStart),
-        lte(usageRecords.periodEnd, periodEnd)
-      )
-    );
+  await db.usageRecord.deleteMany({
+    where: {
+      workspaceId,
+      periodStart: { gte: periodStart },
+      periodEnd: { lte: periodEnd },
+    },
+  });
 
   logger.info("Usage records reset for plan change", { workspaceId });
 }

@@ -1,6 +1,4 @@
 import { db } from "@zenda/db/client";
-import { workspaceMembers, workspaces } from "@zenda/db/schema";
-import { and, eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 
 /**
@@ -25,28 +23,22 @@ export const workspaceBase = new Elysia({ name: "workspace-base" }).derive(
     }
 
     // Verify user has access to this workspace
-    const membership = await db
-      .select()
-      .from(workspaceMembers)
-      .where(
-        and(
-          eq(workspaceMembers.userId, userId),
-          eq(workspaceMembers.workspaceId, workspaceId)
-        )
-      )
-      .limit(1);
+    const membership = await db.workspaceMember.findFirst({
+      where: {
+        userId,
+        workspaceId,
+      },
+    });
 
-    if (membership.length === 0) {
+    if (!membership) {
       return { workspace: null };
     }
 
-    const workspace = await db
-      .select()
-      .from(workspaces)
-      .where(eq(workspaces.id, workspaceId))
-      .limit(1);
+    const workspace = await db.workspace.findFirst({
+      where: { id: workspaceId },
+    });
 
-    return { workspace: workspace[0] ?? null };
+    return { workspace: workspace ?? null };
   }
 );
 

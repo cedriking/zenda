@@ -1,17 +1,6 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import * as schema from "./schema/index.js";
+// Transitional: re-export prisma client as `db` so existing imports still work
+// during migration from Drizzle to Prisma. Once all files are converted,
+// this file will be replaced with a direct prisma export.
 
-const connectionString =
-  process.env.DATABASE_URL ?? "postgres://zenda:zenda_dev@localhost:5432/zenda";
-
-const client = postgres(connectionString, {
-  ssl:
-    process.env.DATABASE_SSL === "true"
-      ? { rejectUnauthorized: false }
-      : undefined,
-  connect_timeout: 10,
-  max: 20,
-  idle_timeout: 30,
-});
-export const db = drizzle(client, { schema });
+export { Prisma } from "@prisma/client";
+export { prisma as db, prisma } from "./prisma-client.js";

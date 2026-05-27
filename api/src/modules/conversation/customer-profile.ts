@@ -1,10 +1,4 @@
 import { db } from "@zenda/db/client";
-import {
-  appointments,
-  customers,
-  services as servicesTable,
-} from "@zenda/db/schema";
-import { and, count, desc, eq } from "drizzle-orm";
 
 interface CustomerProfile {
   id: string;
@@ -20,13 +14,9 @@ export async function getCustomerProfile(
   workspaceId: string,
   customerId: string
 ): Promise<CustomerProfile | null> {
-  const [customer] = await db
-    .select()
-    .from(customers)
-    .where(
-      and(eq(customers.id, customerId), eq(customers.workspaceId, workspaceId))
-    )
-    .limit(1);
+  const customer = await db.customer.findFirst({
+    where: { id: customerId, workspaceId },
+  });
 
   if (!customer) {
     return null;
@@ -35,26 +25,20 @@ export async function getCustomerProfile(
   // Get appointment stats and memory in parallel
   const [appointmentCountResult, lastAppointmentResult, memory] =
     await Promise.all([
-      db
-        .select({ count: count() })
-        .from(appointments)
-        .where(
-          and(
-            eq(appointments.customerId, customerId),
-            eq(appointments.workspaceId, workspaceId)
-          )
-        ),
-      db
-        .select({ startAt: appointments.startAt })
-        .from(appointments)
-        .where(
-          and(
-            eq(appointments.customerId, customerId),
-            eq(appointments.workspaceId, workspaceId)
-          )
-        )
-        .orderBy(desc(appointments.startAt))
-        .limit(1),
+      db.appointment.count({
+        where: {
+          customerId,
+          workspaceId,
+        },
+      }),
+      db.appointment.findFirst({
+        where: {
+          customerId,
+          workspaceId,
+        },
+        select: { startAt: true },
+        orderBy: { startAt: "desc" },
+      }),
       (async () => {
         const { getMemoryForCustomer } = await import("../ai/memory.js");
         return getMemoryForCustomer(workspaceId, customerId);
@@ -66,8 +50,8 @@ export async function getCustomerProfile(
     phoneNumber: customer.phoneNumber,
     name: customer.name,
     language: customer.language,
-    totalAppointments: appointmentCountResult[0]?.count ?? 0,
-    lastVisit: lastAppointmentResult[0]?.startAt?.toISOString() ?? null,
+    totalAppointments: appointmentCountResult ?? 0,
+    lastVisit: lastAppointmentResult?.startAt?.toISOString() ?? null,
     memory,
   };
 }
@@ -86,25 +70,31 @@ export async function getRecentAppointments(
   customerId: string,
   limit = 5
 ): Promise<AppointmentWithService[]> {
-  const rows = await db
-    .select({
-      id: appointments.id,
-      serviceName: servicesTable.name,
-      startAt: appointments.startAt,
-      endAt: appointments.endAt,
-      status: appointments.status,
-      confirmationStatus: appointments.confirmationStatus,
-    })
-    .from(appointments)
-    .innerJoin(servicesTable, eq(appointments.serviceId, servicesTable.id))
-    .where(
-      and(
-        eq(appointments.workspaceId, workspaceId),
-        eq(appointments.customerId, customerId)
-      )
-    )
-    .orderBy(desc(appointments.startAt))
-    .limit(limit);
+  const rows = await db.appointment.findMany({
+    where: {
+      workspaceId,
+      customerId,
+    },
+    select: {
+      id: true,
+      startAt: true,
+      endAt: true,
+      status: true,
+      confirmationStatus: true,
+      service: {
+        select: { name: true },
+      },
+    },
+    orderBy: { startAt: "desc" },
+    take: limit,
+  });
 
-  return rows;
+  return rows.map((row) => ({
+    id: row.id,
+    serviceName: row.service.name,
+    startAt: row.startAt,
+    endAt: row.endAt,
+    status: row.status,
+    confirmationStatus: row.confirmationStatus,
+  }));
 }

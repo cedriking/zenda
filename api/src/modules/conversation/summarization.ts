@@ -1,6 +1,4 @@
 import { db } from "@zenda/db/client";
-import { conversationSummaries, messages } from "@zenda/db/schema";
-import { desc, eq } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 
 const SUMMARY_THRESHOLD = 20;
@@ -8,12 +6,12 @@ const SUMMARY_THRESHOLD = 20;
 export async function shouldSummarize(
   conversationId: string
 ): Promise<boolean> {
-  const recentMessages = await db
-    .select({ id: messages.id })
-    .from(messages)
-    .where(eq(messages.conversationId, conversationId))
-    .orderBy(desc(messages.createdAt))
-    .limit(SUMMARY_THRESHOLD + 1);
+  const recentMessages = await db.message.findMany({
+    where: { conversationId },
+    select: { id: true },
+    orderBy: { createdAt: "desc" },
+    take: SUMMARY_THRESHOLD + 1,
+  });
 
   return recentMessages.length >= SUMMARY_THRESHOLD;
 }
@@ -23,12 +21,11 @@ export async function generateAndStoreSummary(
   _workspaceId: string,
   language: "en" | "es" = "es"
 ): Promise<void> {
-  const recentMessages = await db
-    .select()
-    .from(messages)
-    .where(eq(messages.conversationId, conversationId))
-    .orderBy(desc(messages.createdAt))
-    .limit(SUMMARY_THRESHOLD);
+  const recentMessages = await db.message.findMany({
+    where: { conversationId },
+    orderBy: { createdAt: "desc" },
+    take: SUMMARY_THRESHOLD,
+  });
 
   if (recentMessages.length < SUMMARY_THRESHOLD) {
     return;
@@ -41,9 +38,11 @@ export async function generateAndStoreSummary(
 
   const summaryText = generateSimpleSummary(messageTexts, language);
 
-  await db.insert(conversationSummaries).values({
-    conversationId,
-    summary: summaryText,
+  await db.conversationSummary.create({
+    data: {
+      conversationId,
+      summary: summaryText,
+    },
   });
 
   logger.info("Conversation summarized", { conversationId });
@@ -58,9 +57,8 @@ function generateSimpleSummary(text: string, language: "en" | "es"): string {
 }
 
 export async function getSummariesForConversation(conversationId: string) {
-  return db
-    .select()
-    .from(conversationSummaries)
-    .where(eq(conversationSummaries.conversationId, conversationId))
-    .orderBy(desc(conversationSummaries.createdAt));
+  return db.conversationSummary.findMany({
+    where: { conversationId },
+    orderBy: { createdAt: "desc" },
+  });
 }

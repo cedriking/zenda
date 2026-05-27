@@ -8,8 +8,6 @@
 export * from "./composio/index.js";
 
 import { db } from "@zenda/db/client";
-import { integrations } from "@zenda/db/schema";
-import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { typedContext } from "../../middleware/typed-context.js";
 import { composioModule as composioRoutes } from "./composio/index.js";
@@ -28,10 +26,9 @@ export const integrationsRoutes = new Elysia({ prefix: "/integrations" })
   .get(
     "/:workspaceId",
     async ({ params }: { params: { workspaceId: string } }) => {
-      const workspaceIntegrations = await db
-        .select()
-        .from(integrations)
-        .where(eq(integrations.workspaceId, params.workspaceId));
+      const workspaceIntegrations = await db.integration.findMany({
+        where: { workspaceId: params.workspaceId },
+      });
 
       return {
         integrations: workspaceIntegrations.map((integration) => ({

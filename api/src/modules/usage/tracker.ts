@@ -1,12 +1,6 @@
-import { db } from "@zenda/db/client";
-import {
-  activeContactDedup,
-  subscriptions,
-  usageRecords,
-} from "@zenda/db/schema";
+import { db, Prisma } from "@zenda/db/client";
 import type { PlanTier } from "@zenda/shared";
 import { PLANS, USAGE_WARNING_THRESHOLDS } from "@zenda/shared";
-import { and, eq, gte, lte } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 import { createNotification } from "../notification/service.js";
 
@@ -42,46 +36,55 @@ export async function trackActiveContact(
   // Try to insert dedup row — if it already exists, this is a no-op
   let isNew = false;
   try {
-    await db.insert(activeContactDedup).values({
-      workspaceId,
-      customerPhone,
-      periodStart,
-      periodEnd,
-      firstActionAt: now,
+    await db.activeContactDedup.create({
+      data: {
+        workspaceId,
+        customerPhone,
+        periodStart,
+        periodEnd,
+        firstActionAt: now,
+      },
     });
     isNew = true;
-  } catch {
-    // Duplicate key — this phone already counted this period
-    isNew = false;
+  } catch (err) {
+    // Duplicate key — check for Prisma unique constraint error or raw PG error
+    const pgErr = err as { code?: string } | undefined;
+    if (
+      pgErr?.code === "23505" ||
+      (err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === "P2002")
+    ) {
+      isNew = false;
+    } else {
+      throw err;
+    }
   }
 
   // Only increment the usage counter if this is a new contact
   if (isNew) {
-    const [existing] = await db
-      .select()
-      .from(usageRecords)
-      .where(
-        and(
-          eq(usageRecords.workspaceId, workspaceId),
-          eq(usageRecords.metric, "active_appointment_contacts"),
-          gte(usageRecords.periodStart, periodStart),
-          lte(usageRecords.periodEnd, periodEnd)
-        )
-      )
-      .limit(1);
-
-    if (existing) {
-      await db
-        .update(usageRecords)
-        .set({ value: existing.value + 1 })
-        .where(eq(usageRecords.id, existing.id));
-    } else {
-      await db.insert(usageRecords).values({
+    const existing = await db.usageRecord.findFirst({
+      where: {
         workspaceId,
         metric: "active_appointment_contacts",
-        value: 1,
-        periodStart,
-        periodEnd,
+        periodStart: { gte: periodStart },
+        periodEnd: { lte: periodEnd },
+      },
+    });
+
+    if (existing) {
+      await db.usageRecord.update({
+        where: { id: existing.id },
+        data: { value: existing.value + 1 },
+      });
+    } else {
+      await db.usageRecord.create({
+        data: {
+          workspaceId,
+          metric: "active_appointment_contacts",
+          value: 1,
+          periodStart,
+          periodEnd,
+        },
       });
     }
   }
@@ -114,11 +117,9 @@ export async function getActiveContactUsage(
   );
 
   // Get current plan
-  const [sub] = await db
-    .select()
-    .from(subscriptions)
-    .where(eq(subscriptions.workspaceId, workspaceId))
-    .limit(1);
+  const sub = await db.subscription.findFirst({
+    where: { workspaceId },
+  });
 
   const tier: PlanTier =
     sub?.status === "active" || sub?.status === "trialing"
@@ -128,18 +129,14 @@ export async function getActiveContactUsage(
   const limit = planConfig.activeContactsLimit;
 
   // Get current usage
-  const [record] = await db
-    .select()
-    .from(usageRecords)
-    .where(
-      and(
-        eq(usageRecords.workspaceId, workspaceId),
-        eq(usageRecords.metric, "active_appointment_contacts"),
-        gte(usageRecords.periodStart, periodStart),
-        lte(usageRecords.periodEnd, periodEnd)
-      )
-    )
-    .limit(1);
+  const record = await db.usageRecord.findFirst({
+    where: {
+      workspaceId,
+      metric: "active_appointment_contacts",
+      periodStart: { gte: periodStart },
+      periodEnd: { lte: periodEnd },
+    },
+  });
 
   const used = record?.value ?? 0;
   const percentage = limit > 0 ? used / limit : 0;

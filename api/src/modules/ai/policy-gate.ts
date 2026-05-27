@@ -6,17 +6,11 @@
  * fetching workspace config, consent, and outbound counts manually.
  */
 import { db } from "@zenda/db/client";
-import {
-  messagingConsent,
-  outboundMessageLog,
-  workspaces,
-} from "@zenda/db/schema";
 import type {
   MessagePurpose,
   MessagingConsentStatus,
   SendDecision,
 } from "@zenda/shared";
-import { and, eq } from "drizzle-orm";
 import { canSendOutboundMessage } from "../messaging/sending-policy.js";
 
 interface PolicyGateInput {
@@ -36,44 +30,32 @@ export async function checkSendingPolicy(
 ): Promise<SendDecision> {
   // Fetch workspace config, consent, and outbound log in parallel
   const [ws, consent, log] = await Promise.all([
-    db
-      .select({ maxOutboundWithoutReply: workspaces.maxOutboundWithoutReply })
-      .from(workspaces)
-      .where(eq(workspaces.id, input.workspaceId))
-      .limit(1),
-    db
-      .select({
-        status: messagingConsent.status,
-        allowedPurposes: messagingConsent.allowedPurposes,
-      })
-      .from(messagingConsent)
-      .where(
-        and(
-          eq(messagingConsent.workspaceId, input.workspaceId),
-          eq(messagingConsent.customerId, input.customerId)
-        )
-      )
-      .limit(1),
-    db
-      .select({
-        outboundSinceLastInbound: outboundMessageLog.outboundSinceLastInbound,
-      })
-      .from(outboundMessageLog)
-      .where(
-        and(
-          eq(outboundMessageLog.workspaceId, input.workspaceId),
-          eq(outboundMessageLog.customerId, input.customerId)
-        )
-      )
-      .limit(1),
+    db.workspace.findFirst({
+      where: { id: input.workspaceId },
+      select: { maxOutboundWithoutReply: true },
+    }),
+    db.messagingConsent.findFirst({
+      where: {
+        workspaceId: input.workspaceId,
+        customerId: input.customerId,
+      },
+      select: { status: true, allowedPurposes: true },
+    }),
+    db.outboundMessageLog.findFirst({
+      where: {
+        workspaceId: input.workspaceId,
+        customerId: input.customerId,
+      },
+      select: { outboundSinceLastInbound: true },
+    }),
   ]);
 
-  const maxOutbound = ws[0]?.maxOutboundWithoutReply ?? 3;
-  const consentStatus: MessagingConsentStatus = consent[0]?.status ?? "unknown";
-  const allowedPurposes = consent[0]?.allowedPurposes as
+  const maxOutbound = ws?.maxOutboundWithoutReply ?? 3;
+  const consentStatus: MessagingConsentStatus = consent?.status ?? "unknown";
+  const allowedPurposes = consent?.allowedPurposes as
     | MessagePurpose[]
     | undefined;
-  const outboundCount = log[0]?.outboundSinceLastInbound ?? 0;
+  const outboundCount = log?.outboundSinceLastInbound ?? 0;
 
   return canSendOutboundMessage({
     channel: input.channel,

@@ -1,12 +1,5 @@
 import { db } from "@zenda/db/client";
-import {
-  conversationSummaries,
-  conversations,
-  customers,
-  messages,
-} from "@zenda/db/schema";
 import { sendMessageSchema, updateConversationModeSchema } from "@zenda/shared";
-import { and, desc, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -34,51 +27,39 @@ export const conversationModule = new Elysia({ prefix: "/conversations" })
         | "paused"
         | "queued_offline"
         | "closed";
-      const conditions = [eq(conversations.workspaceId, workspaceId as string)];
+
+      const where: Record<string, unknown> = {
+        workspaceId: workspaceId as string,
+      };
       if (mode) {
-        conditions.push(eq(conversations.mode, mode as ConversationMode));
+        where.mode = mode as ConversationMode;
       }
 
       const include = (query as Record<string, string>).include;
       if (include?.includes("customer")) {
-        return db
-          .select({
-            id: conversations.id,
-            workspaceId: conversations.workspaceId,
-            customerId: conversations.customerId,
-            channel: conversations.channel,
-            mode: conversations.mode,
-            lastMessageAt: conversations.lastMessageAt,
-            language: conversations.language,
-            assignedToOwner: conversations.assignedToOwner,
-            needsAttentionReason: conversations.needsAttentionReason,
-            summary: conversations.summary,
-            createdAt: conversations.createdAt,
-            updatedAt: conversations.updatedAt,
-            customerName: customers.name,
-            customerPhone: customers.phoneNumber,
-            customerLanguage: customers.language,
-            lastMessagePreview: sql<string | null>`(
-              SELECT body FROM ${messages}
-              WHERE ${messages.conversationId} = ${conversations.id}
-              ORDER BY ${messages.createdAt} DESC LIMIT 1
-            )`,
-          })
-          .from(conversations)
-          .leftJoin(customers, eq(conversations.customerId, customers.id))
-          .where(and(...conditions))
-          .orderBy(desc(conversations.lastMessageAt))
-          .limit(parsedLimit)
-          .offset(parsedOffset);
+        return db.conversation.findMany({
+          where,
+          include: {
+            customer: {
+              select: {
+                name: true,
+                phoneNumber: true,
+                language: true,
+              },
+            },
+          },
+          orderBy: { lastMessageAt: "desc" },
+          take: parsedLimit,
+          skip: parsedOffset,
+        });
       }
 
-      return db
-        .select()
-        .from(conversations)
-        .where(and(...conditions))
-        .orderBy(desc(conversations.lastMessageAt))
-        .limit(parsedLimit)
-        .offset(parsedOffset);
+      return db.conversation.findMany({
+        where,
+        orderBy: { lastMessageAt: "desc" },
+        take: parsedLimit,
+        skip: parsedOffset,
+      });
     } catch (err) {
       logger.error("Failed to list conversations", {
         error: (err as Error).message,
@@ -90,33 +71,21 @@ export const conversationModule = new Elysia({ prefix: "/conversations" })
   // Get conversation by ID
   .get("/:id", async ({ workspaceId, params, set }) => {
     try {
-      const [conv] = await db
-        .select({
-          id: conversations.id,
-          workspaceId: conversations.workspaceId,
-          customerId: conversations.customerId,
-          channel: conversations.channel,
-          mode: conversations.mode,
-          lastMessageAt: conversations.lastMessageAt,
-          language: conversations.language,
-          assignedToOwner: conversations.assignedToOwner,
-          needsAttentionReason: conversations.needsAttentionReason,
-          summary: conversations.summary,
-          createdAt: conversations.createdAt,
-          updatedAt: conversations.updatedAt,
-          customerName: customers.name,
-          customerPhone: customers.phoneNumber,
-          customerLanguage: customers.language,
-        })
-        .from(conversations)
-        .leftJoin(customers, eq(conversations.customerId, customers.id))
-        .where(
-          and(
-            eq(conversations.id, params.id),
-            eq(conversations.workspaceId, workspaceId as string)
-          )
-        )
-        .limit(1);
+      const conv = await db.conversation.findFirst({
+        where: {
+          id: params.id,
+          workspaceId: workspaceId as string,
+        },
+        include: {
+          customer: {
+            select: {
+              name: true,
+              phoneNumber: true,
+              language: true,
+            },
+          },
+        },
+      });
       if (!conv) {
         return notFound(set, "Conversation not found");
       }
@@ -136,27 +105,22 @@ export const conversationModule = new Elysia({ prefix: "/conversations" })
       const parsedLimit = Math.max(1, Math.min(200, Number(limit) || 50));
       const parsedOffset = Math.max(0, Number(offset) || 0);
 
-      const [conv] = await db
-        .select()
-        .from(conversations)
-        .where(
-          and(
-            eq(conversations.id, params.id),
-            eq(conversations.workspaceId, workspaceId as string)
-          )
-        )
-        .limit(1);
+      const conv = await db.conversation.findFirst({
+        where: {
+          id: params.id,
+          workspaceId: workspaceId as string,
+        },
+      });
       if (!conv) {
         return notFound(set, "Conversation not found");
       }
 
-      return db
-        .select()
-        .from(messages)
-        .where(eq(messages.conversationId, params.id))
-        .orderBy(desc(messages.createdAt))
-        .limit(parsedLimit)
-        .offset(parsedOffset);
+      return db.message.findMany({
+        where: { conversationId: params.id },
+        orderBy: { createdAt: "desc" },
+        take: parsedLimit,
+        skip: parsedOffset,
+      });
     } catch (err) {
       logger.error("Failed to get messages", { error: (err as Error).message });
       return serverError(set, "Failed to get messages");
@@ -179,16 +143,12 @@ export const conversationModule = new Elysia({ prefix: "/conversations" })
 
         const { mode } = parsed.data;
 
-        const [conv] = await db
-          .select()
-          .from(conversations)
-          .where(
-            and(
-              eq(conversations.id, params.id),
-              eq(conversations.workspaceId, workspaceId as string)
-            )
-          )
-          .limit(1);
+        const conv = await db.conversation.findFirst({
+          where: {
+            id: params.id,
+            workspaceId: workspaceId as string,
+          },
+        });
         if (!conv) {
           return notFound(set, "Conversation not found");
         }
@@ -206,19 +166,20 @@ export const conversationModule = new Elysia({ prefix: "/conversations" })
           (conv.mode === "human_takeover" || conv.mode === "needs_attention")
         ) {
           try {
-            const recentMessages = await db
-              .select()
-              .from(messages)
-              .where(eq(messages.conversationId, params.id))
-              .orderBy(desc(messages.createdAt))
-              .limit(20);
+            const recentMessages = await db.message.findMany({
+              where: { conversationId: params.id },
+              orderBy: { createdAt: "desc" },
+              take: 20,
+            });
 
             if (recentMessages.length > 0) {
-              await db.insert(conversationSummaries).values({
-                conversationId: params.id,
-                summary: `Human takeover ended. Last ${recentMessages.length} messages summarized.`,
-                keyTopics: [],
-                extractedPreferences: {},
+              await db.conversationSummary.create({
+                data: {
+                  conversationId: params.id,
+                  summary: `Human takeover ended. Last ${recentMessages.length} messages summarized.`,
+                  keyTopics: [],
+                  extractedPreferences: {},
+                },
               });
 
               updates.summary = `Human took over from ${conv.mode}. Summary saved with ${recentMessages.length} messages.`;
@@ -234,11 +195,10 @@ export const conversationModule = new Elysia({ prefix: "/conversations" })
           }
         }
 
-        const [updated] = await db
-          .update(conversations)
-          .set(updates)
-          .where(eq(conversations.id, params.id))
-          .returning();
+        const updated = await db.conversation.update({
+          where: { id: params.id },
+          data: updates,
+        });
 
         return updated;
       } catch (err) {
@@ -271,23 +231,18 @@ export const conversationModule = new Elysia({ prefix: "/conversations" })
 
         const { body: text, contentType } = parsed.data;
 
-        const [conv] = await db
-          .select()
-          .from(conversations)
-          .where(
-            and(
-              eq(conversations.id, params.id),
-              eq(conversations.workspaceId, workspaceId as string)
-            )
-          )
-          .limit(1);
+        const conv = await db.conversation.findFirst({
+          where: {
+            id: params.id,
+            workspaceId: workspaceId as string,
+          },
+        });
         if (!conv) {
           return notFound(set, "Conversation not found");
         }
 
-        const [msg] = await db
-          .insert(messages)
-          .values({
+        const msg = await db.message.create({
+          data: {
             conversationId: params.id,
             workspaceId: workspaceId as string,
             senderType: "owner",
@@ -295,13 +250,13 @@ export const conversationModule = new Elysia({ prefix: "/conversations" })
             body: text,
             language: conv.language,
             status: "queued",
-          })
-          .returning();
+          },
+        });
 
-        await db
-          .update(conversations)
-          .set({ lastMessageAt: new Date(), updatedAt: new Date() })
-          .where(eq(conversations.id, params.id));
+        await db.conversation.update({
+          where: { id: params.id },
+          data: { lastMessageAt: new Date(), updatedAt: new Date() },
+        });
 
         return msg;
       } catch (err) {

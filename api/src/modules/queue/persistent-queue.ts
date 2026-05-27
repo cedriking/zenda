@@ -5,9 +5,7 @@
  * Uses PostgreSQL FOR UPDATE SKIP LOCKED for safe concurrent dequeuing.
  */
 import { db } from "@zenda/db/client";
-import { appointments, outboundQueue } from "@zenda/db/schema";
 import type { MessagePurpose } from "@zenda/shared";
-import { and, count, desc, eq, sql } from "drizzle-orm";
 import { MAX_QUEUE_DEPTH_PER_WORKSPACE } from "../../config/env.js";
 import { logger } from "../../infra/logger.js";
 
@@ -78,34 +76,26 @@ export async function enqueueMessage(
   input: EnqueueInput
 ): Promise<QueuedMessage> {
   // --- Per-workspace queue depth check ---
-  const [depthRow] = await db
-    .select({ count: count() })
-    .from(outboundQueue)
-    .where(
-      and(
-        eq(outboundQueue.workspaceId, input.workspaceId),
-        eq(outboundQueue.status, "pending")
-      )
-    );
+  const depthResult = await db.outboundQueue.count({
+    where: {
+      workspaceId: input.workspaceId,
+      status: "pending",
+    },
+  });
 
-  const currentDepth = depthRow?.count ?? 0;
-  if (currentDepth >= MAX_QUEUE_DEPTH_PER_WORKSPACE) {
+  if (depthResult >= MAX_QUEUE_DEPTH_PER_WORKSPACE) {
     throw new Error(
       `Queue depth limit exceeded for workspace ${input.workspaceId}: ` +
-        `${currentDepth} pending messages (max ${MAX_QUEUE_DEPTH_PER_WORKSPACE})`
+        `${depthResult} pending messages (max ${MAX_QUEUE_DEPTH_PER_WORKSPACE})`
     );
   }
 
   // --- Appointment validity check ---
   if (input.appointmentId) {
-    const [appt] = await db
-      .select({
-        status: appointments.status,
-        startAt: appointments.startAt,
-      })
-      .from(appointments)
-      .where(eq(appointments.id, input.appointmentId))
-      .limit(1);
+    const appt = await db.appointment.findFirst({
+      where: { id: input.appointmentId },
+      select: { status: true, startAt: true },
+    });
 
     if (!appt) {
       throw new Error(`Appointment ${input.appointmentId} not found`);
@@ -127,9 +117,8 @@ export async function enqueueMessage(
     }
   }
 
-  const [row] = await db
-    .insert(outboundQueue)
-    .values({
+  const row = await db.outboundQueue.create({
+    data: {
       workspaceId: input.workspaceId,
       customerId: input.customerId,
       conversationId: input.conversationId ?? null,
@@ -138,10 +127,10 @@ export async function enqueueMessage(
       contentType: input.contentType ?? "text",
       appointmentId: input.appointmentId ?? null,
       priority: input.priority ?? "notification",
-      metadata: input.metadata ?? {},
+      metadata: input.metadata ?? undefined,
       status: "pending",
-    })
-    .returning();
+    },
+  });
 
   logger.info("Message enqueued", {
     queueId: row.id,
@@ -150,37 +139,33 @@ export async function enqueueMessage(
     purpose: input.purpose,
   });
 
-  return row as QueuedMessage;
+  return row as unknown as QueuedMessage;
 }
 
 /**
  * Dequeue the next pending message ready for processing.
  * Uses FOR UPDATE SKIP LOCKED for safe concurrent access.
+ * Must use raw SQL because Prisma does not support pessimistic locking.
  */
 export async function dequeueNext(): Promise<QueuedMessage | null> {
   const now = new Date();
 
-  const rows = await db
-    .select()
-    .from(outboundQueue)
-    .where(
-      and(
-        eq(outboundQueue.status, "pending"),
-        sql`(${outboundQueue.nextRetryAt} IS NULL OR ${outboundQueue.nextRetryAt} <= ${now})`
-      )
-    )
-    .orderBy(
-      sql`CASE ${outboundQueue.priority}
+  const rows: QueuedMessage[] = await db.$queryRaw`
+    SELECT * FROM outbound_queue
+    WHERE status = 'pending'
+      AND (next_retry_at IS NULL OR next_retry_at <= ${now})
+    ORDER BY
+      CASE priority
         WHEN 'emergency' THEN 0
         WHEN 'reminder' THEN 1
         WHEN 'notification' THEN 2
         WHEN 'low' THEN 3
         ELSE 2
-      END`,
-      outboundQueue.createdAt
-    )
-    .limit(1)
-    .for("update", { skipLocked: true });
+      END,
+      created_at
+    LIMIT 1
+    FOR UPDATE SKIP LOCKED
+  `;
 
   if (rows.length === 0) {
     return null;
@@ -189,26 +174,26 @@ export async function dequeueNext(): Promise<QueuedMessage | null> {
   const row = rows[0];
 
   // Mark as processing to prevent other workers from picking it up
-  await db
-    .update(outboundQueue)
-    .set({ status: "processing", updatedAt: new Date() })
-    .where(eq(outboundQueue.id, row.id));
+  await db.outboundQueue.update({
+    where: { id: row.id },
+    data: { status: "processing", updatedAt: new Date() },
+  });
 
-  return row as QueuedMessage;
+  return row;
 }
 
 /**
  * Mark a queued message as successfully sent.
  */
 export async function markSent(id: string): Promise<void> {
-  await db
-    .update(outboundQueue)
-    .set({
+  await db.outboundQueue.update({
+    where: { id },
+    data: {
       status: "sent",
       sentAt: new Date(),
       updatedAt: new Date(),
-    })
-    .where(eq(outboundQueue.id, id));
+    },
+  });
 }
 
 /**
@@ -216,11 +201,9 @@ export async function markSent(id: string): Promise<void> {
  * Otherwise, schedule a retry with exponential backoff.
  */
 export async function markFailed(id: string, reason: string): Promise<void> {
-  const [row] = await db
-    .select()
-    .from(outboundQueue)
-    .where(eq(outboundQueue.id, id))
-    .limit(1);
+  const row = await db.outboundQueue.findFirst({
+    where: { id },
+  });
 
   if (!row) {
     return;
@@ -229,16 +212,16 @@ export async function markFailed(id: string, reason: string): Promise<void> {
   const newAttempts = row.attempts + 1;
   const isDead = newAttempts >= row.maxAttempts;
 
-  await db
-    .update(outboundQueue)
-    .set({
+  await db.outboundQueue.update({
+    where: { id },
+    data: {
       status: isDead ? "dead_letter" : "pending",
       attempts: newAttempts,
       failureReason: reason,
       nextRetryAt: isDead ? null : calculateNextRetry(newAttempts),
       updatedAt: new Date(),
-    })
-    .where(eq(outboundQueue.id, id));
+    },
+  });
 
   if (isDead) {
     logger.error("Message moved to dead letter queue", {
@@ -262,14 +245,12 @@ export async function markFailed(id: string, reason: string): Promise<void> {
 export async function getQueueStats(
   workspaceId: string
 ): Promise<Record<string, number>> {
-  const rows = await db
-    .select({
-      status: outboundQueue.status,
-      count: sql<number>`count(*)::int`,
-    })
-    .from(outboundQueue)
-    .where(eq(outboundQueue.workspaceId, workspaceId))
-    .groupBy(outboundQueue.status);
+  const rows: { status: string; count: bigint }[] = await db.$queryRaw`
+    SELECT status, COUNT(*)::int AS count
+    FROM outbound_queue
+    WHERE workspace_id = ${workspaceId}
+    GROUP BY status
+  `;
 
   const stats: Record<string, number> = {
     pending: 0,
@@ -280,7 +261,7 @@ export async function getQueueStats(
   };
 
   for (const row of rows) {
-    stats[row.status] = row.count;
+    stats[row.status] = Number(row.count);
   }
 
   return stats;
@@ -293,19 +274,16 @@ export async function getDeadLetters(
   workspaceId: string,
   limit = 50
 ): Promise<QueuedMessage[]> {
-  const rows = await db
-    .select()
-    .from(outboundQueue)
-    .where(
-      and(
-        eq(outboundQueue.workspaceId, workspaceId),
-        eq(outboundQueue.status, "dead_letter")
-      )
-    )
-    .orderBy(desc(outboundQueue.updatedAt))
-    .limit(limit);
+  const rows = await db.outboundQueue.findMany({
+    where: {
+      workspaceId,
+      status: "dead_letter",
+    },
+    orderBy: { updatedAt: "desc" },
+    take: limit,
+  });
 
-  return rows as QueuedMessage[];
+  return rows as unknown as QueuedMessage[];
 }
 
 /**
@@ -314,18 +292,15 @@ export async function getDeadLetters(
 export async function getPendingMessages(
   workspaceId: string
 ): Promise<QueuedMessage[]> {
-  const rows = await db
-    .select()
-    .from(outboundQueue)
-    .where(
-      and(
-        eq(outboundQueue.workspaceId, workspaceId),
-        eq(outboundQueue.status, "pending")
-      )
-    )
-    .orderBy(outboundQueue.createdAt);
+  const rows = await db.outboundQueue.findMany({
+    where: {
+      workspaceId,
+      status: "pending",
+    },
+    orderBy: { createdAt: "asc" },
+  });
 
-  return rows as QueuedMessage[];
+  return rows as unknown as QueuedMessage[];
 }
 
 /**
@@ -334,23 +309,25 @@ export async function getPendingMessages(
 export async function retryDeadLetter(
   id: string
 ): Promise<QueuedMessage | null> {
-  const [row] = await db
-    .update(outboundQueue)
-    .set({
+  const row = await db.outboundQueue.updateMany({
+    where: {
+      id,
+      status: "dead_letter",
+    },
+    data: {
       status: "pending",
       attempts: 0,
       failureReason: null,
       nextRetryAt: null,
       updatedAt: new Date(),
-    })
-    .where(
-      and(eq(outboundQueue.id, id), eq(outboundQueue.status, "dead_letter"))
-    )
-    .returning();
+    },
+  });
 
-  if (row) {
+  if (row.count > 0) {
+    const updated = await db.outboundQueue.findFirst({ where: { id } });
     logger.info("Dead letter message retried", { queueId: id });
+    return (updated as unknown as QueuedMessage) ?? null;
   }
 
-  return (row as QueuedMessage) ?? null;
+  return null;
 }

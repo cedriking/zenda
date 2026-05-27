@@ -1,16 +1,9 @@
 import { db } from "@zenda/db/client";
-import {
-  businessProfiles,
-  conversations,
-  messages,
-  workspaces,
-} from "@zenda/db/schema";
 import type {
   EscalationReason,
   MessageSender,
   OnboardingStep,
 } from "@zenda/shared";
-import { and, desc, eq } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 import { wsMessageSender } from "../../infra/message-sender.js";
 import { escalateToHuman } from "../ai/tools/escalate-to-human.js";
@@ -113,11 +106,10 @@ export async function processIncomingMessage(
     // is susceptible to race conditions. Add the constraint in the next migration:
     //   ALTER TABLE messages ADD CONSTRAINT messages_external_message_id_unique UNIQUE (external_message_id);
     if (msg.externalMessageId) {
-      const [existing] = await db
-        .select({ id: messages.id })
-        .from(messages)
-        .where(eq(messages.externalMessageId, msg.externalMessageId))
-        .limit(1);
+      const existing = await db.message.findFirst({
+        where: { externalMessageId: msg.externalMessageId },
+        select: { id: true },
+      });
       if (existing) {
         logger.info("Skipping duplicate message", {
           workspaceId,
@@ -128,14 +120,13 @@ export async function processIncomingMessage(
     }
 
     // 1. Load workspace data (defaultLanguage + onboardingStep) in a single query
-    const [ws] = await db
-      .select({
-        defaultLanguage: workspaces.defaultLanguage,
-        onboardingStep: workspaces.onboardingStep,
-      })
-      .from(workspaces)
-      .where(eq(workspaces.id, workspaceId))
-      .limit(1);
+    const ws = await db.workspace.findUnique({
+      where: { id: workspaceId },
+      select: {
+        defaultLanguage: true,
+        onboardingStep: true,
+      },
+    });
     const workspaceLanguage = (ws?.defaultLanguage as "en" | "es") ?? "en";
 
     // 1a. Heuristic hint for initial customer creation — the AI agent will
@@ -211,17 +202,17 @@ export async function processIncomingMessage(
         messageBody = transcription.transcript;
         agentLanguage = transcription.language as "en" | "es";
 
-        await db
-          .update(messages)
-          .set({ body: transcription.transcript, language: agentLanguage })
-          .where(eq(messages.id, storedMessage.id));
+        await db.message.update({
+          where: { id: storedMessage.id },
+          data: { body: transcription.transcript, language: agentLanguage },
+        });
       } else {
         messageBody = "[Audio message — transcription unavailable]";
 
-        await db
-          .update(messages)
-          .set({ body: messageBody })
-          .where(eq(messages.id, storedMessage.id));
+        await db.message.update({
+          where: { id: storedMessage.id },
+          data: { body: messageBody },
+        });
       }
     }
 
@@ -261,10 +252,10 @@ export async function processIncomingMessage(
     }
 
     // 8. Update conversation lastMessageAt
-    await db
-      .update(conversations)
-      .set({ lastMessageAt: new Date(), updatedAt: new Date() })
-      .where(eq(conversations.id, conversation.id));
+    await db.conversation.update({
+      where: { id: conversation.id },
+      data: { lastMessageAt: new Date(), updatedAt: new Date() },
+    });
 
     // 8a. Emergency keyword detection — skip AI, immediately escalate
     if (EMERGENCY_PATTERN.test(messageBody)) {
@@ -708,17 +699,13 @@ export async function processIncomingMessage(
 }
 
 async function findActiveConversation(workspaceId: string, customerId: string) {
-  const [conv] = await db
-    .select()
-    .from(conversations)
-    .where(
-      and(
-        eq(conversations.workspaceId, workspaceId),
-        eq(conversations.customerId, customerId)
-      )
-    )
-    .orderBy(desc(conversations.lastMessageAt))
-    .limit(1);
+  const conv = await db.conversation.findFirst({
+    where: {
+      workspaceId,
+      customerId,
+    },
+    orderBy: { lastMessageAt: "desc" },
+  });
 
   // Only resume conversations created within the last 24 hours
   if (conv) {
@@ -738,16 +725,15 @@ async function createConversation(
   language: "en" | "es",
   _threadId?: string
 ) {
-  const [conv] = await db
-    .insert(conversations)
-    .values({
+  const conv = await db.conversation.create({
+    data: {
       workspaceId,
       customerId,
       channel: "whatsapp",
       mode: "auto",
       language,
-    })
-    .returning();
+    },
+  });
   return conv;
 }
 
@@ -765,9 +751,8 @@ async function storeMessage(
     toolCalls?: unknown[];
   }
 ) {
-  const [msg] = await db
-    .insert(messages)
-    .values({
+  const msg = await db.message.create({
+    data: {
       conversationId,
       workspaceId,
       senderType: data.senderType as "customer" | "ai" | "system",
@@ -779,8 +764,8 @@ async function storeMessage(
       aiModel: data.aiModel,
       toolCalls: data.toolCalls,
       status: data.senderType === "customer" ? "received" : "queued",
-    })
-    .returning();
+    },
+  });
   return msg;
 }
 
@@ -897,11 +882,10 @@ async function detectSensitiveTopic(
   messageBody: string
 ): Promise<string | null> {
   try {
-    const [profile] = await db
-      .select({ sensitiveTopics: businessProfiles.sensitiveTopics })
-      .from(businessProfiles)
-      .where(eq(businessProfiles.workspaceId, workspaceId))
-      .limit(1);
+    const profile = await db.businessProfile.findFirst({
+      where: { workspaceId },
+      select: { sensitiveTopics: true },
+    });
 
     const topics = profile?.sensitiveTopics;
     if (!topics || topics.length === 0) {

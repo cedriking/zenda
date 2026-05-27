@@ -1,7 +1,5 @@
 import { db } from "@zenda/db/client";
-import { workspaces } from "@zenda/db/schema";
 import type { OnboardingStep } from "@zenda/shared";
-import { and, eq } from "drizzle-orm";
 
 const STEP_ORDER: OnboardingStep[] = [
   "not_started",
@@ -52,24 +50,17 @@ export async function advanceOnboarding(
     return "ready";
   }
 
-  const result = await db
-    .update(workspaces)
-    .set({ onboardingStep: next, updatedAt: new Date() })
-    .where(
-      and(
-        eq(workspaces.id, workspaceId),
-        eq(workspaces.onboardingStep, completedStep)
-      )
-    )
-    .returning({ onboardingStep: workspaces.onboardingStep });
+  const result = await db.workspace.updateMany({
+    where: { id: workspaceId, onboardingStep: completedStep },
+    data: { onboardingStep: next, updatedAt: new Date() },
+  });
 
-  if (result.length === 0) {
+  if (result.count === 0) {
     // Step didn't match — fetch current to report the mismatch
-    const [ws] = await db
-      .select({ onboardingStep: workspaces.onboardingStep })
-      .from(workspaces)
-      .where(eq(workspaces.id, workspaceId))
-      .limit(1);
+    const ws = await db.workspace.findFirst({
+      where: { id: workspaceId },
+      select: { onboardingStep: true },
+    });
 
     const currentStep = (ws?.onboardingStep as OnboardingStep) ?? "not_started";
     throw new OnboardingStepMismatchError(completedStep, currentStep);
@@ -79,11 +70,9 @@ export async function advanceOnboarding(
 }
 
 export async function getOnboardingStatus(workspaceId: string) {
-  const [ws] = await db
-    .select()
-    .from(workspaces)
-    .where(eq(workspaces.id, workspaceId))
-    .limit(1);
+  const ws = await db.workspace.findFirst({
+    where: { id: workspaceId },
+  });
 
   const current = (ws?.onboardingStep as OnboardingStep) ?? "not_started";
   return {

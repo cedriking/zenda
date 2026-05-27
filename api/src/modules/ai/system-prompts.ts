@@ -6,19 +6,12 @@
 // Ambiguous: redirect to human escalation
 
 import { db } from "@zenda/db/client";
-import {
-  businessProfiles,
-  receptionistProfiles,
-  services,
-  staffMembers,
-} from "@zenda/db/schema";
 import type {
   CancellationStrictness,
   Language,
   PersonalityPreset,
 } from "@zenda/shared";
 import { PERSONALITY_PRESETS, type PersonalityPresetKey } from "@zenda/shared";
-import { eq } from "drizzle-orm";
 
 interface BusinessContext {
   approvedCancellationText: string | null;
@@ -496,64 +489,60 @@ function levelLabel(
 async function loadBusinessContext(
   workspaceId: string
 ): Promise<BusinessContext> {
-  const [business] = await db
-    .select({
-      name: businessProfiles.name,
-      category: businessProfiles.category,
-      description: businessProfiles.description,
-      location: businessProfiles.location,
-      cancellationPolicy: businessProfiles.cancellationPolicy,
-      refundPolicy: businessProfiles.refundPolicy,
-      priceDisplayPreference: businessProfiles.priceDisplayPreference,
-      cancellationWindowHours: businessProfiles.cancellationWindowHours,
-      reschedulingWindowHours: businessProfiles.reschedulingWindowHours,
-      depositRequired: businessProfiles.depositRequired,
-      depositAmountCents: businessProfiles.depositAmountCents,
-      approvedCancellationText: businessProfiles.approvedCancellationText,
-      approvedRefundText: businessProfiles.approvedRefundText,
-      approvedDiscountText: businessProfiles.approvedDiscountText,
-      emergencyEscalationInstructions:
-        businessProfiles.emergencyEscalationInstructions,
-      sensitiveTopics: businessProfiles.sensitiveTopics,
-    })
-    .from(businessProfiles)
-    .where(eq(businessProfiles.workspaceId, workspaceId))
-    .limit(1);
+  const business = await db.businessProfile.findFirst({
+    where: { workspaceId },
+    select: {
+      name: true,
+      category: true,
+      description: true,
+      location: true,
+      cancellationPolicy: true,
+      refundPolicy: true,
+      priceDisplayPreference: true,
+      cancellationWindowHours: true,
+      reschedulingWindowHours: true,
+      depositRequired: true,
+      depositAmountCents: true,
+      approvedCancellationText: true,
+      approvedRefundText: true,
+      approvedDiscountText: true,
+      emergencyEscalationInstructions: true,
+      sensitiveTopics: true,
+    },
+  });
 
-  const [receptionist] = await db
-    .select({
-      name: receptionistProfiles.name,
-      tone: receptionistProfiles.tone,
-      greetingTemplate: receptionistProfiles.greetingTemplate,
-      personalityPreset: receptionistProfiles.personalityPreset,
-      formalityLevel: receptionistProfiles.formalityLevel,
-      concisenessLevel: receptionistProfiles.concisenessLevel,
-      warmthLevel: receptionistProfiles.warmthLevel,
-      useEmoji: receptionistProfiles.useEmoji,
-      speaksAsBusiness: receptionistProfiles.speaksAsBusiness,
-      proactivelySuggestTimes: receptionistProfiles.proactivelySuggestTimes,
-      confirmsBeforeBooking: receptionistProfiles.confirmsBeforeBooking,
-      cancellationPolicyStrictness:
-        receptionistProfiles.cancellationPolicyStrictness,
-    })
-    .from(receptionistProfiles)
-    .where(eq(receptionistProfiles.workspaceId, workspaceId))
-    .limit(1);
+  const receptionist = await db.receptionistProfile.findFirst({
+    where: { workspaceId },
+    select: {
+      name: true,
+      tone: true,
+      greetingTemplate: true,
+      personalityPreset: true,
+      formalityLevel: true,
+      concisenessLevel: true,
+      warmthLevel: true,
+      useEmoji: true,
+      speaksAsBusiness: true,
+      proactivelySuggestTimes: true,
+      confirmsBeforeBooking: true,
+      cancellationPolicyStrictness: true,
+    },
+  });
 
-  const serviceRows = await db
-    .select({
-      id: services.id,
-      name: services.name,
-      duration: services.durationMinutes,
-      price: services.priceCents,
-    })
-    .from(services)
-    .where(eq(services.workspaceId, workspaceId));
+  const serviceRows = await db.services.findMany({
+    where: { workspaceId },
+    select: {
+      id: true,
+      name: true,
+      durationMinutes: true,
+      priceCents: true,
+    },
+  });
 
-  const staffRows = await db
-    .select({ name: staffMembers.name })
-    .from(staffMembers)
-    .where(eq(staffMembers.workspaceId, workspaceId));
+  const staffRows = await db.staffMember.findMany({
+    where: { workspaceId },
+    select: { name: true },
+  });
 
   return {
     businessName: business?.name ?? "the business",
@@ -566,7 +555,19 @@ async function loadBusinessContext(
     receptionistName: receptionist?.name ?? "Receptionist",
     tone: receptionist?.tone ?? "professional",
     greetingTemplate: receptionist?.greetingTemplate ?? null,
-    services: serviceRows,
+    services: serviceRows.map(
+      (s: {
+        id: string;
+        name: string;
+        durationMinutes: number;
+        priceCents: number | null;
+      }) => ({
+        id: s.id,
+        name: s.name,
+        duration: s.durationMinutes,
+        price: s.priceCents,
+      })
+    ),
     staff: staffRows,
 
     personalityPreset: receptionist?.personalityPreset ?? "professional",

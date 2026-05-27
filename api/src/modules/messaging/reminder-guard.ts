@@ -7,9 +7,7 @@
  * - Appointment time hasn't passed
  */
 import { db } from "@zenda/db/client";
-import { appointments, sentReminderLog } from "@zenda/db/schema";
 import type { ReminderType } from "@zenda/shared";
-import { and, eq } from "drizzle-orm";
 import { shouldRestrictProactive } from "../usage/tracker.js";
 
 interface ReminderGuardResult {
@@ -36,16 +34,12 @@ export async function canSendReminder(
     }
   }
   // 1. Check for duplicate
-  const [existing] = await db
-    .select()
-    .from(sentReminderLog)
-    .where(
-      and(
-        eq(sentReminderLog.appointmentId, appointmentId),
-        eq(sentReminderLog.reminderType, reminderType)
-      )
-    )
-    .limit(1);
+  const existing = await db.sentReminderLog.findFirst({
+    where: {
+      appointmentId,
+      reminderType,
+    },
+  });
 
   if (existing) {
     return {
@@ -55,14 +49,10 @@ export async function canSendReminder(
   }
 
   // 2. Check appointment state
-  const [appointment] = await db
-    .select({
-      status: appointments.status,
-      startAt: appointments.startAt,
-    })
-    .from(appointments)
-    .where(eq(appointments.id, appointmentId))
-    .limit(1);
+  const appointment = await db.appointment.findUnique({
+    where: { id: appointmentId },
+    select: { status: true, startAt: true },
+  });
 
   if (!appointment) {
     return { canSend: false, reason: "Appointment not found" };
@@ -95,9 +85,11 @@ export async function recordReminderSent(
   appointmentId: string,
   reminderType: ReminderType
 ): Promise<void> {
-  await db.insert(sentReminderLog).values({
-    appointmentId,
-    reminderType,
-    sentAt: new Date(),
+  await db.sentReminderLog.create({
+    data: {
+      appointmentId,
+      reminderType,
+      sentAt: new Date(),
+    },
   });
 }

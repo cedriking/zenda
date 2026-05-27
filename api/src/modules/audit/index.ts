@@ -1,6 +1,4 @@
 import { db } from "@zenda/db/client";
-import { auditLogs } from "@zenda/db/schema";
-import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { typedContext } from "../../middleware/typed-context.js";
 import { redactPII } from "./logger.js";
@@ -14,31 +12,28 @@ export const auditModule = new Elysia({ prefix: "/audit" })
     async ({ workspaceId, query }) => {
       const { entityType, entityId, action, limit = 50, offset = 0 } = query;
 
-      const conditions = [eq(auditLogs.workspaceId, workspaceId!)];
+      const where: Record<string, unknown> = { workspaceId: workspaceId! };
       if (entityType) {
-        conditions.push(eq(auditLogs.entityType, entityType));
+        where.entityType = entityType;
       }
       if (entityId) {
-        conditions.push(eq(auditLogs.entityId, entityId));
+        where.entityId = entityId;
       }
       if (action) {
-        conditions.push(eq(auditLogs.action, action));
+        where.action = action;
       }
 
-      const where = and(...conditions);
-
-      const [logs, [{ total }]] = await Promise.all([
-        db
-          .select()
-          .from(auditLogs)
-          .where(where)
-          .orderBy(desc(auditLogs.createdAt))
-          .limit(limit)
-          .offset(offset),
-        db.select({ total: count() }).from(auditLogs).where(where),
+      const [logs, totalResult] = await Promise.all([
+        db.auditLog.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          take: limit,
+          skip: offset,
+        }),
+        db.auditLog.count({ where }),
       ]);
 
-      return { logs, total };
+      return { logs, total: totalResult };
     },
     {
       query: t.Object({
@@ -57,22 +52,27 @@ export const auditModule = new Elysia({ prefix: "/audit" })
     async ({ workspaceId, query, set }) => {
       const { entityType, from, to } = query;
 
-      const conditions = [eq(auditLogs.workspaceId, workspaceId!)];
+      const where: Record<string, unknown> = { workspaceId: workspaceId! };
       if (entityType) {
-        conditions.push(eq(auditLogs.entityType, entityType));
+        where.entityType = entityType;
       }
       if (from) {
-        conditions.push(gte(auditLogs.createdAt, new Date(from)));
+        where.createdAt = {
+          ...((where.createdAt as object) ?? {}),
+          gte: new Date(from),
+        };
       }
       if (to) {
-        conditions.push(lte(auditLogs.createdAt, new Date(to)));
+        where.createdAt = {
+          ...((where.createdAt as object) ?? {}),
+          lte: new Date(to),
+        };
       }
 
-      const rows = await db
-        .select()
-        .from(auditLogs)
-        .where(and(...conditions))
-        .orderBy(desc(auditLogs.createdAt));
+      const rows = await db.auditLog.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+      });
 
       const header =
         "timestamp,actor_type,actor_id,action,entity_type,entity_id,details";
@@ -104,17 +104,17 @@ export const auditModule = new Elysia({ prefix: "/audit" })
 
   // Get audit event counts grouped by action
   .get("/stats", async ({ workspaceId }) => {
-    const rows = await db
-      .select({ action: auditLogs.action, count: count() })
-      .from(auditLogs)
-      .where(eq(auditLogs.workspaceId, workspaceId!))
-      .groupBy(auditLogs.action);
+    const rows = await db.auditLog.groupBy({
+      by: ["action"],
+      where: { workspaceId: workspaceId! },
+      _count: { action: true },
+    });
 
     const counts: Record<string, number> = {};
     let total = 0;
     for (const row of rows) {
-      counts[row.action] = row.count;
-      total += row.count;
+      counts[row.action] = row._count.action;
+      total += row._count.action;
     }
 
     return { counts, total };

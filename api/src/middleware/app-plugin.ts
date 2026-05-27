@@ -1,6 +1,4 @@
 import { db } from "@zenda/db/client";
-import { workspaceMembers, workspaces } from "@zenda/db/schema";
-import { and, eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { jwtVerify } from "jose";
 import { JWT_SECRET } from "../config/env.js";
@@ -64,28 +62,22 @@ export function createAppPlugin() {
         return { workspace: null };
       }
 
-      const membership = await db
-        .select()
-        .from(workspaceMembers)
-        .where(
-          and(
-            eq(workspaceMembers.userId, userId),
-            eq(workspaceMembers.workspaceId, workspaceId)
-          )
-        )
-        .limit(1);
+      const membership = await db.workspaceMember.findFirst({
+        where: {
+          userId,
+          workspaceId,
+        },
+      });
 
-      if (membership.length === 0) {
+      if (!membership) {
         return { workspace: null };
       }
 
-      const workspace = await db
-        .select()
-        .from(workspaces)
-        .where(eq(workspaces.id, workspaceId))
-        .limit(1);
+      const workspace = await db.workspace.findFirst({
+        where: { id: workspaceId },
+      });
 
-      return { workspace: workspace[0] ?? null };
+      return { workspace: workspace ?? null };
     })
     .onBeforeHandle(({ userId }) => {
       if (!userId) {

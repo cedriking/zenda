@@ -21,18 +21,11 @@ const mockStripeInstance = {
   },
 };
 
-const mockDbUpdate = mock(() => ({
-  set: mock(() => ({
-    where: mock(() => Promise.resolve()),
-  })),
-}));
-const mockDbSelect = mock(() => ({
-  from: mock(() => ({
-    where: mock(() => ({
-      limit: mock(() => Promise.resolve([{ planTier: "pro" }])),
-    })),
-  })),
-}));
+const mockDbSubscriptionUpdate = mock(() => Promise.resolve());
+const mockDbSubscriptionFindFirst = mock(() =>
+  Promise.resolve({ id: "sub-1", workspaceId: "ws-1", stripeCustomerId: "cus_123", planTier: "pro" })
+);
+const mockDbSubscriptionUpsert = mock(() => Promise.resolve());
 
 // Mock modules
 mock.module("../../src/modules/billing/stripe.js", () => ({
@@ -42,30 +35,12 @@ mock.module("../../src/modules/billing/stripe.js", () => ({
 
 mock.module("@zenda/db/client", () => ({
   db: {
-    update: mockDbUpdate,
-    select: mockDbSelect,
-    insert: mock(() => ({
-      values: mock(() => ({
-        onConflictDoNothing: mock(() => Promise.resolve()),
-      })),
-    })),
+    subscription: {
+      update: mockDbSubscriptionUpdate,
+      findFirst: mockDbSubscriptionFindFirst,
+      upsert: mockDbSubscriptionUpsert,
+    },
   },
-}));
-
-mock.module("@zenda/db/schema", () => ({
-  subscriptions: {
-    workspaceId: "workspaceId",
-    stripeCustomerId: "stripeCustomerId",
-    stripeSubscriptionId: "stripeSubscriptionId",
-    planTier: "planTier",
-    billingPeriod: "billingPeriod",
-    status: "status",
-    id: "id",
-  },
-}));
-
-mock.module("drizzle-orm", () => ({
-  eq: (_col: string, _val: string) => "eq_mock",
 }));
 
 mock.module("../../src/modules/usage/enforcement.js", () => ({
@@ -103,7 +78,7 @@ describe("handleWebhook - checkout.session.completed", () => {
   beforeEach(() => {
     mockConstructEvent.mockClear();
     mockRetrieveSubscription.mockClear();
-    mockDbUpdate.mockClear();
+    mockDbSubscriptionUpdate.mockClear();
   });
 
   test("activates subscription on checkout completion", async () => {
@@ -129,7 +104,7 @@ describe("handleWebhook - checkout.session.completed", () => {
 
     await handleWebhook("body", "sig");
 
-    expect(mockDbUpdate).toHaveBeenCalled();
+    expect(mockDbSubscriptionUpdate).toHaveBeenCalled();
   });
 
   test("skips if no workspaceId in metadata", async () => {
@@ -156,7 +131,7 @@ describe("handleWebhook - checkout.session.completed", () => {
 describe("handleWebhook - customer.subscription.deleted", () => {
   beforeEach(() => {
     mockConstructEvent.mockClear();
-    mockDbUpdate.mockClear();
+    mockDbSubscriptionUpdate.mockClear();
   });
 
   test("marks subscription as canceled", async () => {
@@ -171,7 +146,7 @@ describe("handleWebhook - customer.subscription.deleted", () => {
     });
 
     await handleWebhook("body", "sig");
-    expect(mockDbUpdate).toHaveBeenCalled();
+    expect(mockDbSubscriptionUpdate).toHaveBeenCalled();
   });
 });
 
@@ -182,8 +157,8 @@ describe("handleWebhook - customer.subscription.deleted", () => {
 describe("handleWebhook - invoice.payment_failed", () => {
   beforeEach(() => {
     mockConstructEvent.mockClear();
-    mockDbUpdate.mockClear();
-    mockDbSelect.mockClear();
+    mockDbSubscriptionUpdate.mockClear();
+    mockDbSubscriptionFindFirst.mockClear();
   });
 
   test("sets subscription to past_due on payment failure", async () => {
@@ -196,25 +171,8 @@ describe("handleWebhook - invoice.payment_failed", () => {
       },
     });
 
-    // Mock select to find a subscription
-    mockDbSelect.mockReturnValue({
-      from: mock(() => ({
-        where: mock(() => ({
-          limit: mock(() =>
-            Promise.resolve([
-              {
-                id: "sub-1",
-                workspaceId: "ws-1",
-                stripeCustomerId: "cus_123",
-              },
-            ])
-          ),
-        })),
-      })),
-    });
-
     await handleWebhook("body", "sig");
-    expect(mockDbUpdate).toHaveBeenCalled();
+    expect(mockDbSubscriptionUpdate).toHaveBeenCalled();
   });
 });
 

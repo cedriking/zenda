@@ -1,10 +1,8 @@
 import { db } from "@zenda/db/client";
-import { businessProfiles, receptionistProfiles } from "@zenda/db/schema";
 import {
   updateBusinessProfileSchema,
   updateReceptionistProfileSchema,
 } from "@zenda/shared";
-import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -16,11 +14,9 @@ export const businessModule = new Elysia({ prefix: "/business" })
   // Get business profile
   .get("/profile", async ({ workspaceId, set }) => {
     try {
-      const [profile] = await db
-        .select()
-        .from(businessProfiles)
-        .where(eq(businessProfiles.workspaceId, workspaceId!))
-        .limit(1);
+      const profile = await db.businessProfile.findFirst({
+        where: { workspaceId: workspaceId! },
+      });
       if (!profile) {
         return notFound(set, "Business profile not found");
       }
@@ -46,11 +42,10 @@ export const businessModule = new Elysia({ prefix: "/business" })
           );
         }
 
-        const [updated] = await db
-          .update(businessProfiles)
-          .set({ ...parsed.data, updatedAt: new Date() })
-          .where(eq(businessProfiles.workspaceId, workspaceId!))
-          .returning();
+        const updated = await db.businessProfile.update({
+          where: { workspaceId: workspaceId! },
+          data: { ...parsed.data, updatedAt: new Date() },
+        });
         if (!updated) {
           return notFound(set, "Business profile not found");
         }
@@ -83,11 +78,9 @@ export const businessModule = new Elysia({ prefix: "/business" })
   // Get receptionist profile
   .get("/receptionist", async ({ workspaceId, set }) => {
     try {
-      const [profile] = await db
-        .select()
-        .from(receptionistProfiles)
-        .where(eq(receptionistProfiles.workspaceId, workspaceId!))
-        .limit(1);
+      const profile = await db.receptionistProfile.findFirst({
+        where: { workspaceId: workspaceId! },
+      });
       if (!profile) {
         return notFound(set, "Receptionist profile not found");
       }
@@ -115,11 +108,10 @@ export const businessModule = new Elysia({ prefix: "/business" })
 
         // Pass through all validated data plus any extra fields the schema allows through
         const data = parsed.data;
-        const [updated] = await db
-          .update(receptionistProfiles)
-          .set({ ...data, updatedAt: new Date() })
-          .where(eq(receptionistProfiles.workspaceId, workspaceId!))
-          .returning();
+        const updated = await db.receptionistProfile.update({
+          where: { workspaceId: workspaceId! },
+          data: { ...data, updatedAt: new Date() },
+        });
         if (!updated) {
           return notFound(set, "Receptionist profile not found");
         }

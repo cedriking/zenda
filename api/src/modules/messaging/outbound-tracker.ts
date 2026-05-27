@@ -5,9 +5,7 @@
  * the "max N outbound without reply" rule.
  */
 import { db } from "@zenda/db/client";
-import { outboundMessageLog } from "@zenda/db/schema";
 import type { MessagePurpose } from "@zenda/shared";
-import { and, eq } from "drizzle-orm";
 
 /**
  * Increment outbound counter after a successful send.
@@ -21,24 +19,26 @@ export async function incrementOutbound(
   const existing = await getLog(workspaceId, customerId);
 
   if (existing) {
-    await db
-      .update(outboundMessageLog)
-      .set({
+    await db.outboundMessageLog.update({
+      where: { id: existing.id },
+      data: {
         outboundSinceLastInbound: existing.outboundSinceLastInbound + 1,
         lastOutboundAt: new Date(),
         purposeOfLastOutbound: purpose,
         conversationId: conversationId ?? existing.conversationId,
         updatedAt: new Date(),
-      })
-      .where(eq(outboundMessageLog.id, existing.id));
+      },
+    });
   } else {
-    await db.insert(outboundMessageLog).values({
-      workspaceId,
-      customerId,
-      conversationId,
-      outboundSinceLastInbound: 1,
-      lastOutboundAt: new Date(),
-      purposeOfLastOutbound: purpose,
+    await db.outboundMessageLog.create({
+      data: {
+        workspaceId,
+        customerId,
+        conversationId,
+        outboundSinceLastInbound: 1,
+        lastOutboundAt: new Date(),
+        purposeOfLastOutbound: purpose,
+      },
     });
   }
 }
@@ -53,20 +53,22 @@ export async function resetOnInbound(
   const existing = await getLog(workspaceId, customerId);
 
   if (existing) {
-    await db
-      .update(outboundMessageLog)
-      .set({
+    await db.outboundMessageLog.update({
+      where: { id: existing.id },
+      data: {
         outboundSinceLastInbound: 0,
         lastInboundAt: new Date(),
         updatedAt: new Date(),
-      })
-      .where(eq(outboundMessageLog.id, existing.id));
+      },
+    });
   } else {
-    await db.insert(outboundMessageLog).values({
-      workspaceId,
-      customerId,
-      outboundSinceLastInbound: 0,
-      lastInboundAt: new Date(),
+    await db.outboundMessageLog.create({
+      data: {
+        workspaceId,
+        customerId,
+        outboundSinceLastInbound: 0,
+        lastInboundAt: new Date(),
+      },
     });
   }
 }
@@ -86,15 +88,11 @@ export async function getOutboundCount(
  * Get the full log record.
  */
 export async function getLog(workspaceId: string, customerId: string) {
-  const [log] = await db
-    .select()
-    .from(outboundMessageLog)
-    .where(
-      and(
-        eq(outboundMessageLog.workspaceId, workspaceId),
-        eq(outboundMessageLog.customerId, customerId)
-      )
-    )
-    .limit(1);
+  const log = await db.outboundMessageLog.findFirst({
+    where: {
+      workspaceId,
+      customerId,
+    },
+  });
   return log ?? null;
 }

@@ -1,6 +1,4 @@
 import { db } from "@zenda/db/client";
-import { workspaces } from "@zenda/db/schema";
-import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -16,11 +14,10 @@ import {
 } from "./flow.js";
 
 async function getWorkspaceLanguage(workspaceId: string): Promise<"en" | "es"> {
-  const [ws] = await db
-    .select({ defaultLanguage: workspaces.defaultLanguage })
-    .from(workspaces)
-    .where(eq(workspaces.id, workspaceId))
-    .limit(1);
+  const ws = await db.workspace.findFirst({
+    where: { id: workspaceId },
+    select: { defaultLanguage: true },
+  });
   return (ws?.defaultLanguage as "en" | "es") ?? "en";
 }
 

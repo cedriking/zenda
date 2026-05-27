@@ -1,13 +1,5 @@
 import { db } from "@zenda/db/client";
-import {
-  availabilityRules,
-  businessProfiles,
-  receptionistProfiles,
-  services,
-  workspaces,
-} from "@zenda/db/schema";
 import type { OnboardingStep } from "@zenda/shared";
-import { eq } from "drizzle-orm";
 
 interface OnboardingQuestion {
   field: string;
@@ -141,11 +133,9 @@ export async function getNextOnboardingQuestion(
   workspaceId: string,
   language: "en" | "es" = "en"
 ): Promise<{ question: string; step: string } | null> {
-  const [ws] = await db
-    .select()
-    .from(workspaces)
-    .where(eq(workspaces.id, workspaceId))
-    .limit(1);
+  const ws = await db.workspace.findFirst({
+    where: { id: workspaceId },
+  });
 
   if (!ws) {
     return null;
@@ -265,41 +255,37 @@ async function saveStepData(
     case "whatsapp_connected": {
       const businessName = response.trim();
       // Update workspace name
-      await db
-        .update(workspaces)
-        .set({ name: businessName, updatedAt: new Date() })
-        .where(eq(workspaces.id, workspaceId));
+      await db.workspace.update({
+        where: { id: workspaceId },
+        data: { name: businessName, updatedAt: new Date() },
+      });
       // Upsert business profile
-      const [existing] = await db
-        .select()
-        .from(businessProfiles)
-        .where(eq(businessProfiles.workspaceId, workspaceId))
-        .limit(1);
+      const existing = await db.businessProfile.findFirst({
+        where: { workspaceId },
+      });
       if (existing) {
-        await db
-          .update(businessProfiles)
-          .set({ name: businessName, updatedAt: new Date() })
-          .where(eq(businessProfiles.id, existing.id));
+        await db.businessProfile.update({
+          where: { id: existing.id },
+          data: { name: businessName, updatedAt: new Date() },
+        });
       } else {
-        await db
-          .insert(businessProfiles)
-          .values({ workspaceId, name: businessName });
+        await db.businessProfile.create({
+          data: { workspaceId, name: businessName },
+        });
       }
       break;
     }
 
     case "business_info": {
       const category = mapCategory(response);
-      const [existing] = await db
-        .select()
-        .from(businessProfiles)
-        .where(eq(businessProfiles.workspaceId, workspaceId))
-        .limit(1);
+      const existing = await db.businessProfile.findFirst({
+        where: { workspaceId },
+      });
       if (existing) {
-        await db
-          .update(businessProfiles)
-          .set({ category, updatedAt: new Date() })
-          .where(eq(businessProfiles.id, existing.id));
+        await db.businessProfile.update({
+          where: { id: existing.id },
+          data: { category, updatedAt: new Date() },
+        });
       }
       break;
     }
@@ -307,11 +293,13 @@ async function saveStepData(
     case "services": {
       const parsed = parseServices(response);
       for (const svc of parsed) {
-        await db.insert(services).values({
-          workspaceId,
-          name: svc.name,
-          durationMinutes: svc.durationMinutes,
-          priceCents: svc.priceCents,
+        await db.services.create({
+          data: {
+            workspaceId,
+            name: svc.name,
+            durationMinutes: svc.durationMinutes,
+            priceCents: svc.priceCents,
+          },
         });
       }
       break;
@@ -320,16 +308,18 @@ async function saveStepData(
     case "availability": {
       const rules = parseAvailability(response);
       // Delete existing rules before inserting to prevent duplicates
-      await db
-        .delete(availabilityRules)
-        .where(eq(availabilityRules.workspaceId, workspaceId));
+      await db.availabilityRule.deleteMany({
+        where: { workspaceId },
+      });
       for (const rule of rules) {
-        await db.insert(availabilityRules).values({
-          workspaceId,
-          dayOfWeek: rule.dayOfWeek,
-          startTime: rule.startTime,
-          endTime: rule.endTime,
-          available: true,
+        await db.availabilityRule.create({
+          data: {
+            workspaceId,
+            dayOfWeek: rule.dayOfWeek,
+            startTime: rule.startTime,
+            endTime: rule.endTime,
+            available: true,
+          },
         });
       }
       break;
@@ -337,45 +327,43 @@ async function saveStepData(
 
     case "policies": {
       const policy = response.trim();
-      const [existing] = await db
-        .select()
-        .from(businessProfiles)
-        .where(eq(businessProfiles.workspaceId, workspaceId))
-        .limit(1);
+      const existing = await db.businessProfile.findFirst({
+        where: { workspaceId },
+      });
       if (existing) {
-        await db
-          .update(businessProfiles)
-          .set({
+        await db.businessProfile.update({
+          where: { id: existing.id },
+          data: {
             cancellationPolicy: policy,
             cancellationPolicyEs: policy,
             updatedAt: new Date(),
-          })
-          .where(eq(businessProfiles.id, existing.id));
+          },
+        });
       }
       break;
     }
 
     case "receptionist_config": {
       const config = parseReceptionistConfig(response);
-      const [existing] = await db
-        .select()
-        .from(receptionistProfiles)
-        .where(eq(receptionistProfiles.workspaceId, workspaceId))
-        .limit(1);
+      const existing = await db.receptionistProfile.findFirst({
+        where: { workspaceId },
+      });
       if (existing) {
-        await db
-          .update(receptionistProfiles)
-          .set({
+        await db.receptionistProfile.update({
+          where: { id: existing.id },
+          data: {
             name: config.name,
             tone: config.tone,
             updatedAt: new Date(),
-          })
-          .where(eq(receptionistProfiles.id, existing.id));
+          },
+        });
       } else {
-        await db.insert(receptionistProfiles).values({
-          workspaceId,
-          name: config.name,
-          tone: config.tone,
+        await db.receptionistProfile.create({
+          data: {
+            workspaceId,
+            name: config.name,
+            tone: config.tone,
+          },
         });
       }
       break;

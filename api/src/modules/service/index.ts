@@ -1,7 +1,5 @@
 import { db } from "@zenda/db/client";
-import { services } from "@zenda/db/schema";
 import { createServiceSchema, updateServiceSchema } from "@zenda/shared";
-import { and, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -12,10 +10,9 @@ export const serviceModule = new Elysia({ prefix: "/services" })
 
   .get("/", async ({ workspaceId, set }) => {
     try {
-      return db
-        .select()
-        .from(services)
-        .where(eq(services.workspaceId, workspaceId!));
+      return db.services.findMany({
+        where: { workspaceId: workspaceId! },
+      });
     } catch (err) {
       logger.error("Failed to list services", {
         error: (err as Error).message,
@@ -37,16 +34,15 @@ export const serviceModule = new Elysia({ prefix: "/services" })
         }
 
         const { name, description, durationMinutes, priceCents } = parsed.data;
-        const [svc] = await db
-          .insert(services)
-          .values({
+        const svc = await db.services.create({
+          data: {
             workspaceId: workspaceId!,
             name,
             description: description ?? null,
             durationMinutes,
             priceCents: priceCents ?? null,
-          })
-          .returning();
+          },
+        });
         return svc;
       } catch (err) {
         logger.error("Failed to create service", {
@@ -77,21 +73,15 @@ export const serviceModule = new Elysia({ prefix: "/services" })
           );
         }
 
-        const [updated] = await db
-          .update(services)
-          .set({ ...parsed.data, updatedAt: new Date() })
-          .where(
-            and(
-              eq(services.id, params.id),
-              eq(services.workspaceId, workspaceId!)
-            )
-          )
-          .returning();
-        if (!updated) {
-          return notFound(set, "Service not found");
-        }
+        const updated = await db.services.update({
+          where: { id: params.id, workspaceId: workspaceId! },
+          data: { ...parsed.data, updatedAt: new Date() },
+        });
         return updated;
       } catch (err) {
+        if ((err as any)?.code === "P2025") {
+          return notFound(set, "Service not found");
+        }
         logger.error("Failed to update service", {
           error: (err as Error).message,
         });
@@ -111,17 +101,14 @@ export const serviceModule = new Elysia({ prefix: "/services" })
 
   .delete("/:id", async ({ workspaceId, params, set }) => {
     try {
-      const result = await db
-        .delete(services)
-        .where(
-          and(
-            eq(services.id, params.id),
-            eq(services.workspaceId, workspaceId!)
-          )
-        )
-        .returning();
-      return { deleted: result.length > 0 };
+      await db.services.delete({
+        where: { id: params.id, workspaceId: workspaceId! },
+      });
+      return { deleted: true };
     } catch (err) {
+      if ((err as any)?.code === "P2025") {
+        return { deleted: false };
+      }
       logger.error("Failed to delete service", {
         error: (err as Error).message,
       });

@@ -1,7 +1,5 @@
 import { cors } from "@elysiajs/cors";
 import { db } from "@zenda/db/client";
-import { revokedTokens, workspaceMembers, workspaces } from "@zenda/db/schema";
-import { and, eq, lt, sql } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { jwtVerify } from "jose";
 import {
@@ -108,11 +106,9 @@ const _app = new Elysia()
         | string
         | undefined;
       if (jti) {
-        const [revoked] = await db
-          .select({ id: revokedTokens.id })
-          .from(revokedTokens)
-          .where(eq(revokedTokens.tokenJti, jti))
-          .limit(1);
+        const revoked = await db.revokedToken.findFirst({
+          where: { tokenJti: jti },
+        });
         if (revoked) {
           return {
             userId: null as string | null,
@@ -124,24 +120,17 @@ const _app = new Elysia()
       // biome-ignore lint/suspicious/noExplicitAny: workspace type resolved dynamically from DB
       let workspace: any = null;
       if (userId && workspaceId) {
-        const [membership] = await db
-          .select()
-          .from(workspaceMembers)
-          .where(
-            and(
-              eq(workspaceMembers.userId, userId),
-              eq(workspaceMembers.workspaceId, workspaceId)
-            )
-          )
-          .limit(1);
+        const membership = await db.workspaceMember.findFirst({
+          where: {
+            userId,
+            workspaceId,
+          },
+        });
 
         if (membership) {
-          const [ws] = await db
-            .select()
-            .from(workspaces)
-            .where(eq(workspaces.id, workspaceId))
-            .limit(1);
-          workspace = ws ?? null;
+          workspace = await db.workspace.findUnique({
+            where: { id: workspaceId },
+          });
         }
       }
 
@@ -186,7 +175,7 @@ const _app = new Elysia()
     };
 
     try {
-      await db.execute(sql`SELECT 1`);
+      await db.$queryRaw`SELECT 1`;
       checks.db = true;
     } catch {
       // db unreachable — health check reports degraded
@@ -292,13 +281,12 @@ setInterval(async () => {
     const cutoff = new Date(
       Date.now() - REVOKED_TOKEN_MAX_AGE_DAYS * 24 * 60 * 60 * 1000
     );
-    const result = await db
-      .delete(revokedTokens)
-      .where(lt(revokedTokens.revokedAt, cutoff))
-      .returning({ id: revokedTokens.id });
-    if (result.length > 0) {
+    const result = await db.revokedToken.deleteMany({
+      where: { revokedAt: { lt: cutoff } },
+    });
+    if (result.count > 0) {
       logger.info("Cleaned up expired revoked tokens", {
-        count: result.length,
+        count: result.count,
       });
     }
   } catch (err) {

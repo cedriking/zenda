@@ -5,13 +5,11 @@
  * Detects opt-out intent from customer messages and generates confirmation text.
  */
 import { db } from "@zenda/db/client";
-import { messagingConsent, outboundQueue } from "@zenda/db/schema";
 import type {
   ConsentSource,
   MessagePurpose,
   MessagingConsentStatus,
 } from "@zenda/shared";
-import { and, eq } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 
 // --- Opt-out regex patterns (EN + ES) ---
@@ -41,27 +39,29 @@ export async function recordConsent(input: RecordConsentInput): Promise<void> {
   const existing = await getConsent(input.workspaceId, input.customerId);
 
   if (existing) {
-    await db
-      .update(messagingConsent)
-      .set({
+    await db.messagingConsent.update({
+      where: { id: existing.id },
+      data: {
         status: input.status,
         source: input.source,
         allowedPurposes: input.allowedPurposes ?? existing.allowedPurposes,
         notes: input.notes ?? existing.notes,
         capturedAt: new Date(),
         updatedAt: new Date(),
-      })
-      .where(eq(messagingConsent.id, existing.id));
+      },
+    });
   } else {
-    await db.insert(messagingConsent).values({
-      workspaceId: input.workspaceId,
-      customerId: input.customerId,
-      phoneNumber: input.phoneNumber,
-      status: input.status,
-      source: input.source,
-      allowedPurposes: input.allowedPurposes ?? [],
-      notes: input.notes,
-      capturedAt: new Date(),
+    await db.messagingConsent.create({
+      data: {
+        workspaceId: input.workspaceId,
+        customerId: input.customerId,
+        phoneNumber: input.phoneNumber,
+        status: input.status,
+        source: input.source,
+        allowedPurposes: input.allowedPurposes ?? [],
+        notes: input.notes,
+        capturedAt: new Date(),
+      },
     });
   }
 }
@@ -71,16 +71,12 @@ export async function recordConsent(input: RecordConsentInput): Promise<void> {
  * Returns null if no record exists.
  */
 export async function getConsent(workspaceId: string, customerId: string) {
-  const [record] = await db
-    .select()
-    .from(messagingConsent)
-    .where(
-      and(
-        eq(messagingConsent.workspaceId, workspaceId),
-        eq(messagingConsent.customerId, customerId)
-      )
-    )
-    .limit(1);
+  const record = await db.messagingConsent.findFirst({
+    where: {
+      workspaceId,
+      customerId,
+    },
+  });
 
   return record ?? null;
 }
@@ -201,15 +197,13 @@ export async function touchInboundTimestamp(
     });
   }
 
-  await db
-    .update(messagingConsent)
-    .set(updates)
-    .where(
-      and(
-        eq(messagingConsent.workspaceId, workspaceId),
-        eq(messagingConsent.customerId, customerId)
-      )
-    );
+  await db.messagingConsent.updateMany({
+    where: {
+      workspaceId,
+      customerId,
+    },
+    data: updates,
+  });
 }
 
 /**
@@ -220,20 +214,18 @@ async function cancelPendingMessagesForCustomer(
   customerId: string
 ): Promise<void> {
   try {
-    await db
-      .update(outboundQueue)
-      .set({
+    await db.outboundQueue.updateMany({
+      where: {
+        workspaceId,
+        customerId,
+        status: "pending",
+      },
+      data: {
         status: "failed",
         failureReason: "Cancelled due to customer opt-out",
         updatedAt: new Date(),
-      })
-      .where(
-        and(
-          eq(outboundQueue.workspaceId, workspaceId),
-          eq(outboundQueue.customerId, customerId),
-          eq(outboundQueue.status, "pending")
-        )
-      );
+      },
+    });
   } catch (err) {
     logger.error("Failed to cancel pending messages on opt-out", {
       workspaceId,

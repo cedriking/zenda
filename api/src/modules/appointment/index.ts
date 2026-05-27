@@ -1,16 +1,9 @@
-import { db } from "@zenda/db/client";
-import {
-  appointments,
-  customers,
-  services,
-  workspaces,
-} from "@zenda/db/schema";
+import { db, Prisma } from "@zenda/db/client";
 import {
   createAppointmentSchema,
   TERMINAL_STATUSES,
   updateAppointmentStatusSchema,
 } from "@zenda/shared";
-import { and, desc, eq, gt, gte, inArray, lt, lte, ne, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -33,38 +26,32 @@ async function resolveCustomer(
   phone: string
 ): Promise<string> {
   const normalized = phone.replace(/[\s()-]/g, "");
-  const [existing] = await db
-    .select({ id: customers.id })
-    .from(customers)
-    .where(
-      and(
-        eq(customers.workspaceId, workspaceId),
-        eq(customers.phoneNumber, normalized)
-      )
-    )
-    .limit(1);
+  const existing = await db.customer.findFirst({
+    where: {
+      workspaceId,
+      phoneNumber: normalized,
+    },
+    select: { id: true, name: true },
+  });
 
   if (existing) {
     // Update name if provided and currently null
-    if (name) {
-      await db
-        .update(customers)
-        .set({ name, updatedAt: new Date() })
-        .where(
-          and(eq(customers.id, existing.id), sql`${customers.name} IS NULL`)
-        );
+    if (name && !existing.name) {
+      await db.customer.update({
+        where: { id: existing.id },
+        data: { name, updatedAt: new Date() },
+      });
     }
     return existing.id;
   }
 
-  const [created] = await db
-    .insert(customers)
-    .values({
+  const created = await db.customer.create({
+    data: {
       workspaceId,
       phoneNumber: normalized,
       name: name || null,
-    })
-    .returning();
+    },
+  });
   return created.id;
 }
 
@@ -84,51 +71,55 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
       const parsedLimit = Math.max(1, Math.min(200, Number(limit) || 50));
       const parsedOffset = Math.max(0, Number(offset) || 0);
 
-      const conditions = [eq(appointments.workspaceId, workspaceId!)];
+      // Build where conditions
+      // biome-ignore lint/style/noNonNullAssertion: validated by middleware
+      const where: Record<string, unknown> = { workspaceId: workspaceId! };
       if (status) {
         const statuses = status
           .split(",")
           .map((s) => s.trim())
           .filter(Boolean);
         if (statuses.length === 1) {
-          conditions.push(eq(appointments.status, statuses[0] as any));
+          where.status = statuses[0];
         } else if (statuses.length > 1) {
-          conditions.push(inArray(appointments.status, statuses as any));
+          where.status = { in: statuses };
         }
       }
       if (from) {
         const fromDate = new Date(from);
         if (!Number.isNaN(fromDate.getTime())) {
-          conditions.push(gte(appointments.startAt, fromDate));
+          where.startAt = {
+            ...((where.startAt as Record<string, unknown>) || {}),
+            gte: fromDate,
+          };
         }
       }
       if (to) {
         const toDate = new Date(to);
         if (!Number.isNaN(toDate.getTime())) {
-          conditions.push(lte(appointments.startAt, toDate));
+          where.startAt = {
+            ...((where.startAt as Record<string, unknown>) || {}),
+            lte: toDate,
+          };
         }
       }
 
-      const rows = await db
-        .select({
-          appointment: appointments,
-          customerName: customers.name,
-          customerPhone: customers.phoneNumber,
-          serviceName: services.name,
-        })
-        .from(appointments)
-        .leftJoin(customers, eq(appointments.customerId, customers.id))
-        .leftJoin(services, eq(appointments.serviceId, services.id))
-        .where(and(...conditions))
-        .orderBy(desc(appointments.startAt))
-        .limit(parsedLimit)
-        .offset(parsedOffset);
+      const rows = await db.appointment.findMany({
+        where,
+        orderBy: { startAt: "desc" },
+        take: parsedLimit,
+        skip: parsedOffset,
+        include: {
+          customer: { select: { name: true, phoneNumber: true } },
+          service: { select: { name: true } },
+        },
+      });
 
       return rows.map((row) => ({
-        ...row.appointment,
-        customerName: row.customerName,
-        customerPhone: row.customerPhone,
-        serviceName: row.serviceName,
+        ...row,
+        customerName: row.customer?.name ?? null,
+        customerPhone: row.customer?.phoneNumber ?? null,
+        serviceName: row.service?.name ?? null,
       }));
     } catch (err) {
       logger.error("Failed to list appointments", {
@@ -141,30 +132,25 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
   // Get appointment by ID (with customer and service names)
   .get("/:id", async ({ workspaceId, params, set }) => {
     try {
-      const [row] = await db
-        .select({
-          appointment: appointments,
-          customerName: customers.name,
-          serviceName: services.name,
-        })
-        .from(appointments)
-        .leftJoin(customers, eq(appointments.customerId, customers.id))
-        .leftJoin(services, eq(appointments.serviceId, services.id))
-        .where(
-          and(
-            eq(appointments.id, params.id),
-            eq(appointments.workspaceId, workspaceId!)
-          )
-        )
-        .limit(1);
+      const row = await db.appointment.findFirst({
+        where: {
+          id: params.id,
+          // biome-ignore lint/style/noNonNullAssertion: validated by middleware
+          workspaceId: workspaceId!,
+        },
+        include: {
+          customer: { select: { name: true } },
+          service: { select: { name: true } },
+        },
+      });
 
       if (!row) {
         return notFound(set, "Appointment not found");
       }
       return {
-        ...row.appointment,
-        customerName: row.customerName,
-        serviceName: row.serviceName,
+        ...row,
+        customerName: row.customer?.name ?? null,
+        serviceName: row.service?.name ?? null,
       };
     } catch (err) {
       logger.error("Failed to get appointment", {
@@ -204,12 +190,11 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
 
         // Derive timezone from workspace settings if not provided
         if (!timezone) {
-          const [ws] = await db
-            .select({ timezone: workspaces.timezone })
-            .from(workspaces)
+          const ws = await db.workspace.findFirst({
             // biome-ignore lint/style/noNonNullAssertion: validated by middleware
-            .where(eq(workspaces.id, workspaceId!))
-            .limit(1);
+            where: { id: workspaceId! },
+            select: { timezone: true },
+          });
           timezone = ws?.timezone || "UTC";
         }
 
@@ -245,42 +230,31 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
         // Use a transaction with pessimistic lock to prevent double-booking.
         // SELECT FOR UPDATE acquires a lock on overlapping rows so concurrent
         // writers cannot both see "no overlap" and proceed.
-        const apt = await db.transaction(async (tx) => {
+        const apt = await db.$transaction(async (tx) => {
           // Overlap: same workspace, same staff, overlapping time range, non-terminal status.
-          // Two ranges [A_start, A_end) and [B_start, B_end) overlap when:
-          //   A_start < B_end AND B_start < A_end
-          const overlapConditions = [
-            // biome-ignore lint/style/noNonNullAssertion: validated by middleware
-            eq(appointments.workspaceId, workspaceId!),
-            lt(appointments.startAt, endAtDate),
-            gt(appointments.endAt, startAtDate),
-            ...TERMINAL_STATUSES.map((s) => ne(appointments.status, s)),
-          ];
+          // Must use raw SQL because Prisma does not support pessimistic locking.
+          // biome-ignore lint/style/noNonNullAssertion: validated by middleware
+          const wsId = workspaceId!;
 
-          if (staffMemberId) {
-            overlapConditions.push(
-              eq(appointments.staffMemberId, staffMemberId)
-            );
-          } else {
-            overlapConditions.push(sql`${appointments.staffMemberId} IS NULL`);
-          }
-
-          const overlapping = await tx
-            .select({ id: appointments.id })
-            .from(appointments)
-            .where(and(...overlapConditions))
-            .limit(1)
-            .for("update");
+          // Use parameterized query to prevent SQL injection
+          const overlapping: Array<{ id: string }> = await tx.$queryRaw`
+              SELECT id FROM appointments
+              WHERE workspace_id = ${wsId}
+                AND start_at < ${endAtDate}
+                AND end_at > ${startAtDate}
+                AND status NOT IN (${Prisma.join(TERMINAL_STATUSES)})
+                AND staff_member_id ${staffMemberId ? Prisma.sql`= ${staffMemberId}` : Prisma.sql`IS NULL`}
+              LIMIT 1
+              FOR UPDATE
+            `;
 
           if (overlapping.length > 0) {
             return null;
           }
 
-          const [inserted] = await tx
-            .insert(appointments)
-            .values({
-              // biome-ignore lint/style/noNonNullAssertion: validated by middleware
-              workspaceId: workspaceId!,
+          const inserted = await tx.appointment.create({
+            data: {
+              workspaceId: wsId,
               customerId,
               serviceId,
               staffMemberId: staffMemberId ?? null,
@@ -292,8 +266,8 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
               createdBy: createdBy ?? "owner",
               notes:
                 ((body as Record<string, unknown>).notes as string) ?? null,
-            })
-            .returning();
+            },
+          });
 
           return inserted;
         });
@@ -308,21 +282,18 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
         });
 
         // Fetch customer and service names for the response
-        const [names] = await db
-          .select({
-            customerName: customers.name,
-            serviceName: services.name,
-          })
-          .from(appointments)
-          .leftJoin(customers, eq(appointments.customerId, customers.id))
-          .leftJoin(services, eq(appointments.serviceId, services.id))
-          .where(eq(appointments.id, apt.id))
-          .limit(1);
+        const names = await db.appointment.findFirst({
+          where: { id: apt.id },
+          include: {
+            customer: { select: { name: true } },
+            service: { select: { name: true } },
+          },
+        });
 
         return {
           ...apt,
-          customerName: names?.customerName ?? null,
-          serviceName: names?.serviceName ?? null,
+          customerName: names?.customer?.name ?? null,
+          serviceName: names?.service?.name ?? null,
         };
       } catch (err) {
         logger.error("Failed to create appointment", {
@@ -364,16 +335,13 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
 
         const { status } = parsed.data;
 
-        const [apt] = await db
-          .select()
-          .from(appointments)
-          .where(
-            and(
-              eq(appointments.id, params.id),
-              eq(appointments.workspaceId, workspaceId!)
-            )
-          )
-          .limit(1);
+        const apt = await db.appointment.findFirst({
+          where: {
+            id: params.id,
+            // biome-ignore lint/style/noNonNullAssertion: validated by middleware
+            workspaceId: workspaceId!,
+          },
+        });
 
         if (!apt) {
           return notFound(set, "Appointment not found");
@@ -396,23 +364,19 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
           updates.completedAt = new Date();
         }
 
-        const [updated] = await db
-          .update(appointments)
-          .set(updates)
-          .where(eq(appointments.id, apt.id))
-          .returning();
+        const updated = await db.appointment.update({
+          where: { id: apt.id },
+          data: updates,
+        });
 
         // Fetch customer and service names for the response
-        const [names] = await db
-          .select({
-            customerName: customers.name,
-            serviceName: services.name,
-          })
-          .from(appointments)
-          .leftJoin(customers, eq(appointments.customerId, customers.id))
-          .leftJoin(services, eq(appointments.serviceId, services.id))
-          .where(eq(appointments.id, apt.id))
-          .limit(1);
+        const names = await db.appointment.findFirst({
+          where: { id: apt.id },
+          include: {
+            customer: { select: { name: true } },
+            service: { select: { name: true } },
+          },
+        });
 
         logger.info("Appointment status updated", {
           workspaceId,
@@ -422,8 +386,8 @@ export const appointmentModule = new Elysia({ prefix: "/appointments" })
         });
         return {
           ...updated,
-          customerName: names?.customerName ?? null,
-          serviceName: names?.serviceName ?? null,
+          customerName: names?.customer?.name ?? null,
+          serviceName: names?.service?.name ?? null,
         };
       } catch (err) {
         logger.error("Failed to update appointment status", {

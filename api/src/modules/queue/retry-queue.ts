@@ -1,5 +1,4 @@
 import { db } from "@zenda/db/client";
-import { messages } from "@zenda/db/schema";
 import { logger } from "../../infra/logger.js";
 
 interface QueuedMessage {
@@ -115,13 +114,15 @@ export async function persistFailedMessage(msg: {
   contentType: string;
 }): Promise<void> {
   try {
-    await db.insert(messages).values({
-      conversationId: msg.conversationId,
-      workspaceId: msg.workspaceId,
-      senderType: "ai",
-      contentType: msg.contentType as "text",
-      body: msg.content,
-      status: "queued",
+    await db.message.create({
+      data: {
+        conversationId: msg.conversationId,
+        workspaceId: msg.workspaceId,
+        senderType: "ai",
+        contentType: msg.contentType as "text",
+        body: msg.content,
+        status: "queued",
+      },
     });
     logger.info("Failed message persisted to DB for recovery", {
       conversationId: msg.conversationId,

@@ -7,8 +7,6 @@
  */
 
 import { db } from "@zenda/db/client";
-import { revokedTokens, workspaceMembers, workspaces } from "@zenda/db/schema";
-import { and, eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { SignJWT } from "jose";
 
@@ -101,11 +99,9 @@ export function createTestApp(...modules: Elysia[]) {
           | string
           | undefined;
         if (jti) {
-          const [revoked] = await db
-            .select({ id: revokedTokens.id })
-            .from(revokedTokens)
-            .where(eq(revokedTokens.tokenJti, jti))
-            .limit(1);
+          const revoked = await db.revokedToken.findFirst({
+            where: { tokenJti: jti },
+          });
           if (revoked) {
             return {
               userId: null as string | null,
@@ -117,24 +113,17 @@ export function createTestApp(...modules: Elysia[]) {
 
         let workspace: any = null;
         if (userId && workspaceId) {
-          const [membership] = await db
-            .select()
-            .from(workspaceMembers)
-            .where(
-              and(
-                eq(workspaceMembers.userId, userId),
-                eq(workspaceMembers.workspaceId, workspaceId)
-              )
-            )
-            .limit(1);
+          const membership = await db.workspaceMember.findFirst({
+            where: {
+              userId,
+              workspaceId,
+            },
+          });
 
           if (membership) {
-            const [ws] = await db
-              .select()
-              .from(workspaces)
-              .where(eq(workspaces.id, workspaceId))
-              .limit(1);
-            workspace = ws ?? null;
+            workspace = await db.workspace.findUnique({
+              where: { id: workspaceId },
+            });
           }
         }
 

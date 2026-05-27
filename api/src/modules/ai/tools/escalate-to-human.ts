@@ -8,9 +8,7 @@
  * - Sending policy is enforced at the agent layer, not bypassed here.
  */
 import { db } from "@zenda/db/client";
-import { conversations, escalations } from "@zenda/db/schema";
 import type { EscalationReason } from "@zenda/shared";
-import { eq } from "drizzle-orm";
 import { logger } from "../../../infra/logger.js";
 import { logEscalationCreated } from "../../audit/logger.js";
 import { createNotification } from "../../notification/service.js";
@@ -72,25 +70,24 @@ export async function escalateToHuman(
   const isEmergency = reason === "emergency";
 
   // 1. Update conversation mode to needs_attention
-  await db
-    .update(conversations)
-    .set({
+  await db.conversation.update({
+    where: { id: conversationId },
+    data: {
       mode: "needs_attention",
       needsAttentionReason: reason,
       updatedAt: new Date(),
-    })
-    .where(eq(conversations.id, conversationId));
+    },
+  });
 
   // 2. Create escalation record in escalations table
-  const [escalation] = await db
-    .insert(escalations)
-    .values({
+  const escalation = await db.escalation.create({
+    data: {
       conversationId,
       workspaceId,
       reason,
       status: "open",
-    })
-    .returning();
+    },
+  });
 
   logEscalationCreated(workspaceId, conversationId, reason).catch(() => {});
 

@@ -6,8 +6,6 @@
  */
 
 import { db } from "@zenda/db/client";
-import { appointments, customers } from "@zenda/db/schema";
-import { eq, sql } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 import { wsMessageSender } from "../../infra/message-sender.js";
 import { logMessageSent } from "../audit/logger.js";
@@ -69,11 +67,11 @@ function cleanupStaleWorkspaceTimestamps(): void {
  */
 async function persistKillSwitch(state: "running" | "paused"): Promise<void> {
   try {
-    await db.execute(sql`
+    await db.$executeRaw`
       INSERT INTO system_settings (key, value, updated_at)
       VALUES ('outbound_kill_switch', ${state}, NOW())
       ON CONFLICT (key) DO UPDATE SET value = ${state}, updated_at = NOW()
-    `);
+    `;
     killSwitchState = state;
   } catch (err) {
     logger.error("Failed to persist kill switch state", {
@@ -90,10 +88,10 @@ async function loadKillSwitchState(): Promise<void> {
     return;
   }
   try {
-    const [row] = (await db.execute(sql`
-      SELECT value FROM system_settings WHERE key = 'outbound_kill_switch'
-    `)) as any;
-    killSwitchState = row?.[0]?.value === "paused" ? "paused" : "running";
+    const rows = await db.$queryRaw<
+      Array<{ value: string }>
+    >`SELECT value FROM system_settings WHERE key = 'outbound_kill_switch'`;
+    killSwitchState = rows[0]?.value === "paused" ? "paused" : "running";
     isPaused = killSwitchState === "paused";
     if (isPaused) {
       logger.warn(
@@ -118,11 +116,9 @@ async function processOne(): Promise<boolean> {
 
   try {
     // Fetch related data for sending policy check
-    const [customer] = await db
-      .select()
-      .from(customers)
-      .where(eq(customers.id, msg.customerId))
-      .limit(1);
+    const customer = await db.customer.findFirst({
+      where: { id: msg.customerId },
+    });
 
     if (!customer) {
       await markFailed(msg.id, "Customer not found");
@@ -152,11 +148,9 @@ async function processOne(): Promise<boolean> {
     let appointmentTimePassed = false;
 
     if (msg.appointmentId) {
-      const [appt] = await db
-        .select()
-        .from(appointments)
-        .where(eq(appointments.id, msg.appointmentId))
-        .limit(1);
+      const appt = await db.appointment.findFirst({
+        where: { id: msg.appointmentId },
+      });
 
       if (appt) {
         appointmentCancelled = appt.status === "cancelled";

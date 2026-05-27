@@ -1,8 +1,6 @@
 import { db } from "@zenda/db/client";
-import { subscriptions } from "@zenda/db/schema";
 import type { PlanTier } from "@zenda/shared";
 import { PLANS } from "@zenda/shared";
-import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -29,11 +27,9 @@ export const usageModule = new Elysia({ prefix: "/usage" })
       const wsId = workspaceId!;
 
       // Get subscription/plan
-      const [sub] = await db
-        .select()
-        .from(subscriptions)
-        .where(eq(subscriptions.workspaceId, wsId))
-        .limit(1);
+      const sub = await db.subscription.findFirst({
+        where: { workspaceId: wsId },
+      });
 
       const tier: PlanTier = (sub?.planTier as PlanTier) ?? "local_solo";
       const plan = PLANS[tier];

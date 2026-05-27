@@ -1,6 +1,4 @@
 import { db } from "@zenda/db/client";
-import { appointments, conversations, messages } from "@zenda/db/schema";
-import { and, eq, gte, sql } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -34,17 +32,14 @@ export const analyticsModule = new Elysia({ prefix: "/analytics" })
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      const [result] = await db
-        .select({ count: sql<number>`COUNT(*)::int` })
-        .from(messages)
-        .where(
-          and(
-            eq(messages.workspaceId, workspaceId!),
-            gte(messages.createdAt, today)
-          )
-        );
+      const count = await db.message.count({
+        where: {
+          workspaceId: workspaceId!,
+          createdAt: { gte: today },
+        },
+      });
 
-      return { todayCount: result?.count ?? 0 };
+      return { todayCount: count };
     } catch (err) {
       logger.error("Failed to get messages today", {
         error: (err as Error).message,
@@ -59,50 +54,38 @@ export const analyticsModule = new Elysia({ prefix: "/analytics" })
 
       const [todayAppts, activeConvs, needsAttention, todayMsgs] =
         await Promise.all([
-          db
-            .select({ count: sql<number>`COUNT(*)::int` })
-            .from(appointments)
-            .where(
-              and(
-                eq(appointments.workspaceId, workspaceId!),
-                sql`DATE(${appointments.startAt}) = ${today}`,
-                sql`${appointments.status} NOT IN ('cancelled', 'completed', 'no_show')`
-              )
-            ),
-          db
-            .select({ count: sql<number>`COUNT(*)::int` })
-            .from(conversations)
-            .where(
-              and(
-                eq(conversations.workspaceId, workspaceId!),
-                eq(conversations.mode, "auto")
-              )
-            ),
-          db
-            .select({ count: sql<number>`COUNT(*)::int` })
-            .from(conversations)
-            .where(
-              and(
-                eq(conversations.workspaceId, workspaceId!),
-                sql`${conversations.mode} IN ('needs_attention', 'human_takeover')`
-              )
-            ),
-          db
-            .select({ count: sql<number>`COUNT(*)::int` })
-            .from(messages)
-            .where(
-              and(
-                eq(messages.workspaceId, workspaceId!),
-                gte(messages.createdAt, new Date(today))
-              )
-            ),
+          db.appointment.count({
+            where: {
+              workspaceId: workspaceId!,
+              startAt: { gte: new Date(today) },
+              status: { notIn: ["cancelled", "completed", "no_show"] },
+            },
+          }),
+          db.conversation.count({
+            where: {
+              workspaceId: workspaceId!,
+              mode: "auto",
+            },
+          }),
+          db.conversation.count({
+            where: {
+              workspaceId: workspaceId!,
+              mode: { in: ["needs_attention", "human_takeover"] },
+            },
+          }),
+          db.message.count({
+            where: {
+              workspaceId: workspaceId!,
+              createdAt: { gte: new Date(today) },
+            },
+          }),
         ]);
 
       return {
-        todayAppointments: todayAppts[0]?.count ?? 0,
-        activeConversations: activeConvs[0]?.count ?? 0,
-        needsAttention: needsAttention[0]?.count ?? 0,
-        todayMessages: todayMsgs[0]?.count ?? 0,
+        todayAppointments: todayAppts,
+        activeConversations: activeConvs,
+        needsAttention,
+        todayMessages: todayMsgs,
       };
     } catch (err) {
       logger.error("Failed to get dashboard stats", {

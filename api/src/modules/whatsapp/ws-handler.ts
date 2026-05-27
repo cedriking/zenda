@@ -358,20 +358,20 @@ export const wsModule = new Elysia({ prefix: "/ws" }).ws("/", {
       });
 
       // Update connection status in DB
-      import("drizzle-orm")
-        .then(({ eq }) => {
-          import("@zenda/db/client").then(({ db }) => {
-            import("@zenda/db/schema").then(({ whatsappConnections }) => {
-              db.update(whatsappConnections)
-                .set({
-                  // biome-ignore lint/suspicious/noExplicitAny: status enum mismatch
-                  status: statusData.status as any,
-                  updatedAt: new Date(),
-                })
-                // biome-ignore lint/style/noNonNullAssertion: workspaceId verified in open handler
-                .where(eq(whatsappConnections.workspaceId, workspaceId!));
+      import("@zenda/db/client")
+        .then(({ db }) => {
+          db.whatsappConnection
+            .update({
+              where: { workspaceId: workspaceId! },
+              data: {
+                // biome-ignore lint/suspicious/noExplicitAny: status enum mismatch
+                status: statusData.status as any,
+                updatedAt: new Date(),
+              },
+            })
+            .catch(() => {
+              // intentionally ignored — non-critical
             });
-          });
         })
         .catch(() => {
           // intentionally ignored — import errors are non-critical

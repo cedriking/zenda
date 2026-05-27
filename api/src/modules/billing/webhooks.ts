@@ -1,21 +1,13 @@
-import { db } from "@zenda/db/client";
-import {
-  type billingPeriodEnum,
-  type planTierEnum,
-  processedStripeEvents,
-  type subscriptionStatusEnum,
-  subscriptions,
-} from "@zenda/db/schema";
-import { eq } from "drizzle-orm";
+import { db, Prisma } from "@zenda/db/client";
 import type Stripe from "stripe";
 import { logger } from "../../infra/logger.js";
 import { resetUsageOnPlanChange } from "../usage/enforcement.js";
 import { tierFromPriceId } from "./products.js";
 import { STRIPE_WEBHOOK_SECRET, stripe } from "./stripe.js";
 
-type PlanTier = (typeof planTierEnum.enumValues)[number];
-type BillingPeriod = (typeof billingPeriodEnum.enumValues)[number];
-type SubscriptionStatus = (typeof subscriptionStatusEnum.enumValues)[number];
+type PlanTier = string;
+type BillingPeriod = string;
+type SubscriptionStatus = string;
 
 /**
  * Record a Stripe event as processed. Returns true if this is a new event
@@ -26,15 +18,21 @@ async function markEventProcessed(
   eventType: string
 ): Promise<boolean> {
   try {
-    await db.insert(processedStripeEvents).values({
-      id: eventId,
-      eventType,
+    await db.processedStripeEvent.create({
+      data: {
+        id: eventId,
+        eventType,
+      },
     });
     return true;
   } catch (err: unknown) {
     // PostgreSQL unique violation (23505) means already processed
     const pgErr = err as { code?: string } | undefined;
-    if (pgErr?.code === "23505") {
+    if (
+      pgErr?.code === "23505" ||
+      (err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === "P2002")
+    ) {
       logger.info("Duplicate Stripe event skipped", { eventId, eventType });
       return false;
     }
@@ -65,9 +63,9 @@ async function handleCheckoutCompleted(event: Stripe.Event): Promise<void> {
     current_period_end: number;
   };
 
-  await db
-    .update(subscriptions)
-    .set({
+  await db.subscription.update({
+    where: { workspaceId },
+    data: {
       stripeCustomerId: session.customer as string,
       stripeSubscriptionId: session.subscription as string,
       planTier: (tier ?? "local_solo") as PlanTier,
@@ -78,8 +76,8 @@ async function handleCheckoutCompleted(event: Stripe.Event): Promise<void> {
       ),
       currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
       updatedAt: new Date(),
-    })
-    .where(eq(subscriptions.workspaceId, workspaceId));
+    },
+  });
 
   logger.info("Subscription activated", { workspaceId, tier });
 }
@@ -100,11 +98,10 @@ async function handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
   const newTier = detectTierFromPrice(newPriceId);
 
   if (newTier) {
-    const [current] = await db
-      .select({ planTier: subscriptions.planTier })
-      .from(subscriptions)
-      .where(eq(subscriptions.workspaceId, workspaceId))
-      .limit(1);
+    const current = await db.subscription.findFirst({
+      where: { workspaceId },
+      select: { planTier: true },
+    });
 
     if (current && isDowngrade(current.planTier, newTier)) {
       logger.info("Plan downgrade detected — resetting usage", {
@@ -116,17 +113,17 @@ async function handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
     }
   }
 
-  await db
-    .update(subscriptions)
-    .set({
+  await db.subscription.update({
+    where: { stripeSubscriptionId: sub.id },
+    data: {
       ...(newTier ? { planTier: newTier as PlanTier } : {}),
       status: sub.status as SubscriptionStatus,
       currentPeriodStart: new Date(sub.current_period_start * 1000),
       currentPeriodEnd: new Date(sub.current_period_end * 1000),
       cancelAtPeriodEnd: sub.cancel_at_period_end,
       updatedAt: new Date(),
-    })
-    .where(eq(subscriptions.stripeSubscriptionId, sub.id));
+    },
+  });
 
   logger.info("Subscription updated", {
     workspaceId,
@@ -184,13 +181,13 @@ export async function handleWebhook(
         break;
       }
 
-      await db
-        .update(subscriptions)
-        .set({
+      await db.subscription.update({
+        where: { stripeSubscriptionId: sub.id },
+        data: {
           status: "canceled",
           updatedAt: new Date(),
-        })
-        .where(eq(subscriptions.stripeSubscriptionId, sub.id));
+        },
+      });
 
       logger.info("Subscription canceled", { workspaceId });
       break;
@@ -200,17 +197,15 @@ export async function handleWebhook(
       const invoice = event.data.object as Stripe.Invoice;
       const customerId = invoice.customer as string;
 
-      const [sub] = await db
-        .select()
-        .from(subscriptions)
-        .where(eq(subscriptions.stripeCustomerId, customerId))
-        .limit(1);
+      const sub = await db.subscription.findFirst({
+        where: { stripeCustomerId: customerId },
+      });
 
       if (sub) {
-        await db
-          .update(subscriptions)
-          .set({ status: "past_due", updatedAt: new Date() })
-          .where(eq(subscriptions.id, sub.id));
+        await db.subscription.update({
+          where: { id: sub.id },
+          data: { status: "past_due", updatedAt: new Date() },
+        });
 
         logger.warn("Payment failed", { workspaceId: sub.workspaceId });
       } else {

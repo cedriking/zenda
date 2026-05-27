@@ -1,11 +1,4 @@
 import { db } from "@zenda/db/client";
-import {
-  appointments,
-  availabilityRules,
-  services,
-  staffMembers,
-} from "@zenda/db/schema";
-import { and, eq, gte, lte } from "drizzle-orm";
 
 interface SlotQuery {
   date: string; // YYYY-MM-DD
@@ -24,16 +17,12 @@ interface AvailableSlot {
 export async function getAvailableSlots(
   query: SlotQuery
 ): Promise<AvailableSlot[]> {
-  const [service] = await db
-    .select()
-    .from(services)
-    .where(
-      and(
-        eq(services.id, query.serviceId),
-        eq(services.workspaceId, query.workspaceId)
-      )
-    )
-    .limit(1);
+  const service = await db.service.findFirst({
+    where: {
+      id: query.serviceId,
+      workspaceId: query.workspaceId,
+    },
+  });
 
   if (!service) {
     return [];
@@ -45,16 +34,13 @@ export async function getAvailableSlots(
   const buffer = 5; // 5 min buffer between appointments
 
   // Get availability rules for this day
-  const rules = await db
-    .select()
-    .from(availabilityRules)
-    .where(
-      and(
-        eq(availabilityRules.workspaceId, query.workspaceId),
-        eq(availabilityRules.dayOfWeek, dayOfWeek),
-        eq(availabilityRules.available, true)
-      )
-    );
+  const rules = await db.availabilityRule.findMany({
+    where: {
+      workspaceId: query.workspaceId,
+      dayOfWeek,
+      available: true,
+    },
+  });
 
   if (!rules.length) {
     return [];
@@ -62,39 +48,29 @@ export async function getAvailableSlots(
 
   // Get staff members for this service
   const staff = query.staffMemberId
-    ? await db
-        .select()
-        .from(staffMembers)
-        .where(
-          and(
-            eq(staffMembers.id, query.staffMemberId),
-            eq(staffMembers.workspaceId, query.workspaceId),
-            eq(staffMembers.active, true)
-          )
-        )
-    : await db
-        .select()
-        .from(staffMembers)
-        .where(
-          and(
-            eq(staffMembers.workspaceId, query.workspaceId),
-            eq(staffMembers.active, true)
-          )
-        );
+    ? await db.staffMember.findMany({
+        where: {
+          id: query.staffMemberId,
+          workspaceId: query.workspaceId,
+          active: true,
+        },
+      })
+    : await db.staffMember.findMany({
+        where: {
+          workspaceId: query.workspaceId,
+          active: true,
+        },
+      });
 
   // Get existing appointments for this day
   const dayStart = new Date(`${query.date}T00:00:00Z`);
   const dayEnd = new Date(`${query.date}T23:59:59Z`);
-  const existingAppts = await db
-    .select()
-    .from(appointments)
-    .where(
-      and(
-        eq(appointments.workspaceId, query.workspaceId),
-        gte(appointments.startAt, dayStart),
-        lte(appointments.startAt, dayEnd)
-      )
-    );
+  const existingAppts = await db.appointment.findMany({
+    where: {
+      workspaceId: query.workspaceId,
+      startAt: { gte: dayStart, lte: dayEnd },
+    },
+  });
 
   const slots: AvailableSlot[] = [];
 

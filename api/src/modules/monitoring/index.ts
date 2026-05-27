@@ -1,5 +1,4 @@
 import { db } from "@zenda/db/client";
-import { sql } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { serverError } from "../../utils/errors.js";
@@ -14,7 +13,7 @@ export const monitoringModule = new Elysia({ prefix: "/monitoring" })
   // Readiness probe (for load balancers) — intentionally unauthenticated
   .get("/ready", async ({ set }) => {
     try {
-      await db.execute(sql`SELECT 1`);
+      await db.$queryRaw`SELECT 1`;
       return { ready: true };
     } catch (err) {
       logger.error("Readiness check failed", { error: (err as Error).message });
@@ -49,7 +48,7 @@ export const monitoringModule = new Elysia({ prefix: "/monitoring" })
       // Database check
       const dbStart = Date.now();
       try {
-        await db.execute(sql`SELECT 1`);
+        await db.$queryRaw`SELECT 1`;
         checks.database = { status: "ok", latency: Date.now() - dbStart };
       } catch (err) {
         checks.database = {
@@ -66,10 +65,9 @@ export const monitoringModule = new Elysia({ prefix: "/monitoring" })
       };
 
       // Queue status — count pending messages in persistent queue
-      const queueResult = await db.execute(sql`
-        SELECT count(*) as pending FROM outbound_queue WHERE status = 'pending'
-      `);
-      const pendingCount = Number((queueResult as any).rows?.[0]?.pending ?? 0);
+      const queueResult: Array<{ pending: bigint }> =
+        await db.$queryRaw`SELECT count(*) as pending FROM outbound_queue WHERE status = 'pending'`;
+      const pendingCount = Number(queueResult[0]?.pending ?? 0);
       checks.queues = {
         status: pendingCount > 100 ? "warn" : "ok",
         details: `${pendingCount} pending messages`,

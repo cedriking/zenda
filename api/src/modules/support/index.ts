@@ -1,6 +1,4 @@
 import { db } from "@zenda/db/client";
-import { waitlistEntries } from "@zenda/db/schema";
-import { count, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { badRequest, serverError } from "../../utils/errors.js";
@@ -50,32 +48,30 @@ export const supportModule = new Elysia({ prefix: "/support" })
         }
 
         // Prevent duplicates by checking the DB
-        const existing = await db
-          .select({ id: waitlistEntries.id })
-          .from(waitlistEntries)
-          .where(eq(waitlistEntries.email, data.email))
-          .limit(1);
+        const existing = await db.waitlistEntry.findFirst({
+          where: { email: data.email },
+        });
 
-        if (existing.length > 0) {
+        if (existing) {
           return { status: "already_registered" };
         }
 
-        await db.insert(waitlistEntries).values({
-          email: data.email,
-          name: data.name ?? null,
-          businessType: data.businessType ?? null,
+        await db.waitlistEntry.create({
+          data: {
+            email: data.email,
+            name: data.name ?? null,
+            businessType: data.businessType ?? null,
+          },
         });
 
-        const [countResult] = await db
-          .select({ count: count() })
-          .from(waitlistEntries);
+        const total = await db.waitlistEntry.count();
 
         logger.info("Waitlist signup", {
           email: data.email,
-          position: countResult?.count ?? 0,
+          position: total,
         });
 
-        return { status: "registered", position: countResult?.count ?? 0 };
+        return { status: "registered", position: total };
       } catch (err) {
         logger.error("Failed to register for waitlist", {
           error: (err as Error).message,
@@ -95,11 +91,9 @@ export const supportModule = new Elysia({ prefix: "/support" })
   // Get waitlist count (admin)
   .get("/waitlist/count", async ({ set }) => {
     try {
-      const [result] = await db
-        .select({ count: count() })
-        .from(waitlistEntries);
+      const total = await db.waitlistEntry.count();
 
-      return { count: result?.count ?? 0 };
+      return { count: total };
     } catch (err) {
       logger.error("Failed to get waitlist count", {
         error: (err as Error).message,

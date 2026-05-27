@@ -1,5 +1,4 @@
 import { db } from "@zenda/db/client";
-import { auditLogs } from "@zenda/db/schema";
 import type { ActorType } from "@zenda/shared";
 
 interface AuditLogInput {
@@ -28,16 +27,18 @@ export function redactPII(text: string): string {
 }
 
 export async function logAudit(input: AuditLogInput) {
-  await db.insert(auditLogs).values({
-    workspaceId: input.workspaceId,
-    actorType: input.actorType,
-    actorId: input.actorId ?? null,
-    action: input.action,
-    entityType: input.entityType,
-    entityId: input.entityId ?? null,
-    channel: input.channel ?? null,
-    channelProvider: input.channelProvider ?? null,
-    metadata: input.details ?? null,
+  await db.auditLog.create({
+    data: {
+      workspaceId: input.workspaceId,
+      actorType: input.actorType,
+      actorId: input.actorId ?? null,
+      action: input.action,
+      entityType: input.entityType,
+      entityId: input.entityId ?? null,
+      channel: input.channel ?? null,
+      channelProvider: input.channelProvider ?? null,
+      metadata: input.details ?? null,
+    },
   });
 }
 

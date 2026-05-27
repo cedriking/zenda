@@ -1,6 +1,4 @@
 import { db } from "@zenda/db/client";
-import { audioAssets } from "@zenda/db/schema";
-import { eq } from "drizzle-orm";
 import { transcribeAudio } from "./index";
 
 type Language = "en" | "es";
@@ -81,15 +79,14 @@ export async function handleAudioMessage(
     const detectedMime = extractMimeType(mediaUrl, mimeType);
 
     // 2. Create audio asset record
-    const [asset] = await db
-      .insert(audioAssets)
-      .values({
+    const asset = await db.audioAsset.create({
+      data: {
         messageId,
         workspaceId,
         storageKey: `inline:${messageId}`,
         durationSeconds: duration ?? null,
-      })
-      .returning();
+      },
+    });
 
     if (!asset) {
       throw new Error("Failed to create audio asset record");
@@ -108,14 +105,14 @@ export async function handleAudioMessage(
       (result.confidence !== undefined && result.confidence < 0.3);
 
     if (isSilentOrUnintelligible) {
-      await db
-        .update(audioAssets)
-        .set({
+      await db.audioAsset.update({
+        where: { id: asset.id },
+        data: {
           transcript: "[unintelligible]",
           language: toDbLanguage(result.language),
           confidence: result.confidence ?? 0,
-        })
-        .where(eq(audioAssets.id, asset.id));
+        },
+      });
 
       return {
         transcript: "[unintelligible]",
@@ -125,14 +122,14 @@ export async function handleAudioMessage(
     }
 
     // 5. Update asset with successful transcription
-    await db
-      .update(audioAssets)
-      .set({
+    await db.audioAsset.update({
+      where: { id: asset.id },
+      data: {
         transcript: result.text,
         language: toDbLanguage(result.language),
         confidence: result.confidence ?? null,
-      })
-      .where(eq(audioAssets.id, asset.id));
+      },
+    });
 
     return {
       transcript: result.text,

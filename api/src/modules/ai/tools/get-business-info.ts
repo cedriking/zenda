@@ -7,25 +7,20 @@
  * - Sending policy is enforced at the agent layer, not bypassed here.
  */
 import { db } from "@zenda/db/client";
-import { availabilityRules, businessProfiles } from "@zenda/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function getBusinessInfo(workspaceId: string) {
-  const [biz] = await db
-    .select()
-    .from(businessProfiles)
-    .where(eq(businessProfiles.workspaceId, workspaceId))
-    .limit(1);
+  const biz = await db.businessProfile.findFirst({
+    where: { workspaceId },
+  });
 
   if (!biz) {
     throw new Error("Business profile not found");
   }
 
   // Get availability rules for business hours
-  const rules = await db
-    .select()
-    .from(availabilityRules)
-    .where(eq(availabilityRules.workspaceId, workspaceId));
+  const rules = await db.availabilityRule.findMany({
+    where: { workspaceId },
+  });
 
   const dayNames = [
     "Sunday",

@@ -1,0 +1,4 @@
+-- This is a baseline migration marking the existing database state.
+-- All tables already exist; this file is intentionally empty.
+-- Run: prisma migrate resolve --applied 0000_init
+-- to mark this as already applied on existing databases.

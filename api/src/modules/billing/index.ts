@@ -1,8 +1,6 @@
 import { db } from "@zenda/db/client";
-import { subscriptions } from "@zenda/db/schema";
 import type { PlanTier } from "@zenda/shared";
 import { PLANS } from "@zenda/shared";
-import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { badRequest, serverError } from "../../utils/errors.js";
@@ -71,8 +69,8 @@ export const billingModule = new Elysia({ prefix: "/billing" })
       // Free tier: skip Stripe, create subscription record directly
       if (tier === "free") {
         try {
-          const existing = await db.query.subscriptions.findFirst({
-            where: eq(subscriptions.workspaceId, workspaceId as string),
+          const existing = await db.subscription.findFirst({
+            where: { workspaceId: workspaceId as string },
           });
           if (existing) {
             // Already has a subscription — let them use the existing one
@@ -80,14 +78,16 @@ export const billingModule = new Elysia({ prefix: "/billing" })
               url: `${process.env.APP_URL ?? "http://localhost:5173"}/dashboard?billing=free`,
             };
           }
-          await db.insert(subscriptions).values({
-            workspaceId: workspaceId as string,
-            stripeCustomerId: `free_${workspaceId}`,
-            stripeSubscriptionId: `free_${workspaceId}`,
-            planTier: "free",
-            status: "active",
-            currentPeriodStart: new Date(),
-            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          await db.subscription.create({
+            data: {
+              workspaceId: workspaceId as string,
+              stripeCustomerId: `free_${workspaceId}`,
+              stripeSubscriptionId: `free_${workspaceId}`,
+              planTier: "free",
+              status: "active",
+              currentPeriodStart: new Date(),
+              currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            },
           });
           logger.info("Activated free tier", { workspaceId });
           return {

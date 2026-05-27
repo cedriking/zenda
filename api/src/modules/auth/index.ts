@@ -1,17 +1,5 @@
-import { db } from "@zenda/db/client";
-import {
-  businessProfiles,
-  partners,
-  passwordResetTokens,
-  receptionistProfiles,
-  referrals,
-  revokedTokens,
-  users,
-  workspaceMembers,
-  workspaces,
-} from "@zenda/db/schema";
+import { db, Prisma } from "@zenda/db/client";
 import { loginSchema, signupSchema } from "@zenda/shared";
-import { and, eq, gt, isNull } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { buildPasswordResetEmailHtml, sendEmail } from "../../infra/email.js";
 import { logger } from "../../infra/logger.js";
@@ -33,12 +21,10 @@ export const authModule = new Elysia({ prefix: "/auth" })
 
     try {
       // Check existing user
-      const existing = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1);
-      if (existing.length > 0) {
+      const existing = await db.user.findFirst({
+        where: { email },
+      });
+      if (existing) {
         set.status = 409;
         return { error: "Email already registered" };
       }
@@ -47,11 +33,10 @@ export const authModule = new Elysia({ prefix: "/auth" })
       const passwordHash = await Bun.password.hash(password);
 
       // Create user, workspace, and defaults in a transaction
-      const result = await db.transaction(async (tx) => {
-        const [user] = await tx
-          .insert(users)
-          .values({ email, name, passwordHash })
-          .returning();
+      const result = await db.$transaction(async (tx) => {
+        const user = await tx.user.create({
+          data: { email, name, passwordHash },
+        });
 
         const baseSlug = businessName
           .toLowerCase()
@@ -64,42 +49,46 @@ export const authModule = new Elysia({ prefix: "/auth" })
         let suffix = 1;
         // eslint-disable-next-line no-constant-binary-expression
         while (true) {
-          const [existing] = await tx
-            .select({ id: workspaces.id })
-            .from(workspaces)
-            .where(eq(workspaces.slug, slug))
-            .limit(1);
-          if (!existing) {
+          const collision = await tx.workspace.findFirst({
+            where: { slug },
+            select: { id: true },
+          });
+          if (!collision) {
             break;
           }
           suffix++;
           slug = `${baseSlug}-${suffix}`;
         }
 
-        const [workspace] = await tx
-          .insert(workspaces)
-          .values({
+        const workspace = await tx.workspace.create({
+          data: {
             name: businessName,
             slug,
             defaultLanguage: language,
-          })
-          .returning();
-
-        await tx.insert(workspaceMembers).values({
-          workspaceId: workspace.id,
-          userId: user.id,
-          role: "owner",
+          },
         });
 
-        await tx.insert(businessProfiles).values({
-          workspaceId: workspace.id,
-          name: businessName,
+        await tx.workspaceMember.create({
+          data: {
+            workspaceId: workspace.id,
+            userId: user.id,
+            role: "owner",
+          },
         });
 
-        await tx.insert(receptionistProfiles).values({
-          workspaceId: workspace.id,
-          name: "Noa",
-          tone: "professional",
+        await tx.businessProfile.create({
+          data: {
+            workspaceId: workspace.id,
+            name: businessName,
+          },
+        });
+
+        await tx.receptionistProfile.create({
+          data: {
+            workspaceId: workspace.id,
+            name: "Noa",
+            tone: "professional",
+          },
         });
 
         return { user, workspace };
@@ -108,16 +97,17 @@ export const authModule = new Elysia({ prefix: "/auth" })
       // Track referral if a valid referral code was provided
       if (referralCode) {
         try {
-          const [partner] = await db
-            .select({ id: partners.id })
-            .from(partners)
-            .where(eq(partners.referralCode, referralCode))
-            .limit(1);
+          const partner = await db.partner.findFirst({
+            where: { referralCode },
+            select: { id: true },
+          });
           if (partner) {
-            await db.insert(referrals).values({
-              partnerId: partner.id,
-              referredEmail: email,
-              status: "signed_up",
+            await db.referral.create({
+              data: {
+                partnerId: partner.id,
+                referredEmail: email,
+                status: "signed_up",
+              },
             });
             logger.info("Referral tracked", {
               partnerId: partner.id,
@@ -182,11 +172,9 @@ export const authModule = new Elysia({ prefix: "/auth" })
 
     try {
       // Find user
-      const [user] = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1);
+      const user = await db.user.findFirst({
+        where: { email },
+      });
       if (!user) {
         set.status = 401;
         return { error: "Invalid credentials" };
@@ -200,18 +188,14 @@ export const authModule = new Elysia({ prefix: "/auth" })
       }
 
       // Get workspace
-      const [membership] = await db
-        .select()
-        .from(workspaceMembers)
-        .where(eq(workspaceMembers.userId, user.id))
-        .limit(1);
-      const [workspace] = membership
-        ? await db
-            .select()
-            .from(workspaces)
-            .where(eq(workspaces.id, membership.workspaceId))
-            .limit(1)
-        : [];
+      const membership = await db.workspaceMember.findFirst({
+        where: { userId: user.id },
+      });
+      const workspace = membership
+        ? await db.workspace.findFirst({
+            where: { id: membership.workspaceId },
+          })
+        : null;
 
       if (!workspace) {
         logger.error("No workspace found for user during login", {
@@ -275,11 +259,9 @@ export const authModule = new Elysia({ prefix: "/auth" })
         | string
         | undefined;
       if (refreshJti) {
-        const [revoked] = await db
-          .select({ id: revokedTokens.id })
-          .from(revokedTokens)
-          .where(eq(revokedTokens.tokenJti, refreshJti))
-          .limit(1);
+        const revoked = await db.revokedToken.findFirst({
+          where: { tokenJti: refreshJti },
+        });
         if (revoked) {
           set.status = 401;
           return { error: "Refresh token has been revoked" };
@@ -300,10 +282,23 @@ export const authModule = new Elysia({ prefix: "/auth" })
       // Revoke the old refresh token to prevent reuse
       if (refreshJti) {
         const oldUserId = payload.sub as string;
-        await db
-          .insert(revokedTokens)
-          .values({ tokenJti: refreshJti, userId: oldUserId })
-          .onConflictDoNothing();
+        try {
+          await db.revokedToken.create({
+            data: { tokenJti: refreshJti, userId: oldUserId },
+          });
+        } catch (err: unknown) {
+          // Ignore unique constraint violations (token already revoked)
+          const pgErr = err as { code?: string } | undefined;
+          if (
+            !(
+              pgErr?.code === "23505" ||
+              (err instanceof Prisma.PrismaClientKnownRequestError &&
+                err.code === "P2002")
+            )
+          ) {
+            throw err;
+          }
+        }
       }
 
       return { accessToken, refreshToken: newRefreshToken };
@@ -334,13 +329,26 @@ export const authModule = new Elysia({ prefix: "/auth" })
 
       // Revoke the current access token
       if (jti) {
-        await db
-          .insert(revokedTokens)
-          .values({
-            tokenJti: jti,
-            userId,
-          })
-          .onConflictDoNothing();
+        try {
+          await db.revokedToken.create({
+            data: {
+              tokenJti: jti,
+              userId,
+            },
+          });
+        } catch (err: unknown) {
+          // Ignore unique constraint violations (token already revoked)
+          const pgErr = err as { code?: string } | undefined;
+          if (
+            !(
+              pgErr?.code === "23505" ||
+              (err instanceof Prisma.PrismaClientKnownRequestError &&
+                err.code === "P2002")
+            )
+          ) {
+            throw err;
+          }
+        }
       }
 
       // Also revoke the refresh token if provided
@@ -354,13 +362,26 @@ export const authModule = new Elysia({ prefix: "/auth" })
             | undefined;
           const refreshUserId = refreshPayload.sub as string;
           if (refreshJti) {
-            await db
-              .insert(revokedTokens)
-              .values({
-                tokenJti: refreshJti,
-                userId: refreshUserId,
-              })
-              .onConflictDoNothing();
+            try {
+              await db.revokedToken.create({
+                data: {
+                  tokenJti: refreshJti,
+                  userId: refreshUserId,
+                },
+              });
+            } catch (err: unknown) {
+              // Ignore unique constraint violations (token already revoked)
+              const pgErr = err as { code?: string } | undefined;
+              if (
+                !(
+                  pgErr?.code === "23505" ||
+                  (err instanceof Prisma.PrismaClientKnownRequestError &&
+                    err.code === "P2002")
+                )
+              ) {
+                throw err;
+              }
+            }
           }
         }
       }
@@ -381,11 +402,10 @@ export const authModule = new Elysia({ prefix: "/auth" })
     }
 
     try {
-      const [user] = await db
-        .select({ id: users.id, email: users.email, name: users.name })
-        .from(users)
-        .where(eq(users.email, email.toLowerCase().trim()))
-        .limit(1);
+      const user = await db.user.findFirst({
+        where: { email: email.toLowerCase().trim() },
+        select: { id: true, email: true, name: true },
+      });
 
       // Always return success to prevent email enumeration
       if (!user) {
@@ -398,21 +418,21 @@ export const authModule = new Elysia({ prefix: "/auth" })
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
       // Invalidate any existing unused tokens for this user
-      await db
-        .update(passwordResetTokens)
-        .set({ usedAt: new Date() })
-        .where(
-          and(
-            eq(passwordResetTokens.userId, user.id),
-            isNull(passwordResetTokens.usedAt)
-          )
-        );
+      await db.passwordResetToken.updateMany({
+        where: {
+          userId: user.id,
+          usedAt: null,
+        },
+        data: { usedAt: new Date() },
+      });
 
       // Insert new token
-      await db.insert(passwordResetTokens).values({
-        userId: user.id,
-        token,
-        expiresAt,
+      await db.passwordResetToken.create({
+        data: {
+          userId: user.id,
+          token,
+          expiresAt,
+        },
       });
 
       // Send reset email
@@ -452,17 +472,13 @@ export const authModule = new Elysia({ prefix: "/auth" })
     try {
       // Find valid token
       const now = new Date();
-      const [resetToken] = await db
-        .select()
-        .from(passwordResetTokens)
-        .where(
-          and(
-            eq(passwordResetTokens.token, token),
-            isNull(passwordResetTokens.usedAt),
-            gt(passwordResetTokens.expiresAt, now)
-          )
-        )
-        .limit(1);
+      const resetToken = await db.passwordResetToken.findFirst({
+        where: {
+          token,
+          usedAt: null,
+          expiresAt: { gt: now },
+        },
+      });
 
       if (!resetToken) {
         set.status = 400;
@@ -473,16 +489,16 @@ export const authModule = new Elysia({ prefix: "/auth" })
       const passwordHash = await Bun.password.hash(newPassword);
 
       // Update user password and mark token as used
-      await db.transaction(async (tx) => {
-        await tx
-          .update(users)
-          .set({ passwordHash, updatedAt: new Date() })
-          .where(eq(users.id, resetToken.userId));
+      await db.$transaction(async (tx) => {
+        await tx.user.update({
+          where: { id: resetToken.userId },
+          data: { passwordHash, updatedAt: new Date() },
+        });
 
-        await tx
-          .update(passwordResetTokens)
-          .set({ usedAt: new Date() })
-          .where(eq(passwordResetTokens.id, resetToken.id));
+        await tx.passwordResetToken.update({
+          where: { id: resetToken.id },
+          data: { usedAt: new Date() },
+        });
       });
 
       logger.info("Password reset successful", { userId: resetToken.userId });

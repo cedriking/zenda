@@ -1,6 +1,4 @@
 import { db } from "@zenda/db/client";
-import { partners } from "@zenda/db/schema";
-import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { badRequest } from "../../utils/errors.js";
@@ -24,11 +22,10 @@ export const partnersModule = new Elysia({ prefix: "/partners" }).post(
     }
 
     // Check for existing partner with same email
-    const existing = await db
-      .select()
-      .from(partners)
-      .where(eq(partners.email, email))
-      .limit(1);
+    const existing = await db.partner.findMany({
+      where: { email },
+      take: 1,
+    });
 
     if (existing.length > 0) {
       const partner = existing[0];
@@ -44,11 +41,10 @@ export const partnersModule = new Elysia({ prefix: "/partners" }).post(
     let referralCode = generateReferralCode();
     let attempts = 0;
     while (attempts < 10) {
-      const existingCode = await db
-        .select()
-        .from(partners)
-        .where(eq(partners.referralCode, referralCode))
-        .limit(1);
+      const existingCode = await db.partner.findMany({
+        where: { referralCode },
+        take: 1,
+      });
       if (existingCode.length === 0) {
         break;
       }
@@ -56,13 +52,15 @@ export const partnersModule = new Elysia({ prefix: "/partners" }).post(
       attempts++;
     }
 
-    await db.insert(partners).values({
-      name,
-      email,
-      website: website || null,
-      howRefer: howRefer || null,
-      referralCode,
-      status: "active",
+    await db.partner.create({
+      data: {
+        name,
+        email,
+        website: website || null,
+        howRefer: howRefer || null,
+        referralCode,
+        status: "active",
+      },
     });
 
     logger.info("Partner signed up", { email, referralCode });

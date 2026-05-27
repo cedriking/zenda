@@ -6,8 +6,6 @@
  * when customers introduce themselves naturally in chat.
  */
 import { db } from "@zenda/db/client";
-import { customers } from "@zenda/db/schema";
-import { and, eq } from "drizzle-orm";
 import { logger } from "../../../infra/logger.js";
 
 interface ToolInput {
@@ -39,16 +37,13 @@ export async function updateCustomerInfo(
     return { success: false, updatedFields: [] };
   }
 
-  const [updated] = await db
-    .update(customers)
-    .set(updateData)
-    .where(
-      and(
-        eq(customers.id, input.customerId),
-        eq(customers.workspaceId, workspaceId)
-      )
-    )
-    .returning();
+  const updated = await db.customer.update({
+    where: {
+      id: input.customerId,
+      workspaceId,
+    },
+    data: updateData,
+  });
 
   if (updated) {
     logger.info("Customer info updated by AI", {

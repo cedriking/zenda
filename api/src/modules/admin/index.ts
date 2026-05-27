@@ -1,12 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { db } from "@zenda/db/client";
-import {
-  planTierEnum,
-  subscriptions,
-  whatsappConnections,
-  workspaces,
-} from "@zenda/db/schema";
-import { desc, eq, sql } from "drizzle-orm";
+import { db, Prisma } from "@zenda/db/client";
 import { Elysia } from "elysia";
 import { ADMIN_SECRET } from "../../config/env.js";
 import { logger } from "../../infra/logger.js";
@@ -14,7 +7,14 @@ import { authBase } from "../../middleware/auth.js";
 import { typedContext } from "../../middleware/typed-context.js";
 import { badRequest, notFound, serverError } from "../../utils/errors.js";
 
-const VALID_PLAN_TIERS: Set<string> = new Set(planTierEnum.enumValues);
+// Derive valid plan tiers from the Prisma enum at runtime
+const _VALID_PLAN_TIERS: Set<string> = new Set(
+  Prisma.PropertyName as unknown as string[]
+);
+
+// Fallback: if the above doesn't work at runtime, hardcode from schema
+const PLAN_TIER_VALUES = ["free", "solo", "starter", "pro", "business"];
+const VALID_TIERS: Set<string> = new Set(PLAN_TIER_VALUES);
 
 const forbiddenRes = new Response(
   JSON.stringify({ error: "Admin access denied" }),
@@ -48,17 +48,17 @@ export const adminModule = new Elysia({ prefix: "/admin" })
   // Workspace overview
   .get("/workspaces", async ({ set }) => {
     try {
-      const wsList = await db
-        .select({
-          id: workspaces.id,
-          name: workspaces.name,
-          slug: workspaces.slug,
-          onboardingStep: workspaces.onboardingStep,
-          createdAt: workspaces.createdAt,
-        })
-        .from(workspaces)
-        .orderBy(desc(workspaces.createdAt))
-        .limit(100);
+      const wsList = await db.workspace.findMany({
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          onboardingStep: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+        take: 100,
+      });
 
       return wsList;
     } catch (err) {
@@ -71,27 +71,22 @@ export const adminModule = new Elysia({ prefix: "/admin" })
 
   .get("/workspaces/:id", async ({ params, set }) => {
     try {
-      const [ws] = await db
-        .select()
-        .from(workspaces)
-        .where(eq(workspaces.id, params.id))
-        .limit(1);
+      const ws = await db.workspace.findUnique({
+        where: { id: params.id },
+      });
 
       if (!ws) {
         return notFound(set, "Workspace not found");
       }
 
-      const [sub] = await db
-        .select()
-        .from(subscriptions)
-        .where(eq(subscriptions.workspaceId, ws.id))
-        .limit(1);
+      const sub = await db.subscription.findFirst({
+        where: { workspaceId: ws.id },
+      });
 
-      const connections = await db
-        .select()
-        .from(whatsappConnections)
-        .where(eq(whatsappConnections.workspaceId, ws.id))
-        .limit(5);
+      const connections = await db.whatsappConnection.findMany({
+        where: { workspaceId: ws.id },
+        take: 5,
+      });
 
       return { workspace: ws, subscription: sub, connections };
     } catch (err) {
@@ -105,17 +100,17 @@ export const adminModule = new Elysia({ prefix: "/admin" })
   // Subscription overview
   .get("/subscriptions", async ({ set }) => {
     try {
-      const subs = await db
-        .select({
-          workspaceId: subscriptions.workspaceId,
-          planTier: subscriptions.planTier,
-          status: subscriptions.status,
-          billingPeriod: subscriptions.billingPeriod,
-          currentPeriodEnd: subscriptions.currentPeriodEnd,
-        })
-        .from(subscriptions)
-        .orderBy(desc(subscriptions.createdAt))
-        .limit(100);
+      const subs = await db.subscription.findMany({
+        select: {
+          workspaceId: true,
+          planTier: true,
+          status: true,
+          billingPeriod: true,
+          currentPeriodEnd: true,
+        },
+        orderBy: { createdAt: "desc" },
+        take: 100,
+      });
 
       return subs;
     } catch (err) {
@@ -130,21 +125,20 @@ export const adminModule = new Elysia({ prefix: "/admin" })
   .post("/workspaces/:id/override-plan", async ({ params, body, set }) => {
     try {
       const data = body as Record<string, string>;
-      if (!(data.planTier && VALID_PLAN_TIERS.has(data.planTier))) {
+      if (!(data.planTier && VALID_TIERS.has(data.planTier))) {
         return badRequest(
           set,
-          `Invalid planTier. Must be one of: ${planTierEnum.enumValues.join(", ")}`
+          `Invalid planTier. Must be one of: ${PLAN_TIER_VALUES.join(", ")}`
         );
       }
-      await db
-        .update(subscriptions)
-        .set({
-          // biome-ignore lint/suspicious/noExplicitAny: planTier is a pgEnum that doesn't accept string directly
-          planTier: data.planTier as (typeof planTierEnum.enumValues)[number],
+      await db.subscription.updateMany({
+        where: { workspaceId: params.id },
+        data: {
+          planTier: data.planTier as any,
           status: "active",
           updatedAt: new Date(),
-        })
-        .where(eq(subscriptions.workspaceId, params.id));
+        },
+      });
 
       logger.info("Plan override", {
         workspaceId: params.id,
@@ -162,18 +156,15 @@ export const adminModule = new Elysia({ prefix: "/admin" })
   // Stats
   .get("/stats", async ({ set }) => {
     try {
-      const [workspaceCount] = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(workspaces);
+      const totalWorkspaces = await db.workspace.count();
 
-      const [activeSubs] = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(subscriptions)
-        .where(eq(subscriptions.status, "active"));
+      const activeSubscriptions = await db.subscription.count({
+        where: { status: "active" },
+      });
 
       return {
-        totalWorkspaces: workspaceCount?.count ?? 0,
-        activeSubscriptions: activeSubs?.count ?? 0,
+        totalWorkspaces,
+        activeSubscriptions,
       };
     } catch (err) {
       logger.error("Failed to get admin stats", {

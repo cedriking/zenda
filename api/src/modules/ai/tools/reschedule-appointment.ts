@@ -12,16 +12,8 @@
  * - On failure the agent receives a structured error it can relay honestly.
  */
 import { db } from "@zenda/db/client";
-import {
-  appointments,
-  businessProfiles,
-  customers,
-  services,
-  staffMembers,
-} from "@zenda/db/schema";
 import type { Language } from "@zenda/shared";
 import { APPOINTMENT_TRANSITIONS } from "@zenda/shared";
-import { and, eq } from "drizzle-orm";
 import { logAppointmentAudit } from "../../audit/logger.js";
 import { trackActiveContact } from "../../usage/tracker.js";
 
@@ -37,33 +29,30 @@ export async function rescheduleAppointment(
   _language?: Language
 ) {
   // Fetch appointment with service and business profile
-  const [row] = await db
-    .select({
-      appointment: appointments,
-      service: services,
-      staff: staffMembers,
-      business: businessProfiles,
-    })
-    .from(appointments)
-    .innerJoin(services, eq(appointments.serviceId, services.id))
-    .leftJoin(staffMembers, eq(appointments.staffMemberId, staffMembers.id))
-    .innerJoin(
-      businessProfiles,
-      eq(appointments.workspaceId, businessProfiles.workspaceId)
-    )
-    .where(
-      and(
-        eq(appointments.id, input.appointmentId),
-        eq(appointments.workspaceId, workspaceId)
-      )
-    )
-    .limit(1);
+  const row = await db.appointment.findFirst({
+    where: {
+      id: input.appointmentId,
+      workspaceId,
+    },
+    include: {
+      service: true,
+      staffMember: true,
+      workspace: {
+        include: {
+          businessProfile: true,
+        },
+      },
+    },
+  });
 
   if (!row) {
     throw new Error("Appointment not found");
   }
 
-  const { appointment: apt, service: svc, staff, business: biz } = row;
+  const apt = row;
+  const svc = row.service;
+  const staff = row.staffMember;
+  const biz = row.workspace.businessProfile;
 
   // Validate status transition
   const validNext =
@@ -78,7 +67,7 @@ export async function rescheduleAppointment(
   }
 
   // ── Check rescheduling window ──
-  const windowHours = biz.reschedulingWindowHours ?? 2;
+  const windowHours = biz?.reschedulingWindowHours ?? 2;
   const hoursUntilAppointment =
     (new Date(apt.startAt).getTime() - Date.now()) / 3_600_000;
 
@@ -106,16 +95,15 @@ export async function rescheduleAppointment(
 
   const staffName = staff?.name ?? null;
 
-  const [updated] = await db
-    .update(appointments)
-    .set({
+  const updated = await db.appointment.update({
+    where: { id: apt.id },
+    data: {
       status: "reschedule_requested",
       startAt,
       endAt,
       updatedAt: new Date(),
-    })
-    .where(eq(appointments.id, apt.id))
-    .returning();
+    },
+  });
 
   logAppointmentAudit(workspaceId, updated.id, "appointment_rescheduled", {
     channel: "whatsapp",
@@ -144,11 +132,10 @@ export async function rescheduleAppointment(
   // Track active contact for usage (background — non-blocking)
   (async () => {
     try {
-      const [customer] = await db
-        .select({ phoneNumber: customers.phoneNumber })
-        .from(customers)
-        .where(eq(customers.id, apt.customerId))
-        .limit(1);
+      const customer = await db.customer.findFirst({
+        where: { id: apt.customerId },
+        select: { phoneNumber: true },
+      });
       if (customer) {
         await trackActiveContact(workspaceId, customer.phoneNumber);
       }

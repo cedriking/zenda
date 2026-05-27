@@ -6,14 +6,12 @@
  */
 
 import { db } from "@zenda/db/client";
-import { customers, messagingConsent, workspaces } from "@zenda/db/schema";
 import type {
   Language,
   MessagePurpose,
   MessagingConsentStatus,
 } from "@zenda/shared";
 import { OUTBOUND_LIMITS } from "@zenda/shared";
-import { eq } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 import { wsMessageSender } from "../../infra/message-sender.js";
 import { getOutboundCount, incrementOutbound } from "./outbound-tracker.js";
@@ -95,27 +93,24 @@ export async function checkAndSendFollowUp(): Promise<number> {
 
     try {
       // ── 1. Fetch customer, workspace, and consent info ──
-      const [row] = await db
-        .select({
-          customer: customers,
-          workspace: workspaces,
-          consent: messagingConsent,
-        })
-        .from(customers)
-        .innerJoin(workspaces, eq(customers.workspaceId, workspaces.id))
-        .leftJoin(
-          messagingConsent,
-          eq(customers.id, messagingConsent.customerId)
-        )
-        .where(eq(customers.id, attempt.customerId))
-        .limit(1);
+      const cust = await db.customer.findUnique({
+        where: { id: attempt.customerId },
+        include: {
+          workspace: true,
+          messagingConsent: true,
+        },
+      });
 
-      if (!row) {
+      if (!cust) {
         activeAttempts.delete(key);
         continue;
       }
 
-      const { customer: cust, workspace: ws, consent } = row;
+      const ws = cust.workspace;
+      const consent = (cust as Record<string, unknown>)
+        .messagingConsent as Awaited<
+        ReturnType<typeof db.messagingConsent.findFirst>
+      > | null;
 
       // ── 2. Check outbound limits ──
       const outboundCount = await getOutboundCount(ws.id, cust.id);

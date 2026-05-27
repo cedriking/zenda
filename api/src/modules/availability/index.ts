@@ -1,7 +1,5 @@
 import { db } from "@zenda/db/client";
-import { availabilityRules } from "@zenda/db/schema";
 import { createAvailabilityRuleSchema } from "@zenda/shared";
-import { and, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -13,15 +11,12 @@ export const availabilityModule = new Elysia({ prefix: "/availability" })
   .get("/", async ({ workspaceId, query, set }) => {
     try {
       const { staffMemberId } = query as Record<string, string>;
-      const conditions = [eq(availabilityRules.workspaceId, workspaceId!)];
+      const where: Record<string, unknown> = { workspaceId: workspaceId! };
       if (staffMemberId) {
-        conditions.push(eq(availabilityRules.staffMemberId, staffMemberId));
+        where.staffMemberId = staffMemberId;
       }
 
-      return db
-        .select()
-        .from(availabilityRules)
-        .where(and(...conditions));
+      return db.availabilityRule.findMany({ where });
     } catch (err) {
       logger.error("Failed to list availability rules", {
         error: (err as Error).message,
@@ -44,17 +39,16 @@ export const availabilityModule = new Elysia({ prefix: "/availability" })
 
         const { staffMemberId, dayOfWeek, startTime, endTime, available } =
           parsed.data;
-        const [rule] = await db
-          .insert(availabilityRules)
-          .values({
+        const rule = await db.availabilityRule.create({
+          data: {
             workspaceId: workspaceId!,
             staffMemberId: staffMemberId ?? null,
             dayOfWeek,
             startTime,
             endTime,
             available: available ?? true,
-          })
-          .returning();
+          },
+        });
         return rule;
       } catch (err) {
         logger.error("Failed to create availability rule", {
@@ -79,21 +73,15 @@ export const availabilityModule = new Elysia({ prefix: "/availability" })
     async ({ workspaceId, params, body, set }) => {
       try {
         const data = body as Record<string, unknown>;
-        const [updated] = await db
-          .update(availabilityRules)
-          .set({ ...data, updatedAt: new Date() })
-          .where(
-            and(
-              eq(availabilityRules.id, params.id),
-              eq(availabilityRules.workspaceId, workspaceId!)
-            )
-          )
-          .returning();
-        if (!updated) {
-          return notFound(set, "Availability rule not found");
-        }
+        const updated = await db.availabilityRule.update({
+          where: { id: params.id, workspaceId: workspaceId! },
+          data: { ...data, updatedAt: new Date() },
+        });
         return updated;
       } catch (err) {
+        if ((err as any)?.code === "P2025") {
+          return notFound(set, "Availability rule not found");
+        }
         logger.error("Failed to update availability rule", {
           error: (err as Error).message,
         });
@@ -112,17 +100,14 @@ export const availabilityModule = new Elysia({ prefix: "/availability" })
 
   .delete("/:id", async ({ workspaceId, params, set }) => {
     try {
-      const result = await db
-        .delete(availabilityRules)
-        .where(
-          and(
-            eq(availabilityRules.id, params.id),
-            eq(availabilityRules.workspaceId, workspaceId!)
-          )
-        )
-        .returning();
-      return { deleted: result.length > 0 };
+      await db.availabilityRule.delete({
+        where: { id: params.id, workspaceId: workspaceId! },
+      });
+      return { deleted: true };
     } catch (err) {
+      if ((err as any)?.code === "P2025") {
+        return { deleted: false };
+      }
       logger.error("Failed to delete availability rule", {
         error: (err as Error).message,
       });

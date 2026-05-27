@@ -1,7 +1,5 @@
 import { db } from "@zenda/db/client";
-import { notifications } from "@zenda/db/schema";
 import type { NotificationType } from "@zenda/shared";
-import { and, desc, eq } from "drizzle-orm";
 import { wsMessageSender } from "../../infra/message-sender.js";
 
 interface CreateNotificationInput {
@@ -13,17 +11,16 @@ interface CreateNotificationInput {
 }
 
 export async function createNotification(input: CreateNotificationInput) {
-  const [notif] = await db
-    .insert(notifications)
-    .values({
+  const notif = await db.notification.create({
+    data: {
       workspaceId: input.workspaceId,
       userId: input.workspaceId, // Will be replaced with actual userId when available
       type: input.type,
       title: input.title,
       body: input.body,
       relatedId: input.relatedId ?? null,
-    })
-    .returning();
+    },
+  });
 
   // Push to connected workspace
   wsMessageSender.send(input.workspaceId, {
@@ -35,28 +32,21 @@ export async function createNotification(input: CreateNotificationInput) {
 }
 
 export async function getNotifications(workspaceId: string, limit = 50) {
-  return db
-    .select()
-    .from(notifications)
-    .where(eq(notifications.workspaceId, workspaceId))
-    .orderBy(desc(notifications.createdAt))
-    .limit(limit);
+  return db.notification.findMany({
+    where: { workspaceId },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
 }
 
 export async function markNotificationRead(
   workspaceId: string,
   notificationId: string
 ) {
-  const [updated] = await db
-    .update(notifications)
-    .set({ read: new Date() })
-    .where(
-      and(
-        eq(notifications.id, notificationId),
-        eq(notifications.workspaceId, workspaceId)
-      )
-    )
-    .returning();
+  const updated = await db.notification.update({
+    where: { id: notificationId, workspaceId },
+    data: { read: new Date() },
+  });
   return updated;
 }
 

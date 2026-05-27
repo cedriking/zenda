@@ -11,15 +11,8 @@
  * - On failure the agent receives a structured error it can relay honestly.
  */
 import { db } from "@zenda/db/client";
-import {
-  appointments,
-  customers,
-  services,
-  staffMembers,
-} from "@zenda/db/schema";
 import type { Language } from "@zenda/shared";
 import { APPOINTMENT_TRANSITIONS } from "@zenda/shared";
-import { and, eq } from "drizzle-orm";
 import { trackActiveContact } from "../../usage/tracker.js";
 
 interface ToolInput {
@@ -32,28 +25,24 @@ export async function confirmAppointment(
   _language?: Language
 ) {
   // Fetch appointment with service and staff details
-  const [row] = await db
-    .select({
-      appointment: appointments,
-      service: services,
-      staff: staffMembers,
-    })
-    .from(appointments)
-    .innerJoin(services, eq(appointments.serviceId, services.id))
-    .leftJoin(staffMembers, eq(appointments.staffMemberId, staffMembers.id))
-    .where(
-      and(
-        eq(appointments.id, input.appointmentId),
-        eq(appointments.workspaceId, workspaceId)
-      )
-    )
-    .limit(1);
+  const row = await db.appointment.findFirst({
+    where: {
+      id: input.appointmentId,
+      workspaceId,
+    },
+    include: {
+      service: true,
+      staffMember: true,
+    },
+  });
 
   if (!row) {
     throw new Error("Appointment not found");
   }
 
-  const { appointment: apt, service: svc, staff } = row;
+  const apt = row;
+  const svc = row.service;
+  const staff = row.staffMember;
 
   const validNext =
     APPOINTMENT_TRANSITIONS[apt.status as keyof typeof APPOINTMENT_TRANSITIONS];
@@ -62,15 +51,14 @@ export async function confirmAppointment(
   }
 
   // Only update after validation passes
-  const [updated] = await db
-    .update(appointments)
-    .set({
+  const updated = await db.appointment.update({
+    where: { id: apt.id },
+    data: {
       status: "confirmed",
       confirmationStatus: "confirmed",
       updatedAt: new Date(),
-    })
-    .where(eq(appointments.id, apt.id))
-    .returning();
+    },
+  });
 
   // Build a human-readable date/time string
   const dateStr = new Date(apt.startAt).toLocaleDateString("en-US", {
@@ -91,11 +79,10 @@ export async function confirmAppointment(
   // Track active contact for usage (background — non-blocking)
   (async () => {
     try {
-      const [customer] = await db
-        .select({ phoneNumber: customers.phoneNumber })
-        .from(customers)
-        .where(eq(customers.id, apt.customerId))
-        .limit(1);
+      const customer = await db.customer.findFirst({
+        where: { id: apt.customerId },
+        select: { phoneNumber: true },
+      });
       if (customer) {
         await trackActiveContact(workspaceId, customer.phoneNumber);
       }

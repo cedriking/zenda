@@ -1,6 +1,4 @@
 import { db } from "@zenda/db/client";
-import { customers } from "@zenda/db/schema";
-import { and, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -12,10 +10,9 @@ export const customerModule = new Elysia({ prefix: "/customers" })
 
   .get("/", async ({ workspaceId, set }) => {
     try {
-      return await db
-        .select()
-        .from(customers)
-        .where(eq(customers.workspaceId, workspaceId!));
+      return await db.customer.findMany({
+        where: { workspaceId: workspaceId! },
+      });
     } catch (err) {
       logger.error("Failed to list customers", {
         error: (err as Error).message,
@@ -49,17 +46,11 @@ export const customerModule = new Elysia({ prefix: "/customers" })
         if ("language" in data) {
           updateData.language = data.language;
         }
-        const [updated] = await db
-          .update(customers)
-          .set(updateData)
-          .where(
-            and(
-              eq(customers.id, params.id),
-              eq(customers.workspaceId, workspaceId!)
-            )
-          )
-          .returning();
-        if (!updated) {
+        const updated = await db.customer.update({
+          where: { id: params.id },
+          data: updateData,
+        });
+        if (!updated || updated.workspaceId !== workspaceId) {
           return notFound(set, "Customer not found");
         }
         return updated;

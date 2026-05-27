@@ -13,18 +13,17 @@
  *   - Auto-recovery attempts a restart for transient errors (max 3 retries)
  */
 import { db } from "@zenda/db/client";
-import {
-  agentHealthEvents,
-  type agentHealthStatusEnum,
-} from "@zenda/db/schema";
-import { desc, eq } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 import { createNotification } from "../notification/service.js";
 
 // ── Types ──────────────────────────────────────────────────────────
 
 export type AgentHealthStatus =
-  (typeof agentHealthStatusEnum.enumValues)[number];
+  | "healthy"
+  | "degraded"
+  | "error"
+  | "unknown"
+  | "recovering";
 
 export interface AgentHealthCheckResult {
   details?: Record<string, unknown>;
@@ -138,14 +137,14 @@ async function checkCircuitBreaker(): Promise<AgentHealthCheckResult> {
 
 async function checkOutboundQueue(): Promise<AgentHealthCheckResult> {
   try {
-    const { sql } = await import("drizzle-orm");
-    const result = await db.execute(sql`
-      SELECT
-        count(*) FILTER (WHERE status = 'pending') AS pending,
-        count(*) FILTER (WHERE status = 'failed') AS failed
-      FROM outbound_queue
-    `);
-    const row = (result as any).rows?.[0];
+    const result: Array<{ pending: bigint; failed: bigint }> =
+      await db.$queryRaw`
+        SELECT
+          count(*) FILTER (WHERE status = 'pending') AS pending,
+          count(*) FILTER (WHERE status = 'failed') AS failed
+        FROM outbound_queue
+      `;
+    const row = result[0];
     const pending = Number(row?.pending ?? 0);
     const failed = Number(row?.failed ?? 0);
 
@@ -172,9 +171,8 @@ async function checkOutboundQueue(): Promise<AgentHealthCheckResult> {
 
 async function checkDatabase(): Promise<AgentHealthCheckResult> {
   try {
-    const { sql } = await import("drizzle-orm");
     const start = Date.now();
-    await db.execute(sql`SELECT 1`);
+    await db.$queryRaw`SELECT 1`;
     const latencyMs = Date.now() - start;
 
     if (latencyMs > 2000) {
@@ -209,13 +207,15 @@ export async function runHealthCheckCycle(): Promise<{
       const previousStatus = lastKnownStatus.get(agent.name) ?? "unknown";
 
       // Record the event
-      await db.insert(agentHealthEvents).values({
-        agentName: agent.name,
-        status: result.status,
-        previousStatus,
-        details: result.details ?? null,
-        latencyMs: result.latencyMs ?? null,
-        error: result.error ?? null,
+      await db.agentHealthEvent.create({
+        data: {
+          agentName: agent.name,
+          status: result.status,
+          previousStatus,
+          details: result.details ?? null,
+          latencyMs: result.latencyMs ?? null,
+          error: result.error ?? null,
+        },
       });
 
       // Update in-memory state
@@ -284,19 +284,15 @@ async function sendAlert(
 ): Promise<void> {
   try {
     // Find workspaces to alert — notify all workspaces with active WhatsApp connections
-    const { sql } = await import("drizzle-orm");
-    const activeWorkspaces = await db.execute(sql`
-      SELECT DISTINCT workspace_id
-      FROM whatsapp_connections
-      WHERE status = 'connected'
-      LIMIT 50
-    `);
+    const activeWorkspaces: Array<{ workspace_id: string }> =
+      await db.$queryRaw`
+        SELECT DISTINCT workspace_id
+        FROM whatsapp_connections
+        WHERE status = 'connected'
+        LIMIT 50
+      `;
 
-    const wsIds = ((activeWorkspaces as any).rows ?? []) as Array<{
-      workspace_id: string;
-    }>;
-
-    if (wsIds.length === 0) {
+    if (activeWorkspaces.length === 0) {
       logger.warn("No active workspaces to send agent health alert", {
         agent: agent.name,
       });
@@ -304,7 +300,7 @@ async function sendAlert(
     }
 
     // Send one notification per workspace (batch, don't await each)
-    const promises = wsIds.map(({ workspace_id }) =>
+    const promises = activeWorkspaces.map(({ workspace_id }) =>
       createNotification({
         workspaceId: workspace_id,
         type: "agent_error",
@@ -324,7 +320,7 @@ async function sendAlert(
     await Promise.allSettled(promises);
     logger.info("Agent health alerts sent", {
       agent: agent.name,
-      count: wsIds.length,
+      count: activeWorkspaces.length,
     });
   } catch (err) {
     logger.error("Failed to send agent health alert", {
@@ -337,16 +333,11 @@ async function sendAlert(
 // ── Query helpers ──────────────────────────────────────────────────
 
 export async function getAgentHealthHistory(agentName?: string, limit = 100) {
-  const query = db
-    .select()
-    .from(agentHealthEvents)
-    .orderBy(desc(agentHealthEvents.createdAt))
-    .limit(limit);
-
-  if (agentName) {
-    return query.where(eq(agentHealthEvents.agentName, agentName));
-  }
-  return query;
+  return db.agentHealthEvent.findMany({
+    where: agentName ? { agentName } : undefined,
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
 }
 
 export async function getAgentStatusSummary(): Promise<
@@ -367,12 +358,10 @@ export async function getAgentStatusSummary(): Promise<
 
   // Fetch latest event per agent
   for (const agent of AGENT_REGISTRY) {
-    const [latest] = await db
-      .select()
-      .from(agentHealthEvents)
-      .where(eq(agentHealthEvents.agentName, agent.name))
-      .orderBy(desc(agentHealthEvents.createdAt))
-      .limit(1);
+    const latest = await db.agentHealthEvent.findFirst({
+      where: { agentName: agent.name },
+      orderBy: { createdAt: "desc" },
+    });
 
     if (latest) {
       result[agent.name] = {

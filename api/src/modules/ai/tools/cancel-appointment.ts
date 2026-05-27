@@ -17,16 +17,8 @@
  * - On failure the agent receives a structured error it can relay honestly.
  */
 import { db } from "@zenda/db/client";
-import {
-  appointments,
-  businessProfiles,
-  receptionistProfiles,
-  services,
-  staffMembers,
-} from "@zenda/db/schema";
 import type { CancellationStrictness, Language } from "@zenda/shared";
 import { APPOINTMENT_TRANSITIONS } from "@zenda/shared";
-import { and, eq } from "drizzle-orm";
 import { logAppointmentAudit } from "../../audit/logger.js";
 
 interface ToolInput {
@@ -60,44 +52,32 @@ export async function cancelAppointment(
   const lang = _language ?? "en";
 
   // Fetch appointment with service, staff, and business config
-  const [row] = await db
-    .select({
-      appointment: appointments,
-      service: services,
-      staff: staffMembers,
-      business: businessProfiles,
-      receptionist: receptionistProfiles,
-    })
-    .from(appointments)
-    .innerJoin(services, eq(appointments.serviceId, services.id))
-    .leftJoin(staffMembers, eq(appointments.staffMemberId, staffMembers.id))
-    .innerJoin(
-      businessProfiles,
-      eq(appointments.workspaceId, businessProfiles.workspaceId)
-    )
-    .innerJoin(
-      receptionistProfiles,
-      eq(appointments.workspaceId, receptionistProfiles.workspaceId)
-    )
-    .where(
-      and(
-        eq(appointments.id, input.appointmentId),
-        eq(appointments.workspaceId, workspaceId)
-      )
-    )
-    .limit(1);
+  const row = await db.appointment.findFirst({
+    where: {
+      id: input.appointmentId,
+      workspaceId,
+    },
+    include: {
+      service: true,
+      staffMember: true,
+      workspace: {
+        include: {
+          businessProfile: true,
+          receptionistProfile: true,
+        },
+      },
+    },
+  });
 
   if (!row) {
     throw new Error("Appointment not found");
   }
 
-  const {
-    appointment: apt,
-    service: svc,
-    staff,
-    business: biz,
-    receptionist: recep,
-  } = row;
+  const apt = row;
+  const svc = row.service;
+  const staff = row.staffMember;
+  const biz = row.workspace.businessProfile;
+  const recep = row.workspace.receptionistProfile;
 
   // Validate status transition
   const validNext =
@@ -109,10 +89,10 @@ export async function cancelAppointment(
   // ── Compute time remaining ──
   const hoursUntilAppointment =
     (new Date(apt.startAt).getTime() - Date.now()) / 3_600_000;
-  const windowHours = biz.cancellationWindowHours ?? 24;
+  const windowHours = biz?.cancellationWindowHours ?? 24;
   const withinWindow = hoursUntilAppointment < windowHours;
   const strictness: CancellationStrictness =
-    recep.cancellationPolicyStrictness ?? "standard";
+    recep?.cancellationPolicyStrictness ?? "standard";
 
   // ── Apply cancellation policy ──
   if (withinWindow && strictness === "strict") {
@@ -139,18 +119,17 @@ export async function cancelAppointment(
   }
 
   // ── Perform cancellation ──
-  const [updated] = await db
-    .update(appointments)
-    .set({
+  const updated = await db.appointment.update({
+    where: { id: apt.id },
+    data: {
       status: "cancelled",
       cancelledAt: new Date(),
       updatedAt: new Date(),
       notes: input.reason
         ? `${apt.notes ?? ""}\nCancel reason: ${input.reason}`.trim()
         : apt.notes,
-    })
-    .where(eq(appointments.id, apt.id))
-    .returning();
+    },
+  });
 
   logAppointmentAudit(workspaceId, updated.id, "appointment_cancelled", {
     channel: "whatsapp",
@@ -161,7 +140,7 @@ export async function cancelAppointment(
 
   // ── Deposit note ──
   let depositNote: string | undefined;
-  if (biz.depositRequired) {
+  if (biz?.depositRequired) {
     depositNote =
       lang === "es"
         ? "Ten en cuenta que se aplicara la politica de depositos del negocio."

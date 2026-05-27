@@ -1,6 +1,4 @@
 import { db } from "@zenda/db/client";
-import { messages } from "@zenda/db/schema";
-import { and, eq, lte } from "drizzle-orm";
 import { logger } from "../../infra/logger.js";
 
 type QueueType = "safe" | "unsafe";
@@ -123,30 +121,28 @@ export async function flushPersistentQueue(
   try {
     // Find messages stuck in 'queued' status for more than 30 seconds
     const cutoff = new Date(Date.now() - 30_000);
-    const queued = await db
-      .select({
-        id: messages.id,
-        conversationId: messages.conversationId,
-        body: messages.body,
-        contentType: messages.contentType,
-      })
-      .from(messages)
-      .where(
-        and(
-          eq(messages.status, "queued"),
-          eq(messages.workspaceId, workspaceId),
-          lte(messages.createdAt, cutoff)
-        )
-      )
-      .limit(50);
+    const queued = await db.message.findMany({
+      where: {
+        status: "queued",
+        workspaceId,
+        createdAt: { lte: cutoff },
+      },
+      select: {
+        id: true,
+        conversationId: true,
+        body: true,
+        contentType: true,
+      },
+      take: 50,
+    });
 
     for (const msg of queued) {
       try {
         const success = await sendFn(msg);
-        await db
-          .update(messages)
-          .set({ status: success ? "sent" : "failed" })
-          .where(eq(messages.id, msg.id));
+        await db.message.update({
+          where: { id: msg.id },
+          data: { status: success ? "sent" : "failed" },
+        });
         if (success) {
           sent++;
         } else {

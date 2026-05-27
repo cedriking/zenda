@@ -1,6 +1,4 @@
 import { db } from "@zenda/db/client";
-import { workspaces } from "@zenda/db/schema";
-import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
@@ -20,11 +18,9 @@ export const workspaceModule = new Elysia({ prefix: "/workspace" })
   .use(typedContext)
   .get("/", async ({ workspaceId, set }) => {
     try {
-      const [ws] = await db
-        .select()
-        .from(workspaces)
-        .where(eq(workspaces.id, workspaceId as string))
-        .limit(1);
+      const ws = await db.workspace.findUnique({
+        where: { id: workspaceId as string },
+      });
       if (!ws) {
         return notFound(set, "Workspace not found");
       }
@@ -54,16 +50,15 @@ export const workspaceModule = new Elysia({ prefix: "/workspace" })
           }
         }
 
-        const [updated] = await db
-          .update(workspaces)
-          .set(updateData as Partial<typeof workspaces.$inferInsert>)
-          .where(eq(workspaces.id, wsId))
-          .returning();
-        if (!updated) {
-          return notFound(set, "Workspace not found");
-        }
+        const updated = await db.workspace.update({
+          where: { id: wsId },
+          data: updateData as Parameters<typeof db.workspace.update>[0]["data"],
+        });
         return updated;
       } catch (err) {
+        if ((err as any)?.code === "P2025") {
+          return notFound(set, "Workspace not found");
+        }
         logger.error("Failed to update workspace", {
           error: (err as Error).message,
         });

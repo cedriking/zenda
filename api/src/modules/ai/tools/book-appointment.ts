@@ -15,16 +15,8 @@
  * - On failure the agent receives a structured error it can relay honestly.
  */
 import { db } from "@zenda/db/client";
-import {
-  appointments,
-  customers,
-  services,
-  staffMembers,
-  workspaces,
-} from "@zenda/db/schema";
 import type { Language } from "@zenda/shared";
 import { TERMINAL_STATUSES } from "@zenda/shared";
-import { and, eq, gt, lt, ne, sql } from "drizzle-orm";
 import { logAppointmentAudit } from "../../audit/logger.js";
 import { enforceLimit } from "../../usage/enforcement.js";
 import { trackActiveContact } from "../../usage/tracker.js";
@@ -120,16 +112,12 @@ export async function bookAppointment(
   }
 
   // ── Phase 2: All fields present — look up service ──
-  const [service] = await db
-    .select()
-    .from(services)
-    .where(
-      and(
-        eq(services.id, input.serviceId!),
-        eq(services.workspaceId, workspaceId)
-      )
-    )
-    .limit(1);
+  const service = await db.services.findFirst({
+    where: {
+      id: input.serviceId!,
+      workspaceId,
+    },
+  });
 
   if (!service) {
     return {
@@ -143,16 +131,13 @@ export async function bookAppointment(
   // Resolve staff name if provided
   let staffName: string | null = null;
   if (input.staffMemberId) {
-    const [staff] = await db
-      .select({ name: staffMembers.name })
-      .from(staffMembers)
-      .where(
-        and(
-          eq(staffMembers.id, input.staffMemberId),
-          eq(staffMembers.workspaceId, workspaceId)
-        )
-      )
-      .limit(1);
+    const staff = await db.staffMember.findFirst({
+      where: {
+        id: input.staffMemberId,
+        workspaceId,
+      },
+      select: { name: true },
+    });
     staffName = staff?.name ?? null;
   }
 
@@ -201,48 +186,40 @@ export async function bookAppointment(
   }
   // Derive timezone from workspace settings, fallback to UTC
   let timezone = "UTC";
-  const [ws] = await db
-    .select({ timezone: workspaces.timezone })
-    .from(workspaces)
-    .where(eq(workspaces.id, workspaceId))
-    .limit(1);
+  const ws = await db.workspace.findFirst({
+    where: { id: workspaceId },
+    select: { timezone: true },
+  });
   if (ws?.timezone) {
     timezone = ws.timezone;
   }
 
   // Use a transaction with pessimistic lock to prevent double-booking.
-  // SELECT FOR UPDATE acquires a lock on overlapping rows so concurrent
-  // writers cannot both see "no overlap" and proceed.
-  const appointment = await db.transaction(async (tx) => {
-    const overlapConditions = [
-      eq(appointments.workspaceId, workspaceId),
-      lt(appointments.startAt, endAt),
-      gt(appointments.endAt, startAt),
-      ...TERMINAL_STATUSES.map((s) => ne(appointments.status, s)),
-    ];
+  const appointment = await db.$transaction(async (tx) => {
+    const whereCondition: Record<string, unknown> = {
+      workspaceId,
+      startAt: { lt: endAt },
+      endAt: { gt: startAt },
+      status: { notIn: TERMINAL_STATUSES },
+    };
 
     if (input.staffMemberId) {
-      overlapConditions.push(
-        eq(appointments.staffMemberId, input.staffMemberId)
-      );
+      whereCondition.staffMemberId = input.staffMemberId;
     } else {
-      overlapConditions.push(sql`${appointments.staffMemberId} IS NULL`);
+      whereCondition.staffMemberId = null;
     }
 
-    const overlapping = await tx
-      .select({ id: appointments.id })
-      .from(appointments)
-      .where(and(...overlapConditions))
-      .limit(1)
-      .for("update");
+    const overlapping = await tx.appointment.findFirst({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      where: whereCondition as any,
+    });
 
-    if (overlapping.length > 0) {
+    if (overlapping) {
       return null;
     }
 
-    const [inserted] = await tx
-      .insert(appointments)
-      .values({
+    const inserted = await tx.appointment.create({
+      data: {
         workspaceId,
         customerId: input.customerId,
         serviceId: input.serviceId!,
@@ -254,8 +231,8 @@ export async function bookAppointment(
         sourceConversationId: conversationId,
         createdBy: "ai",
         notes: input.notes ?? null,
-      })
-      .returning();
+      },
+    });
 
     return inserted;
   });
@@ -282,11 +259,10 @@ export async function bookAppointment(
   // Track active contact for usage (background — non-blocking)
   (async () => {
     try {
-      const [customer] = await db
-        .select({ phoneNumber: customers.phoneNumber })
-        .from(customers)
-        .where(eq(customers.id, input.customerId))
-        .limit(1);
+      const customer = await db.customer.findFirst({
+        where: { id: input.customerId },
+        select: { phoneNumber: true },
+      });
       if (customer) {
         await trackActiveContact(workspaceId, customer.phoneNumber);
       }

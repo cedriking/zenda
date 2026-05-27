@@ -1,11 +1,4 @@
 import { db } from "@zenda/db/client";
-import {
-  appointments,
-  conversations,
-  messages,
-  providerUsage,
-} from "@zenda/db/schema";
-import { and, count, eq, gte, inArray, lte, sql } from "drizzle-orm";
 
 interface AnalyticsPeriod {
   end: Date;
@@ -58,150 +51,110 @@ async function getConversationStats(
   workspaceId: string,
   period: AnalyticsPeriod
 ) {
-  const result = await db
-    .select({
-      count: count(),
-    })
-    .from(conversations)
-    .where(
-      and(
-        eq(conversations.workspaceId, workspaceId),
-        gte(conversations.createdAt, period.start),
-        lte(conversations.createdAt, period.end)
-      )
-    );
+  const [totalResult, byDayResult] = await Promise.all([
+    db.conversation.count({
+      where: {
+        workspaceId,
+        createdAt: { gte: period.start, lte: period.end },
+      },
+    }),
+    db.$queryRaw<Array<{ date: string; count: number }>>`
+      SELECT DATE(created_at) as date, COUNT(*)::int as count
+      FROM conversations
+      WHERE workspace_id = ${workspaceId}
+        AND created_at >= ${period.start}
+        AND created_at <= ${period.end}
+      GROUP BY DATE(created_at)
+      ORDER BY DATE(created_at)
+    `,
+  ]);
 
-  const byDay = await db
-    .select({
-      date: sql<string>`DATE(${conversations.createdAt})`,
-      count: count(),
-    })
-    .from(conversations)
-    .where(
-      and(
-        eq(conversations.workspaceId, workspaceId),
-        gte(conversations.createdAt, period.start),
-        lte(conversations.createdAt, period.end)
-      )
-    )
-    .groupBy(sql`DATE(${conversations.createdAt})`)
-    .orderBy(sql`DATE(${conversations.createdAt})`);
-
-  return { total: result[0]?.count ?? 0, byDay };
+  return { total: totalResult, byDay: byDayResult };
 }
 
 async function getAppointmentStats(
   workspaceId: string,
   period: AnalyticsPeriod
 ) {
-  const totalResult = await db
-    .select({ count: count() })
-    .from(appointments)
-    .where(
-      and(
-        eq(appointments.workspaceId, workspaceId),
-        gte(appointments.createdAt, period.start),
-        lte(appointments.createdAt, period.end)
-      )
-    );
-
-  const noShowResult = await db
-    .select({ count: count() })
-    .from(appointments)
-    .where(
-      and(
-        eq(appointments.workspaceId, workspaceId),
-        // biome-ignore lint/suspicious/noExplicitAny: pgEnum type inference limitation
-        eq(appointments.status, "no_show" as any),
-        gte(appointments.createdAt, period.start),
-        lte(appointments.createdAt, period.end)
-      )
-    );
-
-  const total = totalResult[0]?.count ?? 0;
-  const noShows = noShowResult[0]?.count ?? 0;
-
-  const byDay = await db
-    .select({
-      date: sql<string>`DATE(${appointments.createdAt})`,
-      count: count(),
-    })
-    .from(appointments)
-    .where(
-      and(
-        eq(appointments.workspaceId, workspaceId),
-        gte(appointments.createdAt, period.start),
-        lte(appointments.createdAt, period.end)
-      )
-    )
-    .groupBy(sql`DATE(${appointments.createdAt})`)
-    .orderBy(sql`DATE(${appointments.createdAt})`);
+  const [totalResult, noShowResult, byDayResult] = await Promise.all([
+    db.appointment.count({
+      where: {
+        workspaceId,
+        createdAt: { gte: period.start, lte: period.end },
+      },
+    }),
+    db.appointment.count({
+      where: {
+        workspaceId,
+        status: "no_show",
+        createdAt: { gte: period.start, lte: period.end },
+      },
+    }),
+    db.$queryRaw<Array<{ date: string; count: number }>>`
+      SELECT DATE(created_at) as date, COUNT(*)::int as count
+      FROM appointments
+      WHERE workspace_id = ${workspaceId}
+        AND created_at >= ${period.start}
+        AND created_at <= ${period.end}
+      GROUP BY DATE(created_at)
+      ORDER BY DATE(created_at)
+    `,
+  ]);
 
   return {
-    total,
-    byDay,
-    noShowRate: total > 0 ? noShows / total : 0,
+    total: totalResult,
+    byDay: byDayResult,
+    noShowRate: totalResult > 0 ? noShowResult / totalResult : 0,
   };
 }
 
 async function getMessageStats(workspaceId: string, period: AnalyticsPeriod) {
-  const totalResult = await db
-    .select({ count: count() })
-    .from(messages)
-    .where(
-      and(
-        eq(messages.workspaceId, workspaceId),
-        gte(messages.createdAt, period.start),
-        lte(messages.createdAt, period.end)
-      )
-    );
+  const totalResult = await db.message.count({
+    where: {
+      workspaceId,
+      createdAt: { gte: period.start, lte: period.end },
+    },
+  });
 
   // Calculate avg response time: time between first customer message and first AI response
   // per conversation, then average across all conversations in the period.
-  // Use ISO strings for date params in raw SQL — Drizzle's sql tag serializes Date objects
-  // via .toString() which produces "Wed Apr 22 2026..." that PostgreSQL cannot parse.
   const startIso = period.start.toISOString();
   const endIso = period.end.toISOString();
 
-  const responseTimeResult = await db
-    .select({
-      avgMs: sql<number>`COALESCE(
-        AVG(
-          EXTRACT(EPOCH FROM (
-            first_reply.created_at - first_customer.created_at
-          )) * 1000
-        ),
-        0
-      )`,
-    })
-    .from(
-      // Subquery: first customer message per conversation
-      sql`(SELECT DISTINCT ON (m1.conversation_id)
-           m1.conversation_id, m1.created_at
-           FROM messages m1
-           WHERE m1.sender_type = 'customer'
-             AND m1.workspace_id = ${workspaceId}
-             AND m1.created_at >= ${startIso}::timestamptz
-             AND m1.created_at <= ${endIso}::timestamptz
-           ORDER BY m1.conversation_id, m1.created_at ASC
-          ) AS first_customer`
-    )
-    .innerJoin(
-      // Subquery: first AI response per conversation
-      sql`(SELECT DISTINCT ON (m2.conversation_id)
-           m2.conversation_id, m2.created_at
-           FROM messages m2
-           WHERE m2.sender_type = 'ai'
-             AND m2.workspace_id = ${workspaceId}
-             AND m2.created_at >= ${startIso}::timestamptz
-             AND m2.created_at <= ${endIso}::timestamptz
-           ORDER BY m2.conversation_id, m2.created_at ASC
-          ) AS first_reply`,
-      sql`first_customer.conversation_id = first_reply.conversation_id`
-    );
+  const responseTimeResult = await db.$queryRaw<Array<{ avgMs: number }>>`
+    SELECT COALESCE(
+      AVG(
+        EXTRACT(EPOCH FROM (
+          first_reply.created_at - first_customer.created_at
+        )) * 1000
+      ),
+      0
+    ) as "avgMs"
+    FROM (
+      SELECT DISTINCT ON (m1.conversation_id)
+        m1.conversation_id, m1.created_at
+      FROM messages m1
+      WHERE m1.sender_type = 'customer'
+        AND m1.workspace_id = ${workspaceId}
+        AND m1.created_at >= ${startIso}::timestamptz
+        AND m1.created_at <= ${endIso}::timestamptz
+      ORDER BY m1.conversation_id, m1.created_at ASC
+    ) AS first_customer
+    INNER JOIN (
+      SELECT DISTINCT ON (m2.conversation_id)
+        m2.conversation_id, m2.created_at
+      FROM messages m2
+      WHERE m2.sender_type = 'ai'
+        AND m2.workspace_id = ${workspaceId}
+        AND m2.created_at >= ${startIso}::timestamptz
+        AND m2.created_at <= ${endIso}::timestamptz
+      ORDER BY m2.conversation_id, m2.created_at ASC
+    ) AS first_reply
+    ON first_customer.conversation_id = first_reply.conversation_id
+  `;
 
   return {
-    total: totalResult[0]?.count ?? 0,
+    total: totalResult,
     avgResponseTimeMs: Math.round(responseTimeResult[0]?.avgMs ?? 0),
   };
 }
@@ -210,47 +163,35 @@ async function getEscalationStats(
   workspaceId: string,
   period: AnalyticsPeriod
 ) {
-  // Count conversations that were escalated (mode is needs_attention or human_takeover)
-  const escalatedResult = await db
-    .select({ count: count() })
-    .from(conversations)
-    .where(
-      and(
-        eq(conversations.workspaceId, workspaceId),
-        inArray(conversations.mode, ["needs_attention", "human_takeover"]),
-        gte(conversations.createdAt, period.start),
-        lte(conversations.createdAt, period.end)
-      )
-    );
+  const [escalatedResult, totalResult] = await Promise.all([
+    db.conversation.count({
+      where: {
+        workspaceId,
+        mode: { in: ["needs_attention", "human_takeover"] },
+        createdAt: { gte: period.start, lte: period.end },
+      },
+    }),
+    db.conversation.count({
+      where: {
+        workspaceId,
+        createdAt: { gte: period.start, lte: period.end },
+      },
+    }),
+  ]);
 
-  const totalResult = await db
-    .select({ count: count() })
-    .from(conversations)
-    .where(
-      and(
-        eq(conversations.workspaceId, workspaceId),
-        gte(conversations.createdAt, period.start),
-        lte(conversations.createdAt, period.end)
-      )
-    );
-
-  const total = totalResult[0]?.count ?? 0;
-  const escalated = escalatedResult[0]?.count ?? 0;
-
-  return { total: escalated, rate: total > 0 ? escalated / total : 0 };
+  return {
+    total: escalatedResult,
+    rate: totalResult > 0 ? escalatedResult / totalResult : 0,
+  };
 }
 
 async function getAIStats(workspaceId: string, period: AnalyticsPeriod) {
-  const usage = await db
-    .select()
-    .from(providerUsage)
-    .where(
-      and(
-        eq(providerUsage.workspaceId, workspaceId),
-        gte(providerUsage.createdAt, period.start),
-        lte(providerUsage.createdAt, period.end)
-      )
-    );
+  const usage = await db.providerUsage.findMany({
+    where: {
+      workspaceId,
+      createdAt: { gte: period.start, lte: period.end },
+    },
+  });
 
   const breakdown: Record<string, number> = {};
   let totalTokens = 0;
