@@ -66,6 +66,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/mejor-alternativa-trengo-whatsapp",
     "/mejor-alternativa-sirena-whatsapp",
     "/mejor-alternativa-manychat-whatsapp",
+    "/recepcionista-veterinaria-whatsapp",
+    "/recepcionista-spa-whatsapp",
     "/chatbot-citas-whatsapp",
     "/referir",
     "/generador-link-whatsapp",
@@ -121,6 +123,8 @@ const PRIORITY_09 = new Set([
   "/mejor-alternativa-trengo-whatsapp",
   "/mejor-alternativa-sirena-whatsapp",
   "/mejor-alternativa-manychat-whatsapp",
+  "/recepcionista-veterinaria-whatsapp",
+  "/recepcionista-spa-whatsapp",
   "/chatbot-citas-whatsapp",
   "/blog",
 ]);
