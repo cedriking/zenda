@@ -20,6 +20,8 @@ const spanishSlugs = [
   "/blog/whatsapp-reservaciones-restaurante",
   "/blog/whatsapp-citas-salon-belleza",
   "/blog/whatsapp-lavado-auto-detailing",
+  "/blog/como-agendar-citas-whatsapp-negocio",
+  "/blog/evitar-cancelaciones-citas-whatsapp",
 ];
 
 const englishSlugs = [
