@@ -69,7 +69,7 @@ function createWindow() {
   mainWindow.webContents.session.webRequest.onHeadersReceived(
     (details, callback) => {
       const csp = inDevelopment
-        ? "default-src 'self' 'unsafe-eval'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws://localhost:* wss://localhost:* https: wss:; img-src 'self' data: blob:; font-src 'self'"
+        ? "default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws://localhost:* wss://localhost:* https: wss:; img-src 'self' data: blob:; font-src 'self'"
         : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src wss:*.zenda.bot https:; img-src 'self' data: blob:; font-src 'self'";
       callback({
         responseHeaders: {
