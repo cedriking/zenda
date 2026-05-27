@@ -1,89 +1,405 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-const PROSPECTS = [
+interface Prospect {
+  country: string;
+  day: number;
+  location: string;
+  name: string;
+  notes: string;
+  vertical: string;
+  wa?: string;
+}
+
+const SALON_MX =
+  "Hola! 👋 Soy [Tu nombre] de Zenda. Vi su salón en Google Maps — ¿usan WhatsApp para agendar citas? Imaginaría si sus clientas pudieran agendar 24/7 sin llamar. Nosotros creamos un asistente que hace justo eso — agenda automáticamente por WhatsApp y envía recordatorios para que no falten. ¿Les gustaría ver cómo funciona en 2 minutos?";
+const DENTAL_MX =
+  "Buenos días! Soy [Tu nombre] de Zenda. Vi su clínica en Google Maps. Trabajamos con dentistas para automatizar el agendamiento por WhatsApp. Los pacientes pueden agendar citas 24/7, y se envían recordatorios automáticos para reducir las cancelaciones. ¿Podría enviarle un demo rápido? Toma 2 minutos y puede probarlo gratis.";
+const SPA_MX =
+  "Hola! Soy [Tu nombre] de Zenda. Vi su spa en Google Maps. Tenemos un asistente de WhatsApp que agenda citas automáticamente, envía recordatorios, y maneja las cancelaciones — todo por chat. Sin tener que responder cada mensaje manualmente. ¿Les interesaría probarlo? Es gratis para empezar: https://zenda.bot/es/cita";
+const VET_MX =
+  "Hola! Soy [Tu nombre] de Zenda. Vi su veterinaria en Google Maps. Los dueños de mascotas pueden agendar consultas por WhatsApp 24/7 con nuestro sistema, y se envían recordatorios automáticos para que no se olviden. ¿Les gustaría ver cómo funciona? Les mando un demo rápido.";
+const SALON_AR =
+  "Hola! Soy [Tu nombre] de Zenda. Vi su salón en Google Maps. Trabajamos con peluquerías para automatizar los turnos por WhatsApp. Las clientas pueden reservar 24/7, y se mandan recordatorios automáticos para que no falten. ¿Te interesaría probarlo? Es gratis para empezar.";
+const DENTAL_AR =
+  "Buenos días! Soy [Tu nombre] de Zenda. Trabajamos con clínicas dentales para automatizar el agendamiento por WhatsApp. Los pacientes reducen las cancelaciones un 40% con recordatorios automáticos y confirmación por chat. ¿Podría enviarle un demo rápido? Toma 2 minutos y puede probarlo gratis.";
+const SPA_AR =
+  "Hola! Soy [Tu nombre] de Zenda. Vi su centro en Google. Es un asistente de WhatsApp que agenda citas automáticamente, envía recordatorios, y maneja las cancelaciones — todo por chat. Sin que tengan que responder cada mensaje. ¿Les interesaría probarlo? Es gratis para empezar: https://zenda.bot/es/cita";
+const VET_AR =
+  "Hola! Soy [Tu nombre] de Zenda. Trabajamos con veterinarias para automatizar el agendamiento por WhatsApp. Los dueños pueden agendar consultas por WhatsApp 24/7, y se envían recordatorios automáticos para que no se olviden. ¿Les gustaría ver cómo funciona? Les mando un demo rápido.";
+
+function waLink(phone: string, script: string): string {
+  const digits = phone.replace(/[^0-9]/g, "");
+  const prefix = digits.startsWith("54") ? "" : "";
+  return `https://wa.me/${prefix}${digits}?text=${encodeURIComponent(script)}`;
+}
+
+const PROSPECTS: Prospect[] = [
+  // Week 1 — Mexico (Day 1-6)
   {
-    name: "Diosas Salon de Belleza",
-    location: "M\u00e9rida, Yucat\u00e1n",
-    vertical: "Belleza",
-    notes: "FB activo 2.3K likes, due\u00f1o-operador",
-    link: "https://wa.me/529992017207?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20Diosas%20Salon%20agenda%20citas%20por%20WhatsApp%20%E2%80%94%20%C2%BFcu%C3%A1ntas%20citas%20se%20les%20escapan%20al%20d%C3%ADa%20porque%20no%20pueden%20contestar%20r%C3%A1pido%3F%0A%0ACreamos%20una%20asistente%20que%20responde%20en%20segundos%2C%20agenda%20autom%C3%A1ticamente%20y%20manda%20recordatorios.%20Todo%20desde%20su%20WhatsApp%20actual.%0A%0AOferta%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%203%20meses%20(~%24250%20MXN%2Fmes).%20%C2%BFLes%20interesa%3F%20zenda.bot%2Ffounding",
+    name: "Nova Arts Salon",
+    location: "CDMX Roma Norte",
+    vertical: "Salón",
+    notes: "Salón boutique zona trendy",
+    wa: "525541403367",
+    day: 1,
+    country: "MX",
   },
   {
-    name: "Silvia Galvan Image Studio",
+    name: "Punto 3 Hair Studio",
+    location: "CDMX Condesa",
+    vertical: "Salón",
+    notes: "Estudio de cabello",
+    wa: "525512021164",
+    day: 1,
+    country: "MX",
+  },
+  {
+    name: "Paloma Rosa Salon Belleza",
+    location: "Guadalajara",
+    vertical: "Salón",
+    notes: "Salón de belleza GDL",
+    wa: "523316011757",
+    day: 1,
+    country: "MX",
+  },
+  {
+    name: "Dental Miis",
     location: "CDMX",
-    vertical: "Belleza",
-    notes: "5 sucursales (Lomas, Condesa, Del Valle, Pedregal, Satelite)",
-    link: "https://wa.me/525565381048?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20Silvia%20Galvan%20agenda%20citas%20por%20WhatsApp%20%E2%80%94%20%C2%BFcu%C3%A1ntas%20citas%20se%20les%20escapan%20al%20d%C3%ADa%20porque%20no%20pueden%20contestar%20r%C3%A1pido%3F%0A%0ACreamos%20una%20asistente%20que%20responde%20en%20segundos%2C%20agenda%20autom%C3%A1ticamente%20y%20manda%20recordatorios.%20Todo%20desde%20su%20WhatsApp%20actual.%0A%0AOferta%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%203%20meses%20(~%24250%20MXN%2Fmes).%20%C2%BFLes%20interesa%3F%20zenda.bot%2Ffounding",
+    vertical: "Dental",
+    notes: "Clínica dental CDMX",
+    wa: "525518169988",
+    day: 2,
+    country: "MX",
   },
   {
-    name: "MaquillarteVegetal",
-    location: "Guadalajara, Jalisco",
-    vertical: "Makeup",
-    notes: "Makeup, laminado de cejas, faciales, cortes, u\u00f1as",
-    link: "https://wa.me/523325903186?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20MaquillarteVegetal%20agenda%20citas%20por%20WhatsApp%20%E2%80%94%20%C2%BFcu%C3%A1ntas%20citas%20se%20les%20escapan%20al%20d%C3%ADa%20porque%20no%20pueden%20contestar%20r%C3%A1pido%3F%0A%0ACreamos%20una%20asistente%20que%20responde%20en%20segundos%2C%20agenda%20autom%C3%A1ticamente%20y%20manda%20recordatorios.%20Todo%20desde%20su%20WhatsApp%20actual.%0A%0AOferta%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%203%20meses%20(~%24250%20MXN%2Fmes).%20%C2%BFLes%20interesa%3F%20zenda.bot%2Ffounding",
+    name: "Dra. Fatima de Freitas",
+    location: "CDMX",
+    vertical: "Dental",
+    notes: "Dentista particular",
+    wa: "525631802803",
+    day: 2,
+    country: "MX",
   },
   {
-    name: "NyxSpa",
-    location: "Canc\u00fan, Quintana Roo",
+    name: "Dental Perfect",
+    location: "CDMX Cuauhtemoc",
+    vertical: "Dental",
+    notes: "Clínica dental",
+    wa: "525555412623",
+    day: 2,
+    country: "MX",
+  },
+  {
+    name: "Dental Inn San Angel",
+    location: "CDMX San Angel",
+    vertical: "Dental",
+    notes: "Clínica dental zona premium",
+    wa: "525534410219",
+    day: 2,
+    country: "MX",
+  },
+  {
+    name: "Patio Pedregal Spa",
+    location: "CDMX Coyoacan",
     vertical: "Spa",
-    notes: "Blvd. Kukulkan zona hotelera, ticket alto",
-    link: "https://wa.me/529981016656?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Los%20spas%20pierden%20hasta%2030%25%20de%20citas%20potenciales%20por%20respuestas%20lentas%20en%20WhatsApp.%0A%0AZenda%20es%20una%20asistente%20virtual%20que%20contesta%20en%20segundos%2C%20confirma%20citas%20y%20env%C3%ADa%20recordatorios%20%E2%80%94%20sus%20clientas%20nunca%20esperan.%0A%0AOferta%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20off%20(~%24250%20MXN%2Fmes)%3A%20zenda.bot%2Ffounding",
+    notes: "Spa Pedregal",
+    wa: "5215515873832",
+    day: 3,
+    country: "MX",
   },
   {
-    name: "MAR Franco Beauty Salon",
-    location: "Monterrey, Nuevo Le\u00f3n",
-    vertical: "Belleza/U\u00f1as",
-    notes: "Guadalupe NL, WhatsApp confirmado",
-    link: "https://wa.me/528118164411?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20MAR%20Franco%20agenda%20citas%20por%20WhatsApp%20%E2%80%94%20%C2%BFcu%C3%A1ntas%20citas%20se%20les%20escapan%20al%20d%C3%ADa%20porque%20no%20pueden%20contestar%20r%C3%A1pido%3F%0A%0ACreamos%20una%20asistente%20que%20responde%20en%20segundos%2C%20agenda%20autom%C3%A1ticamente%20y%20manda%20recordatorios.%20Todo%20desde%20su%20WhatsApp%20actual.%0A%0AOferta%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%203%20meses%20(~%24250%20MXN%2Fmes).%20%C2%BFLes%20interesa%3F%20zenda.bot%2Ffounding",
+    name: "Patio Spa Miramontes",
+    location: "CDMX Coyoacan",
+    vertical: "Spa",
+    notes: "Spa Miramontes",
+    wa: "525538168168",
+    day: 3,
+    country: "MX",
+  },
+  {
+    name: "Simple Spa",
+    location: "CDMX Cuauhtemoc",
+    vertical: "Spa",
+    notes: "Spa urbano",
+    wa: "525574573935",
+    day: 3,
+    country: "MX",
+  },
+  {
+    name: "Veterinaria Can-Can",
+    location: "Monterrey",
+    vertical: "Veterinaria",
+    notes: "Vet MTY",
+    wa: "528121230452",
+    day: 4,
+    country: "MX",
+  },
+  {
+    name: "Veterinaria Monterrey",
+    location: "Monterrey",
+    vertical: "Veterinaria",
+    notes: "Vet MTY",
+    wa: "528125976686",
+    day: 4,
+    country: "MX",
   },
   {
     name: "Rafaella Salon",
-    location: "Monterrey, Nuevo Le\u00f3n",
-    vertical: "Belleza",
+    location: "Monterrey",
+    vertical: "Salón",
     notes: "Belleza y maquillaje profesional",
-    link: "https://wa.me/528110226671?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Vi%20que%20Rafaella%20Salon%20agenda%20citas%20por%20WhatsApp%20%E2%80%94%20%C2%BFcu%C3%A1ntas%20citas%20se%20les%20escapan%20al%20d%C3%ADa%20porque%20no%20pueden%20contestar%20r%C3%A1pido%3F%0A%0ACreamos%20una%20asistente%20que%20responde%20en%20segundos%2C%20agenda%20autom%C3%A1ticamente%20y%20manda%20recordatorios.%20Todo%20desde%20su%20WhatsApp%20actual.%0A%0AOferta%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%203%20meses%20(~%24250%20MXN%2Fmes).%20%C2%BFLes%20interesa%3F%20zenda.bot%2Ffounding",
+    wa: "528110226671",
+    day: 5,
+    country: "MX",
   },
   {
-    name: "Gentlemen's Barber Shop",
-    location: "Monterrey, Nuevo Le\u00f3n",
-    vertical: "Barber\u00eda",
-    notes: "Listado en AllBiz, tel\u00e9fono confirmado",
-    link: "https://wa.me/528116208450?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Barber%C3%ADas%20como%20Gentlemen%27s%20pierden%20clientes%20cada%20d%C3%ADa%20porque%20no%20pueden%20contestar%20WhatsApp%20mientras%20cortan%20el%20pelo.%0A%0AZenda%20responde%20por%20ti%20en%20segundos%2C%20agenda%20la%20cita%20y%20manda%20recordatorios%20%E2%80%94%20todo%20autom%C3%A1tico.%0A%0A14%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20para%20los%20primeros%2010%20negocios%20(~%24250%20MXN%2Fmes)%3A%20zenda.bot%2Ffounding",
+    name: "Denisse Mathieu Beauty Lab",
+    location: "Zapopan/GDL",
+    vertical: "Salón",
+    notes: "Beauty lab",
+    wa: "523336286469",
+    day: 5,
+    country: "MX",
   },
   {
-    name: "Mr. Barber's Club",
-    location: "Monterrey, Nuevo Le\u00f3n",
-    vertical: "Barber\u00eda",
-    notes: "Tel\u00e9fono confirmado",
-    link: "https://wa.me/528127190953?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Barber%C3%ADas%20como%20Mr.%20Barber%27s%20Club%20pierden%20clientes%20cada%20d%C3%ADa%20porque%20no%20pueden%20contestar%20WhatsApp%20mientras%20cortan%20el%20pelo.%0A%0AZenda%20responde%20por%20ti%20en%20segundos%2C%20agenda%20la%20cita%20y%20manda%20recordatorios%20%E2%80%94%20todo%20autom%C3%A1tico.%0A%0A14%20d%C3%ADas%20gratis%20%2B%2050%25%20de%20descuento%20(~%24250%20MXN%2Fmes)%3A%20zenda.bot%2Ffounding",
+    name: "Tu Spa Medicina Estética",
+    location: "CDMX Polanco",
+    vertical: "Medical Spa",
+    notes: "Spa médico, ticket alto",
+    day: 6,
+    country: "MX",
   },
   {
-    name: "Dante Spa For Men",
-    location: "M\u00e9rida, Yucat\u00e1n",
-    vertical: "Spa masculino",
-    notes: "WhatsApp confirmado",
-    link: "https://wa.me/529992349251?text=Hola!%20Soy%20[TU_NOMBRE]%20de%20Zenda.%20Los%20spas%20pierden%20hasta%2030%25%20de%20citas%20potenciales%20por%20respuestas%20lentas%20en%20WhatsApp.%0A%0AZenda%20es%20una%20asistente%20virtual%20que%20contesta%20en%20segundos%2C%20confirma%20citas%20y%20env%C3%ADa%20recordatorios%20%E2%80%94%20sus%20clientes%20nunca%20esperan.%0A%0AOferta%20fundador%3A%2014%20d%C3%ADas%20gratis%20%2B%2050%25%20off%20(~%24250%20MXN%2Fmes)%3A%20zenda.bot%2Ffounding",
+    name: "Kpala Spa",
+    location: "CDMX Roma+Coyoacán",
+    vertical: "Spa",
+    notes: "2 ubicaciones",
+    day: 6,
+    country: "MX",
+  },
+  {
+    name: "Sakura Spa",
+    location: "CDMX Polanco",
+    vertical: "Spa",
+    notes: "Spa zona premium",
+    day: 6,
+    country: "MX",
+  },
+  {
+    name: "Maquillarte Vegetal",
+    location: "Guadalajara",
+    vertical: "Salón",
+    notes: "Vegano/niche, teléfono confirmado",
+    wa: "523325903186",
+    day: 6,
+    country: "MX",
+  },
+  // Week 2 — Argentina (Day 8-13)
+  {
+    name: "Ezeangel Peluqueria",
+    location: "BA Congreso",
+    vertical: "Salón",
+    notes: "Peluquería BA",
+    wa: "5491168526534",
+    day: 8,
+    country: "AR",
+  },
+  {
+    name: "Vipeluqueria's",
+    location: "BA Caballito",
+    vertical: "Salón",
+    notes: "Peluquería Caballito",
+    wa: "5491154091348",
+    day: 8,
+    country: "AR",
+  },
+  {
+    name: "Milena Marin Beauty Studio",
+    location: "BA Palermo Soho",
+    vertical: "Salón",
+    notes: "Beauty studio Palermo",
+    wa: "5491138961610",
+    day: 8,
+    country: "AR",
+  },
+  {
+    name: "Llongueras Argentina",
+    location: "BA Colegiales",
+    vertical: "Salón",
+    notes: "Franquicia conocida",
+    wa: "5491151481428",
+    day: 9,
+    country: "AR",
+  },
+  {
+    name: "Buenos Aires SPA",
+    location: "BA San Telmo",
+    vertical: "Spa",
+    notes: "Spa San Telmo",
+    wa: "5491144129300",
+    day: 9,
+    country: "AR",
+  },
+  {
+    name: "Red Veterinaria",
+    location: "BA CABA",
+    vertical: "Veterinaria",
+    notes: "Red de vets",
+    wa: "5491171020829",
+    day: 9,
+    country: "AR",
+  },
+  {
+    name: "Dental Total",
+    location: "BA",
+    vertical: "Dental",
+    notes: "Clínica dental BA",
+    wa: "5491125991391",
+    day: 10,
+    country: "AR",
+  },
+  {
+    name: "Clinica Dental DAS Group",
+    location: "BA CABA",
+    vertical: "Dental",
+    notes: "Clínica dental",
+    wa: "5491132295596",
+    day: 10,
+    country: "AR",
+  },
+  {
+    name: "Modena Peluqueria",
+    location: "San Isidro, BA",
+    vertical: "Salón",
+    notes: "Peluquería zona norte",
+    day: 11,
+    country: "AR",
+  },
+  {
+    name: "Peluqueria Angela Vaccaro",
+    location: "Hurlingham, BA",
+    vertical: "Salón",
+    notes: "Peluquería oeste",
+    day: 11,
+    country: "AR",
+  },
+  {
+    name: "Studio Bell",
+    location: "City Bell, BA",
+    vertical: "Salón",
+    notes: "Peluquería La Plata area",
+    day: 11,
+    country: "AR",
+  },
+  {
+    name: "Dental Medicine",
+    location: "Caseros, BA",
+    vertical: "Dental",
+    notes: "Clínica dental",
+    day: 12,
+    country: "AR",
+  },
+  {
+    name: "Instituto Caride",
+    location: "La Plata, BA",
+    vertical: "Dental",
+    notes: "Instituto dental",
+    day: 12,
+    country: "AR",
+  },
+  {
+    name: "Bliss Spa Urbano",
+    location: "Lanús, BA",
+    vertical: "Spa",
+    notes: "Spa urbano sur",
+    day: 12,
+    country: "AR",
+  },
+  {
+    name: "Leonardo Rivara Peluqueria",
+    location: "Córdoba",
+    vertical: "Salón",
+    notes: "Peluquería Córdoba",
+    day: 13,
+    country: "AR",
   },
 ];
 
+function getScript(p: Prospect): string {
+  if (p.country === "MX") {
+    if (p.vertical.includes("Salón") || p.vertical.includes("Barber")) {
+      return SALON_MX;
+    }
+    if (p.vertical.includes("Dental")) {
+      return DENTAL_MX;
+    }
+    if (p.vertical.includes("Spa")) {
+      return SPA_MX;
+    }
+    if (p.vertical.includes("Vet")) {
+      return VET_MX;
+    }
+    return SALON_MX;
+  }
+  if (p.vertical.includes("Salón") || p.vertical.includes("Peluquería")) {
+    return SALON_AR;
+  }
+  if (p.vertical.includes("Dental")) {
+    return DENTAL_AR;
+  }
+  if (p.vertical.includes("Spa")) {
+    return SPA_AR;
+  }
+  if (p.vertical.includes("Vet")) {
+    return VET_AR;
+  }
+  return SALON_AR;
+}
+
 function generateCards(): string {
-  return PROSPECTS.map(
-    (p, i) => `
-    <div class="card" id="card-${i}">
-      <div class="top">
-        <span class="name">${i + 1}. ${p.name}</span>
-        <span class="status-badge status-pending" id="badge-${i}">Pendiente</span>
-      </div>
-      <div class="location">${p.location}</div>
-      <div class="notes">${p.vertical} — ${p.notes}</div>
-      <a class="btn btn-send" href="${p.link}" target="_blank" rel="noopener" onclick="markSent(${i})">Abrir WhatsApp</a>
-      <button class="btn btn-done" type="button" onclick="markSent(${i})">Marcar enviado</button>
-    </div>`
-  ).join("");
+  const groups = new Map<number, Prospect[]>();
+  for (const p of PROSPECTS) {
+    const arr = groups.get(p.day) ?? [];
+    arr.push(p);
+    groups.set(p.day, arr);
+  }
+
+  const parts: string[] = [];
+  for (const [day, prospects] of groups) {
+    const label =
+      day <= 7
+        ? `Semana 1 — Día ${day} (México)`
+        : `Semana 2 — Día ${day} (Argentina)`;
+    parts.push(
+      `<div class="day-header">📅 ${label} — ${prospects.length} contactos</div>`
+    );
+    for (const p of prospects) {
+      const idx = PROSPECTS.indexOf(p);
+      const hasWa = !!p.wa;
+      const sendBtn =
+        hasWa && p.wa
+          ? `<a class="btn btn-send" href="${waLink(p.wa, getScript(p))}" target="_blank" rel="noopener" onclick="markSent(${idx})">Abrir WhatsApp</a>`
+          : `<div class="btn btn-maps" onclick="searchMaps('${encodeURIComponent(`${p.name} ${p.location}`)}')">Buscar en Google Maps</div>`;
+      parts.push(`
+        <div class="card" id="card-${idx}">
+          <div class="top">
+            <span class="name">${idx + 1}. ${p.name}</span>
+            <span class="status-badge status-pending" id="badge-${idx}">Pendiente</span>
+          </div>
+          <div class="location">${p.location} · ${p.country === "MX" ? "🇲🇽" : "🇦🇷"}</div>
+          <div class="notes">${p.vertical} — ${p.notes}</div>
+          ${sendBtn}
+          <button class="btn btn-done" type="button" onclick="markSent(${idx})">Marcar enviado</button>
+        </div>`);
+    }
+  }
+  return parts.join("");
 }
 
 function getHtml(): string {
+  const total = PROSPECTS.length;
+  const withWa = PROSPECTS.filter((p) => p.wa).length;
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -92,57 +408,73 @@ function getHtml(): string {
 <title>Zenda — Outreach Dashboard</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;padding:16px}
-.header{text-align:center;margin-bottom:24px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;padding:16px;padding-bottom:80px}
+.header{text-align:center;margin-bottom:20px}
 .header h1{font-size:1.5rem;color:#22c55e;margin-bottom:4px}
-.header p{font-size:0.875rem;color:#94a3b8}
-.progress{text-align:center;margin-bottom:20px;font-size:0.875rem;color:#94a3b8}
-.progress-bar{height:6px;background:#1e293b;border-radius:3px;margin-top:8px}
-.progress-fill{height:100%;background:#22c55e;border-radius:3px;transition:width 0.3s}
-.card{background:#1e293b;border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #334155}
-.card.sent{border-color:#22c55e;opacity:0.6}
-.card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.card .name{font-weight:600;font-size:1rem;color:#f1f5f9}
-.card .location{font-size:0.8125rem;color:#64748b;margin-bottom:8px}
-.card .notes{font-size:0.8125rem;color:#94a3b8;margin-bottom:12px}
-.btn{display:block;width:100%;padding:12px;border:none;border-radius:8px;font-size:0.9375rem;font-weight:600;cursor:pointer;text-decoration:none;text-align:center}
+.header p{font-size:0.8125rem;color:#94a3b8}
+.stats{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+.stat{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:8px 12px;text-align:center;flex:1;max-width:120px}
+.stat-num{font-size:1.25rem;font-weight:700;color:#22c55e}
+.stat-label{font-size:0.6875rem;color:#64748b}
+.progress{text-align:center;margin-bottom:16px;font-size:0.8125rem;color:#94a3b8}
+.progress-bar{height:8px;background:#1e293b;border-radius:4px;margin-top:6px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#22c55e,#16a34a);border-radius:4px;transition:width 0.3s}
+.day-header{font-size:0.9375rem;font-weight:700;color:#e2e8f0;margin-top:20px;margin-bottom:8px;padding:8px 12px;background:#1e293b;border-radius:8px;border-left:4px solid #22c55e}
+.card{background:#1e293b;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #334155;transition:opacity 0.3s}
+.card.sent{border-color:#22c55e;opacity:0.5}
+.card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.card .name{font-weight:600;font-size:0.9375rem;color:#f1f5f9}
+.card .location{font-size:0.75rem;color:#64748b;margin-bottom:4px}
+.card .notes{font-size:0.75rem;color:#94a3b8;margin-bottom:10px}
+.btn{display:block;width:100%;padding:11px;border:none;border-radius:8px;font-size:0.875rem;font-weight:600;cursor:pointer;text-decoration:none;text-align:center}
 .btn-send{background:#22c55e;color:#052e16}
 .btn-send:hover{background:#16a34a}
-.btn-done{background:#1e293b;color:#22c55e;border:1px solid #22c55e;margin-top:8px}
-.btn-done:hover{background:#22c55e;color:#052e16}
-.status-badge{font-size:0.75rem;padding:2px 8px;border-radius:9999px}
+.btn-maps{background:#3b82f6;color:#eff6ff}
+.btn-maps:hover{background:#2563eb}
+.btn-done{background:transparent;color:#64748b;border:1px solid #334155;margin-top:6px}
+.btn-done:hover{background:#1e293b;color:#22c55e;border-color:#22c55e}
+.status-badge{font-size:0.6875rem;padding:2px 8px;border-radius:9999px}
 .status-pending{background:#422006;color:#fbbf24}
 .status-sent{background:#052e16;color:#22c55e}
-.tip{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:20px}
-.tip h3{font-size:0.875rem;color:#fbbf24;margin-bottom:8px}
-.tip ol{padding-left:20px;font-size:0.8125rem;color:#94a3b8;line-height:1.8}
+.tip{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:14px;margin-bottom:16px}
+.tip h3{font-size:0.8125rem;color:#fbbf24;margin-bottom:6px}
+.tip ol{padding-left:18px;font-size:0.75rem;color:#94a3b8;line-height:1.8}
+.footer{text-align:center;margin-top:24px;font-size:0.6875rem;color:#475569}
 </style>
 </head>
 <body>
 <div class="header">
   <h1>Zenda Outreach</h1>
-  <p>9 prospectos listos. ~10 minutos.</p>
+  <p>${total} prospectos · ${withWa} con WhatsApp directo · ~40 min total</p>
+</div>
+<div class="stats">
+  <div class="stat"><div class="stat-num">${total}</div><div class="stat-label">Total</div></div>
+  <div class="stat"><div class="stat-num" id="counter">0</div><div class="stat-label">Enviados</div></div>
+  <div class="stat"><div class="stat-num" id="remaining">${total}</div><div class="stat-label">Pendientes</div></div>
 </div>
 <div class="progress">
-  <span id="counter">0</span>/9 enviados
   <div class="progress-bar"><div class="progress-fill" id="bar" style="width:0%"></div></div>
 </div>
 <div class="tip">
   <h3>Instrucciones</h3>
   <ol>
-    <li>Toca "Abrir WhatsApp" — se abre con el mensaje listo</li>
-    <li>Reemplaza <strong>[TU_NOMBRE]</strong> con tu nombre</li>
-    <li>Env\u00eda el mensaje</li>
-    <li>Regresa y toca "Marcar enviado"</li>
+    <li>Toca <strong>"Abrir WhatsApp"</strong> — se abre con el mensaje listo</li>
+    <li>Reemplaza <strong>[Tu nombre]</strong> con tu nombre real</li>
+    <li>Envía el mensaje</li>
+    <li>Regresa y toca <strong>"Marcar enviado"</strong></li>
+    <li>Si no hay botón de WhatsApp: busca en Google Maps primero</li>
   </ol>
 </div>
 <div id="cards">${generateCards()}</div>
+<div class="footer">zenda.bot · Dashboard de Outreach</div>
 <script>
-var STORAGE_KEY='zenda-outreach-sent';
+var STORAGE_KEY='zenda-outreach-v2';
+var TOTAL=${total};
 function getSent(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch(e){return[]}}
 function saveSent(s){localStorage.setItem(STORAGE_KEY,JSON.stringify(s))}
-function updateProgress(){var s=getSent();var c=s.length;document.getElementById('counter').textContent=c;document.getElementById('bar').style.width=(c/${PROSPECTS.length}*100)+'%'}
+function updateProgress(){var s=getSent();var c=s.length;document.getElementById('counter').textContent=c;document.getElementById('remaining').textContent=TOTAL-c;document.getElementById('bar').style.width=(c/TOTAL*100)+'%'}
 function markSent(i){var s=getSent();if(s.indexOf(i)===-1){s.push(i);saveSent(s)}var card=document.getElementById('card-'+i);if(card){card.className='card sent';var badge=document.getElementById('badge-'+i);if(badge){badge.className='status-badge status-sent';badge.textContent='Enviado'}}updateProgress()}
+function searchMaps(q){window.open('https://www.google.com/maps/search/'+q,'_blank')}
 updateProgress();
 </script>
 </body>
