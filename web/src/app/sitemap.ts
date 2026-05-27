@@ -60,6 +60,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/bot-citas-whatsapp",
     "/mejor-alternativa-calendly-whatsapp",
     "/mejor-alternativa-acuity-whatsapp",
+    "/mejor-alternativa-wati-whatsapp",
+    "/mejor-alternativa-kommo-whatsapp",
+    "/mejor-alternativa-zendesk-whatsapp",
     "/chatbot-citas-whatsapp",
     "/referir",
     "/generador-link-whatsapp",
@@ -95,57 +98,36 @@ function getFrequency(route: string): "weekly" | "yearly" | "monthly" {
   return "monthly";
 }
 
+const PRIORITY_09 = new Set([
+  "/pricing",
+  "/features",
+  "/founding",
+  "/demo",
+  "/recepcionista-virtual-whatsapp",
+  "/automatizar-citas-whatsapp",
+  "/recepcionista-dental-whatsapp",
+  "/recordatorios-citas-whatsapp",
+  "/automatizar-turnos-whatsapp",
+  "/recepcionista-virtual-salones",
+  "/bot-citas-whatsapp",
+  "/mejor-alternativa-calendly-whatsapp",
+  "/mejor-alternativa-acuity-whatsapp",
+  "/mejor-alternativa-wati-whatsapp",
+  "/mejor-alternativa-kommo-whatsapp",
+  "/mejor-alternativa-zendesk-whatsapp",
+  "/chatbot-citas-whatsapp",
+  "/blog",
+]);
+
 function getPriority(route: string): number {
   if (route === "") {
     return 1;
   }
-  if (route === "/pricing") {
-    return 0.9;
-  }
-  if (route === "/features") {
-    return 0.9;
-  }
-  if (route === "/founding") {
-    return 0.9;
-  }
-  if (route === "/demo") {
+  if (PRIORITY_09.has(route)) {
     return 0.9;
   }
   if (route === "/partners") {
     return 0.8;
-  }
-  if (route === "/recepcionista-virtual-whatsapp") {
-    return 0.9;
-  }
-  if (route === "/automatizar-citas-whatsapp") {
-    return 0.9;
-  }
-  if (route === "/recepcionista-dental-whatsapp") {
-    return 0.9;
-  }
-  if (route === "/recordatorios-citas-whatsapp") {
-    return 0.9;
-  }
-  if (route === "/automatizar-turnos-whatsapp") {
-    return 0.9;
-  }
-  if (route === "/recepcionista-virtual-salones") {
-    return 0.9;
-  }
-  if (route === "/bot-citas-whatsapp") {
-    return 0.9;
-  }
-  if (route === "/mejor-alternativa-calendly-whatsapp") {
-    return 0.9;
-  }
-  if (route === "/mejor-alternativa-acuity-whatsapp") {
-    return 0.9;
-  }
-  if (route === "/chatbot-citas-whatsapp") {
-    return 0.9;
-  }
-  if (route === "/blog") {
-    return 0.9;
   }
   if (route.startsWith("/blog")) {
     return 0.8;
