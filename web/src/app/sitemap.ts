@@ -79,6 +79,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/plantillas-whatsapp-negocios",
     "/agendar-citas-whatsapp-automatico",
     "/whatsapp-negocios-citas",
+    "/guia-whatsapp-negocios-citas",
     "/confirmar-citas-whatsapp",
     "/cita",
     "/blog",
@@ -133,6 +134,7 @@ const PRIORITY_09 = new Set([
   "/mejor-alternativa-twilio-whatsapp",
   "/recepcionista-veterinaria-whatsapp",
   "/recepcionista-spa-whatsapp",
+  "/guia-whatsapp-negocios-citas",
   "/chatbot-citas-whatsapp",
   "/blog",
 ]);
