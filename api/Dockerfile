@@ -30,9 +30,6 @@ COPY package.json ./package.json
 COPY api/ ./api/
 EXPOSE 3001
 
-# Run migrations using locally installed drizzle-kit, then start API.
-# bun run invokes the bin from node_modules/.bin directly (no download).
-# Errors in migration or API startup will be visible in container logs.
-# Use || true for migrations so drizzle-kit exit 1 (e.g. "already exists" notices)
-# doesn't prevent the API from starting when tables are already up-to-date.
-CMD ["sh", "-c", "echo '[startup] Running DB migrations...' && cd packages/db && (bun run migrate 2>&1 || true) && echo '[startup] Migrations complete. Starting API...' && cd /app && exec bun run api/src/index.ts"]
+# Run migrations using direct SQL runner (bypasses drizzle-kit snapshot validation).
+# All migration files are idempotent (IF NOT EXISTS, DO $ blocks).
+CMD ["sh", "-c", "echo '[startup] Running DB migrations...' && cd packages/db && bun run src/run-migrations.ts && echo '[startup] Migrations complete. Starting API...' && cd /app && exec bun run api/src/index.ts"]

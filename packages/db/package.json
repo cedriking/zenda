@@ -15,7 +15,7 @@
     "check": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "generate": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate",
+    "migrate": "bun run src/run-migrations.ts",
     "studio": "drizzle-kit studio",
     "seed": "bun run src/seed/index.ts"
   },

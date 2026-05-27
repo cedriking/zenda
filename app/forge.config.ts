@@ -9,6 +9,7 @@ import type { ForgeConfig } from "@electron-forge/shared-types";
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    icon: "./resources/icon",
   },
   rebuildConfig: {},
   makers: [

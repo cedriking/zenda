@@ -43,11 +43,13 @@ app.on("before-quit", (e) => {
 function createWindow() {
   const basePath = getBasePath();
   const preload = path.join(basePath, "preload.js");
+  const iconPath = path.join(getBasePath(), "../resources/icon.png");
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     minWidth: 900,
     minHeight: 600,
+    icon: iconPath,
     webPreferences: {
       devTools: inDevelopment,
       contextIsolation: true,

@@ -5,10 +5,7 @@ import { getBasePath } from "../utils/path";
 let tray: Tray | null = null;
 
 export function createTray(getWindow: () => BrowserWindow | null) {
-  const iconPath = path.join(
-    getBasePath(),
-    "../renderer/main_window/assets/icon.png"
-  );
+  const iconPath = path.join(getBasePath(), "../resources/icon.png");
   const icon = nativeImage
     .createFromPath(iconPath)
     .resize({ width: 16, height: 16 });
