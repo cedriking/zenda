@@ -67,6 +67,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/agendar-citas-whatsapp-automatico",
     "/whatsapp-negocios-citas",
     "/confirmar-citas-whatsapp",
+    "/cita",
     "/blog",
     "/legal/privacy",
     "/legal/terms",

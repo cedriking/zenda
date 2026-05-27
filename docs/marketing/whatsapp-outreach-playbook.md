@@ -94,7 +94,7 @@ Direct WhatsApp outreach to LATAM appointment-based businesses. Higher response 
 
 > Hola! Solo quería seguir arriba con mi mensaje. Si no es buen momento, entiendo completamente.
 >
-> Si les interesa, pueden probar Zenda gratis aquí: https://zenda.bot/es/founding
+> Si les interesa, pueden probar Zenda gratis aquí: https://zenda.bot/es/cita
 >
 > ¡Que tengan un excelente día! 🙏
 
@@ -106,7 +106,7 @@ Direct WhatsApp outreach to LATAM appointment-based businesses. Higher response 
 >
 > Y ahora mismo tenemos precio de "founding member" — se quedan con el precio de lanzamiento para siempre.
 >
-> ¿Quieren probar el plan gratuito? Se configuran en 5 minutos: https://zenda.bot/es/founding
+> ¿Quieren probar el plan gratuito? Se configuran en 5 minutos: https://zenda.bot/es/cita
 
 ---
 
