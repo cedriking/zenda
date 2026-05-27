@@ -36,5 +36,4 @@ COPY api/ ./api/
 EXPOSE 3001
 
 # Run migrations using Prisma Migrate, then start API.
-# Resolve any previously failed migrations before deploying new ones.
-CMD ["sh", "-c", "echo '[startup] Running DB migrations...' && cd packages/db && for m in 0000_init 0000_short_crusher_hogan 0001_update_4tier_pricing 0003_add_usage_records_updated_at 0004_prevent_double_booking 0005_password_reset_tokens 0006_add_free_tier 0007_add_partners_referrals 0008_add_agent_health_events; do bunx prisma migrate resolve --applied $m 2>/dev/null; done && bunx prisma migrate deploy && echo '[startup] Migrations complete. Starting API...' && cd /app && exec bun run api/src/index.ts"]
+CMD ["sh", "-c", "echo '[startup] Running DB migrations...' && cd packages/db && bunx prisma migrate deploy && echo '[startup] Migrations complete. Starting API...' && cd /app && exec bun run api/src/index.ts"]
