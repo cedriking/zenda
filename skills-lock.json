@@ -6,12 +6,6 @@
       "sourceType": "autoskills-registry",
       "computedHash": "bffe3d08cfe92ebad63699f74ce29e35c19850ebfbf474c1463183cfe34d6a09"
     },
-    "automate-whatsapp": {
-      "source": "gokapso/agent-skills",
-      "sourceType": "github",
-      "skillPath": "skills/automate-whatsapp/SKILL.md",
-      "computedHash": "8b2085f11c42e102b562aa824c03270165c9e61348e1c03bafa538d28d57db44"
-    },
     "composition-patterns": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "autoskills-registry",
@@ -26,12 +20,6 @@
       "source": "anthropics/skills",
       "sourceType": "autoskills-registry",
       "computedHash": "82fb11a63fb1e35ee2469516ed02d54695f783115b1540c0e783197af4240a3a"
-    },
-    "integrate-whatsapp": {
-      "source": "gokapso/agent-skills",
-      "sourceType": "github",
-      "skillPath": "skills/integrate-whatsapp/SKILL.md",
-      "computedHash": "3a0bd3339ae64b4d6d4394b60e4aaa9531a57bc12ab62b6bc148094877f9fe64"
     },
     "next-best-practices": {
       "source": "vercel-labs/next-skills",
@@ -57,12 +45,6 @@
       "source": "sickn33/antigravity-awesome-skills",
       "sourceType": "autoskills-registry",
       "computedHash": "9dbca8bf122ad4b6d8b6686e05e4e434e00ae1dfa5fa412566ae7ee88780a18f"
-    },
-    "observe-whatsapp": {
-      "source": "gokapso/agent-skills",
-      "sourceType": "github",
-      "skillPath": "skills/observe-whatsapp/SKILL.md",
-      "computedHash": "161a0993e73a2b7c1c7260bb844fc172d3585787077a96f7fbc85aadd8e55d36"
     },
     "playwright-best-practices": {
       "source": "currents-dev/playwright-best-practices-skill",

@@ -106,7 +106,7 @@ Automates the entire appointment booking flow on WhatsApp — from initial inqui
 - Next.js 15 (web app + landing pages)
 - Elysia + Bun (API)
 - Drizzle ORM + PostgreSQL
-- WhatsApp Business API (Kapso)
+- WhatsApp Business API
 - Stripe (billing)
 
 **Revenue: $0 after 2 months**

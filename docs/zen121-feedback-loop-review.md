@@ -33,7 +33,7 @@ Zenda has operated for ~3 weeks with a 3-agent team (CEO, CMO, CTO). The company
 
 **CMO (b87eea18):**
 - Assigned 5 issues (ZEN-115, 117-120)
-- ZEN-117/118 blocked (Facebook/LinkedIn need manual execution, Kapso doesn't support them)
+- ZEN-117/118 blocked (Facebook/LinkedIn need manual execution)
 - Limited execution observed — no comments posted on ZEN-115 (cold email)
 
 ### 2. Where Humans Overrode Agents
@@ -63,7 +63,7 @@ Zenda has operated for ~3 weeks with a 3-agent team (CEO, CMO, CTO). The company
 
 ### 5. Which Skills Need Narrowing
 
-- **CMO outreach skills:** Facebook Groups and LinkedIn are assigned to CMO but blocked — Kapso doesn't support these channels. Should reassign to Board/human or remove.
+- **CMO outreach skills:** Facebook Groups and LinkedIn are assigned to CMO but blocked. Should reassign to Board/human or remove.
 - **Cold email guessing:** Stop generating inferred emails. Only use verified emails (ZEN-124 fixes this).
 - **Board interaction framing:** Interactions should have fewer options and clearer urgency signals.
 
@@ -73,7 +73,7 @@ Zenda has operated for ~3 weeks with a 3-agent team (CEO, CMO, CTO). The company
 |----------|--------|
 | Guessed email outreach | 75-100% bounce rate. Waste of AgentMail quota and sender reputation. |
 | WhatsApp outreach via agents | Board owns this manually. Agents can't execute. |
-| Facebook/LinkedIn via Kapso | Kapso doesn't support these. Blocked indefinitely. |
+| Facebook/LinkedIn outreach | No automated channel available. Blocked indefinitely. |
 | Freelancer platform posting | Needs manual account creation. No agent can do this. |
 
 ### 7. Which to Move Up an Autonomy Level

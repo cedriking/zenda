@@ -1,7 +1,7 @@
 # Zenda Email Outreach Template (Fallback Channel)
 
 ## Context
-WhatsApp outreach is blocked pending Kapso API key. Email outreach is a viable alternative that requires no special tooling. **Free tier now live** — mention in all emails as lowest barrier to entry.
+WhatsApp outreach is done manually by the Board. Email outreach is a viable alternative that requires no special tooling. **Free tier now live** — mention in all emails as lowest barrier to entry.
 
 ## Subject Lines (A/B test)
 - **A**: "Tu clínica dental pierde citas por mensajes sin responder"
