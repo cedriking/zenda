@@ -52,9 +52,12 @@ We sent 65+ cold emails to LATAM business owners.
 
 Result: 47% bounced. 0% replied.
 
-Then we messaged them on WhatsApp.
+Now we're switching to WhatsApp — where LATAM SMB owners actually live.
 
-0% bounced. 5% replied in the first hour.
+Industry data says it all:
+📱 WhatsApp messages have 90%+ read rates (vs 12% email open rates)
+📱 Average response time on WhatsApp: under 90 seconds
+📱 93% of Mexicans use WhatsApp daily
 
 If you're selling to LATAM SMBs, you're not selling on the right channel.
 
@@ -81,7 +84,7 @@ Tu recepcionista de WhatsApp que:
 
 Setup: 5 minutos. Sin bajar apps extra.
 
-Prueba gratis → zenda.ai
+Prueba gratis → zenda.bot
 
 #WhatsAppBusiness #CitasAutomaticas #InteligenciaArtificial #PymesMexico
 ```
@@ -104,7 +107,7 @@ Agenda. Confirma. Lembra. Tudo automático.
 
 Seu cliente não precisa baixar nada. É só WhatsApp.
 
-→ zenda.ai
+→ zenda.bot
 
 #WhatsAppBusiness #Barbearia #Agendamento #PequenasEmpresas
 ```
@@ -114,62 +117,63 @@ Seu cliente não precisa baixar nada. É só WhatsApp.
 
 ---
 
-### Post 5 — Social Proof / CTA (Spanish)
+### Post 5 — Projection / CTA (Spanish)
 
 **Copy:**
 ```
-"Antes perdía como 5 citas por semana porque no podía contestar el WhatsApp. Ahora Zenda responde por mí y hasta manda recordatorios." — Dueña de salón, CDMX
+Imagina si nunca más perderías una cita por no contestar el WhatsApp a tiempo.
 
-Tu negocio pierde $1,500-4,800 USD/mes en citas que no se confirman.
+Tu negocio pierde $1,500-4,800 USD/mes en citas que no se confirman. Y ni te das cuenta.
+
+Con un asistente de WhatsApp que responde por ti, agenda, y manda recordatorios automáticamente, podrías recuperar esas citas perdidas.
 
 Zenda cuesta desde $29/mes. Se paga solo con 2 citas recuperadas.
 
-Prueba 14 días gratis → zenda.ai
+Prueba 14 días gratis → zenda.bot
 
 #WhatsAppBusiness #CitasAutomaticas #PymesMexico #SalonesDeBelleza
 ```
 
-**Format:** Single tweet with testimonial quote card image
+**Format:** Single tweet with projection/CTA image card
 **Posting time:** Monday 9am CT
 
 ---
 
 ## LINKEDIN POSTS (3)
 
-### Post 6 — Case Study Format
+### Post 6 — Common Scenario Format
 
 **Copy:**
 ```
-This dental clinic in Mexico City was losing $3,000 USD/month in missed appointments.
+Here's a scenario we see all the time with dental clinics in Mexico:
 
-The problem wasn't their service. It was their WhatsApp.
+The receptionist is with a patient. WhatsApp keeps buzzing. 7 unread messages by noon.
 
-Here's what was happening:
-- Patients message the clinic on WhatsApp to book
-- The receptionist was with a patient and couldn't answer
-- By the time she replied (2 hours later), the patient had already booked elsewhere
-- 30% of their weekly appointments were no-shows with no reminder system
+Here's what happens next:
+- Patient messages the clinic on WhatsApp to book
+- Receptionist can't answer — she's with a patient
+- By the time she replies (2 hours later), the patient booked elsewhere
+- 30% of weekly appointments become no-shows — no reminder system
 
-They tried email confirmations. Open rate: 12%. In Mexico, patients don't check email from businesses.
+They try email confirmations. Open rate: 12%. In Mexico, patients don't check email from businesses.
 
-They tried an appointment app. Patients refused to download it.
+They try an appointment app. Patients refuse to download it.
 
-So they connected Zenda to their WhatsApp Business account.
+Now imagine connecting Zenda to your WhatsApp Business account:
 
-Now:
 → Zenda answers every WhatsApp message within seconds
-→ It books appointments directly in their calendar
-→ It sends a reminder 24 hours before and 2 hours before
+→ It books appointments directly in your calendar
+→ It sends a reminder 24h before and 2h before
 → It understands voice notes in Mexican Spanish
-→ No-show rate dropped from 30% to 8%
+→ No-show rates typically drop from 30% to under 10%
 
-Setup took 5 minutes. Their patients didn't need to download anything.
+Setup takes 5 minutes. Patients don't need to download anything.
 
 Because in LATAM, WhatsApp IS the platform. Your customers are already there.
 
 If you run an appointment-based business and your WhatsApp is a mess, let's talk.
 
-→ zenda.ai
+→ zenda.bot
 
 #WhatsAppBusiness #DentalClinic #LATAM #AppointmentScheduling #AIReceptionist
 ```
@@ -307,9 +311,9 @@ Channel-market fit matters as much as product-market fit.
 **[0:50-0:60] CTA**
 *Visual: Zenda logo, URL, and "14-day free trial" badge.*
 
-**Voiceover:** "Stop losing appointments. Start your free trial at zenda.ai."
+**Voiceover:** "Stop losing appointments. Start your free trial at zenda.bot."
 
-*On-screen text:* zenda.ai | 14-day free trial | Works on WhatsApp
+*On-screen text:* zenda.bot | 14-day free trial | Works on WhatsApp
 
 ---
 

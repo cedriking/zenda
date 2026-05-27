@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CopyButton } from "@/components/copy-button";
 import { Footer } from "@/components/footer";
 import { JsonLdScript } from "@/components/json-ld";
 import { Nav } from "@/components/nav";
@@ -298,9 +299,6 @@ export default function PlantillasWhatsappPage() {
     })),
   };
 
-  const copyHandler =
-    "navigator.clipboard.writeText(this.parentElement.querySelector('.template-text').textContent);this.textContent='\u00a1Copiado!';setTimeout(()=>this.textContent='Copiar',2000)";
-
   return (
     <div className="min-h-screen bg-neutral-200 pt-16">
       <JsonLdScript data={faqLd} />
@@ -346,13 +344,7 @@ export default function PlantillasWhatsappPage() {
                         {template.text}
                       </p>
                     </div>
-                    <button
-                      className="rounded-lg bg-emerald-600 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-emerald-700"
-                      onclick={copyHandler}
-                      type="button"
-                    >
-                      Copiar
-                    </button>
+                    <CopyButton text={template.text} />
                   </div>
                 ))}
               </div>
