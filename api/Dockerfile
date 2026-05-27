@@ -31,6 +31,7 @@ RUN echo "Build $(date +%s)" > /buildinfo
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build-shared /app/packages/shared ./packages/shared
 COPY --from=build-shared /app/packages/db ./packages/db
+COPY --from=build-shared /app/node_modules/.prisma ./node_modules/.prisma
 COPY package.json ./package.json
 COPY api/ ./api/
 EXPOSE 3001
