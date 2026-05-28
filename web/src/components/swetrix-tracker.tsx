@@ -9,7 +9,7 @@ export function SwetrixTracker() {
   return (
     <>
       <Script
-        src="https://swetrix.org/swetrix.js"
+        src="https://cdn.jsdelivr.net/npm/swetrix@latest/dist/swetrix.js"
         strategy="afterInteractive"
       />
       <Script id="swetrix-init" strategy="afterInteractive">
