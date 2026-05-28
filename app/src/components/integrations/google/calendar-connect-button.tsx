@@ -1,23 +1,20 @@
 import { Calendar, CheckCircle, ExternalLink, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { openExternalLink } from "@/actions/shell";
+import { apiFetch } from "@/services/api-client";
 import { Button } from "../../ui/button";
 
 interface CalendarConnectButtonProps {
-  apiBaseUrl?: string;
   className?: string;
   isConnected?: boolean;
   isConnecting?: boolean;
-  onConnect?: () => void;
-  provider?: "google" | "outlook";
+  onConnected?: () => void;
 }
 
 export function CalendarConnectButton({
   isConnected = false,
   isConnecting = false,
-  onConnect,
-  apiBaseUrl = "https://api.zenda.bot",
-  provider = "google",
+  onConnected,
   className,
 }: CalendarConnectButtonProps) {
   const [isOpening, setIsOpening] = useState(false);
@@ -29,11 +26,12 @@ export function CalendarConnectButton({
 
     setIsOpening(true);
     try {
-      // Open Composio OAuth flow for Google Calendar
-      const connectUrl = `${apiBaseUrl}/integrations/composio/oauth/calendar?provider=${provider}`;
-      openExternalLink(connectUrl);
-
-      onConnect?.();
+      const res = await apiFetch("/integrations/google/connect");
+      const data = (await res.json()) as { authUrl?: string };
+      if (data.authUrl) {
+        openExternalLink(data.authUrl);
+      }
+      onConnected?.();
     } catch (error) {
       console.error("Failed to open calendar connection:", error);
     } finally {
@@ -67,7 +65,7 @@ export function CalendarConnectButton({
         <>
           <Calendar className="mr-1.5" size={14} />
           <ExternalLink className="mr-1" size={14} />
-          Connect {provider === "google" ? "Google" : "Outlook"} Calendar
+          Connect Google Calendar
         </>
       )}
     </Button>

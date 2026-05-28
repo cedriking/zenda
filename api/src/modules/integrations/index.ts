@@ -2,15 +2,16 @@
  * Integrations Module
  *
  * This module provides server-side integrations for external services:
- * - Composio: Google Calendar and other productivity tools
+ * - Google Calendar: Direct Google Calendar API integration
  */
 
-export * from "./composio/index.js";
+// biome-ignore lint/performance/noBarrelFile: re-export for convenience
+export * from "./google/index.js";
 
 import { db } from "@zenda/db/client";
 import { Elysia } from "elysia";
 import { typedContext } from "../../middleware/typed-context.js";
-import { composioModule as composioRoutes } from "./composio/index.js";
+import { googleCalendarModule } from "./google/index.js";
 
 /**
  * Main integrations routes module
@@ -18,7 +19,7 @@ import { composioModule as composioRoutes } from "./composio/index.js";
  */
 export const integrationsRoutes = new Elysia({ prefix: "/integrations" })
   .use(typedContext)
-  .use(composioRoutes)
+  .use(googleCalendarModule)
 
   /**
    * Get integration status for a workspace
@@ -50,6 +51,8 @@ export const integrationsRoutes = new Elysia({ prefix: "/integrations" })
     status: "ok",
     timestamp: new Date().toISOString(),
     integrations: {
-      composio: process.env.COMPOSIO_API_KEY ? "configured" : "not_configured",
+      googleCalendar: process.env.GOOGLE_CLIENT_ID
+        ? "configured"
+        : "not_configured",
     },
   }));

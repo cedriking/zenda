@@ -13,6 +13,7 @@
 import { db } from "@zenda/db/client";
 import type { Language } from "@zenda/shared";
 import { APPOINTMENT_TRANSITIONS } from "@zenda/shared";
+import { pushToCalendar } from "../../integrations/google/calendar-sync.js";
 import { trackActiveContact } from "../../usage/tracker.js";
 
 interface ToolInput {
@@ -86,8 +87,33 @@ export async function confirmAppointment(
       if (customer) {
         await trackActiveContact(workspaceId, customer.phoneNumber);
       }
-    } catch {}
+    } catch {
+      // best-effort usage tracking
+    }
   })();
+
+  // Push to Google Calendar if not already pushed (background — non-blocking)
+  if (!apt.externalCalendarEventId) {
+    (async () => {
+      try {
+        const aptWithRelations = await db.appointment.findFirst({
+          where: { id: updated.id },
+          include: { service: true, customer: true },
+        });
+        if (aptWithRelations) {
+          const eventId = await pushToCalendar(workspaceId, aptWithRelations);
+          if (eventId) {
+            await db.appointment.update({
+              where: { id: updated.id },
+              data: { externalCalendarEventId: eventId },
+            });
+          }
+        }
+      } catch {
+        // best-effort calendar push
+      }
+    })();
+  }
 
   return {
     appointmentId: updated.id,

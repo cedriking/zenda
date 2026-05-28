@@ -20,6 +20,7 @@ import { db } from "@zenda/db/client";
 import type { CancellationStrictness, Language } from "@zenda/shared";
 import { APPOINTMENT_TRANSITIONS } from "@zenda/shared";
 import { logAppointmentAudit } from "../../audit/logger.js";
+import { deleteFromCalendar } from "../../integrations/google/calendar-sync.js";
 
 interface ToolInput {
   appointmentId: string;
@@ -43,6 +44,44 @@ interface CancelSuccessResult {
 }
 
 type CancelResult = CancelBlockedResult | CancelSuccessResult;
+
+function checkCancellationPolicy(
+  startAt: Date,
+  cancellationWindowHours: number | null | undefined,
+  cancellationStrictness: CancellationStrictness | null | undefined,
+  lang: string
+): CancelBlockedResult | { warning: string | null } {
+  const hoursUntilAppointment =
+    (new Date(startAt).getTime() - Date.now()) / 3_600_000;
+  const windowHours = cancellationWindowHours ?? 24;
+  const withinWindow = hoursUntilAppointment < windowHours;
+  const strictness: CancellationStrictness =
+    cancellationStrictness ?? "standard";
+
+  if (withinWindow && strictness === "strict") {
+    const msg =
+      lang === "es"
+        ? `Lo siento, de acuerdo con la politica del negocio no es posible cancelar la cita con menos de ${windowHours} horas de anticipacion. Te gustaria que te comunique con alguien del equipo?`
+        : `I'm sorry, per the business policy cancellations are not allowed within ${windowHours} hours of the appointment. Would you like me to connect you with someone on the team?`;
+
+    return {
+      cancelled: false,
+      blocked: true,
+      reason: `strict_policy_window (${windowHours}h)`,
+      message: msg,
+    };
+  }
+
+  let warning: string | null = null;
+  if (withinWindow && strictness === "standard") {
+    warning =
+      lang === "es"
+        ? `Nota: estas cancelando con menos de ${windowHours} horas de anticipacion.`
+        : `Note: you are cancelling within ${windowHours} hours of the appointment.`;
+  }
+
+  return { warning };
+}
 
 export async function cancelAppointment(
   workspaceId: string,
@@ -86,37 +125,20 @@ export async function cancelAppointment(
     throw new Error(`Cannot cancel appointment in status: ${apt.status}`);
   }
 
-  // ── Compute time remaining ──
-  const hoursUntilAppointment =
-    (new Date(apt.startAt).getTime() - Date.now()) / 3_600_000;
-  const windowHours = biz?.cancellationWindowHours ?? 24;
-  const withinWindow = hoursUntilAppointment < windowHours;
-  const strictness: CancellationStrictness =
-    recep?.cancellationPolicyStrictness ?? "standard";
-
   // ── Apply cancellation policy ──
-  if (withinWindow && strictness === "strict") {
-    const msg =
-      lang === "es"
-        ? `Lo siento, de acuerdo con la politica del negocio no es posible cancelar la cita con menos de ${windowHours} horas de anticipacion. Te gustaria que te comunique con alguien del equipo?`
-        : `I'm sorry, per the business policy cancellations are not allowed within ${windowHours} hours of the appointment. Would you like me to connect you with someone on the team?`;
+  const policyResult = checkCancellationPolicy(
+    apt.startAt,
+    biz?.cancellationWindowHours,
+    recep?.cancellationPolicyStrictness,
+    lang
+  );
 
-    return {
-      cancelled: false,
-      blocked: true,
-      reason: `strict_policy_window (${windowHours}h)`,
-      message: msg,
-    };
+  if ("blocked" in policyResult) {
+    return policyResult;
   }
 
-  // For 'standard' within window: warn but allow
-  let warning: string | null = null;
-  if (withinWindow && strictness === "standard") {
-    warning =
-      lang === "es"
-        ? `Nota: estas cancelando con menos de ${windowHours} horas de anticipacion.`
-        : `Note: you are cancelling within ${windowHours} hours of the appointment.`;
-  }
+  const warning = policyResult.warning;
+  const withinWindow = warning !== null;
 
   // ── Perform cancellation ──
   const updated = await db.appointment.update({
@@ -136,7 +158,16 @@ export async function cancelAppointment(
     channelProvider: "baileys",
     customerId: apt.customerId,
     serviceId: svc.id,
-  }).catch(() => {});
+  }).catch(() => {
+    // best-effort audit logging
+  });
+
+  // Delete Google Calendar event (background — non-blocking)
+  if (apt.externalCalendarEventId) {
+    deleteFromCalendar(workspaceId, apt.externalCalendarEventId).catch(() => {
+      // best-effort calendar cleanup
+    });
+  }
 
   // ── Deposit note ──
   let depositNote: string | undefined;

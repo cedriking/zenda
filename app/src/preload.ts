@@ -25,6 +25,7 @@ contextBridge.exposeInMainWorld("electron", {
       "notification:new",
       "conversation:update",
       "appointment:update",
+      "deep-link:integrations-callback",
     ];
     if (allowed.includes(channel)) {
       const listener = (
@@ -34,7 +35,9 @@ contextBridge.exposeInMainWorld("electron", {
       ipcRenderer.on(channel, listener);
       return () => ipcRenderer.removeListener(channel, listener);
     }
-    return () => {};
+    return () => {
+      // no-op: channel not allowed
+    };
   },
   send: (channel: string, ...args: unknown[]) => {
     const allowed = ["whatsapp:forward-message", "whatsapp:forward-status"];

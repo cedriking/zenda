@@ -18,6 +18,7 @@ import { db } from "@zenda/db/client";
 import type { Language } from "@zenda/shared";
 import { TERMINAL_STATUSES } from "@zenda/shared";
 import { logAppointmentAudit } from "../../audit/logger.js";
+import { pushToCalendar } from "../../integrations/google/calendar-sync.js";
 import { enforceLimit } from "../../usage/enforcement.js";
 import { trackActiveContact } from "../../usage/tracker.js";
 
@@ -76,97 +77,34 @@ type BookResult =
   | BookingResult
   | LimitReachedResult;
 
-export async function bookAppointment(
+function resolveFieldLabel(field: string): string {
+  if (field === "date") {
+    return "date";
+  }
+  if (field === "startTime") {
+    return "time";
+  }
+  return "service";
+}
+
+async function handleConfirmedBooking(
   workspaceId: string,
   input: ToolInput,
   conversationId: string,
+  service: { id: string; name: string; durationMinutes: number },
+  startAt: Date,
+  endAt: Date,
   _language: Language
-): Promise<BookResult> {
-  // ── Phase 1: Determine which required fields are missing ──
-  const missing: string[] = [];
-  if (!input.serviceId) {
-    missing.push("serviceId");
-  }
-  if (!input.date) {
-    missing.push("date");
-  }
-  if (!input.startTime) {
-    missing.push("startTime");
-  }
-
-  // Ask one question at a time — pick the first missing field
-  if (missing.length > 0) {
-    const field = missing[0];
-    const questions: Record<string, string> = {
-      serviceId: "What service would you like to book?",
-      date: "What date works best for you?",
-      startTime: "What time would you prefer?",
-    };
-    return {
-      needsInfo: true,
-      missingFields: missing,
-      question:
-        questions[field] ??
-        `Could you let me know your preferred ${field === "date" ? "date" : field === "startTime" ? "time" : "service"}?`,
-    };
-  }
-
-  // ── Phase 2: All fields present — look up service ──
-  const service = await db.services.findFirst({
-    where: {
-      id: input.serviceId!,
-      workspaceId,
-    },
-  });
-
-  if (!service) {
-    return {
-      needsInfo: true,
-      missingFields: ["serviceId"],
-      question:
-        "I couldn't find that service. Could you tell me which service you're looking for?",
-    };
-  }
-
-  // Resolve staff name if provided
-  let staffName: string | null = null;
-  if (input.staffMemberId) {
-    const staff = await db.staffMember.findFirst({
-      where: {
-        id: input.staffMemberId,
-        workspaceId,
-      },
-      select: { name: true },
-    });
-    staffName = staff?.name ?? null;
-  }
-
-  const startAt = new Date(`${input.date!}T${input.startTime!}:00`);
-  const endAt = new Date(startAt.getTime() + service.durationMinutes * 60_000);
-  const endTime = `${String(endAt.getHours()).padStart(2, "0")}:${String(endAt.getMinutes()).padStart(2, "0")}`;
-
-  // ── Phase 3: Require explicit confirmation before writing to calendar ──
-  if (!input.confirmed) {
-    const langQ =
-      _language === "es"
-        ? `Tengo todo listo para tu cita de ${service.name} el ${input.date} a las ${input.startTime}${staffName ? ` con ${staffName}` : ""}. Te parece bien?`
-        : `I have your ${service.name} appointment on ${input.date} at ${input.startTime}${staffName ? ` with ${staffName}` : ""}. Does that look correct?`;
-
-    return {
-      awaitingConfirmation: true,
-      appointmentDetails: {
-        serviceId: service.id,
-        serviceName: service.name,
-        date: input.date!,
-        startTime: input.startTime!,
-        endTime,
-        staffName,
-      },
-      message: langQ,
-    };
-  }
-
-  // ── Phase 4: Confirmed — check active contact limit, then create ──
+): Promise<
+  | BookingResult
+  | LimitReachedResult
+  | {
+      error: true;
+      message: string;
+      reason: string;
+      usage: { current: number; limit: number };
+    }
+> {
   const appointmentEnforcement = await enforceLimit(workspaceId);
   if (!appointmentEnforcement.allowed) {
     const limitMsg =
@@ -194,6 +132,8 @@ export async function bookAppointment(
     timezone = ws.timezone;
   }
 
+  const endTime = `${String(endAt.getHours()).padStart(2, "0")}:${String(endAt.getMinutes()).padStart(2, "0")}`;
+
   // Use a transaction with pessimistic lock to prevent double-booking.
   const appointment = await db.$transaction(async (tx) => {
     const whereCondition: Record<string, unknown> = {
@@ -210,7 +150,7 @@ export async function bookAppointment(
     }
 
     const overlapping = await tx.appointment.findFirst({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // biome-ignore lint/suspicious/noExplicitAny: dynamic Prisma where clause
       where: whereCondition as any,
     });
 
@@ -222,7 +162,7 @@ export async function bookAppointment(
       data: {
         workspaceId,
         customerId: input.customerId,
-        serviceId: input.serviceId!,
+        serviceId: input.serviceId as string,
         staffMemberId: input.staffMemberId ?? null,
         status: "pending_confirmation",
         startAt,
@@ -253,8 +193,10 @@ export async function bookAppointment(
     channel: "whatsapp",
     channelProvider: "baileys",
     customerId: input.customerId,
-    serviceId: input.serviceId!,
-  }).catch(() => {});
+    serviceId: input.serviceId as string,
+  }).catch(() => {
+    // best-effort audit logging
+  });
 
   // Track active contact for usage (background — non-blocking)
   (async () => {
@@ -266,17 +208,152 @@ export async function bookAppointment(
       if (customer) {
         await trackActiveContact(workspaceId, customer.phoneNumber);
       }
-    } catch {}
+    } catch {
+      // best-effort usage tracking
+    }
+  })();
+
+  // Push to Google Calendar (background — non-blocking)
+  (async () => {
+    try {
+      const aptWithRelations = await db.appointment.findFirst({
+        where: { id: appointment.id },
+        include: { service: true, customer: true },
+      });
+      if (aptWithRelations) {
+        const eventId = await pushToCalendar(workspaceId, aptWithRelations);
+        if (eventId) {
+          await db.appointment.update({
+            where: { id: appointment.id },
+            data: { externalCalendarEventId: eventId },
+          });
+        }
+      }
+    } catch (err) {
+      import("../../../infra/logger.js").then(({ logger }) => {
+        logger.error("Failed to push appointment to Google Calendar", {
+          appointmentId: appointment.id,
+          error: (err as Error).message,
+        });
+      });
+    }
   })();
 
   return {
     appointmentId: appointment.id,
     status: appointment.status,
     service: service.name,
-    date: input.date!,
-    startTime: input.startTime!,
+    date: input.date as string,
+    startTime: input.startTime as string,
     endTime,
   };
+}
+
+export async function bookAppointment(
+  workspaceId: string,
+  input: ToolInput,
+  conversationId: string,
+  _language: Language
+): Promise<BookResult> {
+  // ── Phase 1: Determine which required fields are missing ──
+  const missing: string[] = [];
+  if (!input.serviceId) {
+    missing.push("serviceId");
+  }
+  if (!input.date) {
+    missing.push("date");
+  }
+  if (!input.startTime) {
+    missing.push("startTime");
+  }
+
+  // Ask one question at a time — pick the first missing field
+  if (missing.length > 0) {
+    const field = missing[0];
+    const questions: Record<string, string> = {
+      serviceId: "What service would you like to book?",
+      date: "What date works best for you?",
+      startTime: "What time would you prefer?",
+    };
+    const label = resolveFieldLabel(field);
+    return {
+      needsInfo: true,
+      missingFields: missing,
+      question:
+        questions[field] ?? `Could you let me know your preferred ${label}?`,
+    };
+  }
+
+  // ── Phase 2: All fields present — look up service ──
+  const service = await db.services.findFirst({
+    where: {
+      id: input.serviceId as string,
+      workspaceId,
+    },
+  });
+
+  if (!service) {
+    return {
+      needsInfo: true,
+      missingFields: ["serviceId"],
+      question:
+        "I couldn't find that service. Could you tell me which service you're looking for?",
+    };
+  }
+
+  // Resolve staff name if provided
+  let staffName: string | null = null;
+  if (input.staffMemberId) {
+    const staff = await db.staffMember.findFirst({
+      where: {
+        id: input.staffMemberId,
+        workspaceId,
+      },
+      select: { name: true },
+    });
+    staffName = staff?.name ?? null;
+  }
+
+  const startAt = new Date(
+    `${input.date as string}T${input.startTime as string}:00`
+  );
+  const endAt = new Date(startAt.getTime() + service.durationMinutes * 60_000);
+
+  // ── Phase 3: Require explicit confirmation before writing to calendar ──
+  if (!input.confirmed) {
+    const date = input.date as string;
+    const startTime = input.startTime as string;
+    const langQ =
+      _language === "es"
+        ? `Tengo todo listo para tu cita de ${service.name} el ${date} a las ${startTime}${staffName ? ` con ${staffName}` : ""}. Te parece bien?`
+        : `I have your ${service.name} appointment on ${date} at ${startTime}${staffName ? ` with ${staffName}` : ""}. Does that look correct?`;
+
+    const endTime = `${String(endAt.getHours()).padStart(2, "0")}:${String(endAt.getMinutes()).padStart(2, "0")}`;
+
+    return {
+      awaitingConfirmation: true,
+      appointmentDetails: {
+        serviceId: service.id,
+        serviceName: service.name,
+        date,
+        startTime,
+        endTime,
+        staffName,
+      },
+      message: langQ,
+    };
+  }
+
+  // ── Phase 4: Confirmed — check active contact limit, then create ──
+  return handleConfirmedBooking(
+    workspaceId,
+    input,
+    conversationId,
+    service,
+    startAt,
+    endAt,
+    _language
+  );
 }
 
 export const bookAppointmentToolDef = {

@@ -26,7 +26,7 @@ import { stripe } from "./modules/billing/stripe.js";
 import { businessModule } from "./modules/business/index.js";
 import { customerModule } from "./modules/conversation/customer-endpoint.js";
 import { conversationModule } from "./modules/conversation/index.js";
-import { composioModule } from "./modules/integrations/composio/index.js";
+import { googleCalendarModule } from "./modules/integrations/google/index.js";
 import { knowledgeBaseModule } from "./modules/knowledge-base/index.js";
 import { messagingModule } from "./modules/messaging/index.js";
 import { runHealthCheckCycle } from "./modules/monitoring/agent-health-monitor.js";
@@ -65,6 +65,7 @@ const PUBLIC_PATHS = [
   "/billing/plans",
   "/ws",
   "/partners",
+  "/integrations/google/callback",
 ];
 
 function isPublicPath(path: string): boolean {
@@ -232,7 +233,7 @@ const _app = new Elysia()
   .use(monitoringModule)
   .use(translationModule)
   .use(supportModule)
-  .use(composioModule) // Composio integration (authenticated)
+  .use(googleCalendarModule) // Google Calendar integration
   .use(messagingModule) // Consent management (authenticated)
   .use(settingsModule) // Settings endpoints (authenticated)
 

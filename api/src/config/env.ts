@@ -27,10 +27,13 @@ export const NODE_ENV = process.env.NODE_ENV ?? "development";
 export const WHISPER_LOCAL_URL =
   process.env.WHISPER_LOCAL_URL ?? "http://192.168.68.131:8001";
 
-// Composio Integration
-export const COMPOSIO_API_KEY = process.env.COMPOSIO_API_KEY ?? "";
-export const COMPOSIO_BASE_URL =
-  process.env.COMPOSIO_BASE_URL ?? "https://api.composio.dev";
+// Google Calendar Integration
+export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? "";
+export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ?? "";
+export const GOOGLE_REDIRECT_URI =
+  process.env.GOOGLE_REDIRECT_URI ??
+  "https://api.zenda.bot/integrations/google/callback";
+export const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY ?? "";
 
 // Queue limits
 export const MAX_QUEUE_DEPTH_PER_WORKSPACE = Number.parseInt(
@@ -54,6 +57,9 @@ export function validateProductionEnv(): void {
     "ADMIN_SECRET",
     "JWT_REFRESH_SECRET",
     "REDIS_URL",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "ENCRYPTION_KEY",
   ];
 
   const missing = required.filter((name) => !process.env[name]);

@@ -15,6 +15,7 @@ import { db } from "@zenda/db/client";
 import type { Language } from "@zenda/shared";
 import { APPOINTMENT_TRANSITIONS } from "@zenda/shared";
 import { logAppointmentAudit } from "../../audit/logger.js";
+import { updateInCalendar } from "../../integrations/google/calendar-sync.js";
 import { trackActiveContact } from "../../usage/tracker.js";
 
 interface ToolInput {
@@ -110,7 +111,30 @@ export async function rescheduleAppointment(
     channelProvider: "baileys",
     customerId: apt.customerId,
     serviceId: svc.id,
-  }).catch(() => {});
+  }).catch(() => {
+    // best-effort audit logging
+  });
+
+  // Update Google Calendar event (background — non-blocking)
+  if (apt.externalCalendarEventId) {
+    (async () => {
+      try {
+        const aptWithRelations = await db.appointment.findFirst({
+          where: { id: updated.id },
+          include: { service: true, customer: true },
+        });
+        if (aptWithRelations) {
+          await updateInCalendar(
+            workspaceId,
+            apt.externalCalendarEventId,
+            aptWithRelations
+          );
+        }
+      } catch {
+        // best-effort calendar update
+      }
+    })();
+  }
 
   const newDateStr = startAt.toLocaleDateString("en-US", {
     weekday: "long",
@@ -139,7 +163,9 @@ export async function rescheduleAppointment(
       if (customer) {
         await trackActiveContact(workspaceId, customer.phoneNumber);
       }
-    } catch {}
+    } catch {
+      // best-effort usage tracking
+    }
   })();
 
   return {

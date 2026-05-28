@@ -16,6 +16,13 @@ import { getBasePath } from "./utils/path";
 
 let isQuitting = false;
 
+// ── Single instance lock (must be before app.whenReady) ──
+// Ensures deep links on Windows/Linux route to the existing instance
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+}
+
 // Module-level before-quit handler (registered once)
 app.on("before-quit", (e) => {
   if (isQuitting) {
@@ -134,8 +141,14 @@ async function setupORPC() {
   });
 }
 
+// ── Deep link protocol (zenda://) ──
+const PROTOCOL = "zenda";
+
 app.whenReady().then(async () => {
   try {
+    // Register zenda:// protocol for OAuth callbacks
+    app.setAsDefaultProtocolClient(PROTOCOL);
+
     createWindow();
     await installExtensions();
     checkForUpdates();
@@ -195,3 +208,53 @@ app.on("activate", async () => {
   }
 });
 //osX only ends
+
+// ── Handle deep links (zenda://) on macOS (fires open-url) and Windows/Linux (fires second-instance) ──
+
+function handleDeepLink(url: string) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== `${PROTOCOL}:`) {
+      return;
+    }
+
+    const win = ipcContext.mainWindow;
+    if (!win) {
+      return;
+    }
+
+    // zenda://integrations/google/connected?status=success
+    if (parsed.pathname === "//integrations/google/connected") {
+      const status = parsed.searchParams.get("status");
+      win.webContents.send("deep-link:integrations-callback", { status });
+      if (win.isMinimized()) {
+        win.restore();
+      }
+      win.show();
+      win.focus();
+    }
+  } catch {
+    // ignore malformed URLs
+  }
+}
+
+// macOS: open-url event
+app.on("open-url", (_event, url) => {
+  handleDeepLink(url);
+});
+
+// Windows/Linux: second-instance event (first instance gets the URL)
+app.on("second-instance", (_event, commandLine) => {
+  const deepLink = commandLine.find((arg) => arg.startsWith(`${PROTOCOL}://`));
+  if (deepLink) {
+    handleDeepLink(deepLink);
+  }
+  const win = ipcContext.mainWindow;
+  if (win) {
+    if (win.isMinimized()) {
+      win.restore();
+    }
+    win.show();
+    win.focus();
+  }
+});

@@ -269,6 +269,7 @@ enum IntegrationType {
 
 enum IntegrationProvider {
   composio
+  google
   stripe
   custom
   other
@@ -491,6 +492,7 @@ model Appointment {
   updatedAt            DateTime                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
   cancelledAt          DateTime?               @map("cancelled_at") @db.Timestamptz
   completedAt          DateTime?               @map("completed_at") @db.Timestamptz
+  externalCalendarEventId String?              @map("external_calendar_event_id") @db.VarChar(255)
 
   workspace           Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   customer            Customer      @relation(fields: [customerId], references: [id])
