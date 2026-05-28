@@ -77,6 +77,10 @@ export async function generateMetadata({ params }: Props) {
         "x-default": "https://zenda.bot/en",
       },
     },
+    manifest: "/manifest.json",
+    other: {
+      "apple-mobile-web-app-title": "Zenda",
+    },
   };
 }
 
@@ -111,15 +115,6 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html dir={dir} lang={locale}>
       <head>
-        <link href="/favicon.svg" rel="icon" sizes="any" type="image/svg+xml" />
-        <link href="/favicon.ico" rel="icon" sizes="32x32" />
-        <link
-          href="/apple-touch-icon.png"
-          rel="apple-touch-icon"
-          sizes="180x180"
-        />
-        <link href="/site.webmanifest" rel="manifest" />
-        <meta content="#10b981" name="theme-color" />
         <script
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
           type="application/ld+json"
