@@ -25,7 +25,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https://zenda.bot https://*.stripe.com https://api.20u.net",
               "font-src 'self' data:",
-              "connect-src 'self' https://api.zenda.bot https://*.stripe.com https://static.cloudflareinsights.com https://api.20u.net",
+              "connect-src 'self' https://api.zenda.bot https://*.stripe.com https://static.cloudflareinsights.com https://api.20u.net https://cdn.jsdelivr.net",
               "frame-src https://*.stripe.com https://js.stripe.com",
               "object-src 'none'",
               "base-uri 'self'",
