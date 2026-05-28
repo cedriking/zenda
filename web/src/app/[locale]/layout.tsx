@@ -3,6 +3,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { CookieConsent } from "@/components/cookie-consent";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { LocaleProvider } from "@/components/locale-provider";
+import { SwetrixTracker } from "@/components/swetrix-tracker";
 import { WhatsAppWidget } from "@/components/whatsapp-widget";
 import { type Locale, routing, supportedLanguages } from "@/i18n/routing";
 
@@ -126,6 +127,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       </head>
       <body>
         <GoogleAnalytics />
+        <SwetrixTracker />
         <LocaleProvider locale={locale} messages={messages} now={new Date()}>
           {children}
           <WhatsAppWidget />
