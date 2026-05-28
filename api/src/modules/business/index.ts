@@ -3,7 +3,7 @@ import {
   updateBusinessProfileSchema,
   updateReceptionistProfileSchema,
 } from "@zenda/shared";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
 import { badRequest, notFound, serverError } from "../../utils/errors.js";
@@ -57,22 +57,8 @@ export const businessModule = new Elysia({ prefix: "/business" })
         return serverError(set, "Failed to update business profile");
       }
     },
-    {
-      body: t.Object({
-        name: t.Optional(t.String()),
-        category: t.Optional(t.String()),
-        description: t.Optional(t.String()),
-        location: t.Optional(t.String()),
-        cancellationPolicy: t.Optional(t.String()),
-        refundPolicy: t.Optional(t.String()),
-        priceDisplayPreference: t.Optional(t.String()),
-        minimumNoticeHours: t.Optional(t.Number()),
-        maximumBookingWindowDays: t.Optional(t.Number()),
-        staffAssignmentMode: t.Optional(t.String()),
-        escalationBehavior: t.Optional(t.Object({})),
-        ownerNotificationPreferences: t.Optional(t.Object({})),
-      }),
-    }
+  // No Elysia body schema — Zod handles validation (Elysia t.Object rejects
+  // extra fields that the frontend round-trips from GET, causing 422 errors)
   )
 
   // Get receptionist profile
@@ -123,20 +109,6 @@ export const businessModule = new Elysia({ prefix: "/business" })
         return serverError(set, "Failed to update receptionist profile");
       }
     },
-    {
-      body: t.Object({
-        name: t.Optional(t.String()),
-        tone: t.Optional(t.String()),
-        greetingTemplate: t.Optional(t.String()),
-        personalityPreset: t.Optional(t.String()),
-        formalityLevel: t.Optional(t.Number()),
-        concisenessLevel: t.Optional(t.Number()),
-        warmthLevel: t.Optional(t.Number()),
-        useEmoji: t.Optional(t.Boolean()),
-        speaksAsBusiness: t.Optional(t.Boolean()),
-        proactivelySuggestTimes: t.Optional(t.Boolean()),
-        confirmsBeforeBooking: t.Optional(t.Boolean()),
-        greetingStyle: t.Optional(t.String()),
-      }),
-    }
+  // No Elysia body schema — Zod handles validation (Elysia t.Object rejects
+  // extra fields that the frontend round-trips from GET, causing 422 errors)
   );

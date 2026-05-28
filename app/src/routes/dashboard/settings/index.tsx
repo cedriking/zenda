@@ -32,6 +32,20 @@ interface AvailabilityRule {
   available: boolean;
   closeTime: string;
   dayOfWeek: number;
+
+// Strip server-only fields before PATCH to avoid 422 errors
+function buildPayload(
+  endpoint: string,
+  data: BusinessProfile | ReceptionistProfile
+): Record<string, unknown> {
+  if (endpoint === "/business/profile") {
+    const { name, category, description, location, cancellationPolicy } =
+      data as BusinessProfile;
+    return { name, category, description, location, cancellationPolicy };
+  }
+  const { name, tone, greetingTemplate } = data as ReceptionistProfile;
+  return { name, tone, greetingTemplate };
+}
   enabled: boolean;
   endTime: string;
   id: string;
@@ -97,9 +111,13 @@ export default function SettingsPage() {
     setSaveSuccess(false);
 
     try {
+      // Pick only the fields the API accepts — avoid sending server-only
+      // fields (id, workspaceId, timestamps, etc.) that cause 422 errors
+      const payload = buildPayload(endpoint, data);
+
       await apiFetch(endpoint, {
         method: "PATCH",
-        body: data,
+        body: payload,
       });
 
       if (endpoint === "/business/profile") {
