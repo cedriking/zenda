@@ -1,15 +1,18 @@
 import { db } from "@zenda/db/client";
+import type { OnboardingStep } from "@zenda/shared";
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
 import { typedContext } from "../../middleware/typed-context.js";
-import { serverError, unauthorized } from "../../utils/errors.js";
+import { badRequest, serverError, unauthorized } from "../../utils/errors.js";
 import {
   getNextOnboardingQuestion,
+  getOnboardingResponses,
   processOnboardingResponse,
 } from "./conversation-handler.js";
 import {
   advanceOnboarding,
   getOnboardingStatus,
+  goBackOnboarding,
   OnboardingStepMismatchError,
 } from "./flow.js";
 
@@ -21,19 +24,33 @@ async function getWorkspaceLanguage(workspaceId: string): Promise<"en" | "es"> {
   return (ws?.defaultLanguage as "en" | "es") ?? "en";
 }
 
+function getErrorMessage(err: unknown): string | undefined {
+  if (err instanceof Error) {
+    return err.message;
+  }
+  return;
+}
+
+function getErrorStack(err: unknown): string | undefined {
+  if (err instanceof Error) {
+    return err.stack;
+  }
+  return;
+}
+
 export const onboardingModule = new Elysia({ prefix: "/onboarding" })
   .use(typedContext)
 
-  .get("/status", async ({ workspaceId, set }) => {
+  .get("/status", ({ workspaceId, set }) => {
     if (!workspaceId) {
       return unauthorized(set);
     }
     try {
       return getOnboardingStatus(workspaceId);
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error("Get onboarding status error", {
         workspaceId,
-        error: err?.message,
+        error: getErrorMessage(err),
       });
       return serverError(set, "Failed to get onboarding status");
     }
@@ -46,12 +63,28 @@ export const onboardingModule = new Elysia({ prefix: "/onboarding" })
     try {
       const language = await getWorkspaceLanguage(workspaceId);
       return getNextOnboardingQuestion(workspaceId, language);
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error("Get onboarding question error", {
         workspaceId,
-        error: err?.message,
+        error: getErrorMessage(err),
       });
       return serverError(set, "Failed to get onboarding question");
+    }
+  })
+
+  .get("/responses", async ({ workspaceId, set }) => {
+    if (!workspaceId) {
+      return unauthorized(set);
+    }
+    try {
+      const responses = await getOnboardingResponses(workspaceId);
+      return { responses };
+    } catch (err: unknown) {
+      logger.error("Get onboarding responses error", {
+        workspaceId,
+        error: getErrorMessage(err),
+      });
+      return serverError(set, "Failed to get onboarding responses");
     }
   })
 
@@ -62,10 +95,17 @@ export const onboardingModule = new Elysia({ prefix: "/onboarding" })
         return unauthorized(set);
       }
       const { completedStep } = body as { completedStep: string };
+      if (!completedStep) {
+        return badRequest(set, "completedStep is required");
+      }
       try {
-        const next = await advanceOnboarding(workspaceId, completedStep as any);
-        return { nextStep: next, progress: 100 };
-      } catch (err: any) {
+        const next = await advanceOnboarding(
+          workspaceId,
+          completedStep as OnboardingStep
+        );
+        const status = await getOnboardingStatus(workspaceId);
+        return { nextStep: next, progress: status.progress };
+      } catch (err: unknown) {
         if (err instanceof OnboardingStepMismatchError) {
           set.status = 409;
           return {
@@ -77,7 +117,7 @@ export const onboardingModule = new Elysia({ prefix: "/onboarding" })
         logger.error("Advance onboarding error", {
           workspaceId,
           completedStep,
-          error: err?.message,
+          error: getErrorMessage(err),
         });
         return serverError(set, "Failed to advance onboarding");
       }
@@ -90,12 +130,50 @@ export const onboardingModule = new Elysia({ prefix: "/onboarding" })
   )
 
   .post(
+    "/go-back",
+    async ({ workspaceId, body, set }) => {
+      if (!workspaceId) {
+        return unauthorized(set);
+      }
+      const { currentStep } = body as { currentStep: string };
+      if (!currentStep) {
+        return badRequest(set, "currentStep is required");
+      }
+      try {
+        const target = await goBackOnboarding(
+          workspaceId,
+          currentStep as OnboardingStep
+        );
+        const language = await getWorkspaceLanguage(workspaceId);
+        const question = await getNextOnboardingQuestion(workspaceId, language);
+        const status = await getOnboardingStatus(workspaceId);
+        return { previousStep: target, progress: status.progress, question };
+      } catch (err: unknown) {
+        logger.error("Go back onboarding error", {
+          workspaceId,
+          currentStep,
+          error: getErrorMessage(err),
+        });
+        return serverError(set, "Failed to go back");
+      }
+    },
+    {
+      body: t.Object({
+        currentStep: t.String(),
+      }),
+    }
+  )
+
+  .post(
     "/respond",
     async ({ workspaceId, body, set }) => {
       if (!workspaceId) {
         return unauthorized(set);
       }
       const { step, response } = body as { step: string; response: string };
+      if (!step) {
+        return badRequest(set, "step is required");
+      }
       try {
         const language = await getWorkspaceLanguage(workspaceId);
         return await processOnboardingResponse(
@@ -104,12 +182,12 @@ export const onboardingModule = new Elysia({ prefix: "/onboarding" })
           response,
           language
         );
-      } catch (err: any) {
+      } catch (err: unknown) {
         logger.error("Onboarding respond error", {
           step,
           response,
-          error: err?.message,
-          stack: err?.stack,
+          error: getErrorMessage(err),
+          stack: getErrorStack(err),
         });
         return serverError(set, "Failed to process onboarding response");
       }

@@ -18,6 +18,7 @@ enum OnboardingStep {
   availability
   policies
   receptionist_config
+  test_receptionist
   plan_selection
   ready
 }
@@ -344,6 +345,7 @@ model Workspace {
   defaultLanguage             Language  @default(en) @map("default_language")
   onboardingStep              OnboardingStep @default(not_started) @map("onboarding_step")
   onboardingCompletedAt       DateTime? @map("onboarding_completed_at") @db.Timestamptz
+  onboardingResponses         Json?     @map("onboarding_responses")
   composioAccountId           String?   @map("composio_account_id") @db.VarChar(255)
   composioCalendarId          String?   @map("composio_calendar_id") @db.VarChar(255)
   composioConnectedAt         DateTime? @map("composio_connected_at") @db.Timestamptz

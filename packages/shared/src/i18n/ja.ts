@@ -423,6 +423,20 @@ export const ja: TranslationStrings = {
     processing: "処理中...",
     skipForNow: "スキップ — 無料トライアルを開始",
     settingUp: "無料トライアルをセットアップ中...",
+    goBack: "Go back",
+    testReceptionist: "Test Receptionist",
+    reviewSetup: "Review Setup",
+    testMessage: "Send a message as if you were a customer...",
+    reviewDescription:
+      "Here's a summary of your setup. You can go back to change anything.",
+    categoryLabel: "Business Category",
+    servicesLabel: "Services",
+    availabilityLabel: "Availability",
+    policiesLabel: "Cancellation Policy",
+    receptionistNameLabel: "Receptionist Name",
+    receptionistToneLabel: "Tone",
+    editStep: "Edit",
+    daysAweek: "{{count}} days/week",
     steps: {
       connectWhatsapp: "WhatsAppに接続",
       businessInfo: "ビジネス情報",
@@ -430,6 +444,7 @@ export const ja: TranslationStrings = {
       availability: "営業時間",
       policies: "ポリシー",
       receptionistSetup: "受付設定",
+      testReceptionist: "テスト",
       choosePlan: "プランを選択",
     },
     plans: {

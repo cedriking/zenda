@@ -425,6 +425,20 @@ export const ar: TranslationStrings = {
     processing: "جارٍ المعالجة...",
     skipForNow: "تخطي الآن — البدء بالنسخة التجريبية المجانية",
     settingUp: "جارٍ إعداد النسخة التجريبية المجانية...",
+    goBack: "Go back",
+    testReceptionist: "Test Receptionist",
+    reviewSetup: "Review Setup",
+    testMessage: "Send a message as if you were a customer...",
+    reviewDescription:
+      "Here's a summary of your setup. You can go back to change anything.",
+    categoryLabel: "Business Category",
+    servicesLabel: "Services",
+    availabilityLabel: "Availability",
+    policiesLabel: "Cancellation Policy",
+    receptionistNameLabel: "Receptionist Name",
+    receptionistToneLabel: "Tone",
+    editStep: "Edit",
+    daysAweek: "{{count}} days/week",
     steps: {
       connectWhatsapp: "اتصال واتساب",
       businessInfo: "معلومات النشاط التجاري",
@@ -432,6 +446,7 @@ export const ar: TranslationStrings = {
       availability: "أوقات التوفر",
       policies: "السياسات",
       receptionistSetup: "إعداد موظفة الاستقبال",
+      testReceptionist: "اختبار",
       choosePlan: "اختر خطة",
     },
     plans: {

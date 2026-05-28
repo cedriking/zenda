@@ -418,6 +418,20 @@ export const zh: TranslationStrings = {
     processing: "处理中...",
     skipForNow: "暂时跳过 — 开始免费试用",
     settingUp: "正在设置免费试用...",
+    goBack: "Go back",
+    testReceptionist: "Test Receptionist",
+    reviewSetup: "Review Setup",
+    testMessage: "Send a message as if you were a customer...",
+    reviewDescription:
+      "Here's a summary of your setup. You can go back to change anything.",
+    categoryLabel: "Business Category",
+    servicesLabel: "Services",
+    availabilityLabel: "Availability",
+    policiesLabel: "Cancellation Policy",
+    receptionistNameLabel: "Receptionist Name",
+    receptionistToneLabel: "Tone",
+    editStep: "Edit",
+    daysAweek: "{{count}} days/week",
     steps: {
       connectWhatsapp: "连接 WhatsApp",
       businessInfo: "商家信息",
@@ -425,6 +439,7 @@ export const zh: TranslationStrings = {
       availability: "营业时间",
       policies: "政策",
       receptionistSetup: "接待员设置",
+      testReceptionist: "测试",
       choosePlan: "选择方案",
     },
     plans: {

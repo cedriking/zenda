@@ -434,6 +434,20 @@ export const de: TranslationStrings = {
     processing: "Verarbeitung...",
     skipForNow: "Überspringen — mit kostenloser Testversion starten",
     settingUp: "Kostenlose Testversion wird eingerichtet...",
+    goBack: "Go back",
+    testReceptionist: "Test Receptionist",
+    reviewSetup: "Review Setup",
+    testMessage: "Send a message as if you were a customer...",
+    reviewDescription:
+      "Here's a summary of your setup. You can go back to change anything.",
+    categoryLabel: "Business Category",
+    servicesLabel: "Services",
+    availabilityLabel: "Availability",
+    policiesLabel: "Cancellation Policy",
+    receptionistNameLabel: "Receptionist Name",
+    receptionistToneLabel: "Tone",
+    editStep: "Edit",
+    daysAweek: "{{count}} days/week",
     steps: {
       connectWhatsapp: "WhatsApp verbinden",
       businessInfo: "Unternehmensinfo",
@@ -441,6 +455,7 @@ export const de: TranslationStrings = {
       availability: "Verfügbarkeit",
       policies: "Richtlinien",
       receptionistSetup: "Empfangsdame einrichten",
+      testReceptionist: "Testen",
       choosePlan: "Plan wählen",
     },
     plans: {

@@ -424,6 +424,20 @@ export const ru: TranslationStrings = {
     processing: "Обработка...",
     skipForNow: "Пропустить — начать бесплатный пробный период",
     settingUp: "Настройка бесплатного пробного периода...",
+    goBack: "Go back",
+    testReceptionist: "Test Receptionist",
+    reviewSetup: "Review Setup",
+    testMessage: "Send a message as if you were a customer...",
+    reviewDescription:
+      "Here's a summary of your setup. You can go back to change anything.",
+    categoryLabel: "Business Category",
+    servicesLabel: "Services",
+    availabilityLabel: "Availability",
+    policiesLabel: "Cancellation Policy",
+    receptionistNameLabel: "Receptionist Name",
+    receptionistToneLabel: "Tone",
+    editStep: "Edit",
+    daysAweek: "{{count}} days/week",
     steps: {
       connectWhatsapp: "Подключить WhatsApp",
       businessInfo: "Информация о бизнесе",
@@ -431,6 +445,7 @@ export const ru: TranslationStrings = {
       availability: "Доступность",
       policies: "Политики",
       receptionistSetup: "Настройка ресепшиониста",
+      testReceptionist: "Тест",
       choosePlan: "Выбрать план",
     },
     plans: {

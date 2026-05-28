@@ -1,4 +1,5 @@
 import {
+  ArrowLeft,
   ArrowRight,
   Building2,
   Check,
@@ -22,10 +23,11 @@ const STEP_IDS = [
   "availability",
   "policies",
   "receptionist_config",
+  "test_receptionist",
   "plan_selection",
 ] as const;
 
-const STEP_ICONS = ["📱", "🏢", "✂️", "🕐", "📋", "🤖", "🚀"];
+const STEP_ICONS = ["📱", "🏢", "✂️", "🕐", "📋", "🤖", "💬", "🚀"];
 
 const PLAN_TIERS = [
   {
@@ -65,6 +67,7 @@ const STEP_KEYS: Record<string, string> = {
   availability: "onboarding.steps.availability",
   policies: "onboarding.steps.policies",
   receptionist_config: "onboarding.steps.receptionistSetup",
+  test_receptionist: "onboarding.steps.testReceptionist",
   plan_selection: "onboarding.steps.choosePlan",
 };
 
@@ -89,6 +92,9 @@ export default function OnboardingPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [_savedResponses, setSavedResponses] = useState<Record<string, string>>(
+    {}
+  );
   const chatEndRef = useRef<HTMLDivElement>(null);
   const typingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadedRef = useRef(false);
@@ -112,9 +118,10 @@ export default function OnboardingPage() {
     // biome-ignore lint/correctness/useExhaustiveDependencies: only run once on mount
   }, [loadStatus]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on new messages and typing updates
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
+  }, [messages, typingText]);
 
   const typeMessage = useCallback((text: string, onComplete?: () => void) => {
     setIsTyping(true);
@@ -164,6 +171,16 @@ export default function OnboardingPage() {
       setProgress(status.progress);
       setCurrentStep(status.currentStep);
 
+      // Load saved responses for review/go-back
+      try {
+        const resp = await apiFetch<{ responses: Record<string, string> }>(
+          "/onboarding/responses"
+        );
+        setSavedResponses(resp.responses ?? {});
+      } catch {
+        // Non-critical
+      }
+
       if (status.currentStep === "ready") {
         updateWorkspace({ onboardingStep: "ready" });
         navigate("/dashboard");
@@ -200,13 +217,15 @@ export default function OnboardingPage() {
       const result = await apiFetch<{
         acknowledged: string;
         nextStep: string;
-        selectedTier?: string;
       }>("/onboarding/respond", {
         method: "POST",
         body: { step: currentStep, response: userMsg },
       });
 
       setCurrentStep(result.nextStep);
+
+      // Save response locally for review/go-back
+      setSavedResponses((prev) => ({ ...prev, [currentStep]: userMsg }));
 
       const status = await apiFetch<{ currentStep: string; progress: number }>(
         "/onboarding/status"
@@ -230,7 +249,7 @@ export default function OnboardingPage() {
             }
           })
           .catch(() => {
-            /* checkout URL open failure is non-critical */
+            /* intentionally ignored */
           });
       });
       return;
@@ -243,6 +262,36 @@ export default function OnboardingPage() {
           id: ++msgIdRef.current,
         },
       ]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGoBack() {
+    if (loading || isTyping) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await apiFetch<{
+        previousStep: string;
+        progress: number;
+        question: { question: string; step: string } | null;
+      }>("/onboarding/go-back", {
+        method: "POST",
+        body: { currentStep },
+      });
+
+      setCurrentStep(result.previousStep);
+      setProgress(result.progress);
+
+      // Clear messages after the go-back point and show the question again
+      setMessages((prev) => prev.slice(0, -2));
+      if (result.question) {
+        setTimeout(() => typeMessage(result.question.question), 300);
+      }
+    } catch {
+      // Silently fail
     } finally {
       setLoading(false);
     }
@@ -345,6 +394,8 @@ export default function OnboardingPage() {
     currentStep as (typeof STEP_IDS)[number]
   );
   const isPlanSelection = currentStep === "plan_selection";
+  const isTestReceptionist = currentStep === "test_receptionist";
+  const canGoBack = currentStepIndex > 0 && currentStep !== "plan_selection";
   const allMessages = [
     ...messages,
     ...(typingText
@@ -382,7 +433,7 @@ export default function OnboardingPage() {
             const isCurrent = step.id === currentStep;
             let stepClass = "text-muted-foreground";
             if (isComplete) {
-              stepClass = "bg-emerald-50/50 text-emerald-600";
+              stepClass = "text-emerald-600";
             } else if (isCurrent) {
               stepClass = "bg-primary/10 font-medium text-primary shadow-sm";
             }
@@ -421,8 +472,21 @@ export default function OnboardingPage() {
           })}
         </div>
 
+        {/* Go-back button */}
+        {canGoBack && (
+          <button
+            className="mb-4 flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-muted-foreground text-sm transition-colors hover:bg-muted hover:text-foreground"
+            disabled={loading || isTyping}
+            onClick={handleGoBack}
+            type="button"
+          >
+            <ArrowLeft size={14} />
+            {t("onboarding.goBack")}
+          </button>
+        )}
+
         {/* Progress bar */}
-        <div className="mt-6 border-border border-t pt-6">
+        <div className="border-border border-t pt-6">
           <div className="mb-2 flex items-center justify-between">
             <span className="font-medium text-muted-foreground text-xs">
               {t("onboarding.progress")}
@@ -457,7 +521,7 @@ export default function OnboardingPage() {
           </div>
         </div>
 
-        {isPlanSelection ? (
+        {isPlanSelection && (
           <PlanSelectionView
             chatEndRef={chatEndRef}
             checkoutLoading={checkoutLoading}
@@ -465,7 +529,19 @@ export default function OnboardingPage() {
             onSelect={handlePlanSelect}
             onSkip={handleSkipPlan}
           />
-        ) : (
+        )}
+        {!isPlanSelection && isTestReceptionist && (
+          <TestReceptionistView
+            chatEndRef={chatEndRef}
+            input={input}
+            isTyping={isTyping}
+            loading={loading}
+            messages={allMessages}
+            onSubmit={handleSubmit}
+            setInput={setInput}
+          />
+        )}
+        {!(isPlanSelection || isTestReceptionist) && (
           <ChatView
             chatEndRef={chatEndRef}
             input={input}
@@ -536,6 +612,89 @@ function ChatView({
             disabled={loading || isTyping}
             onChange={(e) => setInput(e.target.value)}
             placeholder={t("onboarding.typeAnswer")}
+            type="text"
+            value={input}
+          />
+          <button
+            className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 p-3 text-white shadow-emerald-500/20 shadow-lg transition-all duration-200 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-emerald-500/30 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={loading || isTyping || !input.trim()}
+            type="submit"
+          >
+            <Send size={18} />
+          </button>
+        </div>
+      </form>
+    </>
+  );
+}
+
+/* ── Test Receptionist View ─────────────────────────────────── */
+
+function TestReceptionistView({
+  messages,
+  input,
+  setInput,
+  loading,
+  isTyping,
+  onSubmit,
+  chatEndRef,
+}: {
+  messages: ChatMessage[];
+  input: string;
+  setInput: (v: string) => void;
+  loading: boolean;
+  isTyping: boolean;
+  onSubmit: (e: React.FormEvent) => void;
+  chatEndRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <div className="flex-1 space-y-4 overflow-auto px-6 py-6">
+        {/* Hint banner */}
+        <div className="mx-auto max-w-2xl rounded-2xl border border-primary/20 bg-primary/5 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              <MessageSquare className="text-primary" size={16} />
+            </div>
+            <p className="text-foreground text-sm">
+              {t("onboarding.testReceptionist")}
+            </p>
+          </div>
+        </div>
+
+        {messages.map((msg) => (
+          <MessageBubble key={msg.id} msg={msg} />
+        ))}
+        {loading && !messages.some((m) => m.id === -1) && (
+          <div className="flex justify-start">
+            <div className="rounded-2xl rounded-bl-md border border-border bg-card px-5 py-3.5 shadow-sm">
+              <div className="flex gap-1.5">
+                {[0, 1, 2].map((i) => (
+                  <span
+                    className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground"
+                    key={i}
+                    style={{ animationDelay: `${i * 160}ms` }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={chatEndRef} />
+      </div>
+
+      <form
+        className="border-border border-t bg-white/80 px-6 py-4 backdrop-blur-sm"
+        onSubmit={onSubmit}
+      >
+        <div className="mx-auto flex max-w-2xl items-center gap-3">
+          <input
+            className="flex-1 rounded-xl border border-border bg-muted px-4 py-3 text-sm transition-all duration-200 placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/40"
+            disabled={loading || isTyping}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={t("onboarding.testMessage")}
             type="text"
             value={input}
           />

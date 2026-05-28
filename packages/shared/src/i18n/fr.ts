@@ -435,6 +435,20 @@ export const fr: TranslationStrings = {
     processing: "Traitement en cours...",
     skipForNow: "Passer pour l'instant — commencer l'essai gratuit",
     settingUp: "Configuration de l'essai gratuit...",
+    goBack: "Go back",
+    testReceptionist: "Test Receptionist",
+    reviewSetup: "Review Setup",
+    testMessage: "Send a message as if you were a customer...",
+    reviewDescription:
+      "Here's a summary of your setup. You can go back to change anything.",
+    categoryLabel: "Business Category",
+    servicesLabel: "Services",
+    availabilityLabel: "Availability",
+    policiesLabel: "Cancellation Policy",
+    receptionistNameLabel: "Receptionist Name",
+    receptionistToneLabel: "Tone",
+    editStep: "Edit",
+    daysAweek: "{{count}} days/week",
     steps: {
       connectWhatsapp: "Connecter WhatsApp",
       businessInfo: "Informations entreprise",
@@ -442,6 +456,7 @@ export const fr: TranslationStrings = {
       availability: "Disponibilité",
       policies: "Politiques",
       receptionistSetup: "Configuration du réceptionniste",
+      testReceptionist: "Tester",
       choosePlan: "Choisir un plan",
     },
     plans: {

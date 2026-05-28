@@ -9,6 +9,7 @@ const STEP_ORDER: OnboardingStep[] = [
   "availability",
   "policies",
   "receptionist_config",
+  "test_receptionist",
   "plan_selection",
   "ready",
 ];
@@ -21,6 +22,16 @@ export function getNextStep(current: OnboardingStep): OnboardingStep | null {
   return STEP_ORDER[idx + 1];
 }
 
+export function getPreviousStep(
+  current: OnboardingStep
+): OnboardingStep | null {
+  const idx = STEP_ORDER.indexOf(current);
+  if (idx <= 0) {
+    return null;
+  }
+  return STEP_ORDER[idx - 1];
+}
+
 export function getProgress(current: OnboardingStep): number {
   const idx = STEP_ORDER.indexOf(current);
   if (idx === -1) {
@@ -30,14 +41,16 @@ export function getProgress(current: OnboardingStep): number {
 }
 
 export class OnboardingStepMismatchError extends Error {
-  constructor(
-    public readonly expected: OnboardingStep,
-    public readonly actual: OnboardingStep
-  ) {
+  readonly expected: OnboardingStep;
+  readonly actual: OnboardingStep;
+
+  constructor(expected: OnboardingStep, actual: OnboardingStep) {
     super(
       `Onboarding step mismatch: expected ${expected}, but workspace is at ${actual}`
     );
     this.name = "OnboardingStepMismatchError";
+    this.expected = expected;
+    this.actual = actual;
   }
 }
 
@@ -50,13 +63,26 @@ export async function advanceOnboarding(
     return "ready";
   }
 
+  const data: {
+    onboardingStep: OnboardingStep;
+    updatedAt: Date;
+    onboardingCompletedAt?: Date;
+  } = {
+    onboardingStep: next,
+    updatedAt: new Date(),
+  };
+
+  // Set onboardingCompletedAt when reaching "ready"
+  if (next === "ready") {
+    data.onboardingCompletedAt = new Date();
+  }
+
   const result = await db.workspace.updateMany({
     where: { id: workspaceId, onboardingStep: completedStep },
-    data: { onboardingStep: next, updatedAt: new Date() },
+    data,
   });
 
   if (result.count === 0) {
-    // Step didn't match — fetch current to report the mismatch
     const ws = await db.workspace.findFirst({
       where: { id: workspaceId },
       select: { onboardingStep: true },
@@ -67,6 +93,29 @@ export async function advanceOnboarding(
   }
 
   return next;
+}
+
+export async function goBackOnboarding(
+  workspaceId: string,
+  currentStep: OnboardingStep
+): Promise<OnboardingStep> {
+  const prev = getPreviousStep(currentStep);
+  if (!prev) {
+    return currentStep;
+  }
+
+  // Skip auto-advance steps when going back
+  const skipSteps: OnboardingStep[] = ["not_started", "whatsapp_connected"];
+  const target = skipSteps.includes(prev)
+    ? (getPreviousStep(prev) ?? prev)
+    : prev;
+
+  await db.workspace.update({
+    where: { id: workspaceId },
+    data: { onboardingStep: target, updatedAt: new Date() },
+  });
+
+  return target;
 }
 
 export async function getOnboardingStatus(workspaceId: string) {
@@ -82,3 +131,5 @@ export async function getOnboardingStatus(workspaceId: string) {
     nextStep: getNextStep(current),
   };
 }
+
+export { STEP_ORDER };

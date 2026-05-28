@@ -421,6 +421,20 @@ export const ko: TranslationStrings = {
     processing: "처리 중...",
     skipForNow: "건너뛰기 — 무료 체험 시작",
     settingUp: "무료 체험 설정 중...",
+    goBack: "Go back",
+    testReceptionist: "Test Receptionist",
+    reviewSetup: "Review Setup",
+    testMessage: "Send a message as if you were a customer...",
+    reviewDescription:
+      "Here's a summary of your setup. You can go back to change anything.",
+    categoryLabel: "Business Category",
+    servicesLabel: "Services",
+    availabilityLabel: "Availability",
+    policiesLabel: "Cancellation Policy",
+    receptionistNameLabel: "Receptionist Name",
+    receptionistToneLabel: "Tone",
+    editStep: "Edit",
+    daysAweek: "{{count}} days/week",
     steps: {
       connectWhatsapp: "WhatsApp 연결",
       businessInfo: "비즈니스 정보",
@@ -428,6 +442,7 @@ export const ko: TranslationStrings = {
       availability: "영업시간",
       policies: "정책",
       receptionistSetup: "리셉셔니스트 설정",
+      testReceptionist: "테스트",
       choosePlan: "플랜 선택",
     },
     plans: {
