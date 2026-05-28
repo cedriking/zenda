@@ -5,7 +5,7 @@ const withNextIntl = createNextIntlPlugin();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
-  async headers() {
+  headers() {
     return [
       {
         source: "/(.*)",
@@ -21,11 +21,11 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://swetrix.org",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: https://zenda.bot https://*.stripe.com",
+              "img-src 'self' data: https://zenda.bot https://*.stripe.com https://api.20u.net",
               "font-src 'self' data:",
-              "connect-src 'self' https://api.zenda.bot https://*.stripe.com https://static.cloudflareinsights.com",
+              "connect-src 'self' https://api.zenda.bot https://*.stripe.com https://static.cloudflareinsights.com https://api.20u.net",
               "frame-src https://*.stripe.com https://js.stripe.com",
               "object-src 'none'",
               "base-uri 'self'",
