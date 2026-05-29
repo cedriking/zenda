@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://api.zenda.bot";
 const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://zenda.bot";
 
 const VALID_TIERS = [

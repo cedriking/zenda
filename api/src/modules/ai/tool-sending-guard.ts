@@ -77,15 +77,19 @@ export async function checkToolSendingPolicy(
 
     return null;
   } catch (err) {
-    // On policy check failure, log but allow the tool to proceed.
-    // The queue processor will re-check at send time — we don't block
-    // on infrastructure errors.
-    logger.error("Sending policy check failed, allowing tool through", {
+    // On policy check failure, deny the tool (fail closed for compliance).
+    // This prevents messages to opted-out customers during infrastructure incidents.
+    logger.error("Sending policy check failed, blocking tool (fail-closed)", {
       toolName,
       workspaceId,
       customerId,
       error: err instanceof Error ? err.message : String(err),
     });
-    return null;
+    return {
+      policyDenied: true,
+      reason: "Sending policy check unavailable — blocked for safety",
+      toolName,
+      purpose,
+    };
   }
 }

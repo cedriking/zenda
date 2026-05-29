@@ -31,11 +31,20 @@ async function setWorkspaceSetting(
 export const settingsModule = new Elysia({ prefix: "/settings" })
   .use(typedContext)
 
+  // ── Auth guard for all settings routes ──
+  .onBeforeHandle(({ workspaceId, set }) => {
+    if (!workspaceId) {
+      set.status = 401;
+      return { error: "Authentication required" };
+    }
+  })
+  .derive(({ workspaceId }) => ({ wid: workspaceId as string }))
+
   // ── Receptionist settings ────────────────────────────────────────
-  .get("/receptionist", async ({ workspaceId, set }) => {
+  .get("/receptionist", async ({ wid, set }) => {
     try {
       const profile = await db.receptionistProfile.findFirst({
-        where: { workspaceId: workspaceId! },
+        where: { workspaceId: wid },
         select: {
           personalityPreset: true,
           formalityLevel: true,
@@ -62,7 +71,7 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
 
   .patch(
     "/receptionist",
-    async ({ workspaceId, body, set }) => {
+    async ({ wid, body, set }) => {
       try {
         const data = body as Record<string, unknown>;
         // Explicitly pick only allowed fields to prevent mass assignment
@@ -84,7 +93,7 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
           }
         }
         const updated = await db.receptionistProfile.updateMany({
-          where: { workspaceId: workspaceId! },
+          where: { workspaceId: wid },
           data: updateData,
         });
         if (updated.count === 0) {
@@ -92,7 +101,7 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
         }
         // Fetch back the updated record to return selected fields
         const refreshed = await db.receptionistProfile.findFirst({
-          where: { workspaceId: workspaceId! },
+          where: { workspaceId: wid },
           select: {
             personalityPreset: true,
             formalityLevel: true,
@@ -129,10 +138,10 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
   )
 
   // ── Appointment settings ─────────────────────────────────────────
-  .get("/appointments", async ({ workspaceId, set }) => {
+  .get("/appointments", async ({ wid, set }) => {
     try {
       const profile = await db.businessProfile.findFirst({
-        where: { workspaceId: workspaceId! },
+        where: { workspaceId: wid },
         select: {
           cancellationWindowHours: true,
           reschedulingWindowHours: true,
@@ -171,7 +180,7 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
 
   .patch(
     "/appointments",
-    async ({ workspaceId, body, set }) => {
+    async ({ wid, body, set }) => {
       try {
         const data = body as Record<string, unknown>;
 
@@ -207,7 +216,7 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
 
         if (Object.keys(businessFields).length > 0) {
           const updated = await db.businessProfile.updateMany({
-            where: { workspaceId: workspaceId! },
+            where: { workspaceId: wid },
             data: { ...businessFields, updatedAt: new Date() },
           });
           if (updated.count === 0) {
@@ -218,7 +227,7 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
 
         if (Object.keys(receptionistFields).length > 0) {
           await db.receptionistProfile.updateMany({
-            where: { workspaceId: workspaceId! },
+            where: { workspaceId: wid },
             data: { ...receptionistFields, updatedAt: new Date() },
           });
           result = { ...result, ...receptionistFields };
@@ -246,10 +255,10 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
   )
 
   // ── Safety settings ──────────────────────────────────────────────
-  .get("/safety", async ({ workspaceId, set }) => {
+  .get("/safety", async ({ wid, set }) => {
     try {
       const profile = await db.businessProfile.findFirst({
-        where: { workspaceId: workspaceId! },
+        where: { workspaceId: wid },
         select: {
           sensitiveTopics: true,
           emergencyEscalationInstructions: true,
@@ -269,7 +278,7 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
 
   .patch(
     "/safety",
-    async ({ workspaceId, body, set }) => {
+    async ({ wid, body, set }) => {
       try {
         const data = body as Record<string, unknown>;
 
@@ -282,7 +291,7 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
         }
 
         const updated = await db.businessProfile.updateMany({
-          where: { workspaceId: workspaceId! },
+          where: { workspaceId: wid },
           data: {
             sensitiveTopics: data.sensitiveTopics as string[] | undefined,
             emergencyEscalationInstructions:
@@ -295,7 +304,7 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
         }
         // Fetch back the updated record to return selected fields
         const refreshed = await db.businessProfile.findFirst({
-          where: { workspaceId: workspaceId! },
+          where: { workspaceId: wid },
           select: {
             sensitiveTopics: true,
             emergencyEscalationInstructions: true,
@@ -317,14 +326,14 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
     }
   )
 
-  .get("/safety/escalations", async ({ workspaceId, query, set }) => {
+  .get("/safety/escalations", ({ wid, query, set }) => {
     try {
       const { limit = "50", offset = "0" } = query as Record<string, string>;
       const parsedLimit = Math.max(1, Math.min(200, Number(limit) || 50));
       const parsedOffset = Math.max(0, Number(offset) || 0);
 
       return db.escalation.findMany({
-        where: { workspaceId: workspaceId! },
+        where: { workspaceId: wid },
         select: {
           id: true,
           reason: true,
@@ -345,11 +354,11 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
   })
 
   // ── Messaging settings ───────────────────────────────────────────
-  .get("/messaging", async ({ workspaceId, set }) => {
+  .get("/messaging", async ({ wid, set }) => {
     try {
       const [maxOutbound, maxReminders] = await Promise.all([
-        getWorkspaceSetting(workspaceId!, "maxOutboundWithoutReply"),
-        getWorkspaceSetting(workspaceId!, "maxRemindersPerAppointment"),
+        getWorkspaceSetting(wid, "maxOutboundWithoutReply"),
+        getWorkspaceSetting(wid, "maxRemindersPerAppointment"),
       ]);
       return {
         maxOutboundWithoutReply: maxOutbound ? Number(maxOutbound) : 5,
@@ -365,19 +374,19 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
 
   .patch(
     "/messaging",
-    async ({ workspaceId, body, set }) => {
+    async ({ wid, body, set }) => {
       try {
         const data = body as Record<string, unknown>;
         if ("maxOutboundWithoutReply" in data) {
           await setWorkspaceSetting(
-            workspaceId!,
+            wid,
             "maxOutboundWithoutReply",
             String(data.maxOutboundWithoutReply)
           );
         }
         if ("maxRemindersPerAppointment" in data) {
           await setWorkspaceSetting(
-            workspaceId!,
+            wid,
             "maxRemindersPerAppointment",
             String(data.maxRemindersPerAppointment)
           );
@@ -385,18 +394,12 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
         return {
           maxOutboundWithoutReply: Number(
             data.maxOutboundWithoutReply ??
-              (await getWorkspaceSetting(
-                workspaceId!,
-                "maxOutboundWithoutReply"
-              )) ??
+              (await getWorkspaceSetting(wid, "maxOutboundWithoutReply")) ??
               5
           ),
           maxRemindersPerAppointment: Number(
             data.maxRemindersPerAppointment ??
-              (await getWorkspaceSetting(
-                workspaceId!,
-                "maxRemindersPerAppointment"
-              )) ??
+              (await getWorkspaceSetting(wid, "maxRemindersPerAppointment")) ??
               2
           ),
         };
@@ -415,14 +418,14 @@ export const settingsModule = new Elysia({ prefix: "/settings" })
     }
   )
 
-  .get("/messaging/consent", async ({ workspaceId, query, set }) => {
+  .get("/messaging/consent", ({ wid, query, set }) => {
     try {
       const { limit = "50", offset = "0" } = query as Record<string, string>;
       const parsedLimit = Math.max(1, Math.min(200, Number(limit) || 50));
       const parsedOffset = Math.max(0, Number(offset) || 0);
 
       return db.messagingConsent.findMany({
-        where: { workspaceId: workspaceId! },
+        where: { workspaceId: wid },
         select: {
           id: true,
           phoneNumber: true,

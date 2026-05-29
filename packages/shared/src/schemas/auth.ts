@@ -17,7 +17,9 @@ export const signupSchema = z.object({
     .string()
     .min(2, "Business name must be at least 2 characters")
     .max(100),
-  language: z.enum(["en", "es"]).default("en"),
+  language: z
+    .enum(["en", "es", "ar", "fr", "de", "ru", "zh", "ja", "ko"])
+    .default("en"),
 });
 
 export const refreshTokenSchema = z.object({

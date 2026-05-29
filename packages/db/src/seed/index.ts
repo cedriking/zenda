@@ -12,7 +12,6 @@ async function seed() {
         tier: p.tier,
         name: p.name,
         monthlyPriceCents: p.monthlyPriceCents,
-        annualPriceCents: p.monthlyPriceCents * 12,
         activeContactsLimit: p.activeContactsLimit,
         calendarsStaffLimit: p.calendarsStaffLimit,
         locationsLimit: p.locationsLimit,

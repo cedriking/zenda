@@ -502,6 +502,8 @@ model Appointment {
   reminders           Reminder[]
   sentReminderLogs    SentReminderLog[]
 
+  @@index([workspaceId, status])
+  @@index([startAt])
   @@map("appointments")
 }
 
@@ -552,6 +554,8 @@ model Message {
   workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   audioAsset   AudioAsset?
 
+  @@unique([externalMessageId])
+  @@index([conversationId, createdAt])
   @@map("messages")
 }
 
@@ -580,6 +584,7 @@ model Escalation {
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  @@index([workspaceId, status])
   @@map("escalations")
 }
 
@@ -676,6 +681,7 @@ model Subscription {
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  @@index([workspaceId])
   @@map("subscriptions")
 }
 
@@ -732,6 +738,7 @@ model Notification {
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, read])
   @@map("notifications")
 }
 
@@ -805,6 +812,7 @@ model OutboundQueue {
   customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
   conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
 
+  @@index([workspaceId, status, priority])
   @@map("outbound_queue")
 }
 
@@ -978,6 +986,7 @@ model ProviderUsage {
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  @@index([workspaceId, createdAt])
   @@map("provider_usage")
 }
 

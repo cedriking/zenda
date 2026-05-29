@@ -22,9 +22,15 @@ mock.module("../../src/modules/ai/policy-gate.js", () => ({
 
 mock.module("../../src/infra/logger.js", () => ({
   logger: {
-    info: mock(() => {}),
-    warn: mock(() => {}),
-    error: mock(() => {}),
+    info: mock(() => {
+      /* noop */
+    }),
+    warn: mock(() => {
+      /* noop */
+    }),
+    error: mock(() => {
+      /* noop */
+    }),
   },
 }));
 
@@ -159,7 +165,7 @@ describe("Tool Sending Guard", () => {
     );
   });
 
-  test("returns null (allows tool) when policy check throws", async () => {
+  test("returns PolicyDenial (fail-closed) when policy check throws", async () => {
     mockCheckSendingPolicy.mockRejectedValueOnce(
       new Error("DB connection lost")
     );
@@ -169,8 +175,10 @@ describe("Tool Sending Guard", () => {
       "ws-1",
       "cust-1"
     );
-    // Fail-open on infrastructure error
-    expect(result).toBeNull();
+    // Fail-closed on infrastructure error for compliance safety
+    expect(result).not.toBeNull();
+    expect(result?.policyDenied).toBe(true);
+    expect(result?.reason).toContain("unavailable");
   });
 
   test("returns denial with correct reason for rate limit exceeded", async () => {

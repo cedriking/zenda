@@ -25,7 +25,7 @@ export const NODE_ENV = process.env.NODE_ENV ?? "development";
 
 // Local Whisper STT server (faster-whisper)
 export const WHISPER_LOCAL_URL =
-  process.env.WHISPER_LOCAL_URL ?? "http://192.168.68.131:8001";
+  process.env.WHISPER_LOCAL_URL ?? "http://localhost:8001";
 
 // Google Calendar Integration
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? "";

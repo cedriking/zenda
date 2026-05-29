@@ -6,6 +6,8 @@ import type {
 } from "@zenda/shared";
 import { logger } from "../../infra/logger.js";
 import { wsMessageSender } from "../../infra/message-sender.js";
+// Emergency keywords — imported from input-guard.ts (single source of truth)
+import { EMERGENCY_KEYWORDS } from "../ai/input-guard.js";
 import { escalateToHuman } from "../ai/tools/escalate-to-human.js";
 import { handleAudioMessage } from "../ai/transcription/audio-handler.js";
 import { logConsentEvent } from "../audit/logger.js";
@@ -25,39 +27,6 @@ import {
 import { enforceLimit, trackAndEnforce } from "../usage/enforcement.js";
 import { resolveOrCreateCustomer } from "./customer-resolver.js";
 import { detectLanguage } from "./language-detector.js";
-
-// Emergency keywords in multiple languages (exported for use by other modules)
-export const EMERGENCY_KEYWORDS = [
-  "emergency",
-  "urgente",
-  "ayuda",
-  "socorro",
-  "911",
-  "ambulancia",
-  "incendio",
-  "fire",
-  "drowning",
-  "ahogo",
-  "bleeding",
-  "sangrando",
-  "heart attack",
-  "ataque cardiaco",
-  "stroke",
-  "derrame cerebral",
-  "overdose",
-  "sobredosis",
-  "suicide",
-  "suicidio",
-  "accidente",
-  "accident",
-  "choque",
-  "desmayo",
-  "fainting",
-  "no respira",
-  "not breathing",
-  "choking",
-  "atragantado",
-];
 
 const EMERGENCY_PATTERN = new RegExp(
   `\\b(${EMERGENCY_KEYWORDS.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
@@ -707,11 +676,11 @@ async function findActiveConversation(workspaceId: string, customerId: string) {
     orderBy: { lastMessageAt: "desc" },
   });
 
-  // Only resume conversations created within the last 24 hours
+  // Only resume conversations with recent activity (last 24 hours)
   if (conv) {
-    const createdAt = new Date(conv.createdAt);
+    const lastActive = new Date(conv.lastMessageAt ?? conv.createdAt);
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    if (createdAt < twentyFourHoursAgo) {
+    if (lastActive < twentyFourHoursAgo) {
       return null;
     }
   }

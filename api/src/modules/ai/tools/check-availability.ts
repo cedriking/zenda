@@ -55,36 +55,38 @@ export async function checkAvailability(
     return { slots: [], serviceName: service.name, date: input.date };
   }
 
-  // Use first rule's time range (simplified — could merge overlapping rules)
-  const { startTime, endTime } = rules[0];
+  // Merge overlapping availability rules into combined time ranges
+  const mergedRanges = mergeRules(rules);
   const slotDuration = service.durationMinutes;
   const bufferMinutes = 5;
 
-  // Generate all possible slots
+  // Generate all possible slots from merged ranges
   const slots: TimeSlot[] = [];
-  const [startH, startM] = startTime.split(":").map(Number);
-  const [endH, endM] = endTime.split(":").map(Number);
-  const startMinutes = startH * 60 + startM;
-  const endMinutes = endH * 60 + endM;
-
-  for (
-    let mins = startMinutes;
-    mins + slotDuration <= endMinutes;
-    mins += slotDuration + bufferMinutes
-  ) {
-    const slotStart = `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
-    const slotEnd = `${String(Math.floor((mins + slotDuration) / 60)).padStart(2, "0")}:${String((mins + slotDuration) % 60).padStart(2, "0")}`;
-    slots.push({ startTime: slotStart, endTime: slotEnd, available: true });
+  for (const range of mergedRanges) {
+    for (
+      let mins = range.start;
+      mins + slotDuration <= range.end;
+      mins += slotDuration + bufferMinutes
+    ) {
+      const slotStart = `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+      const slotEnd = `${String(Math.floor((mins + slotDuration) / 60)).padStart(2, "0")}:${String((mins + slotDuration) % 60).padStart(2, "0")}`;
+      slots.push({ startTime: slotStart, endTime: slotEnd, available: true });
+    }
   }
 
   // Get existing appointments for that day to mark conflicts
+  // Exclude terminal statuses (cancelled, completed, no_show)
   const dayStart = new Date(`${input.date}T00:00:00Z`);
   const dayEnd = new Date(`${input.date}T23:59:59Z`);
+
+  const TERMINAL_STATUSES = ["cancelled", "completed", "no_show"] as const;
 
   const existingAppts = await db.appointment.findMany({
     where: {
       workspaceId,
       startAt: { gte: dayStart, lte: dayEnd },
+      status: { notIn: [...TERMINAL_STATUSES] },
+      ...(input.staffMemberId ? { staffMemberId: input.staffMemberId } : {}),
     },
   });
 
@@ -137,3 +139,32 @@ export const checkAvailabilityToolDef = {
     },
   },
 };
+
+interface TimeRange {
+  end: number;
+  start: number; // minutes from midnight
+}
+
+/** Merge overlapping time ranges from multiple availability rules. */
+function mergeRules(
+  rules: Array<{ startTime: string; endTime: string }>
+): TimeRange[] {
+  const ranges: TimeRange[] = rules.map((r) => {
+    const [sh, sm] = r.startTime.split(":").map(Number);
+    const [eh, em] = r.endTime.split(":").map(Number);
+    return { start: sh * 60 + sm, end: eh * 60 + em };
+  });
+
+  ranges.sort((a, b) => a.start - b.start);
+
+  const merged: TimeRange[] = [];
+  for (const r of ranges) {
+    const last = merged.at(-1);
+    if (last && r.start <= last.end) {
+      last.end = Math.max(last.end, r.end);
+    } else {
+      merged.push({ ...r });
+    }
+  }
+  return merged;
+}

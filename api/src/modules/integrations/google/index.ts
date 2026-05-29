@@ -1,9 +1,56 @@
+import crypto from "node:crypto";
 import { db } from "@zenda/db/client";
 import Elysia from "elysia";
 import { decrypt, encrypt } from "../../../infra/encryption.js";
 import { logger } from "../../../infra/logger.js";
 import { typedContext } from "../../../middleware/typed-context.js";
 import { exchangeCodeForTokens, getAuthUrl, listCalendars } from "./client.js";
+
+const STATE_HMAC_SECRET = process.env.JWT_SECRET;
+
+function signState(workspaceId: string): string {
+  if (!STATE_HMAC_SECRET) {
+    throw new Error("JWT_SECRET must be set to sign OAuth state");
+  }
+  const payload = JSON.stringify({ wid: workspaceId });
+  const base64 = Buffer.from(payload).toString("base64url");
+  const sig = crypto
+    .createHmac("sha256", STATE_HMAC_SECRET)
+    .update(base64)
+    .digest("base64url");
+  return `${base64}.${sig}`;
+}
+
+function verifyState(state: string): { wid: string } | null {
+  if (!STATE_HMAC_SECRET) {
+    return null;
+  }
+  const dotIdx = state.lastIndexOf(".");
+  if (dotIdx === -1) {
+    return null;
+  }
+  const base64 = state.slice(0, dotIdx);
+  const sig = state.slice(dotIdx + 1);
+  const expected = crypto
+    .createHmac("sha256", STATE_HMAC_SECRET)
+    .update(base64)
+    .digest("base64url");
+  const sigBuf = Buffer.from(sig);
+  const expectedBuf = Buffer.from(expected);
+  if (sigBuf.length !== expectedBuf.length) {
+    return null;
+  }
+  if (!crypto.timingSafeEqual(sigBuf, expectedBuf)) {
+    return null;
+  }
+  try {
+    return JSON.parse(Buffer.from(base64, "base64url").toString()) as {
+      wid: string;
+    };
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Google Calendar integration routes.
@@ -23,10 +70,7 @@ export const googleCalendarModule = new Elysia({
       return { authUrl: null, error: "No workspace" };
     }
 
-    // State = workspaceId (in production, sign this with HMAC)
-    const state = Buffer.from(JSON.stringify({ wid: workspaceId })).toString(
-      "base64url"
-    );
+    const state = signState(workspaceId);
     const authUrl = getAuthUrl(state);
 
     return { authUrl };
@@ -36,6 +80,7 @@ export const googleCalendarModule = new Elysia({
    * GET /callback
    * Public route — Google redirects here after user consents.
    * Exchanges the auth code for tokens and stores them encrypted.
+   * State parameter is HMAC-signed to prevent CSRF.
    */
   .get("/callback", async ({ query, set }) => {
     const code = query.code as string;
@@ -54,18 +99,14 @@ export const googleCalendarModule = new Elysia({
       return;
     }
 
-    // Decode workspaceId from state
-    let workspaceId: string;
-    try {
-      const parsed = JSON.parse(Buffer.from(state, "base64url").toString()) as {
-        wid: string;
-      };
-      workspaceId = parsed.wid;
-    } catch {
+    // Verify HMAC-signed state to prevent CSRF
+    const parsed = verifyState(state);
+    if (!parsed?.wid) {
       set.redirect =
         "zenda://integrations/google/connected?status=error&message=invalid_state";
       return;
     }
+    const workspaceId = parsed.wid;
 
     // Exchange code for tokens
     const tokens = await exchangeCodeForTokens(code);

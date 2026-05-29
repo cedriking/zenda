@@ -63,6 +63,10 @@ export const billingModule = new Elysia({ prefix: "/billing" })
     async (ctx) => {
       const { body, set } = ctx;
       const workspaceId = (ctx as unknown as AuthContext).workspaceId;
+      if (!workspaceId) {
+        set.status = 401;
+        return { error: "Authentication required" };
+      }
       const data = body as Record<string, string | undefined>;
       const tier = (data.tier ?? "free") as PlanTier;
 
@@ -70,7 +74,7 @@ export const billingModule = new Elysia({ prefix: "/billing" })
       if (tier === "free") {
         try {
           const existing = await db.subscription.findFirst({
-            where: { workspaceId: workspaceId as string },
+            where: { workspaceId },
           });
           if (existing) {
             // Already has a subscription — let them use the existing one
@@ -80,7 +84,7 @@ export const billingModule = new Elysia({ prefix: "/billing" })
           }
           await db.subscription.create({
             data: {
-              workspaceId: workspaceId as string,
+              workspaceId,
               stripeCustomerId: `free_${workspaceId}`,
               stripeSubscriptionId: `free_${workspaceId}`,
               planTier: "free",
@@ -103,7 +107,7 @@ export const billingModule = new Elysia({ prefix: "/billing" })
 
       try {
         const session = await createCheckoutSession(
-          workspaceId as string,
+          workspaceId,
           data.email,
           (data.tier ?? "local_solo") as PlanTier,
           data.founding === "true",
@@ -135,8 +139,12 @@ export const billingModule = new Elysia({ prefix: "/billing" })
   .post("/portal", async (ctx) => {
     const { set } = ctx;
     const workspaceId = (ctx as unknown as AuthContext).workspaceId;
+    if (!workspaceId) {
+      set.status = 401;
+      return { error: "Authentication required" };
+    }
     try {
-      return await createPortalSession(workspaceId as string);
+      return await createPortalSession(workspaceId);
     } catch (err) {
       logger.error("Portal error", { error: (err as Error).message });
       return serverError(set, "Failed to create portal session");
@@ -147,8 +155,12 @@ export const billingModule = new Elysia({ prefix: "/billing" })
   .get("/subscription", async (ctx) => {
     const { set } = ctx;
     const workspaceId = (ctx as unknown as AuthContext).workspaceId;
+    if (!workspaceId) {
+      set.status = 401;
+      return { error: "Authentication required" };
+    }
     try {
-      return await getSubscription(workspaceId as string);
+      return await getSubscription(workspaceId);
     } catch (err) {
       logger.error("Subscription error", { error: (err as Error).message });
       return serverError(set, "Failed to get subscription");

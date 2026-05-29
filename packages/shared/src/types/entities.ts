@@ -239,7 +239,7 @@ export interface Customer {
 // --- Conversations & Messages ---
 
 export interface Conversation {
-  assignedToOwner: boolean;
+  assignedToOwner: Date | null;
   channel: "whatsapp";
   createdAt: Date;
   customerId: string;

@@ -1,19 +1,22 @@
 import { Elysia, t } from "elysia";
 import { logger } from "../../infra/logger.js";
+import { typedContext } from "../../middleware/typed-context.js";
 
 export const translationModule = new Elysia({ prefix: "/translation" })
+  .use(typedContext)
 
   .post(
     "/generate",
-    async ({ body }) => {
+    async ({ body, workspaceId }) => {
+      if (!workspaceId) {
+        return { error: "Authentication required" };
+      }
       const { text, sourceLang, targetLang } = body as {
         text: string;
         sourceLang: string;
         targetLang: string;
       };
 
-      // In production, call an LLM or translation API
-      // For now, return a placeholder indicating translation is needed
       const translated = await generateTranslation(
         text,
         sourceLang as "en" | "es",
@@ -24,7 +27,7 @@ export const translationModule = new Elysia({ prefix: "/translation" })
     },
     {
       body: t.Object({
-        text: t.String(),
+        text: t.String({ maxLength: 5000 }),
         sourceLang: t.String(),
         targetLang: t.String(),
       }),
@@ -33,7 +36,10 @@ export const translationModule = new Elysia({ prefix: "/translation" })
 
   .post(
     "/generate-batch",
-    async ({ body }) => {
+    async ({ body, workspaceId }) => {
+      if (!workspaceId) {
+        return { error: "Authentication required" };
+      }
       const { items, sourceLang, targetLang } = body as {
         items: Array<{ field: string; text: string }>;
         sourceLang: string;
