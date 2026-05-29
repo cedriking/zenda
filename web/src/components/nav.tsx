@@ -1,6 +1,7 @@
 "use client";
 
-import { Menu, MessageCircle, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -9,13 +10,13 @@ import { Link, usePathname } from "@/i18n/navigation";
 function Logo() {
   return (
     <Link className="group flex items-center gap-2" href="/">
-      <div className="relative">
-        <MessageCircle
-          className="size-7 fill-emerald-500 stroke-white text-emerald-500"
-          strokeWidth={2}
-        />
-        <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-400" />
-      </div>
+      <Image
+        alt="Zenda"
+        className="size-8"
+        height={32}
+        src="/logo-nav.png"
+        width={32}
+      />
       <span className="font-bold text-slate-900 text-xl">Zenda</span>
     </Link>
   );
@@ -95,12 +96,6 @@ export function Nav({ variant = "home" }: { variant?: "home" | "simple" }) {
 
   const handleMobileClose = useCallback(() => setMobileOpen(false), []);
 
-  const handlePanelKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      setMobileOpen(false);
-    }
-  }, []);
-
   if (variant === "simple") {
     return (
       <nav className="fixed top-0 z-50 w-full border-slate-200 border-b bg-white shadow-sm transition-all duration-300">
@@ -161,6 +156,7 @@ export function Nav({ variant = "home" }: { variant?: "home" | "simple" }) {
           aria-label={t("menuToggle")}
           className="p-2 text-slate-600 md:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
+          type="button"
         >
           {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
@@ -169,9 +165,10 @@ export function Nav({ variant = "home" }: { variant?: "home" | "simple" }) {
       {/* Mobile menu */}
       {mobileOpen && (
         <div
+          aria-label={t("menuToggle")}
           className="border-slate-200 border-b bg-white px-6 pb-4 md:hidden"
           id="mobile-menu"
-          onKeyDown={handlePanelKeyDown}
+          role="dialog"
         >
           <div className="flex flex-col gap-3">
             {NAV_LINKS.map((l) =>

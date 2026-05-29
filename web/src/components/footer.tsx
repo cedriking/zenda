@@ -1,4 +1,5 @@
-import { MessageCircle, Send } from "lucide-react";
+import { Send } from "lucide-react";
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Link } from "@/i18n/navigation";
@@ -6,13 +7,13 @@ import { Link } from "@/i18n/navigation";
 function Logo() {
   return (
     <div className="flex items-center gap-2">
-      <div className="relative">
-        <MessageCircle
-          className="size-6 fill-emerald-400 stroke-slate-900 text-emerald-400"
-          strokeWidth={2}
-        />
-        <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-slate-900 bg-emerald-400" />
-      </div>
+      <Image
+        alt="Zenda"
+        className="size-7"
+        height={28}
+        src="/logo-nav.png"
+        width={28}
+      />
       <span className="font-bold text-lg text-white">Zenda</span>
     </div>
   );
