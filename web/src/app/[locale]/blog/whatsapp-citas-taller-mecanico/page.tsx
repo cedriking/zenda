@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-citas-taller-mecanico";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "Agendar Citas por WhatsApp en Taller Mecánico | Automatiza con Zenda",
+      description:
+        "Automatiza las citas de tu taller mecánico por WhatsApp. Recibe solicitudes de servicio 24/7, reduce tiempos muertos y organiza tu agenda automáticamente.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "Agendar Citas por WhatsApp en Taller Mecánico | Automatiza con Zenda",

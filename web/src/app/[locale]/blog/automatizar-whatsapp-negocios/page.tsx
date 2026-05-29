@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "automatizar-whatsapp-negocios";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "Como Automatizar WhatsApp para tu Negocio en 2025 | Guía Completa | Zenda",
+      description:
+        "Guía paso a paso para automatizar WhatsApp Business en tu salón, clínica o spa. Aprende a configurar respuestas automáticas, agendar citas y reducir ausencias sin conocimientos técnicos.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "Como Automatizar WhatsApp para tu Negocio en 2025 | Guía Completa | Zenda",

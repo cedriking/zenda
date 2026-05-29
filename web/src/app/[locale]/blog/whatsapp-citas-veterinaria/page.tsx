@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-citas-veterinaria";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "Agendar Citas por WhatsApp en Clínica Veterinaria | Automatiza con Zenda",
+      description:
+        "Automatiza las citas de tu clínica veterinaria por WhatsApp. Agenda consultas, vacunas y cirugías 24/7 con recepcionista virtual.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "Agendar Citas por WhatsApp en Clínica Veterinaria | Automatiza con Zenda",

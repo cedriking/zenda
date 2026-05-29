@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "reducir-ausencias-clinica";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "Como Reducir Ausencias en tu Clínica con Recordatorios WhatsApp | Zenda",
+      description:
+        "Aprende a reducir hasta 40% las ausencias en clínicas médicas, dentales y de terapia con recordatorios automáticos por WhatsApp. Guía práctica con pasos concretos.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "Como Reducir Ausencias en tu Clínica con Recordatorios WhatsApp | Zenda",

@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-fitness-booking";
+
+  if (locale !== "en") {
+    return {
+      title:
+        "WhatsApp for Fitness Studios: Reduce No-Shows & Book More Classes | Zenda",
+      description:
+        "How fitness studios and gyms use WhatsApp automation to reduce class no-shows by 40%, automate booking, and keep members engaged. Free guide with ROI calculator.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/en/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "WhatsApp for Fitness Studios: Reduce No-Shows & Book More Classes | Zenda",

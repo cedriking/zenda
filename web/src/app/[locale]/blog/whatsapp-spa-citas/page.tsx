@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-spa-citas";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "WhatsApp para Spas: Automatiza Citas y Aumenta tus Ingresos | Zenda",
+      description:
+        "Cómo los spas usan WhatsApp para automatizar reservas, reducir cancelaciones 40% y aumentar ingresos. Guía con calculadora de ROI y configuración en 5 minutos.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "WhatsApp para Spas: Automatiza Citas y Aumenta tus Ingresos | Zenda",

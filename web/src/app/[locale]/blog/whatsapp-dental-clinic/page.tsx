@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-dental-clinic";
+
+  if (locale !== "en") {
+    return {
+      title:
+        "WhatsApp for Dental Clinics: Reduce Cancellations & Fill Your Calendar | Zenda",
+      description:
+        "How dental clinics use WhatsApp automation to reduce cancellations by 40%, fill last-minute openings, and book more patients. Step-by-step guide with ROI calculator.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/en/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "WhatsApp for Dental Clinics: Reduce Cancellations & Fill Your Calendar | Zenda",

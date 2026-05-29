@@ -11,6 +11,19 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-citas-barberia";
+
+  if (locale !== "es") {
+    return {
+      title: "Agendar Citas por WhatsApp en Barbería | Automatiza con Zenda",
+      description:
+        "Aprende cómo automatizar las citas de tu barbería por WhatsApp. Reduce ausencias, acepta reservas 24/7 y crece tu negocio con recepcionista virtual.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title: "Agendar Citas por WhatsApp en Barbería | Automatiza con Zenda",
     description:

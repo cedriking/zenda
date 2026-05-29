@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-lavado-auto-detailing";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "Citas por WhatsApp para Auto Detailing y Car Wash | Automatiza con Zenda",
+      description:
+        "Automatiza las citas de tu negocio de lavado de autos y detailing por WhatsApp. Agenda servicios, coordina entregas y envía recordatorios.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "Citas por WhatsApp para Auto Detailing y Car Wash | Automatiza con Zenda",

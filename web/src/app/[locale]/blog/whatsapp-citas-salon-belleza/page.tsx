@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-citas-salon-belleza";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "Citas por WhatsApp para Salón de Belleza | Agenda Automáticamente con Zenda",
+      description:
+        "Automatiza las citas de tu salón de belleza por WhatsApp. Agenda cortes, manicura, tratamientos faciales y más automáticamente.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "Citas por WhatsApp para Salón de Belleza | Agenda Automáticamente con Zenda",

@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-sesiones-fotograficas";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "Agendar Sesiones Fotográficas por WhatsApp | Automatiza tu Estudio con Zenda",
+      description:
+        "Automatiza las sesiones de tu estudio fotográfico por WhatsApp. Agenda sesiones, confirma horarios y envía galerías automáticamente.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "Agendar Sesiones Fotográficas por WhatsApp | Automatiza tu Estudio con Zenda",

@@ -5,6 +5,7 @@ import { JsonLdScript } from "@/components/json-ld";
 import { Nav } from "@/components/nav";
 import { PricingAnimations } from "@/components/pricing-animations";
 import { Link } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -15,7 +16,7 @@ export async function generateMetadata({
   const t = await getTranslations("pricing");
 
   const path = "pricing";
-  const locales = ["es", "en", "ar", "fr", "de", "ru", "zh", "ja", "ko"];
+  const locales = routing.locales;
   const languages: Record<string, string> = {};
   for (const loc of locales) {
     languages[loc] = `https://zenda.bot/${loc}/${path}`;

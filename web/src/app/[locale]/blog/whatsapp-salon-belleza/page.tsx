@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-salon-belleza";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "WhatsApp para Salones de Belleza: Agenda Más Citas y Mantén Tu Silla Ocupada | Zenda",
+      description:
+        "Cómo los salones de belleza usan WhatsApp para agendar más citas, reducir inasistencias 40% y responder clientes al instante. Guía gratis con configuración en 5 minutos.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "WhatsApp para Salones de Belleza: Agenda Más Citas y Mantén Tu Silla Ocupada | Zenda",

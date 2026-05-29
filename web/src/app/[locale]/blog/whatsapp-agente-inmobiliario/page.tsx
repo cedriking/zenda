@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-agente-inmobiliario";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "Agente Inmobiliario por WhatsApp: Agenda Visitas y Cierres Automáticos | Zenda",
+      description:
+        "Automatiza tu agencia inmobiliaria por WhatsApp. Agenda visitas, califica prospectos y coordina cierres 24/7 con recepcionista virtual.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "Agente Inmobiliario por WhatsApp: Agenda Visitas y Cierres Automáticos | Zenda",

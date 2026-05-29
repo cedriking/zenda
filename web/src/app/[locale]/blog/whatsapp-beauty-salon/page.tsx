@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-beauty-salon";
+
+  if (locale !== "en") {
+    return {
+      title:
+        "WhatsApp for Beauty Salons: Book More Appointments & Keep Your Chair Full | Zenda",
+      description:
+        "How beauty salons use WhatsApp automation to book more appointments, reduce no-shows by 40%, and respond to clients instantly. Free guide with setup in under 5 minutes.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/en/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "WhatsApp for Beauty Salons: Book More Appointments & Keep Your Chair Full | Zenda",

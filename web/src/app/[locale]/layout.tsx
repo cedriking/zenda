@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: Props) {
           url: `https://zenda.bot/api/og?locale=${locale}`,
           width: 1200,
           height: 630,
-          alt: "Zenda — AI Receptionist",
+          alt: t("openGraph.imageAlt"),
         },
       ],
     },

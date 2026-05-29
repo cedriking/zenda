@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "evitar-cancelaciones-citas-whatsapp";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "Cómo Evitar Cancelaciones de Citas con WhatsApp (Reduce 40%) | Zenda",
+      description:
+        "Reduce cancelaciones de citas hasta 40% con recordatorios por WhatsApp. Estrategias probadas, plantillas de mensajes y automatización para clínicas, salones y spas.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "Cómo Evitar Cancelaciones de Citas con WhatsApp (Reduce 40%) | Zenda",

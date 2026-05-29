@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-citas-salon";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "Como Usar WhatsApp para Agendar Citas en tu Salón de Belleza | Zenda",
+      description:
+        "Guía completa para automatizar citas por WhatsApp en salones, clínicas y spas. Reduce ausencias, ahorra tiempo y consigue más clientes con un recepcionista AI.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "Como Usar WhatsApp para Agendar Citas en tu Salón de Belleza | Zenda",

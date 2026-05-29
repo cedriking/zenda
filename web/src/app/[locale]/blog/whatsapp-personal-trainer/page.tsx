@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-personal-trainer";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "Personal Trainer por WhatsApp: Agenda Sesiones Automáticamente | Zenda",
+      description:
+        "Automatiza las sesiones de tu servicio de personal trainer por WhatsApp. Agenda entrenamientos, confirma asistencia y envía rutinas automáticamente.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "Personal Trainer por WhatsApp: Agenda Sesiones Automáticamente | Zenda",

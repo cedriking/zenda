@@ -53,6 +53,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/founding",
     "/demo",
     "/partners",
+    "/getting-started",
     "/recepcionista-virtual-whatsapp",
     "/automatizar-citas-whatsapp",
     "/recepcionista-dental-whatsapp",
@@ -94,7 +95,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const routes = [...baseRoutes, ...blogRoutes];
     return routes.map((route) => ({
       url: `${baseUrl}/${locale}${route}`,
-      lastModified: BUILD_DATE,
+      lastModified: getLastModified(route),
       changeFrequency: getFrequency(route),
       priority: getPriority(route),
     }));
@@ -108,7 +109,22 @@ function getFrequency(route: string): "weekly" | "yearly" | "monthly" {
   if (route.includes("legal")) {
     return "yearly";
   }
+  if (
+    ["/pricing", "/features", "/download", "/getting-started"].includes(route)
+  ) {
+    return "weekly";
+  }
   return "monthly";
+}
+
+function getLastModified(route: string): Date {
+  if (route === "") {
+    return new Date();
+  }
+  if (route.includes("legal")) {
+    return new Date("2025-01-01");
+  }
+  return BUILD_DATE;
 }
 
 const PRIORITY_09 = new Set([

@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-citas-abogado";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "Agendar Citas por WhatsApp para Abogados | Automatiza tu Despacho con Zenda",
+      description:
+        "Automatiza las consultas de tu despacho jurídico por WhatsApp. Agenda citas, califica casos y envía recordatorios automáticamente.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "Agendar Citas por WhatsApp para Abogados | Automatiza tu Despacho con Zenda",

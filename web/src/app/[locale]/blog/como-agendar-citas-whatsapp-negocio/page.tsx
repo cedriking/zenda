@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "como-agendar-citas-whatsapp-negocio";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "Cómo Agendar Citas por WhatsApp en tu Negocio (Guía 2025) | Zenda",
+      description:
+        "Guía paso a paso para agendar citas por WhatsApp automáticamente. Configura en 5 minutos, reduce cancelaciones 40% y aumenta reservas. Para clínicas, salones, spas y más.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title: "Cómo Agendar Citas por WhatsApp en tu Negocio (Guía 2025) | Zenda",
     description:

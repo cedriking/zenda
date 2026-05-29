@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-dentista-citas";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "WhatsApp para Dentistas: Reduce Cancelaciones y Llena tu Agenda | Zenda",
+      description:
+        "Cómo las clínicas dentales usan WhatsApp para reducir cancelaciones 40%, llenar cupos de última hora y captar más pacientes. Guía con calculadora de ROI.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "WhatsApp para Dentistas: Reduce Cancelaciones y Llena tu Agenda | Zenda",

@@ -11,6 +11,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-reservaciones-restaurante";
+
+  if (locale !== "es") {
+    return {
+      title:
+        "Reservaciones por WhatsApp para Restaurantes | Automatiza con Zenda",
+      description:
+        "Automatiza las reservaciones de tu restaurante por WhatsApp. Confirma mesas, maneja listas de espera y envía menú automáticamente.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title:
       "Reservaciones por WhatsApp para Restaurantes | Automatiza con Zenda",
