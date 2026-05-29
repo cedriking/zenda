@@ -4,37 +4,52 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "mejor-alternativa-sirena-whatsapp";
+  const title =
+    "Mejor Alternativa a Sirena para WhatsApp | Recepcionista IA que Agenda Citas — Zenda";
+  const description =
+    "Sirena distribuye leads. Zenda agenda citas automáticamente con IA por WhatsApp. Sin cambiar tu número, sin WhatsApp Business API obligatorio. Prueba gratis.";
+
+  if (locale !== "es") {
+    return {
+      title,
+      description,
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/${slug}`,
+      },
+    };
+  }
+
   return {
-    title:
-      "Mejor Alternativa a Sirena para WhatsApp | Recepcionista IA que Agenda Citas — Zenda",
-    description:
-      "Sirena distribuye leads. Zenda agenda citas automáticamente con IA por WhatsApp. Sin cambiar tu número, sin WhatsApp Business API obligatorio. Prueba gratis.",
+    title,
+    description,
     alternates: {
-      canonical: "https://zenda.bot/es/mejor-alternativa-sirena-whatsapp",
+      canonical: `https://zenda.bot/es/${slug}`,
       languages: {
-        es: "https://zenda.bot/es/mejor-alternativa-sirena-whatsapp",
-        en: "https://zenda.bot/en/mejor-alternativa-sirena-whatsapp",
-        ar: "https://zenda.bot/ar/mejor-alternativa-sirena-whatsapp",
-        fr: "https://zenda.bot/fr/mejor-alternativa-sirena-whatsapp",
-        de: "https://zenda.bot/de/mejor-alternativa-sirena-whatsapp",
-        ru: "https://zenda.bot/ru/mejor-alternativa-sirena-whatsapp",
-        zh: "https://zenda.bot/zh/mejor-alternativa-sirena-whatsapp",
-        ja: "https://zenda.bot/ja/mejor-alternativa-sirena-whatsapp",
-        ko: "https://zenda.bot/ko/mejor-alternativa-sirena-whatsapp",
-        "x-default": "https://zenda.bot/es/mejor-alternativa-sirena-whatsapp",
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/${slug}`])
+        ),
+        "x-default": "https://zenda.bot/en",
       },
     },
     openGraph: {
       title: "Mejor Alternativa a Sirena para WhatsApp — Zenda",
       description:
         "Sirena distribuye leads. Zenda los convierte en citas con IA por WhatsApp. Automatización inteligente para negocios en LATAM.",
-      url: "https://zenda.bot/es/mejor-alternativa-sirena-whatsapp",
+      url: `https://zenda.bot/es/${slug}`,
       type: "website",
       images: [
         {
-          url: "https://zenda.bot/api/og?locale=es",
+          url: `https://zenda.bot/api/og?locale=${locale}`,
           width: 1200,
           height: 630,
           alt: "Zenda — Alternativa a Sirena para WhatsApp",

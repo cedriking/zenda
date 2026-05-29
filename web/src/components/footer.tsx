@@ -30,11 +30,34 @@ export async function Footer() {
     ],
     [t("company")]: [
       { label: t("about"), href: "/docs" },
+      { label: t("blog"), href: "/blog" },
       { label: t("contact"), href: "mailto:hello@zenda.bot", external: true },
     ],
     [t("legal")]: [
       { label: t("privacyPolicy"), href: "/legal/privacy" },
       { label: t("termsOfService"), href: "/legal/terms" },
+    ],
+    [t("verticals")]: [
+      {
+        label: t("verticals.dental", { defaultValue: "Dental" }),
+        href: "/dental",
+      },
+      {
+        label: t("verticals.beauty", { defaultValue: "Beauty" }),
+        href: "/beauty",
+      },
+      {
+        label: t("verticals.fitness", { defaultValue: "Fitness" }),
+        href: "/fitness",
+      },
+      {
+        label: t("verticals.clinics", { defaultValue: "Clinics" }),
+        href: "/clinics",
+      },
+      {
+        label: t("verticals.wellness", { defaultValue: "Wellness" }),
+        href: "/wellness",
+      },
     ],
   };
 
@@ -42,7 +65,7 @@ export async function Footer() {
     <footer className="bg-neutral-200 px-4 py-6 md:px-8">
       <div className="overflow-hidden rounded-[2rem] bg-slate-950">
         <div className="mx-auto max-w-7xl px-8 py-16">
-          <div className="grid grid-cols-2 gap-10 md:grid-cols-5">
+          <div className="grid grid-cols-2 gap-10 md:grid-cols-6">
             {/* Brand column */}
             <div className="col-span-2">
               <Logo />

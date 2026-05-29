@@ -13,29 +13,43 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "mejor-alternativa-zenvia-whatsapp";
+  const title =
+    "Mejor Alternativa a Zenvia para WhatsApp | Recepcionista IA para Citas — Zenda";
+  const description =
+    "Zenvia es una plataforma de mensajería enterprise. Zenda es un recepcionista IA que agenda citas por WhatsApp automáticamente. Hecho para PyMEs en LATAM. Prueba gratis.";
+
+  if (locale !== "es") {
+    return {
+      title,
+      description,
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/${slug}`,
+      },
+    };
+  }
+
   return {
-    title:
-      "Mejor Alternativa a Zenvia para WhatsApp | Recepcionista IA para Citas — Zenda",
-    description:
-      "Zenvia es una plataforma de mensajería enterprise. Zenda es un recepcionista IA que agenda citas por WhatsApp automáticamente. Hecho para PyMEs en LATAM. Prueba gratis.",
+    title,
+    description,
     alternates: {
-      canonical: `https://zenda.bot/${locale}/${slug}`,
+      canonical: `https://zenda.bot/es/${slug}`,
       languages: {
         ...Object.fromEntries(
           routing.locales.map((l) => [l, `https://zenda.bot/${l}/${slug}`])
         ),
-        "x-default": `https://zenda.bot/es/${slug}`,
+        "x-default": "https://zenda.bot/en",
       },
     },
     openGraph: {
       title: "Mejor Alternativa a Zenvia para WhatsApp — Zenda",
       description:
         "Zenvia es una plataforma enterprise. Zenda es un recepcionista IA para PyMEs en LATAM. Agenda citas automáticamente.",
-      url: `https://zenda.bot/${locale}/${slug}`,
+      url: `https://zenda.bot/es/${slug}`,
       type: "website",
       images: [
         {
-          url: "https://zenda.bot/api/og?locale=es",
+          url: `https://zenda.bot/api/og?locale=${locale}`,
           width: 1200,
           height: 630,
           alt: "Zenda — Alternativa a Zenvia para WhatsApp",

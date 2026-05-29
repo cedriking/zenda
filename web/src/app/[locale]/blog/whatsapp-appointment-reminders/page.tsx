@@ -11,6 +11,19 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "whatsapp-appointment-reminders";
+
+  if (locale !== "en") {
+    return {
+      title: "WhatsApp Appointment Reminders: Reduce No-Shows by 40% | Zenda",
+      description:
+        "Learn how automated WhatsApp appointment reminders reduce no-shows by up to 40%. Complete guide for salons, clinics, and appointment-based businesses.",
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/en/blog/${slug}`,
+      },
+    };
+  }
+
   return {
     title: "WhatsApp Appointment Reminders: Reduce No-Shows by 40% | Zenda",
     description:
@@ -175,9 +188,9 @@ export default function WhatsAppRemindersBlogPage() {
                   Send 24 hours before
                 </h3>
                 <p className="mt-1 text-slate-600 text-sm leading-relaxed">
-                  The single most impactful reminder. Include date, time,
-                  service, and a quick-reply button to confirm or reschedule.
-                  This alone reduces no-shows by 25%.
+                  The single most impactful reminder. Include date, time, and
+                  service details so the customer can confirm or request a
+                  reschedule in one reply. This alone reduces no-shows by 25%.
                 </p>
               </div>
             </div>

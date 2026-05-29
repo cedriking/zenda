@@ -4,37 +4,52 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "mejor-alternativa-acuity-whatsapp";
+  const title =
+    "Mejor Alternativa a Acuity Scheduling para WhatsApp | Agendar Citas con IA — Zenda";
+  const description =
+    "Acuity Scheduling no es nativo para WhatsApp. Zenda agenda citas directamente por WhatsApp con IA en español. Sin descargar apps, sin formularios. Prueba gratis.";
+
+  if (locale !== "es") {
+    return {
+      title,
+      description,
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/${slug}`,
+      },
+    };
+  }
+
   return {
-    title:
-      "Mejor Alternativa a Acuity Scheduling para WhatsApp | Agendar Citas con IA — Zenda",
-    description:
-      "Acuity Scheduling no es nativo para WhatsApp. Zenda agenda citas directamente por WhatsApp con IA en español. Sin descargar apps, sin formularios. Prueba gratis.",
+    title,
+    description,
     alternates: {
-      canonical: "https://zenda.bot/es/mejor-alternativa-acuity-whatsapp",
+      canonical: `https://zenda.bot/es/${slug}`,
       languages: {
-        es: "https://zenda.bot/es/mejor-alternativa-acuity-whatsapp",
-        en: "https://zenda.bot/en/mejor-alternativa-acuity-whatsapp",
-        ar: "https://zenda.bot/ar/mejor-alternativa-acuity-whatsapp",
-        fr: "https://zenda.bot/fr/mejor-alternativa-acuity-whatsapp",
-        de: "https://zenda.bot/de/mejor-alternativa-acuity-whatsapp",
-        ru: "https://zenda.bot/ru/mejor-alternativa-acuity-whatsapp",
-        zh: "https://zenda.bot/zh/mejor-alternativa-acuity-whatsapp",
-        ja: "https://zenda.bot/ja/mejor-alternativa-acuity-whatsapp",
-        ko: "https://zenda.bot/ko/mejor-alternativa-acuity-whatsapp",
-        "x-default": "https://zenda.bot/es/mejor-alternativa-acuity-whatsapp",
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/${slug}`])
+        ),
+        "x-default": "https://zenda.bot/en",
       },
     },
     openGraph: {
       title: "Mejor Alternativa a Acuity Scheduling para WhatsApp — Zenda",
       description:
         "Acuity no funciona en WhatsApp. Zenda agenda citas con IA directamente por WhatsApp para negocios en LATAM. Sin apps, sin fricción.",
-      url: "https://zenda.bot/es/mejor-alternativa-acuity-whatsapp",
+      url: `https://zenda.bot/es/${slug}`,
       type: "website",
       images: [
         {
-          url: "https://zenda.bot/api/og?locale=es",
+          url: `https://zenda.bot/api/og?locale=${locale}`,
           width: 1200,
           height: 630,
           alt: "Zenda — Alternativa a Acuity Scheduling para WhatsApp",

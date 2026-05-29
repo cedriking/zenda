@@ -4,37 +4,52 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "mejor-alternativa-kommo-whatsapp";
+  const title =
+    "Mejor Alternativa a Kommo para WhatsApp | Agendar Citas con IA — Zenda";
+  const description =
+    "Kommo es un CRM. Zenda es un recepcionista IA que agenda citas directamente por WhatsApp. Sin configuración compleja, sin pipelines. Prueba gratis.";
+
+  if (locale !== "es") {
+    return {
+      title,
+      description,
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/${slug}`,
+      },
+    };
+  }
+
   return {
-    title:
-      "Mejor Alternativa a Kommo para WhatsApp | Agendar Citas con IA — Zenda",
-    description:
-      "Kommo es un CRM. Zenda es un recepcionista IA que agenda citas directamente por WhatsApp. Sin configuración compleja, sin pipelines. Prueba gratis.",
+    title,
+    description,
     alternates: {
-      canonical: "https://zenda.bot/es/mejor-alternativa-kommo-whatsapp",
+      canonical: `https://zenda.bot/es/${slug}`,
       languages: {
-        es: "https://zenda.bot/es/mejor-alternativa-kommo-whatsapp",
-        en: "https://zenda.bot/en/mejor-alternativa-kommo-whatsapp",
-        ar: "https://zenda.bot/ar/mejor-alternativa-kommo-whatsapp",
-        fr: "https://zenda.bot/fr/mejor-alternativa-kommo-whatsapp",
-        de: "https://zenda.bot/de/mejor-alternativa-kommo-whatsapp",
-        ru: "https://zenda.bot/ru/mejor-alternativa-kommo-whatsapp",
-        zh: "https://zenda.bot/zh/mejor-alternativa-kommo-whatsapp",
-        ja: "https://zenda.bot/ja/mejor-alternativa-kommo-whatsapp",
-        ko: "https://zenda.bot/ko/mejor-alternativa-kommo-whatsapp",
-        "x-default": "https://zenda.bot/es/mejor-alternativa-kommo-whatsapp",
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/${slug}`])
+        ),
+        "x-default": "https://zenda.bot/en",
       },
     },
     openGraph: {
       title: "Mejor Alternativa a Kommo para WhatsApp — Zenda",
       description:
         "Kommo es un CRM con WhatsApp. Zenda es un recepcionista IA que agenda citas automáticamente. Diseñado para negocios en LATAM.",
-      url: "https://zenda.bot/es/mejor-alternativa-kommo-whatsapp",
+      url: `https://zenda.bot/es/${slug}`,
       type: "website",
       images: [
         {
-          url: "https://zenda.bot/api/og?locale=es",
+          url: `https://zenda.bot/api/og?locale=${locale}`,
           width: 1200,
           height: 630,
           alt: "Zenda — Alternativa a Kommo para WhatsApp",

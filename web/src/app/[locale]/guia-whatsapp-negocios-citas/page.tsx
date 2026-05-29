@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "website",
       images: [
         {
-          url: "https://zenda.bot/api/og?locale=es",
+          url: `https://zenda.bot/api/og?locale=${locale}`,
           width: 1200,
           height: 630,
           alt: "Guía WhatsApp para Negocios de Citas — Zenda",

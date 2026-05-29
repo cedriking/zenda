@@ -4,38 +4,52 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "mejor-alternativa-freshchat-whatsapp";
+  const title =
+    "Mejor Alternativa a Freshchat para WhatsApp | Recepcionista IA para Citas — Zenda";
+  const description =
+    "Freshchat es un chat de soporte. Zenda es un recepcionista IA que agenda citas por WhatsApp automáticamente. Hecho para Latinoamérica. Prueba gratis.";
+
+  if (locale !== "es") {
+    return {
+      title,
+      description,
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/${slug}`,
+      },
+    };
+  }
+
   return {
-    title:
-      "Mejor Alternativa a Freshchat para WhatsApp | Recepcionista IA para Citas — Zenda",
-    description:
-      "Freshchat es un chat de soporte. Zenda es un recepcionista IA que agenda citas por WhatsApp automáticamente. Hecho para Latinoamérica. Prueba gratis.",
+    title,
+    description,
     alternates: {
-      canonical: "https://zenda.bot/es/mejor-alternativa-freshchat-whatsapp",
+      canonical: `https://zenda.bot/es/${slug}`,
       languages: {
-        es: "https://zenda.bot/es/mejor-alternativa-freshchat-whatsapp",
-        en: "https://zenda.bot/en/mejor-alternativa-freshchat-whatsapp",
-        ar: "https://zenda.bot/ar/mejor-alternativa-freshchat-whatsapp",
-        fr: "https://zenda.bot/fr/mejor-alternativa-freshchat-whatsapp",
-        de: "https://zenda.bot/de/mejor-alternativa-freshchat-whatsapp",
-        ru: "https://zenda.bot/ru/mejor-alternativa-freshchat-whatsapp",
-        zh: "https://zenda.bot/zh/mejor-alternativa-freshchat-whatsapp",
-        ja: "https://zenda.bot/ja/mejor-alternativa-freshchat-whatsapp",
-        ko: "https://zenda.bot/ko/mejor-alternativa-freshchat-whatsapp",
-        "x-default":
-          "https://zenda.bot/es/mejor-alternativa-freshchat-whatsapp",
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/${slug}`])
+        ),
+        "x-default": "https://zenda.bot/en",
       },
     },
     openGraph: {
       title: "Mejor Alternativa a Freshchat para WhatsApp — Zenda",
       description:
         "Freshchat es un chat de soporte. Zenda es un recepcionista IA que agenda citas por WhatsApp. Hecho para Latinoamérica.",
-      url: "https://zenda.bot/es/mejor-alternativa-freshchat-whatsapp",
+      url: `https://zenda.bot/es/${slug}`,
       type: "website",
       images: [
         {
-          url: "https://zenda.bot/api/og?locale=es",
+          url: `https://zenda.bot/api/og?locale=${locale}`,
           width: 1200,
           height: 630,
           alt: "Zenda — Alternativa a Freshchat para WhatsApp",

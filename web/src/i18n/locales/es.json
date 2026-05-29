@@ -22,7 +22,8 @@
     ],
     "openGraph": {
       "title": "Zenda — Recepcionista con IA para tu negocio",
-      "description": "Tu recepcionista con IA que nunca pierde un mensaje. Gestiona conversaciones, citas y recordatorios a través de WhatsApp."
+      "description": "Tu recepcionista con IA que nunca pierde un mensaje. Gestiona conversaciones, citas y recordatorios a través de WhatsApp.",
+      "imageAlt": "Zenda — Recepcionista con IA"
     },
     "twitter": {
       "title": "Zenda — Recepcionista con IA",
@@ -34,6 +35,8 @@
     "pricing": "Precios",
     "howItWorks": "Cómo funciona",
     "faq": "Preguntas frecuentes",
+    "blog": "Blog",
+    "download": "Descargar",
     "login": "Iniciar sesión",
     "getStarted": "Comenzar",
     "menuToggle": "Abrir menú"
@@ -51,6 +54,7 @@
     "legal": "Legal",
     "privacyPolicy": "Política de privacidad",
     "termsOfService": "Términos de servicio",
+    "verticals": "Verticales",
     "copyright": "Todos los derechos reservados.",
     "builtIn": "Hecho en América Latina"
   },
@@ -194,7 +198,7 @@
     "faq3Q": "¿Qué idiomas soporta Zenda?",
     "faq3A": "Zenda soporta 9 idiomas: inglés, español, francés, alemán, coreano, japonés, chino, ruso y árabe. La IA detecta automáticamente qué idioma está usando el cliente.",
     "faq4Q": "¿Mis datos están seguros?",
-    "faq4A": "Todas las conversaciones están cifradas. Tus datos permanecen en tu espacio de trabajo. Nunca los compartimos con terceros.",
+    "faq4A": "Todos los datos se transmiten por conexiones seguras (HTTPS/TLS). Tus datos permanecen en tu espacio de trabajo. Nunca los compartimos con terceros.",
     "faq5Q": "¿Puedo cancelar en cualquier momento?",
     "faq5A": "Sí, sin contratos. Cancela desde el panel o el portal de facturación en cualquier momento. Tus datos son tuyos para exportar.",
     "faq6Q": "¿Qué pasa si la IA comete un error?",
@@ -231,7 +235,7 @@
     "proDesc": "Para negocios en crecimiento con un equipo",
     "proFeature1": "Hasta 600 contactos activos mensuales",
     "proFeature2": "5 calendarios u horarios de personal",
-    "proFeature3": "2 ubicaciones comerciales",
+    "proFeature3": "Sincronización con Google Calendar",
     "proFeature4": "Reglas avanzadas de cancelación y reprogramación",
     "proFeature5": "Controles personalizados del asistente",
     "proFeature6": "Soporte prioritario",
@@ -239,7 +243,7 @@
     "businessDesc": "Para negocios establecidos",
     "businessFeature1": "Hasta 1,200 contactos activos mensuales",
     "businessFeature2": "10 calendarios u horarios de personal",
-    "businessFeature3": "3 ubicaciones comerciales",
+    "businessFeature3": "Sincronización con Google Calendar",
     "businessFeature4": "Reglas de escalado personalizadas",
     "businessFeature5": "Registros de auditoría de citas",
     "businessFeature6": "Configuración asistida incluida",
@@ -328,9 +332,9 @@
     "billingStarter": "Starter — $49/mes",
     "billingStarterDesc": "200 contactos activos, 2 horarios, recordatorios día antes y mismo día",
     "billingPro": "Pro — $89/mes",
-    "billingProDesc": "600 contactos activos, 5 empleados, 2 ubicaciones, soporte prioritario",
+    "billingProDesc": "600 contactos activos, 5 empleados, soporte prioritario",
     "billingBusiness": "Business — $149/mes",
-    "billingBusinessDesc": "1,200 contactos activos, 10 empleados, 3 ubicaciones, configuración asistida"
+    "billingBusinessDesc": "1,200 contactos activos, 10 empleados, configuración asistida"
   },
   "verticals": {
     "badge": "Recepcionista con IA en WhatsApp",
@@ -373,7 +377,7 @@
       "feature4Title": "Soporte multilingüe",
       "feature4Desc": "9 idiomas incluyendo inglés, español, francés, alemán y más. Atiende a una clientela diversa sin personal adicional de recepción.",
       "feature5Title": "Horario flexible",
-      "feature5Desc": "Horas personalizadas, bloques de tiempo y configuración de días festivos. La IA respeta tu agenda automáticamente.",
+      "feature5Desc": "Horas personalizadas y bloques de tiempo. La IA respeta tu agenda automáticamente.",
       "feature6Title": "Toma de control humana",
       "feature6Desc": "Interviene en cualquier momento con un clic. Transferencia fluida de vuelta a la IA cuando termines."
     },
@@ -393,25 +397,25 @@
       "feature4Title": "Soporte multilingüe",
       "feature4Desc": "9 idiomas incluyendo inglés, español, francés, alemán y más. Atiende a una clientela diversa sin personal adicional de recepción.",
       "feature5Title": "Comunicación segura",
-      "feature5Desc": "Todas las conversaciones están cifradas. Datos aislados por espacio de trabajo con registros de auditoría completos.",
-      "feature6Title": "Flujos personalizados",
-      "feature6Desc": "Define formularios de ingreso personalizados, tipos de citas y reglas de escalado para que coincidan con los procesos de tu clínica."
+      "feature5Desc": "Datos transmitidos por conexiones seguras (HTTPS/TLS). Datos aislados por espacio de trabajo con registros de auditoría completos.",
+      "feature6Title": "Sincronización con Google Calendar",
+      "feature6Desc": "Mantén tu agenda sincronizada. Las citas reservadas por WhatsApp aparecen al instante en Google Calendar."
     },
     "fitness": {
       "metaTitle": "Recepcionista con IA para estudios de fitness — Zenda",
-      "metaDesc": "Automatiza las reservas de clases y la gestión de miembros de tu gimnasio o estudio de fitness con un recepcionista con IA por WhatsApp.",
+      "metaDesc": "Automatiza las reservas de sesiones y la programación de citas para tu gimnasio o estudio de fitness con un recepcionista con IA por WhatsApp.",
       "title": "Estudios de fitness",
       "headline": "Recepcionista con IA para estudios de fitness",
-      "description": "Gimnasios, estudios de yoga y centros de fitness usan Zenda para reservar clases, gestionar membresías y reducir ausencias — todo por WhatsApp.",
+      "description": "Gimnasios, estudios de yoga y centros de fitness usan Zenda para reservar sesiones y reducir ausencias — todo por WhatsApp.",
       "featuresTitle": "Diseñado para negocios de fitness",
-      "feature1Title": "Reserva de clases",
-      "feature1Desc": "Los miembros reservan yoga, HIIT, CrossFit y más enviando un mensaje a tu WhatsApp. Sin app adicional.",
+      "feature1Title": "Reserva de sesiones",
+      "feature1Desc": "Los clientes reservan yoga, HIIT, CrossFit y más enviando un mensaje a tu WhatsApp. Sin app adicional.",
       "feature2Title": "Recordatorios automáticos",
-      "feature2Desc": "Recordatorios por WhatsApp a las 24 h y 2 h. Reduce las ausencias en clases hasta en un 40% y mantén tu agenda llena.",
-      "feature3Title": "Gestión de membresías",
-      "feature3Desc": "La IA gestiona reservas de prueba, preguntas sobre membresías y recordatorios de renovación automáticamente.",
-      "feature4Title": "Lista de espera y cancelaciones",
-      "feature4Desc": "¿Clases llenas? La IA gestiona listas de espera y llena automáticamente los cupos cuando alguien cancela.",
+      "feature2Desc": "Recordatorios por WhatsApp a las 24 h y 2 h. Reduce las ausencias hasta en un 40% y mantén tu agenda llena.",
+      "feature3Title": "Base de conocimiento",
+      "feature3Desc": "Agrega preguntas frecuentes sobre horarios, precios y políticas. La IA responde con precisión a las preguntas de los clientes.",
+      "feature4Title": "Reprogramación fácil",
+      "feature4Desc": "Los clientes reprograman con un simple mensaje. La IA actualiza el calendario automáticamente.",
       "feature5Title": "Soporte multilingüe",
       "feature5Desc": "9 idiomas incluyendo inglés, español, francés, alemán y más. Atiende a poblaciones diversas sin personal adicional en recepción.",
       "feature6Title": "Toma de control humana",
@@ -426,8 +430,8 @@
       "featuresTitle": "Diseñado para clínicas dentales",
       "feature1Title": "Programación de pacientes",
       "feature1Desc": "La IA gestiona limpiezas, empastes, ortodoncia y urgencias 24/7. No más llamadas perdidas durante los procedimientos.",
-      "feature2Title": "Recuperación de cancelaciones",
-      "feature2Desc": "Cuando un paciente cancela, la IA contacta tu lista de espera al instante para llenar el cupo. Recupera hasta $2,000 USD/mes en ingresos perdidos.",
+      "feature2Title": "Gestión de reprogramaciones",
+      "feature2Desc": "Cuando un paciente necesita reprogramar, la IA encuentra el siguiente horario disponible automáticamente. Mantén tu agenda llena.",
       "feature3Title": "Recordatorios de citas",
       "feature3Desc": "Recordatorios por WhatsApp a las 24 h y 2 h con instrucciones de preparación. Reduce ausencias hasta en un 40%.",
       "feature4Title": "Reserva por tratamiento",
@@ -435,7 +439,7 @@
       "feature5Title": "Soporte multilingüe",
       "feature5Desc": "9 idiomas incluyendo inglés, español, francés, alemán y más. Atiende a poblaciones diversas sin personal adicional en recepción.",
       "feature6Title": "Comunicación segura",
-      "feature6Desc": "Todas las conversaciones cifradas con registros de auditoría completos. Mensajería compatible desde el primer día."
+      "feature6Desc": "Datos transmitidos por conexiones seguras (HTTPS/TLS) con registros de auditoría completos. Mensajería compatible desde el primer día."
     },
     "otherVerticals": "También servimos a otras industrias"
   },
@@ -713,5 +717,12 @@
     "fieldHowReferPlaceholder": "Ej: Mi red de contactos, mi agencia, mi comunidad...",
     "submitting": "Registrando...",
     "submitCta": "Obtener mi código de referido"
+  },
+  "whatsappWidget": {
+    "defaultMessage": "Hola! Quiero saber más sobre Zenda — el asistente virtual por WhatsApp para mi negocio",
+    "replyTime": "Responde en minutos",
+    "description": "¿Tienes preguntas? Escríbenos por WhatsApp y te ayudamos a configurar tu recepcionista virtual.",
+    "startChat": "Iniciar chat",
+    "openChat": "Abrir chat de WhatsApp"
   }
 }

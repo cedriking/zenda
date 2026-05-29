@@ -4,37 +4,52 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "mejor-alternativa-calendly-whatsapp";
+  const title =
+    "Mejor Alternativa a Calendly para WhatsApp | Agendar Citas con IA — Zenda";
+  const description =
+    "Calendly envía enlaces. Zenda chatea directamente por WhatsApp con tus clientes en Latinoamérica. Agendamiento automático con IA, sin descargar nada. Prueba gratis.";
+
+  if (locale !== "es") {
+    return {
+      title,
+      description,
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/${slug}`,
+      },
+    };
+  }
+
   return {
-    title:
-      "Mejor Alternativa a Calendly para WhatsApp | Agendar Citas con IA — Zenda",
-    description:
-      "Calendly envía enlaces. Zenda chatea directamente por WhatsApp con tus clientes en Latinoamérica. Agendamiento automático con IA, sin descargar nada. Prueba gratis.",
+    title,
+    description,
     alternates: {
-      canonical: "https://zenda.bot/es/mejor-alternativa-calendly-whatsapp",
+      canonical: `https://zenda.bot/es/${slug}`,
       languages: {
-        es: "https://zenda.bot/es/mejor-alternativa-calendly-whatsapp",
-        en: "https://zenda.bot/en/mejor-alternativa-calendly-whatsapp",
-        ar: "https://zenda.bot/ar/mejor-alternativa-calendly-whatsapp",
-        fr: "https://zenda.bot/fr/mejor-alternativa-calendly-whatsapp",
-        de: "https://zenda.bot/de/mejor-alternativa-calendly-whatsapp",
-        ru: "https://zenda.bot/ru/mejor-alternativa-calendly-whatsapp",
-        zh: "https://zenda.bot/zh/mejor-alternativa-calendly-whatsapp",
-        ja: "https://zenda.bot/ja/mejor-alternativa-calendly-whatsapp",
-        ko: "https://zenda.bot/ko/mejor-alternativa-calendly-whatsapp",
-        "x-default": "https://zenda.bot/es/mejor-alternativa-calendly-whatsapp",
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/${slug}`])
+        ),
+        "x-default": "https://zenda.bot/en",
       },
     },
     openGraph: {
       title: "Mejor Alternativa a Calendly para WhatsApp — Zenda",
       description:
         "Calendly envía enlaces. Zenda chatea por WhatsApp con tus clientes. Agendamiento automático con IA para negocios en LATAM.",
-      url: "https://zenda.bot/es/mejor-alternativa-calendly-whatsapp",
+      url: `https://zenda.bot/es/${slug}`,
       type: "website",
       images: [
         {
-          url: "https://zenda.bot/api/og?locale=es",
+          url: `https://zenda.bot/api/og?locale=${locale}`,
           width: 1200,
           height: 630,
           alt: "Zenda — Alternativa a Calendly para WhatsApp",

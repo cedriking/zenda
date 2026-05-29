@@ -22,7 +22,8 @@
     ],
     "openGraph": {
       "title": "Zenda — AI Receptionist for Your Business",
-      "description": "Your AI receptionist that never misses a message. Handles customer conversations, appointments, and reminders via WhatsApp."
+      "description": "Your AI receptionist that never misses a message. Handles customer conversations, appointments, and reminders via WhatsApp.",
+      "imageAlt": "Zenda — AI Receptionist"
     },
     "twitter": {
       "title": "Zenda — AI Receptionist",
@@ -34,6 +35,8 @@
     "pricing": "Pricing",
     "howItWorks": "How It Works",
     "faq": "FAQ",
+    "blog": "Blog",
+    "download": "Download",
     "login": "Log in",
     "getStarted": "Get Started",
     "menuToggle": "Toggle menu"
@@ -51,6 +54,7 @@
     "legal": "Legal",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
+    "verticals": "Verticals",
     "copyright": "All rights reserved.",
     "builtIn": "Built in Latin America"
   },
@@ -200,7 +204,7 @@
     "faq3Q": "What languages does Zenda support?",
     "faq3A": "Zenda supports 9 languages: English, Spanish, French, German, Korean, Japanese, Chinese, Russian, and Arabic. The AI auto-detects which language the customer is using.",
     "faq4Q": "Is my data secure?",
-    "faq4A": "All conversations are encrypted. Your data stays in your workspace. We never share it with third parties.",
+    "faq4A": "All data is transmitted over secure connections (HTTPS/TLS). Your data stays in your workspace. We never share it with third parties.",
     "faq5Q": "Can I cancel anytime?",
     "faq5A": "Yes, no contracts. Cancel from the dashboard or billing portal at any time. Your data is yours to export.",
     "faq6Q": "What if the AI makes a mistake?",
@@ -231,7 +235,7 @@
     "proDesc": "For businesses depending on WhatsApp for scheduling",
     "proFeature1": "Up to 600 monthly active contacts",
     "proFeature2": "5 calendars or staff schedules",
-    "proFeature3": "2 business locations",
+    "proFeature3": "Google Calendar sync",
     "proFeature4": "Advanced cancellation & rescheduling rules",
     "proFeature5": "Custom assistant behavior controls",
     "proFeature6": "Priority support",
@@ -239,7 +243,7 @@
     "businessDesc": "For high-touch businesses with heavier scheduling needs",
     "businessFeature1": "Up to 1,200 monthly active contacts",
     "businessFeature2": "10 calendars or staff schedules",
-    "businessFeature3": "3 business locations",
+    "businessFeature3": "Google Calendar sync",
     "businessFeature4": "Custom escalation rules",
     "businessFeature5": "Appointment audit logs",
     "businessFeature6": "Assisted setup included",
@@ -317,9 +321,9 @@
     "billingStarter": "Starter — $49/mo",
     "billingStarterDesc": "200 active contacts, 2 staff schedules, day-before + same-day reminders",
     "billingPro": "Pro — $89/mo",
-    "billingProDesc": "600 active contacts, 5 staff, 2 locations, priority support",
+    "billingProDesc": "600 active contacts, 5 staff, priority support",
     "billingBusiness": "Business — $149/mo",
-    "billingBusinessDesc": "1,200 active contacts, 10 staff, 3 locations, assisted setup",
+    "billingBusinessDesc": "1,200 active contacts, 10 staff, assisted setup",
     "billingCancel": "Cancel anytime from Settings. No contracts, no hidden fees. {link}.",
     "billingPricingLink": "See full pricing",
     "commonQuestions": "Common Questions",
@@ -373,7 +377,7 @@
       "feature4Title": "Multilingual Support",
       "feature4Desc": "9 languages including English, Spanish, French, German, and more. Serve a diverse clientele without extra reception staff.",
       "feature5Title": "Flexible Scheduling",
-      "feature5Desc": "Custom hours, blocked times, and holiday settings. AI respects your schedule automatically.",
+      "feature5Desc": "Custom hours and blocked times. AI respects your schedule automatically.",
       "feature6Title": "Human Takeover",
       "feature6Desc": "Step in anytime with one click. Seamlessly hand back to AI when you are done."
     },
@@ -393,25 +397,25 @@
       "feature4Title": "Multilingual Support",
       "feature4Desc": "9 languages including English, Spanish, French, German, and more. Serve a diverse clientele without extra reception staff.",
       "feature5Title": "Secure Communication",
-      "feature5Desc": "All conversations are encrypted. Workspace-isolated data with full audit trails.",
-      "feature6Title": "Custom Workflows",
-      "feature6Desc": "Define custom intake forms, appointment types, and escalation rules to match your clinic's processes."
+      "feature5Desc": "Data transmitted over secure connections (HTTPS/TLS). Workspace-isolated data with full audit trails.",
+      "feature6Title": "Google Calendar Sync",
+      "feature6Desc": "Keep your schedule in sync. Appointments booked via WhatsApp appear instantly in Google Calendar."
     },
     "fitness": {
       "metaTitle": "AI Receptionist for Fitness Studios — Zenda",
-      "metaDesc": "Automate class bookings and member scheduling for your fitness studio or gym with an AI receptionist via WhatsApp.",
+      "metaDesc": "Automate session bookings and appointment scheduling for your fitness studio or gym with an AI receptionist via WhatsApp.",
       "title": "Fitness Studios",
       "headline": "AI Receptionist for Fitness Studios",
-      "description": "Gyms, yoga studios, and fitness centers use Zenda to book classes, manage memberships, and reduce no-shows — all through WhatsApp.",
+      "description": "Gyms, yoga studios, and fitness centers use Zenda to book sessions and reduce no-shows — all through WhatsApp.",
       "featuresTitle": "Built for fitness businesses",
-      "feature1Title": "Class Booking",
-      "feature1Desc": "Members book yoga, HIIT, CrossFit, and more by texting your WhatsApp. No app needed.",
+      "feature1Title": "Session Booking",
+      "feature1Desc": "Clients book yoga, HIIT, CrossFit, and more by texting your WhatsApp. No app needed.",
       "feature2Title": "Automated Reminders",
       "feature2Desc": "24h and 2h WhatsApp reminders. Reduce class no-shows by up to 40% and keep your schedule full.",
-      "feature3Title": "Membership Management",
-      "feature3Desc": "AI handles trial bookings, membership questions, and renewal reminders automatically.",
-      "feature4Title": "Waitlist & Cancellations",
-      "feature4Desc": "Full classes? AI manages waitlists and auto-fills spots when someone cancels.",
+      "feature3Title": "Knowledge Base",
+      "feature3Desc": "Add FAQs about class schedules, pricing, and policies. AI answers member questions accurately.",
+      "feature4Title": "Easy Rescheduling",
+      "feature4Desc": "Clients reschedule with a simple message. AI updates the calendar automatically.",
       "feature5Title": "Multilingual Support",
       "feature5Desc": "9 languages including English, Spanish, French, German, and more. Serve diverse member populations without additional front-desk staff.",
       "feature6Title": "Human Takeover",
@@ -426,8 +430,8 @@
       "featuresTitle": "Built for dental clinics",
       "feature1Title": "Patient Scheduling",
       "feature1Desc": "AI handles cleanings, fillings, orthodontics, and emergency bookings 24/7. No more missed calls during procedures.",
-      "feature2Title": "Cancellation Recovery",
-      "feature2Desc": "When a patient cancels, AI instantly contacts your waitlist to fill the gap. Recover up to $2,000/month in lost revenue.",
+      "feature2Title": "Rescheduling Management",
+      "feature2Desc": "When a patient needs to reschedule, AI finds the next available slot automatically. Keep your schedule full.",
       "feature3Title": "Appointment Reminders",
       "feature3Desc": "24h and 2h WhatsApp reminders with preparation instructions. Reduce no-shows by up to 40%.",
       "feature4Title": "Treatment-Specific Booking",
@@ -435,7 +439,7 @@
       "feature5Title": "Multilingual Support",
       "feature5Desc": "9 languages including English, Spanish, French, German, and more. Serve diverse patient populations without additional front-desk staff.",
       "feature6Title": "Secure Communication",
-      "feature6Desc": "All conversations are encrypted with full audit trails. Compliant messaging out of the box."
+      "feature6Desc": "Data transmitted over secure connections (HTTPS/TLS) with full audit trails. Compliant messaging out of the box."
     },
     "otherVerticals": "Also serving other industries"
   },
@@ -715,5 +719,12 @@
     "fieldHowReferPlaceholder": "E.g., My network, my agency, my community...",
     "submitting": "Registering...",
     "submitCta": "Get my referral code"
+  },
+  "whatsappWidget": {
+    "defaultMessage": "Hi! I want to learn more about Zenda — the WhatsApp virtual assistant for my business",
+    "replyTime": "Replies in minutes",
+    "description": "Have questions? Message us on WhatsApp and we'll help you set up your virtual receptionist.",
+    "startChat": "Start chat",
+    "openChat": "Open WhatsApp chat"
   }
 }

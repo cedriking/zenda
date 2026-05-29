@@ -15,7 +15,7 @@ export function GET(request: NextRequest) {
   const tier = searchParams.get("tier");
 
   if (!tier) {
-    return NextResponse.redirect(`${APP_BASE_URL}/pricing`);
+    return NextResponse.redirect(`${APP_BASE_URL}/es/pricing`);
   }
 
   if (!VALID_TIERS.includes(tier)) {

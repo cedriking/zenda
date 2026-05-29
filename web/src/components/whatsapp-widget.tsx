@@ -1,17 +1,17 @@
 "use client";
 
 import { MessageCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
-const DEFAULT_MESSAGE =
-  "Hola! Quiero saber más sobre Zenda — el asistente virtual por WhatsApp para mi negocio";
 
 export function WhatsAppWidget() {
+  const t = useTranslations("whatsappWidget");
   const [open, setOpen] = useState(false);
 
   const chatUrl = WHATSAPP_NUMBER
-    ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(DEFAULT_MESSAGE)}`
+    ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t("defaultMessage"))}`
     : "https://zenda.bot/es/demo";
 
   return (
@@ -24,13 +24,10 @@ export function WhatsAppWidget() {
             </div>
             <div>
               <p className="font-semibold text-sm">Zenda</p>
-              <p className="text-gray-500 text-xs">Responde en minutos</p>
+              <p className="text-gray-500 text-xs">{t("replyTime")}</p>
             </div>
           </div>
-          <p className="mb-4 text-gray-600 text-sm">
-            ¿Tienes preguntas? Escríbenos por WhatsApp y te ayudamos a
-            configurar tu recepcionista virtual.
-          </p>
+          <p className="mb-4 text-gray-600 text-sm">{t("description")}</p>
           <a
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-2.5 font-medium text-sm text-white transition-colors hover:bg-green-600"
             href={chatUrl}
@@ -38,12 +35,12 @@ export function WhatsAppWidget() {
             target="_blank"
           >
             <MessageCircle className="size-4" />
-            Iniciar chat
+            {t("startChat")}
           </a>
         </div>
       )}
       <button
-        aria-label="Abrir chat de WhatsApp"
+        aria-label={t("openChat")}
         className="flex size-14 items-center justify-center rounded-full bg-green-500 text-white shadow-lg transition-transform hover:scale-110 hover:bg-green-600"
         onClick={() => setOpen(!open)}
         type="button"

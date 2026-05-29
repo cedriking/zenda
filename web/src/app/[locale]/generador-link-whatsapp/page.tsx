@@ -3,6 +3,7 @@ import { Footer } from "@/components/footer";
 import { JsonLdScript } from "@/components/json-ld";
 import { Nav } from "@/components/nav";
 import { WhatsAppLinkGenerator } from "@/components/whatsapp-link-generator";
+import { Link } from "@/i18n/navigation";
 
 export function generateMetadata(): Metadata {
   return {
@@ -233,14 +234,14 @@ export default function GeneradorLinkWhatsAppPage() {
             Zenda conecta una IA a tu WhatsApp que agenda citas, responde
             preguntas y envia recordatorios — automaticamente.
           </p>
-          <a href="/founding">
+          <Link href="/founding">
             <button
               className="rounded-full bg-white px-8 py-3 font-semibold text-base text-emerald-700 hover:bg-emerald-50"
               type="button"
             >
               Conoce Zenda — Es gratis
             </button>
-          </a>
+          </Link>
           <p className="mt-4 text-emerald-200 text-xs">
             $0/mes · Sin tarjeta de credito · Funciona con tu WhatsApp
           </p>

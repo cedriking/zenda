@@ -5,7 +5,12 @@ import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
   return {
     title:
       "Chatbot para Citas por WhatsApp con IA | Agenda Automática 24/7 — Zenda",
@@ -34,7 +39,7 @@ export function generateMetadata(): Metadata {
       type: "website",
       images: [
         {
-          url: "https://zenda.bot/api/og?locale=es",
+          url: `https://zenda.bot/api/og?locale=${locale}`,
           width: 1200,
           height: 630,
           alt: "Zenda — Chatbot de Citas WhatsApp con IA",

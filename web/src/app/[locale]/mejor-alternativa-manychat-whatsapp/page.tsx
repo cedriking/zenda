@@ -4,37 +4,52 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "mejor-alternativa-manychat-whatsapp";
+  const title =
+    "Mejor Alternativa a ManyChat para WhatsApp | Recepcionista IA para Citas — Zenda";
+  const description =
+    "ManyChat es una plataforma de chatbots. Zenda es un recepcionista IA que agenda citas reales por WhatsApp. Sin construir flujos, sin configuración compleja. Prueba gratis.";
+
+  if (locale !== "es") {
+    return {
+      title,
+      description,
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/${slug}`,
+      },
+    };
+  }
+
   return {
-    title:
-      "Mejor Alternativa a ManyChat para WhatsApp | Recepcionista IA para Citas — Zenda",
-    description:
-      "ManyChat es una plataforma de chatbots. Zenda es un recepcionista IA que agenda citas reales por WhatsApp. Sin construir flujos, sin configuración compleja. Prueba gratis.",
+    title,
+    description,
     alternates: {
-      canonical: "https://zenda.bot/es/mejor-alternativa-manychat-whatsapp",
+      canonical: `https://zenda.bot/es/${slug}`,
       languages: {
-        es: "https://zenda.bot/es/mejor-alternativa-manychat-whatsapp",
-        en: "https://zenda.bot/en/mejor-alternativa-manychat-whatsapp",
-        ar: "https://zenda.bot/ar/mejor-alternativa-manychat-whatsapp",
-        fr: "https://zenda.bot/fr/mejor-alternativa-manychat-whatsapp",
-        de: "https://zenda.bot/de/mejor-alternativa-manychat-whatsapp",
-        ru: "https://zenda.bot/ru/mejor-alternativa-manychat-whatsapp",
-        zh: "https://zenda.bot/zh/mejor-alternativa-manychat-whatsapp",
-        ja: "https://zenda.bot/ja/mejor-alternativa-manychat-whatsapp",
-        ko: "https://zenda.bot/ko/mejor-alternativa-manychat-whatsapp",
-        "x-default": "https://zenda.bot/es/mejor-alternativa-manychat-whatsapp",
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/${slug}`])
+        ),
+        "x-default": "https://zenda.bot/en",
       },
     },
     openGraph: {
       title: "Mejor Alternativa a ManyChat para WhatsApp — Zenda",
       description:
         "ManyChat requiere construir flujos. Zenda es un recepcionista IA que agenda citas reales por WhatsApp. Sin fricción, sin configuración.",
-      url: "https://zenda.bot/es/mejor-alternativa-manychat-whatsapp",
+      url: `https://zenda.bot/es/${slug}`,
       type: "website",
       images: [
         {
-          url: "https://zenda.bot/api/og?locale=es",
+          url: `https://zenda.bot/api/og?locale=${locale}`,
           width: 1200,
           height: 630,
           alt: "Zenda — Alternativa a ManyChat para WhatsApp",

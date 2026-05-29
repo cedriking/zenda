@@ -73,6 +73,7 @@ export function Nav({ variant = "home" }: { variant?: "home" | "simple" }) {
   const NAV_LINKS = [
     { href: "/features", label: t("features"), hash: false },
     { href: "/pricing", label: t("pricing"), hash: false },
+    { href: "/blog", label: t("blog"), hash: false },
     {
       href: isHome ? "#how-it-works" : "/#how-it-works",
       label: t("howItWorks"),
@@ -98,7 +99,10 @@ export function Nav({ variant = "home" }: { variant?: "home" | "simple" }) {
 
   if (variant === "simple") {
     return (
-      <nav className="fixed top-0 z-50 w-full border-slate-200 border-b bg-white shadow-sm transition-all duration-300">
+      <nav
+        aria-label="Main"
+        className="fixed top-0 z-50 w-full border-slate-200 border-b bg-white shadow-sm transition-all duration-300"
+      >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Logo />
           <div className="flex items-center gap-3">
@@ -113,6 +117,7 @@ export function Nav({ variant = "home" }: { variant?: "home" | "simple" }) {
 
   return (
     <nav
+      aria-label="Main"
       className={`fixed top-0 z-50 w-full transition-all duration-500 ${
         scrolled
           ? "border-slate-200/60 border-b bg-white/80 shadow-sm backdrop-blur-xl"

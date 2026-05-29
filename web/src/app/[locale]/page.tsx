@@ -1,7 +1,35 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Footer } from "@/components/footer";
 import { HomeAnimations } from "@/components/home-animations";
 import { Nav } from "@/components/nav";
+import { routing } from "@/i18n/routing";
+
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t("title.default"),
+    description: t("description"),
+    alternates: {
+      canonical: `https://zenda.bot/${locale}`,
+      languages: {
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}`])
+        ),
+        "x-default": "https://zenda.bot/en",
+      },
+    },
+    openGraph: {
+      url: `https://zenda.bot/${locale}`,
+    },
+  };
+}
 
 export default async function Home() {
   const t = await getTranslations("home");
@@ -128,6 +156,49 @@ export default async function Home() {
             {t("industriesTitle")}
           </h2>
           <HomeAnimations variant="industries" />
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="bg-white px-6 py-20" id="faq">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="mb-12 text-center font-black text-2xl text-slate-900 md:text-3xl">
+            {t("faqTitle")}
+          </h2>
+          <div className="space-y-6">
+            {[
+              { q: t("faq1Q"), a: t("faq1A") },
+              { q: t("faq2Q"), a: t("faq2A") },
+              { q: t("faq3Q"), a: t("faq3A") },
+              { q: t("faq4Q"), a: t("faq4A") },
+            ].map((faq) => (
+              <details
+                className="group rounded-2xl border border-slate-200 bg-slate-50 p-6 open:bg-white"
+                key={faq.q}
+              >
+                <summary className="cursor-pointer list-none font-semibold text-lg text-slate-900 [&::-webkit-details-marker]:hidden">
+                  <span className="flex items-center justify-between">
+                    {faq.q}
+                    <svg
+                      aria-hidden="true"
+                      className="size-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M19 9l-7 7-7-7"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                </summary>
+                <p className="mt-3 text-slate-600 leading-relaxed">{faq.a}</p>
+              </details>
+            ))}
+          </div>
         </div>
       </section>
 

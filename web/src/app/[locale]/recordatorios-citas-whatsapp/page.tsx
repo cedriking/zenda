@@ -5,7 +5,12 @@ import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
   return {
     title: "Recordatorios de Citas por WhatsApp | Reduce Inasistencias — Zenda",
     description:
@@ -26,7 +31,7 @@ export function generateMetadata(): Metadata {
       type: "website",
       images: [
         {
-          url: "https://zenda.bot/api/og?locale=es",
+          url: `https://zenda.bot/api/og?locale=${locale}`,
           width: 1200,
           height: 630,
           alt: "Zenda — Recordatorios de Citas WhatsApp",

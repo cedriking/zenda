@@ -13,29 +13,43 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const slug = "mejor-alternativa-chatwoot-whatsapp";
+  const title =
+    "Mejor Alternativa a Chatwoot para WhatsApp | Recepcionista IA para Citas — Zenda";
+  const description =
+    "Chatwoot es open-source pero requiere servidores. Zenda es un recepcionista IA que agenda citas por WhatsApp automáticamente. Sin servidores, sin código. Prueba gratis.";
+
+  if (locale !== "es") {
+    return {
+      title,
+      description,
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/${slug}`,
+      },
+    };
+  }
+
   return {
-    title:
-      "Mejor Alternativa a Chatwoot para WhatsApp | Recepcionista IA para Citas — Zenda",
-    description:
-      "Chatwoot es open-source pero requiere servidores. Zenda es un recepcionista IA que agenda citas por WhatsApp automáticamente. Sin servidores, sin código. Prueba gratis.",
+    title,
+    description,
     alternates: {
-      canonical: `https://zenda.bot/${locale}/${slug}`,
+      canonical: `https://zenda.bot/es/${slug}`,
       languages: {
         ...Object.fromEntries(
           routing.locales.map((l) => [l, `https://zenda.bot/${l}/${slug}`])
         ),
-        "x-default": `https://zenda.bot/es/${slug}`,
+        "x-default": "https://zenda.bot/en",
       },
     },
     openGraph: {
       title: "Mejor Alternativa a Chatwoot para WhatsApp — Zenda",
       description:
         "Chatwoot es open-source pero requiere servidores. Zenda es un recepcionista IA listo para usar. Hecho para LATAM.",
-      url: `https://zenda.bot/${locale}/${slug}`,
+      url: `https://zenda.bot/es/${slug}`,
       type: "website",
       images: [
         {
-          url: "https://zenda.bot/api/og?locale=es",
+          url: `https://zenda.bot/api/og?locale=${locale}`,
           width: 1200,
           height: 630,
           alt: "Zenda — Alternativa a Chatwoot para WhatsApp",

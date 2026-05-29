@@ -4,38 +4,52 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 
-export function generateMetadata(): Metadata {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const slug = "mejor-alternativa-respondio-whatsapp";
+  const title =
+    "Mejor Alternativa a Respond.io para WhatsApp | Recepcionista IA para Citas — Zenda";
+  const description =
+    "Respond.io es una plataforma de mensajería. Zenda es un recepcionista IA que agenda citas por WhatsApp automáticamente. Hecho para Latinoamérica. Prueba gratis.";
+
+  if (locale !== "es") {
+    return {
+      title,
+      description,
+      robots: { index: false, follow: false },
+      alternates: {
+        canonical: `https://zenda.bot/es/${slug}`,
+      },
+    };
+  }
+
   return {
-    title:
-      "Mejor Alternativa a Respond.io para WhatsApp | Recepcionista IA para Citas — Zenda",
-    description:
-      "Respond.io es una plataforma de mensajería. Zenda es un recepcionista IA que agenda citas por WhatsApp automáticamente. Hecho para Latinoamérica. Prueba gratis.",
+    title,
+    description,
     alternates: {
-      canonical: "https://zenda.bot/es/mejor-alternativa-respondio-whatsapp",
+      canonical: `https://zenda.bot/es/${slug}`,
       languages: {
-        es: "https://zenda.bot/es/mejor-alternativa-respondio-whatsapp",
-        en: "https://zenda.bot/en/mejor-alternativa-respondio-whatsapp",
-        ar: "https://zenda.bot/ar/mejor-alternativa-respondio-whatsapp",
-        fr: "https://zenda.bot/fr/mejor-alternativa-respondio-whatsapp",
-        de: "https://zenda.bot/de/mejor-alternativa-respondio-whatsapp",
-        ru: "https://zenda.bot/ru/mejor-alternativa-respondio-whatsapp",
-        zh: "https://zenda.bot/zh/mejor-alternativa-respondio-whatsapp",
-        ja: "https://zenda.bot/ja/mejor-alternativa-respondio-whatsapp",
-        ko: "https://zenda.bot/ko/mejor-alternativa-respondio-whatsapp",
-        "x-default":
-          "https://zenda.bot/es/mejor-alternativa-respondio-whatsapp",
+        ...Object.fromEntries(
+          routing.locales.map((l) => [l, `https://zenda.bot/${l}/${slug}`])
+        ),
+        "x-default": "https://zenda.bot/en",
       },
     },
     openGraph: {
       title: "Mejor Alternativa a Respond.io para WhatsApp — Zenda",
       description:
         "Respond.io es una plataforma de mensajería. Zenda es un recepcionista IA que agenda citas por WhatsApp. Hecho para Latinoamérica.",
-      url: "https://zenda.bot/es/mejor-alternativa-respondio-whatsapp",
+      url: `https://zenda.bot/es/${slug}`,
       type: "website",
       images: [
         {
-          url: "https://zenda.bot/api/og?locale=es",
+          url: `https://zenda.bot/api/og?locale=${locale}`,
           width: 1200,
           height: 630,
           alt: "Zenda — Alternativa a Respond.io para WhatsApp",
