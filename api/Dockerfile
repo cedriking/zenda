@@ -35,6 +35,7 @@ COPY --from=build-shared /app/packages/db ./packages/db
 COPY --from=build-shared /app/node_modules/.prisma ./node_modules/.prisma
 COPY package.json ./package.json
 COPY api/ ./api/
+RUN chown -R appuser:appgroup /app
 EXPOSE 3001
 USER appuser
 
