@@ -695,6 +695,7 @@ model Integration {
   provider     IntegrationProvider
   config       String?
   status       IntegrationStatus   @default(pending)
+  /// Encrypted with AES-256-GCM via api/src/infra/encryption.ts — never store plaintext
   credentials  String?
   lastSyncAt   DateTime?           @map("last_sync_at") @db.Timestamptz
   createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz
@@ -875,6 +876,7 @@ model WhatsappConnection {
   workspaceId          String                    @map("workspace_id")
   status               WhatsappConnectionStatus  @default(disconnected)
   phoneNumber          String?                   @map("phone_number") @db.VarChar(20)
+  /// Encrypted Baileys session — must be encrypted before storage
   sessionData          String?                   @map("session_data")
   lastConnectedAt      DateTime?                 @map("last_connected_at") @db.Timestamptz
   lastDisconnectedAt   DateTime?                 @map("last_disconnected_at") @db.Timestamptz

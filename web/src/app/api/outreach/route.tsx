@@ -34,297 +34,27 @@ function waLink(phone: string, script: string): string {
   return `https://wa.me/${prefix}${digits}?text=${encodeURIComponent(script)}`;
 }
 
-const PROSPECTS: Prospect[] = [
-  // Week 1 — Mexico (Day 1-6)
-  {
-    name: "Nova Arts Salon",
-    location: "CDMX Roma Norte",
-    vertical: "Salón",
-    notes: "Salón boutique zona trendy",
-    wa: "525541403367",
-    day: 1,
-    country: "MX",
-  },
-  {
-    name: "Punto 3 Hair Studio",
-    location: "CDMX Condesa",
-    vertical: "Salón",
-    notes: "Estudio de cabello",
-    wa: "525512021164",
-    day: 1,
-    country: "MX",
-  },
-  {
-    name: "Paloma Rosa Salon Belleza",
-    location: "Guadalajara",
-    vertical: "Salón",
-    notes: "Salón de belleza GDL",
-    wa: "523316011757",
-    day: 1,
-    country: "MX",
-  },
-  {
-    name: "Dental Miis",
-    location: "CDMX",
-    vertical: "Dental",
-    notes: "Clínica dental CDMX",
-    wa: "525518169988",
-    day: 2,
-    country: "MX",
-  },
-  {
-    name: "Dra. Fatima de Freitas",
-    location: "CDMX",
-    vertical: "Dental",
-    notes: "Dentista particular",
-    wa: "525631802803",
-    day: 2,
-    country: "MX",
-  },
-  {
-    name: "Dental Perfect",
-    location: "CDMX Cuauhtemoc",
-    vertical: "Dental",
-    notes: "Clínica dental",
-    wa: "525555412623",
-    day: 2,
-    country: "MX",
-  },
-  {
-    name: "Dental Inn San Angel",
-    location: "CDMX San Angel",
-    vertical: "Dental",
-    notes: "Clínica dental zona premium",
-    wa: "525534410219",
-    day: 2,
-    country: "MX",
-  },
-  {
-    name: "Patio Pedregal Spa",
-    location: "CDMX Coyoacan",
-    vertical: "Spa",
-    notes: "Spa Pedregal",
-    wa: "5215515873832",
-    day: 3,
-    country: "MX",
-  },
-  {
-    name: "Patio Spa Miramontes",
-    location: "CDMX Coyoacan",
-    vertical: "Spa",
-    notes: "Spa Miramontes",
-    wa: "525538168168",
-    day: 3,
-    country: "MX",
-  },
-  {
-    name: "Simple Spa",
-    location: "CDMX Cuauhtemoc",
-    vertical: "Spa",
-    notes: "Spa urbano",
-    wa: "525574573935",
-    day: 3,
-    country: "MX",
-  },
-  {
-    name: "Veterinaria Can-Can",
-    location: "Monterrey",
-    vertical: "Veterinaria",
-    notes: "Vet MTY",
-    wa: "528121230452",
-    day: 4,
-    country: "MX",
-  },
-  {
-    name: "Veterinaria Monterrey",
-    location: "Monterrey",
-    vertical: "Veterinaria",
-    notes: "Vet MTY",
-    wa: "528125976686",
-    day: 4,
-    country: "MX",
-  },
-  {
-    name: "Rafaella Salon",
-    location: "Monterrey",
-    vertical: "Salón",
-    notes: "Belleza y maquillaje profesional",
-    wa: "528110226671",
-    day: 5,
-    country: "MX",
-  },
-  {
-    name: "Denisse Mathieu Beauty Lab",
-    location: "Zapopan/GDL",
-    vertical: "Salón",
-    notes: "Beauty lab",
-    wa: "523336286469",
-    day: 5,
-    country: "MX",
-  },
-  {
-    name: "Tu Spa Medicina Estética",
-    location: "CDMX Polanco",
-    vertical: "Medical Spa",
-    notes: "Spa médico, ticket alto",
-    day: 6,
-    country: "MX",
-  },
-  {
-    name: "Kpala Spa",
-    location: "CDMX Roma+Coyoacán",
-    vertical: "Spa",
-    notes: "2 ubicaciones",
-    day: 6,
-    country: "MX",
-  },
-  {
-    name: "Sakura Spa",
-    location: "CDMX Polanco",
-    vertical: "Spa",
-    notes: "Spa zona premium",
-    day: 6,
-    country: "MX",
-  },
-  {
-    name: "Maquillarte Vegetal",
-    location: "Guadalajara",
-    vertical: "Salón",
-    notes: "Vegano/niche, teléfono confirmado",
-    wa: "523325903186",
-    day: 6,
-    country: "MX",
-  },
-  // Week 2 — Argentina (Day 8-13)
-  {
-    name: "Ezeangel Peluqueria",
-    location: "BA Congreso",
-    vertical: "Salón",
-    notes: "Peluquería BA",
-    wa: "5491168526534",
-    day: 8,
-    country: "AR",
-  },
-  {
-    name: "Vipeluqueria's",
-    location: "BA Caballito",
-    vertical: "Salón",
-    notes: "Peluquería Caballito",
-    wa: "5491154091348",
-    day: 8,
-    country: "AR",
-  },
-  {
-    name: "Milena Marin Beauty Studio",
-    location: "BA Palermo Soho",
-    vertical: "Salón",
-    notes: "Beauty studio Palermo",
-    wa: "5491138961610",
-    day: 8,
-    country: "AR",
-  },
-  {
-    name: "Llongueras Argentina",
-    location: "BA Colegiales",
-    vertical: "Salón",
-    notes: "Franquicia conocida",
-    wa: "5491151481428",
-    day: 9,
-    country: "AR",
-  },
-  {
-    name: "Buenos Aires SPA",
-    location: "BA San Telmo",
-    vertical: "Spa",
-    notes: "Spa San Telmo",
-    wa: "5491144129300",
-    day: 9,
-    country: "AR",
-  },
-  {
-    name: "Red Veterinaria",
-    location: "BA CABA",
-    vertical: "Veterinaria",
-    notes: "Red de vets",
-    wa: "5491171020829",
-    day: 9,
-    country: "AR",
-  },
-  {
-    name: "Dental Total",
-    location: "BA",
-    vertical: "Dental",
-    notes: "Clínica dental BA",
-    wa: "5491125991391",
-    day: 10,
-    country: "AR",
-  },
-  {
-    name: "Clinica Dental DAS Group",
-    location: "BA CABA",
-    vertical: "Dental",
-    notes: "Clínica dental",
-    wa: "5491132295596",
-    day: 10,
-    country: "AR",
-  },
-  {
-    name: "Modena Peluqueria",
-    location: "San Isidro, BA",
-    vertical: "Salón",
-    notes: "Peluquería zona norte",
-    day: 11,
-    country: "AR",
-  },
-  {
-    name: "Peluqueria Angela Vaccaro",
-    location: "Hurlingham, BA",
-    vertical: "Salón",
-    notes: "Peluquería oeste",
-    day: 11,
-    country: "AR",
-  },
-  {
-    name: "Studio Bell",
-    location: "City Bell, BA",
-    vertical: "Salón",
-    notes: "Peluquería La Plata area",
-    day: 11,
-    country: "AR",
-  },
-  {
-    name: "Dental Medicine",
-    location: "Caseros, BA",
-    vertical: "Dental",
-    notes: "Clínica dental",
-    day: 12,
-    country: "AR",
-  },
-  {
-    name: "Instituto Caride",
-    location: "La Plata, BA",
-    vertical: "Dental",
-    notes: "Instituto dental",
-    day: 12,
-    country: "AR",
-  },
-  {
-    name: "Bliss Spa Urbano",
-    location: "Lanús, BA",
-    vertical: "Spa",
-    notes: "Spa urbano sur",
-    day: 12,
-    country: "AR",
-  },
-  {
-    name: "Leonardo Rivara Peluqueria",
-    location: "Córdoba",
-    vertical: "Salón",
-    notes: "Peluquería Córdoba",
-    day: 13,
-    country: "AR",
-  },
-];
+const PROSPECTS: Prospect[] = (() => {
+  try {
+    const raw = process.env.OUTREACH_PROSPECTS;
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter(
+      (p: unknown): p is Prospect =>
+        typeof p === "object" &&
+        p !== null &&
+        typeof (p as Prospect).name === "string" &&
+        typeof (p as Prospect).country === "string"
+    );
+  } catch {
+    return [];
+  }
+})();
 
 function getScript(p: Prospect): string {
   if (p.country === "MX") {
@@ -481,7 +211,7 @@ updateProgress();
 </html>`;
 }
 
-const OUTREACH_PASSWORD = process.env.OUTREACH_PASSWORD ?? "9996146459";
+const OUTREACH_PASSWORD = process.env.OUTREACH_PASSWORD;
 
 export function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -492,7 +222,7 @@ export function GET(request: NextRequest) {
 
   const providedToken = token ?? queryToken;
 
-  if (providedToken !== OUTREACH_PASSWORD) {
+  if (!OUTREACH_PASSWORD || providedToken !== OUTREACH_PASSWORD) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 

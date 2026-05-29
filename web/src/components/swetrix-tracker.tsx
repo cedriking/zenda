@@ -1,15 +1,38 @@
 "use client";
 
 import Script from "next/script";
+import { useEffect, useState } from "react";
 
 const SWETRIX_PID = "AC1SHDUu6HrE";
 const SWETRIX_API_URL = "https://api.20u.net/log";
+const CONSENT_KEY = "zenda_cookie_consent";
+
+function hasConsent(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  return localStorage.getItem(CONSENT_KEY) === "accepted";
+}
 
 export function SwetrixTracker() {
+  const [consented, setConsented] = useState(false);
+
+  useEffect(() => {
+    setConsented(hasConsent());
+
+    const handler = () => setConsented(hasConsent());
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, []);
+
+  if (!consented) {
+    return null;
+  }
+
   return (
     <>
       <Script
-        src="https://cdn.jsdelivr.net/npm/swetrix@latest/dist/swetrix.js"
+        src="https://cdn.jsdelivr.net/npm/swetrix@10/dist/swetrix.js"
         strategy="afterInteractive"
       />
       <Script id="swetrix-init" strategy="afterInteractive">
@@ -22,16 +45,6 @@ export function SwetrixTracker() {
           })
         `}
       </Script>
-      <noscript>
-        <img
-          alt=""
-          height="1"
-          referrerPolicy="no-referrer-when-downgrade"
-          src={`${SWETRIX_API_URL}/noscript?pid=${SWETRIX_PID}`}
-          style={{ display: "none" }}
-          width="1"
-        />
-      </noscript>
     </>
   );
 }

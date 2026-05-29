@@ -103,7 +103,8 @@ async function reset() {
           .digest("hex")
           .substring(0, 16);
         await applySql.unsafe(
-          `INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ('${hash}', ${Date.now()})`
+          `INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ($1, $2)`,
+          [hash, Date.now()]
         );
         console.log(`  Tracked: ${sqlFiles[0]}`);
       }

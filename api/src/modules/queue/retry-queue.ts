@@ -28,7 +28,7 @@ export function enqueueForRetry(msg: {
   contentType: string;
 }): string {
   const id = generateId();
-  const delay = Math.min(BASE_DELAY * 2 ** 0, MAX_DELAY);
+  const delay = Math.min(BASE_DELAY * 2 ** 1, MAX_DELAY);
 
   retryQueue.push({
     id,

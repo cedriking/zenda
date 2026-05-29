@@ -20,11 +20,13 @@ export function CookieConsent() {
 
   function accept() {
     localStorage.setItem(CONSENT_KEY, "accepted");
+    window.dispatchEvent(new Event("storage"));
     setVisible(false);
   }
 
   function decline() {
     localStorage.setItem(CONSENT_KEY, "declined");
+    window.dispatchEvent(new Event("storage"));
     setVisible(false);
   }
 
