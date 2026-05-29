@@ -55,6 +55,11 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "verticals": "Verticals",
+    "verticalDental": "Dental",
+    "verticalBeauty": "Beauty",
+    "verticalFitness": "Fitness",
+    "verticalClinics": "Clinics",
+    "verticalWellness": "Wellness",
     "copyright": "All rights reserved.",
     "builtIn": "Built in Latin America"
   },

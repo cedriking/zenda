@@ -38,26 +38,11 @@ export async function Footer() {
       { label: t("termsOfService"), href: "/legal/terms" },
     ],
     [t("verticals")]: [
-      {
-        label: t("verticals.dental", { defaultValue: "Dental" }),
-        href: "/dental",
-      },
-      {
-        label: t("verticals.beauty", { defaultValue: "Beauty" }),
-        href: "/beauty",
-      },
-      {
-        label: t("verticals.fitness", { defaultValue: "Fitness" }),
-        href: "/fitness",
-      },
-      {
-        label: t("verticals.clinics", { defaultValue: "Clinics" }),
-        href: "/clinics",
-      },
-      {
-        label: t("verticals.wellness", { defaultValue: "Wellness" }),
-        href: "/wellness",
-      },
+      { label: t("verticalDental"), href: "/dental" },
+      { label: t("verticalBeauty"), href: "/beauty" },
+      { label: t("verticalFitness"), href: "/fitness" },
+      { label: t("verticalClinics"), href: "/clinics" },
+      { label: t("verticalWellness"), href: "/wellness" },
     ],
   };
 
