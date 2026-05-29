@@ -11,7 +11,7 @@ function Logo() {
         alt="Zenda"
         className="size-7"
         height={28}
-        src="/logo-nav.png"
+        src="/logo.png"
         width={28}
       />
       <span className="font-bold text-lg text-white">Zenda</span>
