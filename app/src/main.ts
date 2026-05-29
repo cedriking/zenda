@@ -1,5 +1,5 @@
 import path from "node:path";
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, nativeImage } from "electron";
 import { ipcMain } from "electron/main";
 import {
   installExtension,
@@ -148,6 +148,14 @@ app.whenReady().then(async () => {
   try {
     // Register zenda:// protocol for OAuth callbacks
     app.setAsDefaultProtocolClient(PROTOCOL);
+
+    // macOS: set dock icon (dev mode uses generic electron icon otherwise)
+    if (process.platform === "darwin") {
+      const dockIcon = nativeImage.createFromPath(
+        path.join(getBasePath(), "../resources/icon.png")
+      );
+      app.dock.setIcon(dockIcon);
+    }
 
     createWindow();
     await installExtensions();
