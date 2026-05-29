@@ -8,6 +8,18 @@ import { Router } from "./utils/router";
 import { authGuard, indexGuard, routes } from "./utils/routes";
 import "./localization/i18n";
 
+function SplashScreenHider({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    const splash = document.getElementById("splash");
+    if (splash) {
+      splash.classList.add("fade-out");
+      splash.addEventListener("transitionend", () => splash.remove());
+      setTimeout(() => splash.remove(), 500);
+    }
+  }, []);
+  return <>{children}</>;
+}
+
 function DashboardErrorBoundary({ children }: { children: React.ReactNode }) {
   return <ErrorBoundary>{children}</ErrorBoundary>;
 }
@@ -25,12 +37,14 @@ export default function App() {
   }, [i18n]);
 
   return (
-    <RouteErrorBoundaries>
-      <Router
-        guards={[{ check: authGuard }, { check: indexGuard }]}
-        routes={routes}
-      />
-    </RouteErrorBoundaries>
+    <SplashScreenHider>
+      <RouteErrorBoundaries>
+        <Router
+          guards={[{ check: authGuard }, { check: indexGuard }]}
+          routes={routes}
+        />
+      </RouteErrorBoundaries>
+    </SplashScreenHider>
   );
 }
 
