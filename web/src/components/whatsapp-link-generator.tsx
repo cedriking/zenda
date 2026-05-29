@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Copy, ExternalLink, MessageCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -47,9 +48,10 @@ function generateWhatsAppLink(
 }
 
 export function WhatsAppLinkGenerator() {
+  const t = useTranslations("waLinkGenerator");
   const [countryCode, setCountryCode] = useState("52");
   const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState("Hola, me gustaria agendar una cita.");
+  const [message, setMessage] = useState(t("defaultMessage"));
   const [copied, setCopied] = useState(false);
 
   const generatedLink = generateWhatsAppLink(countryCode, phone, message);
@@ -81,10 +83,8 @@ export function WhatsAppLinkGenerator() {
             <MessageCircle className="h-5 w-5 text-white" />
           </div>
           <div>
-            <p className="font-semibold text-white">
-              Genera tu link de WhatsApp
-            </p>
-            <p className="text-emerald-100 text-xs">Gratis · Sin registro</p>
+            <p className="font-semibold text-white">{t("headerTitle")}</p>
+            <p className="text-emerald-100 text-xs">{t("headerSubtitle")}</p>
           </div>
         </div>
 
@@ -96,7 +96,7 @@ export function WhatsAppLinkGenerator() {
               className="mb-1.5 block font-medium text-slate-700 text-sm"
               htmlFor="phone"
             >
-              Numero de WhatsApp
+              {t("phoneLabel")}
             </label>
             <div className="flex gap-2">
               <select
@@ -114,15 +114,12 @@ export function WhatsAppLinkGenerator() {
                 className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-slate-900 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 id="phone"
                 onChange={handlePhoneChange}
-                placeholder="Ej: 5512345678"
+                placeholder={t("phonePlaceholder")}
                 type="tel"
                 value={phone}
               />
             </div>
-            <p className="mt-1 text-slate-400 text-xs">
-              Solo numeros, sin espacios ni guiones. El codigo de pais se agrega
-              automaticamente.
-            </p>
+            <p className="mt-1 text-slate-400 text-xs">{t("phoneHint")}</p>
           </div>
 
           {/* Message */}
@@ -131,21 +128,19 @@ export function WhatsAppLinkGenerator() {
               className="mb-1.5 block font-medium text-slate-700 text-sm"
               htmlFor="message"
             >
-              Mensaje predeterminado
+              {t("messageLabel")}
             </label>
             <textarea
               className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-slate-900 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
               id="message"
               maxLength={MAX_MESSAGE_LENGTH}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Escribe el mensaje que veran tus clientes..."
+              placeholder={t("messagePlaceholder")}
               rows={3}
               value={message}
             />
             <div className="mt-1 flex justify-between">
-              <p className="text-slate-400 text-xs">
-                Opcional — facilita que el cliente inicie la conversacion
-              </p>
+              <p className="text-slate-400 text-xs">{t("messageHint")}</p>
               <p
                 className={`text-xs ${
                   charCount > MAX_MESSAGE_LENGTH * 0.9
@@ -162,7 +157,7 @@ export function WhatsAppLinkGenerator() {
           {generatedLink && (
             <div>
               <p className="mb-1.5 block font-medium text-slate-700 text-sm">
-                Tu link de WhatsApp
+                {t("yourLink")}
               </p>
               <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
                 <code className="min-w-0 flex-1 overflow-x-auto break-all font-mono text-emerald-800 text-xs">
@@ -172,7 +167,7 @@ export function WhatsAppLinkGenerator() {
                   className="shrink-0 rounded-md bg-emerald-600 p-2 text-white hover:bg-emerald-700 disabled:opacity-50"
                   disabled={!isPhoneValid}
                   onClick={handleCopy}
-                  title="Copiar link"
+                  title={t("copyLink")}
                   type="button"
                 >
                   {copied ? (
@@ -196,12 +191,12 @@ export function WhatsAppLinkGenerator() {
               {copied ? (
                 <>
                   <Check className="mr-2 h-4 w-4" />
-                  Copiado
+                  {t("copied")}
                 </>
               ) : (
                 <>
                   <Copy className="mr-2 h-4 w-4" />
-                  Copiar link
+                  {t("copyLink")}
                 </>
               )}
             </Button>
@@ -214,7 +209,7 @@ export function WhatsAppLinkGenerator() {
                 target="_blank"
               >
                 <ExternalLink className="h-4 w-4" />
-                Probar link
+                {t("testLink")}
               </a>
             )}
           </div>
@@ -224,7 +219,7 @@ export function WhatsAppLinkGenerator() {
         {generatedLink && isPhoneValid && (
           <div className="border-slate-100 border-t bg-slate-50 p-6">
             <p className="mb-3 font-medium text-slate-600 text-xs uppercase tracking-wide">
-              Vista previa
+              {t("preview")}
             </p>
             <div className="overflow-hidden rounded-xl border border-green-200 bg-green-50">
               {/* WhatsApp header */}
@@ -233,8 +228,10 @@ export function WhatsAppLinkGenerator() {
                   <MessageCircle className="h-4 w-4 text-white" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm text-white">Tu Negocio</p>
-                  <p className="text-green-100 text-xs">Enlace de WhatsApp</p>
+                  <p className="font-semibold text-sm text-white">
+                    {t("previewBusiness")}
+                  </p>
+                  <p className="text-green-100 text-xs">{t("previewLink")}</p>
                 </div>
               </div>
               {/* Chat bubble preview */}
@@ -246,7 +243,7 @@ export function WhatsAppLinkGenerator() {
                         {message}
                       </p>
                       <p className="mt-1 text-right text-[10px] text-green-700">
-                        Ahora ✓✓
+                        {t("previewNow")}
                       </p>
                     </div>
                   </div>
@@ -255,7 +252,7 @@ export function WhatsAppLinkGenerator() {
               {/* Input bar */}
               <div className="flex items-center gap-2 bg-green-50 px-3 py-2">
                 <div className="flex-1 rounded-full bg-white px-4 py-1.5 text-slate-400 text-sm">
-                  Escribe un mensaje...
+                  {t("previewInput")}
                 </div>
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-green-600">
                   <MessageCircle className="h-3 w-3 text-white" />
@@ -263,7 +260,7 @@ export function WhatsAppLinkGenerator() {
               </div>
             </div>
             <p className="mt-2 text-center text-slate-400 text-xs">
-              Asi veran tus clientes el mensaje al abrir tu link
+              {t("previewCaption")}
             </p>
           </div>
         )}

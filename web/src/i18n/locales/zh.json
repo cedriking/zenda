@@ -24,7 +24,8 @@
     ],
     "openGraph": {
       "title": "Zenda — 您企业的智能AI前台",
-      "description": "永不遗漏消息的AI前台。通过WhatsApp智能处理客户对话、预约和提醒，让您的业务高效运转。"
+      "description": "永不遗漏消息的AI前台。通过WhatsApp智能处理客户对话、预约和提醒，让您的业务高效运转。",
+      "imageAlt": "Zenda — 智能AI前台"
     },
     "twitter": {
       "title": "Zenda — 智能AI前台",

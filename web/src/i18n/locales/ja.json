@@ -25,7 +25,8 @@
     ],
     "openGraph": {
       "title": "Zenda — ビジネスを支えるAI受付",
-      "description": "一件のメッセージも見逃さないAI受付。WhatsApp経由で顧客対応、予約管理、リマインダー送信を24時間自動化します。"
+      "description": "一件のメッセージも見逃さないAI受付。WhatsApp経由で顧客対応、予約管理、リマインダー送信を24時間自動化します。",
+      "imageAlt": "Zenda — AI受付"
     },
     "twitter": {
       "title": "Zenda — AI受付",

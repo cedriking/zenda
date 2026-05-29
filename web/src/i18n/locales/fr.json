@@ -22,7 +22,8 @@
     ],
     "openGraph": {
       "title": "Zenda — Réceptionniste IA pour votre entreprise",
-      "description": "Votre réceptionniste IA ne manque jamais un message. Il gère les conversations clients, les rendez-vous et les rappels via WhatsApp."
+      "description": "Votre réceptionniste IA ne manque jamais un message. Il gère les conversations clients, les rendez-vous et les rappels via WhatsApp.",
+      "imageAlt": "Zenda — Réceptionniste IA"
     },
     "twitter": {
       "title": "Zenda — Réceptionniste IA",

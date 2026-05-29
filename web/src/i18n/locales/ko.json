@@ -22,7 +22,8 @@
     ],
     "openGraph": {
       "title": "Zenda — 비즈니스를 위한 AI 리셉셔니스트",
-      "description": "메시지를 놓치지 않는 AI 리셉셔니스트입니다. WhatsApp를 통해 고객 대화, 예약, 알림을 처리합니다."
+      "description": "메시지를 놓치지 않는 AI 리셉셔니스트입니다. WhatsApp를 통해 고객 대화, 예약, 알림을 처리합니다.",
+      "imageAlt": "Zenda — AI 리셉셔니스트"
     },
     "twitter": {
       "title": "Zenda — AI 리셉셔니스트",

@@ -22,7 +22,8 @@
     ],
     "openGraph": {
       "title": "Zenda — KI-Empfangsassistent für Ihr Unternehmen",
-      "description": "Ihr KI-Empfangsassistent, der keine Nachricht verpasst. Verwaltet Kundengespräche, Termine und Erinnerungen über WhatsApp."
+      "description": "Ihr KI-Empfangsassistent, der keine Nachricht verpasst. Verwaltet Kundengespräche, Termine und Erinnerungen über WhatsApp.",
+      "imageAlt": "Zenda — KI-Empfangsassistent"
     },
     "twitter": {
       "title": "Zenda — KI-Empfangsassistent",
