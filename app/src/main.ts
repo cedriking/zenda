@@ -151,10 +151,11 @@ app.whenReady().then(async () => {
 
     // macOS: set dock icon (dev mode uses generic electron icon otherwise)
     if (process.platform === "darwin") {
-      const dockIcon = nativeImage.createFromPath(
-        path.join(getBasePath(), "../resources/icon.png")
-      );
-      app.dock.setIcon(dockIcon);
+      const iconFile = path.join(getBasePath(), "../resources/icon.png");
+      const dockIcon = nativeImage.createFromPath(iconFile);
+      if (!dockIcon.isEmpty()) {
+        app.dock.setIcon(dockIcon);
+      }
     }
 
     createWindow();
