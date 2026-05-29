@@ -32,6 +32,13 @@ interface AvailabilityRule {
   available: boolean;
   closeTime: string;
   dayOfWeek: number;
+  enabled: boolean;
+  endTime: string;
+  id: string;
+  openTime: string;
+  slotDurationMinutes: number;
+  startTime: string;
+}
 
 // Strip server-only fields before PATCH to avoid 422 errors
 function buildPayload(
@@ -45,13 +52,6 @@ function buildPayload(
   }
   const { name, tone, greetingTemplate } = data as ReceptionistProfile;
   return { name, tone, greetingTemplate };
-}
-  enabled: boolean;
-  endTime: string;
-  id: string;
-  openTime: string;
-  slotDurationMinutes: number;
-  startTime: string;
 }
 
 export default function SettingsPage() {
