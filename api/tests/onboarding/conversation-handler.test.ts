@@ -194,10 +194,10 @@ function parseReceptionistConfig(input: string): {
   let tone = "professional";
 
   const namePatterns = [
-    /(?:call\s+(?:her|him|it|the\s+receptionist)\s+|ll[aá]m(?:alo|ala|ar\s+(?:la\s+)?)\s+|n[oó]mbr(?:alo|ala)\s+|name\s+(?:her|him|it|the\s+receptionist)\s+)(['"]?\w+['"]?)/i,
-    /(?:name(?:'s| is)?\s+|nombre\s+(?:es\s+)?|llama\s+(?:se\s+)?|called\s+|sea\s+)(['"]?\w+['"]?)/i,
-    /(?:her|his|its|su)\s+nombre\s+(?:es\s+)?(['"]?\w+['"]?)/i,
-    /['"](\w+)['"]/,
+    /(?:call\s+(?:her|him|it|the\s+receptionist)\s+|ll[aá]m(?:alo|ala|ar\s+(?:la\s+)?)\s+|n[oó]mbr(?:alo|ala)\s+|name\s+(?:her|him|it|the\s+receptionist)\s+)['"]?([\wáéíóúñÁÉÍÓÚÑüÜ]+)['"]?/i,
+    /(?:name(?:'s| is)?\s+|nombre\s+(?:es\s+)?|llama\s+(?:se\s+)?|called\s+|sea\s+)['"]?([\wáéíóúñÁÉÍÓÚÑüÜ]+)['"]?/i,
+    /(?:her|his|its|su)\s+nombre\s+(?:es\s+)?['"]?([\wáéíóúñÁÉÍÓÚÑüÜ]+)['"]?/i,
+    /['"]([\wáéíóúñÁÉÍÓÚÑüÜ]+)['"]/i,
   ];
   for (const pattern of namePatterns) {
     const match = input.match(pattern);
@@ -508,11 +508,10 @@ describe("Receptionist config parsing", () => {
     expect(result.tone).toBe("elegant");
   });
 
-  test('Spanish: "Se llama María, tono cálido" — accented char truncation', () => {
-    // \w in regex does not match accented chars, so "María" → "Mar" (stops at í)
-    // Pattern 1 "llama\s+(?:se\s+)?" correctly matches "llama " from "Se llama María"
+  test('Spanish: "Se llama María, tono cálido" — accented chars preserved', () => {
+    // Accented characters (á, é, í, ó, ú, ñ) should be preserved in names
     const result = parseReceptionistConfig("Se llama María, tono cálido");
-    expect(result.name).toBe("Mar");
+    expect(result.name).toBe("María");
     expect(result.tone).toBe("warm");
   });
 

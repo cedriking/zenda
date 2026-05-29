@@ -156,7 +156,9 @@ export type OnboardingStep =
   | "services"
   | "availability"
   | "policies"
+  | "safety"
   | "receptionist_config"
+  | "review"
   | "test_receptionist"
   | "plan_selection"
   | "ready";

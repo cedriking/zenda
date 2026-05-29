@@ -10,7 +10,10 @@ const STEP_ORDER = [
   "services",
   "availability",
   "policies",
+  "safety",
   "receptionist_config",
+  "review",
+  "test_receptionist",
   "plan_selection",
   "ready",
 ] as const;
@@ -54,12 +57,24 @@ describe("Onboarding Flow: step progression", () => {
     expect(getNextStep("availability")).toBe("policies");
   });
 
-  test("policies -> receptionist_config", () => {
-    expect(getNextStep("policies")).toBe("receptionist_config");
+  test("policies -> safety", () => {
+    expect(getNextStep("policies")).toBe("safety");
   });
 
-  test("receptionist_config -> plan_selection", () => {
-    expect(getNextStep("receptionist_config")).toBe("plan_selection");
+  test("safety -> receptionist_config", () => {
+    expect(getNextStep("safety")).toBe("receptionist_config");
+  });
+
+  test("receptionist_config -> review", () => {
+    expect(getNextStep("receptionist_config")).toBe("review");
+  });
+
+  test("review -> test_receptionist", () => {
+    expect(getNextStep("review")).toBe("test_receptionist");
+  });
+
+  test("test_receptionist -> plan_selection", () => {
+    expect(getNextStep("test_receptionist")).toBe("plan_selection");
   });
 
   test("plan_selection -> ready", () => {
@@ -80,32 +95,44 @@ describe("Onboarding Flow: progress calculation", () => {
     expect(getProgress("not_started")).toBe(0);
   });
 
-  test("whatsapp_connected = 13%", () => {
-    expect(getProgress("whatsapp_connected")).toBe(13);
+  test("whatsapp_connected = 9%", () => {
+    expect(getProgress("whatsapp_connected")).toBe(9);
   });
 
-  test("business_info = 25%", () => {
-    expect(getProgress("business_info")).toBe(25);
+  test("business_info = 18%", () => {
+    expect(getProgress("business_info")).toBe(18);
   });
 
-  test("services = 38%", () => {
-    expect(getProgress("services")).toBe(38);
+  test("services = 27%", () => {
+    expect(getProgress("services")).toBe(27);
   });
 
-  test("availability = 50%", () => {
-    expect(getProgress("availability")).toBe(50);
+  test("availability = 36%", () => {
+    expect(getProgress("availability")).toBe(36);
   });
 
-  test("policies = 63%", () => {
-    expect(getProgress("policies")).toBe(63);
+  test("policies = 45%", () => {
+    expect(getProgress("policies")).toBe(45);
   });
 
-  test("receptionist_config = 75%", () => {
-    expect(getProgress("receptionist_config")).toBe(75);
+  test("safety = 55%", () => {
+    expect(getProgress("safety")).toBe(55);
   });
 
-  test("plan_selection = 88%", () => {
-    expect(getProgress("plan_selection")).toBe(88);
+  test("receptionist_config = 64%", () => {
+    expect(getProgress("receptionist_config")).toBe(64);
+  });
+
+  test("review = 73%", () => {
+    expect(getProgress("review")).toBe(73);
+  });
+
+  test("test_receptionist = 82%", () => {
+    expect(getProgress("test_receptionist")).toBe(82);
+  });
+
+  test("plan_selection = 91%", () => {
+    expect(getProgress("plan_selection")).toBe(91);
   });
 
   test("ready = 100%", () => {

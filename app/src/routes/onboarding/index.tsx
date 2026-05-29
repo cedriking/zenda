@@ -1,3 +1,4 @@
+import { PERSONALITY_PRESETS } from "@zenda/shared/personality/presets";
 import {
   ArrowLeft,
   ArrowRight,
@@ -22,12 +23,14 @@ const STEP_IDS = [
   "services",
   "availability",
   "policies",
+  "safety",
   "receptionist_config",
+  "review",
   "test_receptionist",
   "plan_selection",
 ] as const;
 
-const STEP_ICONS = ["📱", "🏢", "✂️", "🕐", "📋", "🤖", "💬", "🚀"];
+const STEP_ICONS = ["📱", "🏢", "✂️", "🕐", "📋", "🛡️", "🤖", "✅", "💬", "🚀"];
 
 const PLAN_TIERS = [
   {
@@ -66,7 +69,9 @@ const STEP_KEYS: Record<string, string> = {
   services: "onboarding.steps.services",
   availability: "onboarding.steps.availability",
   policies: "onboarding.steps.policies",
+  safety: "onboarding.steps.safety",
   receptionist_config: "onboarding.steps.receptionistSetup",
+  review: "onboarding.steps.review",
   test_receptionist: "onboarding.steps.testReceptionist",
   plan_selection: "onboarding.steps.choosePlan",
 };
@@ -81,7 +86,7 @@ export default function OnboardingPage() {
   const msgIdRef = useRef(0);
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, workspace: authWorkspace } = useAuthStore();
   const { updateWorkspace } = useAuthStore();
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState("");
@@ -92,7 +97,7 @@ export default function OnboardingPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  const [_savedResponses, setSavedResponses] = useState<Record<string, string>>(
+  const [savedResponses, setSavedResponses] = useState<Record<string, string>>(
     {}
   );
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -287,8 +292,9 @@ export default function OnboardingPage() {
 
       // Clear messages after the go-back point and show the question again
       setMessages((prev) => prev.slice(0, -2));
-      if (result.question) {
-        setTimeout(() => typeMessage(result.question.question), 300);
+      const questionText = result.question?.question;
+      if (questionText) {
+        setTimeout(() => typeMessage(questionText), 300);
       }
     } catch {
       // Silently fail
@@ -395,7 +401,58 @@ export default function OnboardingPage() {
   );
   const isPlanSelection = currentStep === "plan_selection";
   const isTestReceptionist = currentStep === "test_receptionist";
+  const isReview = currentStep === "review";
+  const isReceptionistConfig = currentStep === "receptionist_config";
   const canGoBack = currentStepIndex > 0 && currentStep !== "plan_selection";
+
+  // Direct confirm for review step (bypasses input state)
+  async function handleConfirmReview() {
+    setLoading(true);
+    try {
+      const result = await apiFetch<{
+        acknowledged: string;
+        nextStep: string;
+      }>("/onboarding/respond", {
+        method: "POST",
+        body: { step: currentStep, response: "looks good" },
+      });
+      setCurrentStep(result.nextStep);
+      setSavedResponses((prev) => ({ ...prev, [currentStep]: "looks good" }));
+    } catch {
+      // Error handled silently — user can retry
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Handle personality picker selection
+  async function handlePickPersonality(name: string, preset: string) {
+    setLoading(true);
+    try {
+      const toneMap: Record<string, string> = {
+        professional: "professional",
+        warm: "warm",
+        minimal: "casual",
+        premium: "elegant",
+        friendly: "friendly",
+      };
+      const tone = toneMap[preset] ?? "professional";
+      const response = `${name}, ${tone}`;
+      const result = await apiFetch<{
+        acknowledged: string;
+        nextStep: string;
+      }>("/onboarding/respond", {
+        method: "POST",
+        body: { step: currentStep, response },
+      });
+      setCurrentStep(result.nextStep);
+      setSavedResponses((prev) => ({ ...prev, [currentStep]: response }));
+    } catch {
+      // Error handled silently — user can retry
+    } finally {
+      setLoading(false);
+    }
+  }
   const allMessages = [
     ...messages,
     ...(typingText
@@ -541,7 +598,30 @@ export default function OnboardingPage() {
             setInput={setInput}
           />
         )}
-        {!(isPlanSelection || isTestReceptionist) && (
+        {isReceptionistConfig && (
+          <PersonalityPickerView
+            chatEndRef={chatEndRef}
+            loading={loading}
+            messages={allMessages}
+            onPickPersonality={handlePickPersonality}
+            workspaceName={authWorkspace?.name ?? ""}
+          />
+        )}
+        {isReview && (
+          <ReviewStepView
+            chatEndRef={chatEndRef}
+            loading={loading}
+            messages={allMessages}
+            onConfirmReview={handleConfirmReview}
+            savedResponses={savedResponses}
+          />
+        )}
+        {!(
+          isPlanSelection ||
+          isTestReceptionist ||
+          isReview ||
+          isReceptionistConfig
+        ) && (
           <ChatView
             chatEndRef={chatEndRef}
             input={input}
@@ -734,6 +814,276 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
           {msg.content}
         </p>
       </div>
+    </div>
+  );
+}
+
+/* ── Personality Picker View ───────────────────────────────── */
+
+const PRESET_KEYS: (
+  | "professional"
+  | "warm"
+  | "minimal"
+  | "premium"
+  | "friendly"
+)[] = ["professional", "warm", "minimal", "premium", "friendly"];
+
+function PersonalityPickerView({
+  messages,
+  loading,
+  onPickPersonality,
+  chatEndRef,
+  workspaceName,
+}: {
+  messages: ChatMessage[];
+  loading: boolean;
+  onPickPersonality: (name: string, preset: string) => void;
+  chatEndRef: React.RefObject<HTMLDivElement | null>;
+  workspaceName: string;
+}) {
+  const { t, i18n } = useTranslation();
+  const lang = (i18n.language?.startsWith("es") ? "es" : "en") as "en" | "es";
+  const [selected, setSelected] = useState<(typeof PRESET_KEYS)[number] | null>(
+    null
+  );
+  const [hoveredPreset, setHoveredPreset] = useState<
+    (typeof PRESET_KEYS)[number] | null
+  >(null);
+  const [receptionistName, setReceptionistName] = useState("Sofía");
+
+  function handleConfirm() {
+    if (!selected) {
+      return;
+    }
+    onPickPersonality(receptionistName, selected);
+  }
+
+  const activePreset = hoveredPreset ?? selected;
+
+  return (
+    <div className="flex-1 space-y-4 overflow-auto px-6 py-6">
+      {messages.map((msg) => (
+        <MessageBubble key={msg.id} msg={msg} />
+      ))}
+
+      <div
+        className="mx-auto max-w-3xl space-y-4"
+        style={{ animation: "fadeSlideIn 0.5s ease-out 0.2s both" }}
+      >
+        {/* Name input */}
+        <div className="space-y-2">
+          <label
+            className="font-medium text-muted-foreground text-sm"
+            htmlFor="receptionist-name"
+          >
+            {lang === "es"
+              ? "Nombre de tu recepcionista"
+              : "Your receptionist's name"}
+          </label>
+          <input
+            className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            id="receptionist-name"
+            onChange={(e) => setReceptionistName(e.target.value)}
+            placeholder={lang === "es" ? "Ej: Sofía" : "e.g., Sofia"}
+            value={receptionistName}
+          />
+        </div>
+
+        {/* Preset cards */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-5">
+          {PRESET_KEYS.map((key) => {
+            const preset = PERSONALITY_PRESETS[key];
+            if (!preset) {
+              return null;
+            }
+            const isSelected = selected === key;
+            const isHovered = hoveredPreset === key;
+            let stateClass =
+              "border-border bg-card hover:border-primary/40 hover:bg-primary/5";
+            if (isSelected) {
+              stateClass =
+                "border-primary bg-primary/10 shadow-md shadow-primary/10";
+            } else if (isHovered) {
+              stateClass = "border-primary/40 bg-primary/5";
+            }
+            return (
+              <button
+                className={`relative rounded-xl border-2 p-3 text-left transition-all duration-200 ${stateClass}`}
+                key={key}
+                onClick={() => setSelected(key)}
+                onMouseEnter={() => setHoveredPreset(key)}
+                onMouseLeave={() => setHoveredPreset(null)}
+                type="button"
+              >
+                <div className="font-semibold text-foreground text-sm">
+                  {lang === "es" ? preset.nameEs : preset.name}
+                </div>
+                <div className="mt-1 text-muted-foreground text-xs leading-snug">
+                  {lang === "es" ? preset.descriptionEs : preset.description}
+                </div>
+                {/* Check mark for selected */}
+                {isSelected && (
+                  <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white">
+                    <Check size={12} />
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Live preview */}
+        {activePreset && PERSONALITY_PRESETS[activePreset] && (
+          <div
+            className="space-y-3 rounded-xl border border-border bg-muted/30 p-4"
+            style={{ animation: "fadeSlideIn 0.3s ease-out" }}
+          >
+            <div className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+              {t("onboarding.personalityPreview")}
+            </div>
+
+            {/* Greeting preview */}
+            <div className="space-y-1.5">
+              <div className="font-medium text-muted-foreground text-xs">
+                {t("onboarding.personalityGreeting")}
+              </div>
+              <div className="max-w-md whitespace-pre-wrap rounded-lg border border-border/50 bg-white/80 px-4 py-3 text-foreground text-sm shadow-sm dark:bg-card/80">
+                {PERSONALITY_PRESETS[activePreset].greetingTemplate[lang]
+                  .replace("{name}", receptionistName || "Sofía")
+                  .replace("{business}", workspaceName || "your business")}
+              </div>
+            </div>
+
+            {/* Booking confirmation preview */}
+            <div className="space-y-1.5">
+              <div className="font-medium text-muted-foreground text-xs">
+                {t("onboarding.personalityBooking")}
+              </div>
+              <div className="max-w-md whitespace-pre-wrap rounded-lg border border-border/50 bg-white/80 px-4 py-3 text-foreground text-sm shadow-sm dark:bg-card/80">
+                {PERSONALITY_PRESETS[activePreset].previewBookingMessage[lang]
+                  .replace(
+                    "{service}",
+                    lang === "es" ? "Corte de cabello" : "Haircut"
+                  )
+                  .replace(
+                    "{date}",
+                    lang === "es" ? "Lunes 2 de Junio" : "Monday, June 2"
+                  )
+                  .replace("{time}", "10:00 AM")}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Confirm button */}
+        <div className="flex justify-center pt-2 pb-4">
+          <button
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-3 font-semibold text-white shadow-emerald-500/20 shadow-lg transition-all duration-200 hover:from-emerald-600 hover:to-emerald-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={!selected || loading}
+            onClick={handleConfirm}
+            type="button"
+          >
+            <Check size={16} />
+            {t("onboarding.continue")}
+          </button>
+        </div>
+      </div>
+
+      <div ref={chatEndRef} />
+    </div>
+  );
+}
+
+/* ── Review Step View ───────────────────────────────────────── */
+
+function ReviewStepView({
+  messages,
+  loading,
+  onConfirmReview,
+  chatEndRef,
+  savedResponses,
+}: {
+  messages: ChatMessage[];
+  loading: boolean;
+  onConfirmReview: () => void;
+  chatEndRef: React.RefObject<HTMLDivElement | null>;
+  savedResponses: Record<string, string>;
+}) {
+  const { t } = useTranslation();
+
+  const reviewSections = [
+    {
+      key: "business_info",
+      label: t("onboarding.steps.businessInfo"),
+      icon: "🏢",
+    },
+    { key: "services", label: t("onboarding.steps.services"), icon: "✂️" },
+    {
+      key: "availability",
+      label: t("onboarding.steps.availability"),
+      icon: "🕐",
+    },
+    { key: "policies", label: t("onboarding.steps.policies"), icon: "📋" },
+    { key: "safety", label: t("onboarding.steps.safety"), icon: "🛡️" },
+    {
+      key: "receptionist_config",
+      label: t("onboarding.steps.receptionistSetup"),
+      icon: "🤖",
+    },
+  ];
+
+  return (
+    <div className="flex-1 space-y-4 overflow-auto px-6 py-6">
+      {messages.map((msg) => (
+        <MessageBubble key={msg.id} msg={msg} />
+      ))}
+
+      {/* Review cards */}
+      <div
+        className="mx-auto max-w-2xl space-y-3"
+        style={{ animation: "fadeSlideIn 0.5s ease-out 0.2s both" }}
+      >
+        {reviewSections.map((section) => {
+          const response = savedResponses[section.key];
+          if (!response) {
+            return null;
+          }
+          return (
+            <div
+              className="rounded-xl border border-border bg-card p-4 shadow-sm"
+              key={section.key}
+            >
+              <div className="mb-1.5 flex items-center gap-2">
+                <span className="text-base">{section.icon}</span>
+                <span className="font-medium text-foreground text-sm">
+                  {section.label}
+                </span>
+              </div>
+              <p className="whitespace-pre-wrap text-muted-foreground text-sm">
+                {response}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Confirm button */}
+      <div
+        className="flex justify-center pt-2 pb-4"
+        style={{ animation: "fadeSlideIn 0.5s ease-out 0.5s both" }}
+      >
+        <button
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-3 font-semibold text-white shadow-emerald-500/20 shadow-lg transition-all duration-200 hover:from-emerald-600 hover:to-emerald-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={loading}
+          onClick={onConfirmReview}
+          type="button"
+        >
+          <Check size={16} />
+          {t("onboarding.continue")}
+        </button>
+      </div>
+
+      <div ref={chatEndRef} />
     </div>
   );
 }

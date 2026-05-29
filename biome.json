@@ -22,6 +22,16 @@
   },
   "overrides": [
     {
+      "includes": ["api/**"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "useTopLevelRegex": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["app/**", "web/**"],
       "linter": {
         "rules": {

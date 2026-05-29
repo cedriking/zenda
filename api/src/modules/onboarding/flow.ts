@@ -8,7 +8,9 @@ const STEP_ORDER: OnboardingStep[] = [
   "services",
   "availability",
   "policies",
+  "safety",
   "receptionist_config",
+  "review",
   "test_receptionist",
   "plan_selection",
   "ready",
@@ -99,16 +101,18 @@ export async function goBackOnboarding(
   workspaceId: string,
   currentStep: OnboardingStep
 ): Promise<OnboardingStep> {
-  const prev = getPreviousStep(currentStep);
-  if (!prev) {
-    return currentStep;
+  const skipSteps: OnboardingStep[] = ["not_started", "whatsapp_connected"];
+
+  // Walk backwards through STEP_ORDER until we find a non-skip step
+  let target = getPreviousStep(currentStep);
+  while (target && skipSteps.includes(target)) {
+    target = getPreviousStep(target);
   }
 
-  // Skip auto-advance steps when going back
-  const skipSteps: OnboardingStep[] = ["not_started", "whatsapp_connected"];
-  const target = skipSteps.includes(prev)
-    ? (getPreviousStep(prev) ?? prev)
-    : prev;
+  // Fallback: if we exhausted all previous steps, stay on current
+  if (!target) {
+    return currentStep;
+  }
 
   await db.workspace.update({
     where: { id: workspaceId },
