@@ -23,7 +23,7 @@ RUN bun run --filter @zenda/db build
 
 # Production stage — run API source directly with Bun
 FROM oven/bun:1 AS runner
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 WORKDIR /app
 ARG DATABASE_URL
 ENV NODE_ENV=production
