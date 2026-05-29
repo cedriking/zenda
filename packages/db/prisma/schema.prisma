@@ -531,6 +531,7 @@ model Conversation {
   outboundQueues      OutboundQueue[]
 
   @@unique([workspaceId, customerId, channel])
+  @@index([workspaceId, lastMessageAt])
   @@map("conversations")
 }
 
@@ -619,6 +620,7 @@ model BusinessProfile {
 
   workspace           Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  @@unique([workspaceId])
   @@map("business_profiles")
 }
 
@@ -648,6 +650,7 @@ model ReceptionistProfile {
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  @@unique([workspaceId])
   @@map("receptionist_profiles")
 }
 
@@ -831,6 +834,7 @@ model AuditLog {
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  @@index([workspaceId, createdAt])
   @@map("audit_logs")
 }
 
@@ -847,6 +851,7 @@ model AgentMemory {
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   customer  Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
+  @@index([workspaceId, customerId])
   @@map("agent_memory")
 }
 
@@ -893,6 +898,7 @@ model UsageRecord {
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  @@index([workspaceId, metric])
   @@map("usage_records")
 }
 
@@ -912,6 +918,7 @@ model ActiveContactDedup {
 model ProcessedStripeEvent {
   id        String   @id @default(uuid())
   eventId   String   @unique @map("event_id") @db.VarChar(255)
+  eventType String?  @map("event_type") @db.VarChar(100)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@map("processed_stripe_events")

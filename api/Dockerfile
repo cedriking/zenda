@@ -23,6 +23,7 @@ RUN bun run --filter @zenda/db build
 
 # Production stage — run API source directly with Bun
 FROM oven/bun:1 AS runner
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /app
 ARG DATABASE_URL
 ENV NODE_ENV=production
@@ -35,6 +36,7 @@ COPY --from=build-shared /app/node_modules/.prisma ./node_modules/.prisma
 COPY package.json ./package.json
 COPY api/ ./api/
 EXPOSE 3001
+USER appuser
 
 # Run migrations using Prisma Migrate, then start API.
 CMD ["sh", "-c", "echo '[startup] Running DB migrations...' && cd packages/db && bunx prisma migrate deploy && echo '[startup] Migrations complete. Starting API...' && cd /app && exec bun run api/src/index.ts"]

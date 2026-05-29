@@ -8,11 +8,13 @@ import { exchangeCodeForTokens, getAuthUrl, listCalendars } from "./client.js";
 
 const STATE_HMAC_SECRET = process.env.JWT_SECRET;
 
+const STATE_MAX_AGE_MS = 10 * 60 * 1000; // 10 minutes
+
 function signState(workspaceId: string): string {
   if (!STATE_HMAC_SECRET) {
     throw new Error("JWT_SECRET must be set to sign OAuth state");
   }
-  const payload = JSON.stringify({ wid: workspaceId });
+  const payload = JSON.stringify({ wid: workspaceId, ts: Date.now() });
   const base64 = Buffer.from(payload).toString("base64url");
   const sig = crypto
     .createHmac("sha256", STATE_HMAC_SECRET)
@@ -44,9 +46,18 @@ function verifyState(state: string): { wid: string } | null {
     return null;
   }
   try {
-    return JSON.parse(Buffer.from(base64, "base64url").toString()) as {
+    const parsed = JSON.parse(Buffer.from(base64, "base64url").toString()) as {
       wid: string;
+      ts?: number;
     };
+    // Reject replayed state parameters older than STATE_MAX_AGE_MS
+    if (parsed.ts && Date.now() - parsed.ts > STATE_MAX_AGE_MS) {
+      logger.warn("OAuth state expired (replay protection)", {
+        ageMs: Date.now() - parsed.ts,
+      });
+      return null;
+    }
+    return { wid: parsed.wid };
   } catch {
     return null;
   }

@@ -77,7 +77,9 @@ export function validateProductionEnv(): void {
   }
 
   if (!process.env.CORS_ORIGINS) {
-    console.warn("[env] CORS_ORIGINS not set — using development defaults");
+    throw new Error(
+      "CORS_ORIGINS must be explicitly set in production — development defaults are not secure"
+    );
   }
 }
 

@@ -16,7 +16,18 @@ function getKey(identifier: string, path: string): string {
   return `rl:${identifier}:${path}`;
 }
 
+// Lua script for atomic INCR + conditional EXPIRE — eliminates race condition
+const RATE_LIMIT_SCRIPT = `
+  local count = redis.call('INCR', KEYS[1])
+  if count == 1 then
+    redis.call('EXPIRE', KEYS[1], ARGV[1])
+  end
+  return count
+`;
+
 // In-memory fallback limiter for when Redis is unavailable
+const MAX_IN_MEMORY_ENTRIES = 10_000;
+
 class InMemoryLimiter {
   private readonly counts = new Map<
     string,
@@ -28,6 +39,10 @@ class InMemoryLimiter {
     const entry = this.counts.get(key);
 
     if (!entry || entry.expiresAt < now) {
+      // Evict oldest entries if at capacity
+      if (this.counts.size >= MAX_IN_MEMORY_ENTRIES) {
+        this.cleanup();
+      }
       const newEntry = { count: 1, expiresAt: now + WINDOW_S * 1000 };
       this.counts.set(key, newEntry);
       return 1;
@@ -80,10 +95,12 @@ export function rateLimit(max: number = DEFAULT_MAX) {
       let count: number;
 
       try {
-        count = await redis.incr(_rlKey);
-        if (count === 1) {
-          await redis.expire(_rlKey, WINDOW_S);
-        }
+        count = (await redis.eval(
+          RATE_LIMIT_SCRIPT,
+          1,
+          _rlKey,
+          WINDOW_S
+        )) as number;
       } catch (err) {
         // Redis unavailable — fail closed using in-memory fallback
         logger.warn("Rate limit Redis error, using in-memory fallback", {

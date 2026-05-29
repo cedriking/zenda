@@ -79,8 +79,8 @@ export interface Subscription {
   id: string;
   planTier: PlanTier;
   status: SubscriptionStatus;
-  stripeCustomerId: string;
-  stripeSubscriptionId: string;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
   updatedAt: Date;
   workspaceId: string;
 }
@@ -141,7 +141,6 @@ export interface ReceptionistProfile {
   createdAt: Date;
   depositHandlingMode: string | null;
   discountHandlingMode: string | null;
-  escalationRules: EscalationRule[];
   formalityLevel: number; // 1-5
   greetingStyle: string | null;
   greetingTemplate: string | null;

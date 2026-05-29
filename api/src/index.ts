@@ -75,6 +75,15 @@ function isPublicPath(path: string): boolean {
 const _app = new Elysia()
   .use(cors({ origin: corsOrigins, credentials: true }))
   .use(rateLimit())
+  // Security headers
+  .onAfterHandle(({ set }) => {
+    set.headers["X-Content-Type-Options"] = "nosniff";
+    set.headers["X-Frame-Options"] = "DENY";
+    set.headers["X-XSS-Protection"] = "0";
+    set.headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    set.headers["Permissions-Policy"] =
+      "camera=(), microphone=(), geolocation=()";
+  })
 
   // ── Global auth derive ──────────────────────────────────────────
   .derive(async ({ headers, path }) => {
@@ -346,3 +355,15 @@ setTimeout(() => {
 logger.info(
   `Agent health monitor active (every ${AGENT_HEALTH_INTERVAL_MS / 1000}s)`
 );
+
+// ── Graceful shutdown ─────────────────────────────────────────────
+function gracefulShutdown(signal: string): void {
+  logger.info(`Received ${signal}, shutting down gracefully...`);
+  redis.quit().catch(() => {
+    /* best-effort close */
+  });
+  process.exit(0);
+}
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));

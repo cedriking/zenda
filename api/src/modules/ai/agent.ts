@@ -64,13 +64,25 @@ const MAX_CONTEXT_MESSAGES = 40;
 const RATE_LIMIT_WINDOW_S = 60;
 const RATE_LIMIT_MAX = 10;
 
+// Lua script for atomic INCR + conditional EXPIRE — avoids the race condition
+// where INCR returns 1 but EXPIRE fails or a concurrent INCR happens first.
+const RATE_LIMIT_SCRIPT = `
+  local count = redis.call('INCR', KEYS[1])
+  if count == 1 then
+    redis.call('EXPIRE', KEYS[1], ARGV[1])
+  end
+  return count
+`;
+
 async function isRateLimited(customerId: string): Promise<boolean> {
   const key = `rl:ai:${customerId}`;
   try {
-    const count = await redis.incr(key);
-    if (count === 1) {
-      await redis.expire(key, RATE_LIMIT_WINDOW_S);
-    }
+    const count = (await redis.eval(
+      RATE_LIMIT_SCRIPT,
+      1,
+      key,
+      RATE_LIMIT_WINDOW_S
+    )) as number;
     return count > RATE_LIMIT_MAX;
   } catch (err) {
     // On Redis failure, allow request through (fail-open)

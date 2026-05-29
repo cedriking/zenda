@@ -207,6 +207,14 @@ export const authModule = new Elysia({ prefix: "/auth" })
         };
       }
 
+      // Fetch actual subscription plan tier
+      const subscription = workspace
+        ? await db.subscription.findFirst({
+            where: { workspaceId: workspace.id },
+            select: { planTier: true },
+          })
+        : null;
+
       // Generate tokens with jti for revocation support
       const accessJti = crypto.randomUUID();
       const refreshJti = crypto.randomUUID();
@@ -231,7 +239,7 @@ export const authModule = new Elysia({ prefix: "/auth" })
           id: workspace.id,
           name: workspace.name,
           slug: workspace.slug,
-          planTier: "local_solo" as const,
+          planTier: (subscription?.planTier ?? "local_solo") as const,
           onboardingStep: workspace.onboardingStep,
         },
       };
