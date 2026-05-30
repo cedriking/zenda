@@ -730,7 +730,8 @@
     "replyTime": "Replies in minutes",
     "description": "Have questions? Message us on WhatsApp and we'll help you set up your virtual receptionist.",
     "startChat": "Start chat",
-    "openChat": "Open WhatsApp chat"
+    "openChat": "Open WhatsApp chat",
+    "closeChat": "Close chat"
   },
   "waLinkGenerator": {
     "headerTitle": "Generate your WhatsApp link",
@@ -798,5 +799,39 @@
     "ctaDesc": "Zenda connects an AI to your WhatsApp that books appointments, answers questions, and sends reminders — automatically.",
     "ctaButton": "Try Zenda — It's Free",
     "ctaSubtext": "$0/month · No credit card · Works with your WhatsApp"
+  },
+  "demo": {
+    "badge": "Live Demo",
+    "heading": "This is how Zenda works on WhatsApp",
+    "subtitle": "See how a client books an appointment in under 2 minutes — without anyone at the salon touching the phone.",
+    "businessName": "Beauty Studio",
+    "onlineStatus": "online",
+    "chatInput": "Type a message...",
+    "chatDisclaimer": "Simulated conversation — your business works just like this",
+    "stepsHeading": "What just happened — in 2 minutes",
+    "step1Title": "Client writes",
+    "step1Desc": "A client messages on WhatsApp as usual.",
+    "step2Title": "Zenda replies",
+    "step2Desc": "The AI understands, checks the schedule, and suggests times.",
+    "step3Title": "Appointment booked",
+    "step3Desc": "Automatic confirmation + scheduled reminder.",
+    "ctaHeading": "Your business can do this today",
+    "ctaSubtitle": "Connect your WhatsApp Business in 5 minutes. Free plan available.",
+    "ctaButton": "Try for free →",
+    "ctaDisclaimer": "$0/month · No credit card · Works with your WhatsApp",
+    "metaTitle": "See Zenda in Action — WhatsApp Demo | Zenda",
+    "metaDescription": "See how Zenda automatically books appointments via WhatsApp. Real AI conversation. Try it free.",
+    "metaOgTitle": "See Zenda in Action — WhatsApp Demo",
+    "metaOgDescription": "See how Zenda's AI books appointments on WhatsApp automatically.",
+    "chat": {
+      "msg1": "Hi! I'd like to book a haircut appointment",
+      "msg2": "Hi Maria! 👋 I'll help you right away.\n\nFor a haircut, we have availability:\n\n📅 Today at 3:00 PM with Carlos\n📅 Tomorrow at 11:00 AM with Laura\n📅 Thursday at 5:00 PM with Carlos\n\nWhich do you prefer?",
+      "msg3": "Today at 3 with Carlos please",
+      "msg4": "✅ Done! Your appointment is booked:\n\n💇 Haircut\n👤 Carlos\n📅 Today, 3:00 PM\n📍 Beauty Studio\n\nI'll send you a reminder 2 hours before. Do you need anything else?",
+      "msg5": "How much does it cost?",
+      "msg6": "The haircut with Carlos costs $250 MXN.\n\nWe also have these services:\n✂️ Cut + beard — $350\n💇 Cut + wash — $300\n💆 Cut + treatment — $500\n\nWould you like to add anything?",
+      "msg7": "No, just the haircut. Thanks!",
+      "msg8": "Perfect! We'll see you today at 3:00 PM. 😊\n\nIf you need to change your appointment, just message me and I'll help."
+    }
   }
 }

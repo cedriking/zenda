@@ -74,6 +74,7 @@ export default function LoginPage() {
                 setResetSent(false);
                 setResetError(null);
               }}
+              type="button"
             >
               <ArrowLeft size={16} />
               {t("auth.backToLogin")}
@@ -92,13 +93,19 @@ export default function LoginPage() {
           </div>
 
           {resetSent ? (
-            <div className="rounded-md border border-border bg-emerald-500/10 p-4 text-emerald-600 text-sm">
+            <div
+              className="rounded-md border border-border bg-primary/10 p-4 text-primary text-sm"
+              role="alert"
+            >
               {t("auth.resetLinkSentDetail", { email: resetEmail })}
             </div>
           ) : (
             <form className="space-y-4" onSubmit={handleResetSubmit}>
               {resetError && (
-                <div className="rounded-md bg-destructive/10 p-3 text-destructive text-sm">
+                <div
+                  className="rounded-md bg-destructive/10 p-3 text-destructive text-sm"
+                  role="alert"
+                >
                   {resetError}
                 </div>
               )}
@@ -140,7 +147,10 @@ export default function LoginPage() {
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-destructive text-sm">
+            <div
+              className="rounded-md bg-destructive/10 p-3 text-destructive text-sm"
+              role="alert"
+            >
               {error}
             </div>
           )}
@@ -183,6 +193,7 @@ export default function LoginPage() {
           <button
             className="text-primary underline hover:no-underline"
             onClick={() => setShowReset(true)}
+            type="button"
           >
             {t("auth.forgotPassword")}
           </button>

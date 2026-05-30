@@ -1,7 +1,24 @@
 import { AlertCircle, Bot, Building2, Clock, Eye, Wrench } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import LangToggle from "@/components/lang-toggle";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
 import { apiFetch } from "../../../services/api-client";
 
 type TabId = "business" | "receptionist" | "services" | "availability";
@@ -90,19 +107,49 @@ export default function SettingsPage() {
       }
     }
     load();
-    // biome-ignore lint: exhaustive-deps - t is stable after init
   }, [t]);
+
+  function validateRequiredName(
+    endpoint: string,
+    data: BusinessProfile | ReceptionistProfile,
+    translate: (key: string) => string,
+    setError: (err: string | null) => void
+  ): boolean {
+    if (!data.name?.trim()) {
+      const label =
+        endpoint === "/business/profile"
+          ? translate("settings.businessName")
+          : translate("settings.receptionistName");
+      setError(`${label} is required`);
+      return false;
+    }
+    return true;
+  }
+
+  function cacheOnSuccess(
+    endpoint: string,
+    data: BusinessProfile | ReceptionistProfile
+  ) {
+    if (endpoint === "/business/profile") {
+      setLastSavedBusiness({ ...data });
+    } else if (endpoint === "/business/receptionist") {
+      setLastSavedReceptionist({ ...data });
+    }
+  }
+
+  function rollbackOnError(endpoint: string) {
+    if (endpoint === "/business/profile" && lastSavedBusiness) {
+      setBusinessProfile({ ...lastSavedBusiness });
+    } else if (endpoint === "/business/receptionist" && lastSavedReceptionist) {
+      setReceptionistProfile({ ...lastSavedReceptionist });
+    }
+  }
 
   const handleSave = async (
     endpoint: string,
     data: BusinessProfile | ReceptionistProfile
   ) => {
-    if (endpoint === "/business/profile" && !data.name?.trim()) {
-      setSaveError(`${t("settings.businessName")} is required`);
-      return;
-    }
-    if (endpoint === "/business/receptionist" && !data.name?.trim()) {
-      setSaveError(`${t("settings.receptionistName")} is required`);
+    if (!validateRequiredName(endpoint, data, t, setSaveError)) {
       return;
     }
 
@@ -120,27 +167,14 @@ export default function SettingsPage() {
         body: payload,
       });
 
-      if (endpoint === "/business/profile") {
-        setLastSavedBusiness({ ...data });
-      } else if (endpoint === "/business/receptionist") {
-        setLastSavedReceptionist({ ...data });
-      }
-
+      cacheOnSuccess(endpoint, data);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : t("settings.errorSave");
       setSaveError(message);
-
-      if (endpoint === "/business/profile" && lastSavedBusiness) {
-        setBusinessProfile({ ...lastSavedBusiness });
-      } else if (
-        endpoint === "/business/receptionist" &&
-        lastSavedReceptionist
-      ) {
-        setReceptionistProfile({ ...lastSavedReceptionist });
-      }
+      rollbackOnError(endpoint);
     } finally {
       setSaving(false);
     }
@@ -192,6 +226,7 @@ export default function SettingsPage() {
       const tabButtons = document.querySelectorAll<HTMLElement>('[role="tab"]');
       tabButtons[nextIndex]?.focus();
     },
+    // biome-ignore lint/correctness/useExhaustiveDependencies: tabs is a stable memo
     [tab, tabs]
   );
 
@@ -231,6 +266,7 @@ export default function SettingsPage() {
             onClick={() => setTab(t.id)}
             role="tab"
             tabIndex={tab === t.id ? 0 : -1}
+            type="button"
           >
             {t.icon}
             {t.label}
@@ -244,7 +280,7 @@ export default function SettingsPage() {
         </div>
       )}
       {saveSuccess && (
-        <div className="mb-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-emerald-600 text-sm">
+        <div className="mb-4 rounded-lg border border-primary/20 bg-primary/10 p-3 text-primary text-sm">
           {t("settings.saved")}
         </div>
       )}
@@ -257,11 +293,12 @@ export default function SettingsPage() {
           role="tabpanel"
         >
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
+            <Label htmlFor="settings-business-name">
               {t("settings.businessName")}
-            </label>
+            </Label>
             <input
-              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              id="settings-business-name"
               onChange={(e) =>
                 setBusinessProfile({ ...businessProfile, name: e.target.value })
               }
@@ -270,11 +307,12 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
+            <Label htmlFor="settings-business-category">
               {t("settings.category")}
-            </label>
+            </Label>
             <select
-              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              id="settings-business-category"
               onChange={(e) =>
                 setBusinessProfile({
                   ...businessProfile,
@@ -292,11 +330,12 @@ export default function SettingsPage() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
+            <Label htmlFor="settings-business-location">
               {t("settings.location")}
-            </label>
+            </Label>
             <input
-              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              id="settings-business-location"
               onChange={(e) =>
                 setBusinessProfile({
                   ...businessProfile,
@@ -308,11 +347,12 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
+            <Label htmlFor="settings-business-description">
               {t("settings.description")}
-            </label>
+            </Label>
             <textarea
-              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              id="settings-business-description"
               onChange={(e) =>
                 setBusinessProfile({
                   ...businessProfile,
@@ -325,11 +365,12 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
+            <Label htmlFor="settings-business-cancellation">
               {t("settings.cancellationPolicy")}
-            </label>
+            </Label>
             <textarea
-              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              id="settings-business-cancellation"
               onChange={(e) =>
                 setBusinessProfile({
                   ...businessProfile,
@@ -344,6 +385,7 @@ export default function SettingsPage() {
             className="rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             disabled={saving}
             onClick={() => handleSave("/business/profile", businessProfile)}
+            type="button"
           >
             {saving ? t("common.saving") : t("settings.saveProfile")}
           </button>
@@ -358,11 +400,12 @@ export default function SettingsPage() {
           role="tabpanel"
         >
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
+            <Label htmlFor="settings-rec-name">
               {t("settings.receptionistName")}
-            </label>
+            </Label>
             <input
-              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              id="settings-rec-name"
               onChange={(e) =>
                 setReceptionistProfile({
                   ...receptionistProfile,
@@ -374,11 +417,10 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
-              {t("settings.tone")}
-            </label>
+            <Label htmlFor="settings-rec-tone">{t("settings.tone")}</Label>
             <select
-              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              id="settings-rec-tone"
               onChange={(e) =>
                 setReceptionistProfile({
                   ...receptionistProfile,
@@ -397,11 +439,12 @@ export default function SettingsPage() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
+            <Label htmlFor="settings-rec-greeting">
               {t("settings.greetingTemplate")}
-            </label>
+            </Label>
             <textarea
-              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              id="settings-rec-greeting"
               onChange={(e) =>
                 setReceptionistProfile({
                   ...receptionistProfile,
@@ -419,6 +462,7 @@ export default function SettingsPage() {
             onClick={() =>
               handleSave("/business/receptionist", receptionistProfile)
             }
+            type="button"
           >
             {saving ? t("common.saving") : t("settings.saveReceptionist")}
           </button>
@@ -445,6 +489,81 @@ export default function SettingsPage() {
 
 // --- Services CRUD ---
 
+function renderServicesList(
+  isLoading: boolean,
+  services: Service[],
+  t: (key: string, defaultValue?: string) => string,
+  startEdit: (svc: Service) => void,
+  setDeleteTargetId: (id: string | null) => void
+): ReactNode {
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        {[1, 2, 3].map((n) => (
+          <div
+            className="animate-pulse rounded-lg border border-border bg-card p-4"
+            key={`svc-skeleton-${n}`}
+          >
+            <div className="flex justify-between">
+              <div>
+                <div className="h-4 w-32 rounded bg-muted" />
+                <div className="mt-2 h-3 w-20 rounded bg-muted" />
+              </div>
+              <div className="h-4 w-16 rounded bg-muted" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (services.length === 0) {
+    return (
+      <div className="py-8 text-center text-muted-foreground">
+        <Wrench className="mx-auto mb-3 opacity-50" size={36} />
+        <p>{t("services.empty")}</p>
+        <p className="text-sm">{t("services.emptyHint")}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {services.map((svc) => (
+        <div
+          className="flex items-center justify-between rounded-lg border border-border bg-card p-4"
+          key={svc.id}
+        >
+          <div>
+            <p className="font-medium text-foreground">{svc.name}</p>
+            <p className="text-muted-foreground text-sm">
+              {svc.durationMinutes} {t("services.minutesShort", "min")}
+              {svc.priceCents ? ` · $${(svc.priceCents / 100).toFixed(2)}` : ""}
+              {svc.description ? ` · ${svc.description}` : ""}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              className="text-primary text-sm hover:text-primary/80"
+              onClick={() => startEdit(svc)}
+              type="button"
+            >
+              {t("common.edit")}
+            </button>
+            <button
+              className="text-destructive text-sm hover:text-destructive/80"
+              onClick={() => setDeleteTargetId(svc.id)}
+              type="button"
+            >
+              {t("common.delete")}
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ServicesManager() {
   const { t } = useTranslation();
   const [services, setServices] = useState<Service[]>([]);
@@ -452,6 +571,7 @@ function ServicesManager() {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -461,6 +581,7 @@ function ServicesManager() {
 
   useEffect(() => {
     loadServices();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: loadServices uses stable setters and t
   }, [loadServices]);
 
   async function loadServices() {
@@ -510,8 +631,9 @@ function ServicesManager() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm(t("services.confirmDelete"))) {
+  async function confirmDelete() {
+    const id = deleteTargetId;
+    if (!id) {
       return;
     }
     try {
@@ -520,6 +642,7 @@ function ServicesManager() {
     } catch (err) {
       setError(err instanceof Error ? err.message : t("services.errorDelete"));
     }
+    setDeleteTargetId(null);
   }
 
   function startEdit(svc: Service) {
@@ -572,6 +695,7 @@ function ServicesManager() {
               setShowForm(true);
               setEditingId(null);
             }}
+            type="button"
           >
             {t("services.addService")}
           </button>
@@ -594,11 +718,10 @@ function ServicesManager() {
           </h4>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block font-medium text-foreground text-sm">
-                {t("services.name")}
-              </label>
+              <Label htmlFor="settings-svc-name">{t("services.name")}</Label>
               <input
-                className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+                className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+                id="settings-svc-name"
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder={t("services.namePlaceholder")}
                 required
@@ -607,11 +730,12 @@ function ServicesManager() {
               />
             </div>
             <div>
-              <label className="mb-1 block font-medium text-foreground text-sm">
+              <Label htmlFor="settings-svc-duration">
                 {t("services.duration")}
-              </label>
+              </Label>
               <input
-                className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+                className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+                id="settings-svc-duration"
                 min={5}
                 onChange={(e) =>
                   setForm({
@@ -626,11 +750,12 @@ function ServicesManager() {
             </div>
           </div>
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
+            <Label htmlFor="settings-svc-desc">
               {t("services.descriptionField")}
-            </label>
+            </Label>
             <input
-              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              id="settings-svc-desc"
               onChange={(e) =>
                 setForm({ ...form, description: e.target.value })
               }
@@ -640,11 +765,10 @@ function ServicesManager() {
             />
           </div>
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
-              {t("services.price")}
-            </label>
+            <Label htmlFor="settings-svc-price">{t("services.price")}</Label>
             <input
-              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              id="settings-svc-price"
               onChange={(e) => setForm({ ...form, priceCents: e.target.value })}
               placeholder={t("services.pricePlaceholder")}
               type="text"
@@ -686,64 +810,34 @@ function ServicesManager() {
         </form>
       )}
 
-      {isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              className="animate-pulse rounded-lg border border-border bg-card p-4"
-              key={i}
-            >
-              <div className="flex justify-between">
-                <div>
-                  <div className="h-4 w-32 rounded bg-muted" />
-                  <div className="mt-2 h-3 w-20 rounded bg-muted" />
-                </div>
-                <div className="h-4 w-16 rounded bg-muted" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : services.length === 0 ? (
-        <div className="py-8 text-center text-muted-foreground">
-          <Wrench className="mx-auto mb-3 opacity-50" size={36} />
-          <p>{t("services.empty")}</p>
-          <p className="text-sm">{t("services.emptyHint")}</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {services.map((svc) => (
-            <div
-              className="flex items-center justify-between rounded-lg border border-border bg-card p-4"
-              key={svc.id}
-            >
-              <div>
-                <p className="font-medium text-foreground">{svc.name}</p>
-                <p className="text-muted-foreground text-sm">
-                  {svc.durationMinutes} {t("services.minutesShort", "min")}
-                  {svc.priceCents
-                    ? ` · $${(svc.priceCents / 100).toFixed(2)}`
-                    : ""}
-                  {svc.description ? ` · ${svc.description}` : ""}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  className="text-primary text-sm hover:text-primary/80"
-                  onClick={() => startEdit(svc)}
-                >
-                  {t("common.edit")}
-                </button>
-                <button
-                  className="text-destructive text-sm hover:text-destructive/80"
-                  onClick={() => handleDelete(svc.id)}
-                >
-                  {t("common.delete")}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {renderServicesList(isLoading, services, t, startEdit, setDeleteTargetId)}
+
+      <AlertDialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTargetId(null);
+          }
+        }}
+        open={deleteTargetId !== null}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("services.confirmDelete")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                "services.confirmDeleteDesc",
+                "This service will be permanently removed."
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>
+              {t("common.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -760,6 +854,87 @@ const DAY_KEYS = [
   "daysFull.6",
 ];
 
+function renderRulesList(
+  isLoading: boolean,
+  rules: AvailabilityRule[],
+  t: (key: string) => string,
+  toggleRule: (rule: AvailabilityRule) => void,
+  handleDelete: (id: string) => void
+): ReactNode {
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        {[1, 2, 3].map((n) => (
+          <div
+            className="animate-pulse rounded-lg border border-border bg-card p-4"
+            key={`avail-skeleton-${n}`}
+          >
+            <div className="h-4 w-full rounded bg-muted" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (rules.length === 0) {
+    return (
+      <div className="py-8 text-center text-muted-foreground">
+        <Clock className="mx-auto mb-3 opacity-50" size={36} />
+        <p>{t("availability.empty")}</p>
+        <p className="text-sm">{t("availability.emptyHint")}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {rules
+        .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
+        .map((rule) => (
+          <div
+            className={`flex items-center justify-between rounded-lg border p-4 ${
+              rule.available
+                ? "border-border bg-card"
+                : "border-border bg-muted opacity-60"
+            }`}
+            key={rule.id}
+          >
+            <div className="flex items-center gap-4">
+              <span className="w-28 font-medium text-foreground">
+                {t(DAY_KEYS[rule.dayOfWeek] ?? `Day ${rule.dayOfWeek}`)}
+              </span>
+              <span className="text-muted-foreground text-sm">
+                {rule.startTime} — {rule.endTime}
+              </span>
+            </div>
+            <div className="flex gap-3">
+              <button
+                className={`rounded-full px-3 py-1 text-xs ${
+                  rule.available
+                    ? "bg-primary/10 text-primary"
+                    : "bg-muted text-muted-foreground"
+                }`}
+                onClick={() => toggleRule(rule)}
+                type="button"
+              >
+                {rule.available
+                  ? t("availability.open")
+                  : t("availability.closed")}
+              </button>
+              <button
+                className="text-destructive text-sm hover:text-destructive/80"
+                onClick={() => handleDelete(rule.id)}
+                type="button"
+              >
+                {t("common.delete")}
+              </button>
+            </div>
+          </div>
+        ))}
+    </div>
+  );
+}
+
 function AvailabilityManager() {
   const { t } = useTranslation();
   const [rules, setRules] = useState<AvailabilityRule[]>([]);
@@ -774,6 +949,7 @@ function AvailabilityManager() {
 
   useEffect(() => {
     loadRules();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: loadRules uses stable setters and t
   }, [loadRules]);
 
   async function loadRules() {
@@ -852,6 +1028,7 @@ function AvailabilityManager() {
           <button
             className="rounded-lg bg-primary px-4 py-2 text-primary-foreground text-sm hover:bg-primary/90"
             onClick={() => setShowForm(true)}
+            type="button"
           >
             {t("availability.addHours")}
           </button>
@@ -873,11 +1050,10 @@ function AvailabilityManager() {
             {t("availability.addBusinessHours")}
           </h4>
           <div>
-            <label className="mb-1 block font-medium text-foreground text-sm">
-              {t("availability.day")}
-            </label>
+            <Label htmlFor="settings-avail-day">{t("availability.day")}</Label>
             <select
-              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+              id="settings-avail-day"
               onChange={(e) =>
                 setForm({
                   ...form,
@@ -887,7 +1063,7 @@ function AvailabilityManager() {
               value={form.dayOfWeek}
             >
               {DAY_KEYS.map((key, i) => (
-                <option key={i} value={i}>
+                <option key={`day-${key}`} value={i}>
                   {t(key)}
                 </option>
               ))}
@@ -895,11 +1071,12 @@ function AvailabilityManager() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block font-medium text-foreground text-sm">
+              <Label htmlFor="settings-avail-open">
                 {t("availability.open")}
-              </label>
+              </Label>
               <input
-                className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+                className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+                id="settings-avail-open"
                 onChange={(e) =>
                   setForm({ ...form, startTime: e.target.value })
                 }
@@ -909,11 +1086,12 @@ function AvailabilityManager() {
               />
             </div>
             <div>
-              <label className="mb-1 block font-medium text-foreground text-sm">
+              <Label htmlFor="settings-avail-close">
                 {t("availability.close")}
-              </label>
+              </Label>
               <input
-                className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+                className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+                id="settings-avail-close"
                 onChange={(e) => setForm({ ...form, endTime: e.target.value })}
                 required
                 type="time"
@@ -939,68 +1117,7 @@ function AvailabilityManager() {
         </form>
       )}
 
-      {isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              className="animate-pulse rounded-lg border border-border bg-card p-4"
-              key={i}
-            >
-              <div className="h-4 w-full rounded bg-muted" />
-            </div>
-          ))}
-        </div>
-      ) : rules.length === 0 ? (
-        <div className="py-8 text-center text-muted-foreground">
-          <Clock className="mx-auto mb-3 opacity-50" size={36} />
-          <p>{t("availability.empty")}</p>
-          <p className="text-sm">{t("availability.emptyHint")}</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {rules
-            .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
-            .map((rule) => (
-              <div
-                className={`flex items-center justify-between rounded-lg border p-4 ${
-                  rule.available
-                    ? "border-border bg-card"
-                    : "border-border bg-muted opacity-60"
-                }`}
-                key={rule.id}
-              >
-                <div className="flex items-center gap-4">
-                  <span className="w-28 font-medium text-foreground">
-                    {t(DAY_KEYS[rule.dayOfWeek] ?? `Day ${rule.dayOfWeek}`)}
-                  </span>
-                  <span className="text-muted-foreground text-sm">
-                    {rule.startTime} — {rule.endTime}
-                  </span>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    className={`rounded-full px-3 py-1 text-xs ${
-                      rule.available
-                        ? "bg-emerald-500/10 text-emerald-600"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                    onClick={() => toggleRule(rule)}
-                  >
-                    {rule.available
-                      ? t("availability.open")
-                      : t("availability.closed")}
-                  </button>
-                  <button
-                    className="text-destructive text-sm hover:text-destructive/80"
-                    onClick={() => handleDelete(rule.id)}
-                  >
-                    {t("common.delete")}
-                  </button>
-                </div>
-              </div>
-            ))}
-        </div>
-      )}
+      {renderRulesList(isLoading, rules, t, toggleRule, handleDelete)}
     </div>
   );
 }

@@ -15,7 +15,7 @@ export function WhatsAppWidget() {
     : "https://zenda.bot/es/demo";
 
   return (
-    <div className="fixed right-6 bottom-6 z-50 flex flex-col items-end gap-3">
+    <div className="fixed right-6 bottom-6 z-40 flex flex-col items-end gap-3">
       {open && (
         <div className="fade-in slide-in-from-bottom-2 w-72 animate-in rounded-2xl border border-gray-200 bg-white p-5 shadow-2xl dark:border-gray-700 dark:bg-gray-900">
           <div className="mb-3 flex items-center gap-3">
@@ -40,6 +40,7 @@ export function WhatsAppWidget() {
         </div>
       )}
       <button
+        aria-expanded={open}
         aria-label={t("openChat")}
         className="flex size-14 items-center justify-center rounded-full bg-green-500 text-white shadow-lg transition-transform hover:scale-110 hover:bg-green-600"
         onClick={() => setOpen(!open)}
@@ -47,7 +48,7 @@ export function WhatsAppWidget() {
       >
         {open ? (
           <svg
-            aria-label="Cerrar"
+            aria-label={t("closeChat")}
             className="size-6"
             fill="none"
             role="img"
@@ -55,7 +56,7 @@ export function WhatsAppWidget() {
             strokeWidth={2}
             viewBox="0 0 24 24"
           >
-            <title>Cerrar</title>
+            <title>{t("closeChat")}</title>
             <path
               d="M6 18L18 6M6 6l12 12"
               strokeLinecap="round"

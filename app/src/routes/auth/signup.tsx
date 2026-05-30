@@ -7,6 +7,42 @@ import { apiFetch } from "@/services/api-client";
 import { getPostAuthRoute, useAuthStore } from "@/stores/auth";
 import { Link, useNavigate } from "@/utils/router";
 
+const REGEX_UPPERCASE = /[A-Z]/;
+const REGEX_DIGIT = /[0-9]/;
+const REGEX_SPECIAL = /[^A-Za-z0-9]/;
+
+function getStrengthLabel(
+  strength: number,
+  t: (key: string) => string
+): string {
+  if (strength === 0) {
+    return "";
+  }
+  if (strength <= 1) {
+    return t("auth.strengthWeak");
+  }
+  if (strength <= 2) {
+    return t("auth.strengthFair");
+  }
+  if (strength <= 3) {
+    return t("auth.strengthGood");
+  }
+  return t("auth.strengthStrong");
+}
+
+function getStrengthColor(strength: number): string {
+  if (strength <= 1) {
+    return "bg-red-500";
+  }
+  if (strength <= 2) {
+    return "bg-amber-500";
+  }
+  if (strength <= 3) {
+    return "bg-emerald-400";
+  }
+  return "bg-emerald-600";
+}
+
 export default function SignupPage() {
   const { t, i18n } = useTranslation();
   const [name, setName] = useState("");
@@ -45,6 +81,30 @@ export default function SignupPage() {
     }
   }
 
+  function getPasswordStrength(pwd: string): number {
+    if (!pwd) {
+      return 0;
+    }
+    let score = 0;
+    if (pwd.length >= 8) {
+      score++;
+    }
+    if (REGEX_UPPERCASE.test(pwd)) {
+      score++;
+    }
+    if (REGEX_DIGIT.test(pwd)) {
+      score++;
+    }
+    if (REGEX_SPECIAL.test(pwd)) {
+      score++;
+    }
+    return score;
+  }
+
+  const strength = getPasswordStrength(password);
+  const strengthLabel = getStrengthLabel(strength, t);
+  const strengthColor = getStrengthColor(strength);
+
   function handleLanguageChange(lang: string) {
     const uiLang = lang as UILanguage;
     setLanguage(uiLang);
@@ -61,7 +121,10 @@ export default function SignupPage() {
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-destructive text-sm">
+            <div
+              className="rounded-md bg-destructive/10 p-3 text-destructive text-sm"
+              role="alert"
+            >
               {error}
             </div>
           )}
@@ -109,6 +172,21 @@ export default function SignupPage() {
               type="password"
               value={password}
             />
+            {password && (
+              <div className="space-y-1">
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4].map((level) => (
+                    <div
+                      className={`h-1 flex-1 rounded-full transition-colors ${
+                        level <= strength ? strengthColor : "bg-border"
+                      }`}
+                      key={level}
+                    />
+                  ))}
+                </div>
+                <p className="text-muted-foreground text-xs">{strengthLabel}</p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

@@ -38,6 +38,10 @@ export const ru: TranslationStrings = {
       "Ссылка отправлена на {{email}}. Проверьте входящие и спам.",
     minChars: "Минимум 8 символов",
     reEnterPassword: "Повторите пароль",
+    strengthWeak: "Слабый",
+    strengthFair: "Средний",
+    strengthGood: "Хороший",
+    strengthStrong: "Надёжный",
     createOne: "Создать",
   },
   nav: {
@@ -551,5 +555,21 @@ export const ru: TranslationStrings = {
     cancel: "Отмена",
     saving: "Сохранение...",
     errorGeneric: "Ошибка",
+  },
+
+  integrations: {
+    title: "Интеграции",
+    connectDesc:
+      "Подключите Google Calendar для автоматической синхронизации записей.",
+    connectedDesc:
+      "Синхронизируйте записи с Google Calendar. Новые бронирования будут автоматически создавать события.",
+    connected: "Подключено",
+    connectedAs: "Подключено как",
+    calendarToSync: "Календарь для синхронизации",
+    primaryCalendar: "Основной календарь",
+    primary: "Основной",
+    disconnect: "Отключить",
+    connecting: "Подключение...",
+    connectGoogle: "Подключить Google Calendar",
   },
 };

@@ -728,7 +728,8 @@
     "replyTime": "Responde en minutos",
     "description": "¿Tienes preguntas? Escríbenos por WhatsApp y te ayudamos a configurar tu recepcionista virtual.",
     "startChat": "Iniciar chat",
-    "openChat": "Abrir chat de WhatsApp"
+    "openChat": "Abrir chat de WhatsApp",
+    "closeChat": "Cerrar chat"
   },
   "waLinkGenerator": {
     "headerTitle": "Genera tu link de WhatsApp",
@@ -796,5 +797,39 @@
     "ctaDesc": "Zenda conecta una IA a tu WhatsApp que agenda citas, responde preguntas y envia recordatorios — automaticamente.",
     "ctaButton": "Conoce Zenda — Es gratis",
     "ctaSubtext": "$0/mes · Sin tarjeta de credito · Funciona con tu WhatsApp"
+  },
+  "demo": {
+    "badge": "Demo en Vivo",
+    "heading": "Asi funciona Zenda por WhatsApp",
+    "subtitle": "Mira como un cliente agenda una cita en menos de 2 minutos — sin que nadie del salon toque el telefono.",
+    "businessName": "Beauty Studio",
+    "onlineStatus": "en linea",
+    "chatInput": "Escribe un mensaje...",
+    "chatDisclaimer": "Conversacion simulada — tu negocio funciona igual que esto",
+    "stepsHeading": "Lo que acaba de pasar — en 2 minutos",
+    "step1Title": "Cliente escribe",
+    "step1Desc": "Un cliente escribe por WhatsApp como siempre.",
+    "step2Title": "Zenda responde",
+    "step2Desc": "La IA entiende, consulta la agenda y propone horarios.",
+    "step3Title": "Cita agendada",
+    "step3Desc": "Confirmacion automatica + recordatorio programado.",
+    "ctaHeading": "Tu negocio puede hacer esto hoy",
+    "ctaSubtitle": "Conecta tu WhatsApp Business en 5 minutos. Plan gratis disponible.",
+    "ctaButton": "Probar gratis →",
+    "ctaDisclaimer": "$0/mes · Sin tarjeta de credito · Funciona con tu WhatsApp",
+    "metaTitle": "Ver Zenda en Accion — Demo por WhatsApp | Zenda",
+    "metaDescription": "Mira como Zenda agenda citas automaticamente por WhatsApp. Conversacion real con IA. Prueba gratis.",
+    "metaOgTitle": "Ver Zenda en Accion — Demo por WhatsApp",
+    "metaOgDescription": "Mira como la IA de Zenda agenda citas por WhatsApp automaticamente.",
+    "chat": {
+      "msg1": "Hola! Quisiera una cita para un corte de pelo",
+      "msg2": "Hola Maria! Te atiendo enseguida.\n\nPara un corte de pelo, tenemos disponibilidad:\n\nHoy a las 3:00 PM con Carlos\nManana a las 11:00 AM con Laura\nJueves a las 5:00 PM con Carlos\n\nCual prefieres?",
+      "msg3": "Hoy a las 3 con Carlos por favor",
+      "msg4": "Listo! Tu cita esta agendada:\n\nCorte de pelo\nCarlos\nHoy, 3:00 PM\nBeauty Studio\n\nTe enviare un recordatorio 2 horas antes. Necesitas algo mas?",
+      "msg5": "Cuanto cuesta?",
+      "msg6": "El corte de pelo con Carlos cuesta $250 MXN.\n\nTambien tenemos estos servicios:\nCorte + barba — $350\nCorte + lavado — $300\nCorte + tratamiento — $500\n\nTe gustaria agregar algo?",
+      "msg7": "No, solo el corte. Gracias!",
+      "msg8": "Perfecto! Te esperamos hoy a las 3:00 PM.\n\nSi necesitas cambiar tu cita, escribeme y te ayudo."
+    }
   }
 }

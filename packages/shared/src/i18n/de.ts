@@ -39,6 +39,10 @@ export const de: TranslationStrings = {
       "Link gesendet an {{email}}. Prüfen Sie Posteingang und Spam.",
     minChars: "Mindestens 8 Zeichen",
     reEnterPassword: "Passwort erneut eingeben",
+    strengthWeak: "Schwach",
+    strengthFair: "Mäßig",
+    strengthGood: "Gut",
+    strengthStrong: "Stark",
     createOne: "Erstellen",
   },
   nav: {
@@ -563,5 +567,21 @@ export const de: TranslationStrings = {
     cancel: "Abbrechen",
     saving: "Speichern...",
     errorGeneric: "Fehler",
+  },
+
+  integrations: {
+    title: "Integrationen",
+    connectDesc:
+      "Verbinden Sie Ihren Google Calendar, um Termine automatisch zu synchronisieren.",
+    connectedDesc:
+      "Synchronisieren Sie Ihre Termine mit Google Calendar. Neue Buchungen erstellen automatisch Ereignisse.",
+    connected: "Verbunden",
+    connectedAs: "Verbunden als",
+    calendarToSync: "Kalender zum Synchronisieren",
+    primaryCalendar: "Hauptkalender",
+    primary: "Primär",
+    disconnect: "Trennen",
+    connecting: "Verbindung wird hergestellt...",
+    connectGoogle: "Google Calendar verbinden",
   },
 };

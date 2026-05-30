@@ -2,6 +2,8 @@ import {
   BarChart3,
   Bell,
   Calendar,
+  ChevronLeft,
+  ChevronRight,
   HelpCircle,
   LayoutDashboard,
   LogOut,
@@ -17,6 +19,7 @@ import {
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toggleTheme } from "@/actions/theme";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Link, Outlet, useLocation, useNavigate } from "@/utils/router";
 import { ConnectivityBanner } from "../components/connectivity-banner";
 import { useDashboardShortcuts } from "../hooks/use-keyboard-shortcuts";
@@ -43,6 +46,25 @@ export default function DashboardLayout() {
   >([]);
   const [isDark, setIsDark] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem("sidebar-collapsed") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("sidebar-collapsed", String(next));
+      } catch {
+        // localStorage unavailable
+      }
+      return next;
+    });
+  }, []);
 
   // Initialize keyboard shortcuts
   const shortcuts = useDashboardShortcuts();
@@ -82,7 +104,7 @@ export default function DashboardLayout() {
 
     return () => clearInterval(interval);
   }, [
-    // Initial load
+    // biome-ignore lint/correctness/useExhaustiveDependencies: loadNotifications is a stable function defined in the component
     loadNotifications,
   ]);
 
@@ -186,44 +208,70 @@ export default function DashboardLayout() {
         {t("layout.skipToContent")}
       </a>
       {/* Sidebar */}
-      <aside className="flex w-64 shrink-0 flex-col border-border border-r bg-card">
-        <div className="border-border border-b p-4">
-          <h1 className="font-bold text-foreground text-xl tracking-tight">
-            {t("layout.brandName")}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {workspace?.name ?? t("layout.defaultWorkspaceName")}
-          </p>
+      <aside
+        className={`flex shrink-0 flex-col border-border border-r bg-card transition-all duration-200 ${sidebarCollapsed ? "w-16" : "w-64"}`}
+      >
+        <div className="flex items-center justify-between border-border border-b p-4">
+          <div
+            className={`overflow-hidden transition-all duration-200 ${sidebarCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"}`}
+          >
+            <h1 className="whitespace-nowrap font-bold text-foreground text-xl tracking-tight">
+              {t("layout.brandName")}
+            </h1>
+            <p className="whitespace-nowrap text-muted-foreground text-sm">
+              {workspace?.name ?? t("layout.defaultWorkspaceName")}
+            </p>
+          </div>
+          <button
+            aria-label={
+              sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
+            }
+            className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            onClick={toggleSidebar}
+            type="button"
+          >
+            {sidebarCollapsed ? (
+              <ChevronRight size={16} />
+            ) : (
+              <ChevronLeft size={16} />
+            )}
+          </button>
         </div>
 
         <nav aria-label="Main navigation" className="flex-1 space-y-1 p-2">
           <NavLink
+            collapsed={sidebarCollapsed}
             exact
             icon={<LayoutDashboard size={20} />}
             label={t("nav.dashboard")}
             to="/dashboard"
           />
           <NavLink
+            collapsed={sidebarCollapsed}
             icon={<MessageSquare size={20} />}
             label={t("nav.chats")}
             to="/dashboard/conversations"
           />
           <NavLink
+            collapsed={sidebarCollapsed}
             icon={<Calendar size={20} />}
             label={t("nav.calendar")}
             to="/dashboard/appointments"
           />
           <NavLink
+            collapsed={sidebarCollapsed}
             icon={<Users size={20} />}
             label={t("nav.customers")}
             to="/dashboard/customers"
           />
           <NavLink
+            collapsed={sidebarCollapsed}
             icon={<Settings size={20} />}
             label={t("nav.settings")}
             to="/dashboard/settings"
           />
           <NavLink
+            collapsed={sidebarCollapsed}
             icon={<BarChart3 size={20} />}
             label={t("nav.analytics")}
             to="/dashboard/analytics"
@@ -237,16 +285,19 @@ export default function DashboardLayout() {
               className="mb-1 flex items-center gap-2 text-muted-foreground text-sm"
               role="status"
             >
-              <Wifi className="text-emerald-500" size={16} />{" "}
-              {t("whatsapp.connected")}
+              <Wifi className="text-primary" size={16} />
+              {!sidebarCollapsed && <span>{t("whatsapp.connected")}</span>}
             </div>
           ) : (
             <button
               aria-label="WhatsApp disconnected — click to connect"
               className="mb-1 flex cursor-pointer items-center gap-2 text-destructive text-sm hover:text-destructive/80"
               onClick={() => navigate("/auth/connect-whatsapp")}
+              title={sidebarCollapsed ? t("whatsapp.connect") : undefined}
+              type="button"
             >
-              <WifiOff size={16} /> {t("whatsapp.connect")}
+              <WifiOff size={16} />
+              {!sidebarCollapsed && <span>{t("whatsapp.connect")}</span>}
             </button>
           )}
           <div className="flex items-center justify-between">
@@ -254,15 +305,21 @@ export default function DashboardLayout() {
               aria-label="Logout"
               className="flex items-center gap-2 text-muted-foreground text-sm hover:text-foreground"
               onClick={handleLogout}
+              title={sidebarCollapsed ? t("layout.logout") : undefined}
+              type="button"
             >
               <LogOut size={16} />
-              {t("layout.logout")}
+              {!sidebarCollapsed && t("layout.logout")}
             </button>
             <div className="flex items-center gap-1">
               <button
                 aria-label="Show keyboard shortcuts"
                 className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 onClick={() => setShowShortcuts(true)}
+                title={
+                  sidebarCollapsed ? t("layout.keyboardShortcuts") : undefined
+                }
+                type="button"
               >
                 <HelpCircle size={16} />
               </button>
@@ -272,6 +329,7 @@ export default function DashboardLayout() {
                 }
                 className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 onClick={handleToggleTheme}
+                type="button"
               >
                 {isDark ? <Sun size={16} /> : <Moon size={16} />}
               </button>
@@ -281,44 +339,21 @@ export default function DashboardLayout() {
       </aside>
 
       {/* Shortcuts modal */}
-      {showShortcuts && (
-        <div
-          aria-label="Keyboard shortcuts"
-          className="fixed inset-0 z-[100] flex items-center justify-center"
-          role="dialog"
-        >
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setShowShortcuts(false)}
-          />
-          <div className="relative w-96 rounded-xl border border-border bg-card p-6 shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-semibold text-foreground text-lg">
-                {t("layout.keyboardShortcuts")}
-              </h3>
-              <button
-                aria-label="Close"
-                className="text-muted-foreground hover:text-foreground"
-                onClick={() => setShowShortcuts(false)}
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <div className="space-y-3">
-              {shortcuts.map((s) => (
-                <div className="flex items-center justify-between" key={s.key}>
-                  <span className="text-foreground text-sm">
-                    {s.description}
-                  </span>
-                  <kbd className="rounded border border-border bg-muted px-2 py-1 font-mono text-muted-foreground text-xs">
-                    {formatShortcut(s)}
-                  </kbd>
-                </div>
-              ))}
-            </div>
+      <Dialog onOpenChange={setShowShortcuts} open={showShortcuts}>
+        <DialogContent className="w-96">
+          <DialogTitle>{t("layout.keyboardShortcuts")}</DialogTitle>
+          <div className="space-y-3">
+            {shortcuts.map((s) => (
+              <div className="flex items-center justify-between" key={s.key}>
+                <span className="text-foreground text-sm">{s.description}</span>
+                <kbd className="rounded border border-border bg-muted px-2 py-1 font-mono text-muted-foreground text-xs">
+                  {formatShortcut(s)}
+                </kbd>
+              </div>
+            ))}
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden" id="main-content">
@@ -339,6 +374,7 @@ export default function DashboardLayout() {
                 aria-live="polite"
                 className="relative p-1 text-muted-foreground transition-colors hover:text-foreground"
                 onClick={toggleNotifications}
+                type="button"
               >
                 <Bell size={18} />
                 {unreadCount > 0 && (
@@ -366,6 +402,7 @@ export default function DashboardLayout() {
                       aria-label="Close notifications"
                       className="text-muted-foreground hover:text-foreground"
                       onClick={() => setShowNotifications(false)}
+                      type="button"
                     >
                       <X size={16} />
                     </button>
@@ -434,10 +471,12 @@ function formatShortcut(s: {
   return parts.join("+");
 }
 
+const REGEX_APPLE_DEVICE = /Mac|iPod|iPhone|iPad/;
+
 function isMac(): boolean {
   return (
     typeof navigator !== "undefined" &&
-    /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
+    REGEX_APPLE_DEVICE.test(navigator.userAgent)
   );
 }
 
@@ -447,11 +486,13 @@ const NavLink = memo(
     icon,
     label,
     exact = false,
+    collapsed = false,
   }: {
     to: string;
     icon: React.ReactNode;
     label: string;
     exact?: boolean;
+    collapsed?: boolean;
   }) {
     const location = useLocation();
     const isActive = exact
@@ -463,18 +504,20 @@ const NavLink = memo(
           isActive
             ? "bg-accent font-medium text-accent-foreground"
             : "text-muted-foreground"
-        }`}
+        } ${collapsed ? "justify-center" : ""}`}
+        title={collapsed ? label : undefined}
         to={to}
       >
         {icon}
-        <span>{label}</span>
+        {!collapsed && <span>{label}</span>}
       </Link>
     );
   },
   (prev, next) =>
     prev.to === next.to &&
     prev.label === next.label &&
-    prev.exact === next.exact
+    prev.exact === next.exact &&
+    prev.collapsed === next.collapsed
 );
 
 const PAGE_TITLE_KEYS: Record<string, string> = {

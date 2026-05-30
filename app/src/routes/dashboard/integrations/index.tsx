@@ -123,14 +123,12 @@ export default function IntegrationsPage() {
   }
 
   const description = status?.connected
-    ? t(
-        "Sync your appointments to Google Calendar. New bookings will automatically create events."
-      )
-    : t("Connect your Google Calendar to automatically sync appointments.");
+    ? t("integrations.connectedDesc")
+    : t("integrations.connectDesc");
 
   return (
     <div className="space-y-6">
-      <h1 className="font-semibold text-2xl">{t("Integrations")}</h1>
+      <h1 className="font-semibold text-2xl">{t("integrations.title")}</h1>
 
       {/* Google Calendar Card */}
       <div className="rounded-lg border bg-card p-6">
@@ -140,7 +138,7 @@ export default function IntegrationsPage() {
           {status?.connected && (
             <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 font-medium text-green-700 text-xs">
               <CheckCircle className="h-3 w-3" />
-              Connected
+              {t("integrations.connected")}
             </span>
           )}
         </div>
@@ -151,14 +149,14 @@ export default function IntegrationsPage() {
           <div className="space-y-4">
             {status.email && (
               <p className="text-muted-foreground text-sm">
-                Connected as <strong>{status.email}</strong>
+                {t("integrations.connectedAs")} <strong>{status.email}</strong>
               </p>
             )}
 
             {/* Calendar selector */}
             <div className="space-y-2">
               <label className="font-medium text-sm" htmlFor="calendar-select">
-                {t("Calendar to sync")}
+                {t("integrations.calendarToSync")}
               </label>
               <div className="flex items-center gap-2">
                 <select
@@ -169,12 +167,14 @@ export default function IntegrationsPage() {
                   value={selectedCalendarId}
                 >
                   {calendars.length === 0 ? (
-                    <option value="primary">Primary Calendar</option>
+                    <option value="primary">
+                      {t("integrations.primaryCalendar")}
+                    </option>
                   ) : (
                     calendars.map((cal) => (
                       <option key={cal.id} value={cal.id}>
                         {cal.summary}
-                        {cal.primary ? " (Primary)" : ""}
+                        {cal.primary ? ` (${t("integrations.primary")})` : ""}
                       </option>
                     ))
                   )}
@@ -188,7 +188,7 @@ export default function IntegrationsPage() {
               type="button"
             >
               <Trash2 className="h-4 w-4" />
-              {t("Disconnect")}
+              {t("integrations.disconnect")}
             </button>
           </div>
         ) : (
@@ -203,7 +203,9 @@ export default function IntegrationsPage() {
             ) : (
               <ExternalLink className="h-4 w-4" />
             )}
-            {connecting ? t("Connecting...") : t("Connect Google Calendar")}
+            {connecting
+              ? t("integrations.connecting")
+              : t("integrations.connectGoogle")}
           </button>
         )}
       </div>

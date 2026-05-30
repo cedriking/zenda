@@ -7,10 +7,10 @@ import {
   Plus,
   Search,
   User,
-  X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useAppointments } from "../../../hooks/use-appointments";
 import { apiFetch } from "../../../services/api-client";
 
@@ -482,7 +482,7 @@ function CalendarWeekView({
 
                       return (
                         <div
-                          className={`mb-0.5 cursor-default rounded px-1.5 py-1 text-[10px] leading-tight ${getStatusColorClass(apt.status)}`}
+                          className={`mb-0.5 cursor-default rounded px-1.5 py-1 text-xs leading-tight ${getStatusColorClass(apt.status)}`}
                           key={apt.id}
                           title={`${apt.customerName ?? apt.customerPhone ?? t("calendar.unknownCustomer", "Unknown")} — ${apt.serviceName ?? ""}${apt.notes ? `\n${apt.notes}` : ""}\n${statusLabels[apt.status] ?? apt.status}`}
                         >
@@ -655,40 +655,16 @@ function CreateAppointmentModal({
   }
 
   return (
-    // biome-ignore lint/a11y/noNoninteractiveElementInteractions: modal backdrop
-    // biome-ignore lint/a11y/noStaticElementInteractions: modal backdrop with escape
-    <div
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
+    <Dialog
+      onOpenChange={(open) => {
+        if (!open) {
           onClose();
         }
       }}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") {
-          onClose();
-        }
-      }}
-      role="dialog"
+      open={true}
     >
-      <div
-        className="w-full max-w-md rounded-xl bg-card p-6 shadow-xl"
-        role="document"
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-semibold text-foreground text-lg">
-            {t("calendar.newAppointment")}
-          </h3>
-          <button
-            aria-label={t("common.close")}
-            className="text-muted-foreground hover:text-foreground"
-            onClick={onClose}
-            type="button"
-          >
-            <X size={20} />
-          </button>
-        </div>
+      <DialogContent className="w-full max-w-md">
+        <DialogTitle>{t("calendar.newAppointment")}</DialogTitle>
 
         {error && (
           <div
@@ -831,7 +807,7 @@ function CreateAppointmentModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

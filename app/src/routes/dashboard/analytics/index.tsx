@@ -67,12 +67,12 @@ interface AnalyticsData {
 }
 
 const PIE_COLORS = [
-  "#6366f1",
-  "#10b981",
-  "#f59e0b",
-  "#ef4444",
-  "#8b5cf6",
-  "#ec4899",
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+  "var(--chart-1)",
 ];
 
 function MetricCard({
@@ -150,16 +150,16 @@ export default function AnalyticsPage() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
-          <AlertCircle className="h-5 w-5 shrink-0 text-red-500" />
+        <div className="flex items-center gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-4">
+          <AlertCircle className="h-5 w-5 shrink-0 text-destructive" />
           <div>
-            <p className="font-medium text-red-800 text-sm">
+            <p className="font-medium text-destructive text-sm">
               {t("analytics.error.title", "Failed to load analytics")}
             </p>
-            <p className="mt-1 text-red-600 text-xs">{error}</p>
+            <p className="mt-1 text-destructive/80 text-xs">{error}</p>
           </div>
           <button
-            className="ml-auto font-medium text-red-700 text-sm underline hover:text-red-900"
+            className="ml-auto font-medium text-destructive text-sm underline hover:text-destructive/80"
             onClick={loadAnalytics}
             type="button"
           >
@@ -309,9 +309,9 @@ export default function AnalyticsPage() {
                   />
                   <Area
                     dataKey="count"
-                    fill="#6366f1"
+                    fill="var(--chart-1)"
                     fillOpacity={0.15}
-                    stroke="#6366f1"
+                    stroke="var(--chart-1)"
                     strokeWidth={2}
                     type="monotone"
                   />
@@ -359,7 +359,11 @@ export default function AnalyticsPage() {
                       new Date(String(d)).toLocaleDateString()
                     }
                   />
-                  <Bar dataKey="count" fill="#10b981" radius={[4, 4, 0, 0]} />
+                  <Bar
+                    dataKey="count"
+                    fill="var(--chart-2)"
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </Suspense>

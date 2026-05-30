@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getMessages, getTranslations } from "next-intl/server";
+import { ThemeProvider } from "next-themes";
 import { CookieConsent } from "@/components/cookie-consent";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { LocaleProvider } from "@/components/locale-provider";
@@ -113,7 +114,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   };
 
   return (
-    <html dir={dir} lang={locale}>
+    <html dir={dir} lang={locale} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -121,13 +122,18 @@ export default async function LocaleLayout({ children, params }: Props) {
         />
       </head>
       <body>
+        <a className="skip-to-content" href="#main-content">
+          Skip to content
+        </a>
         <GoogleAnalytics />
         <SwetrixTracker />
-        <LocaleProvider locale={locale} messages={messages} now={new Date()}>
-          {children}
-          <WhatsAppWidget />
-          <CookieConsent />
-        </LocaleProvider>
+        <ThemeProvider attribute="class" defaultTheme="light">
+          <LocaleProvider locale={locale} messages={messages} now={new Date()}>
+            {children}
+            <WhatsAppWidget />
+            <CookieConsent />
+          </LocaleProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

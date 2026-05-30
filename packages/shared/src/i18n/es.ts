@@ -39,6 +39,10 @@ export const es: TranslationStrings = {
       "Enlace enviado a {{email}}. Revisa tu bandeja de entrada y spam.",
     minChars: "Mínimo 8 caracteres",
     reEnterPassword: "Re-ingresa tu contraseña",
+    strengthWeak: "Débil",
+    strengthFair: "Regular",
+    strengthGood: "Buena",
+    strengthStrong: "Fuerte",
     createOne: "Crear una",
   },
   nav: {
@@ -559,5 +563,21 @@ export const es: TranslationStrings = {
     cancel: "Cancelar",
     saving: "Guardando...",
     errorGeneric: "Error",
+  },
+
+  integrations: {
+    title: "Integraciones",
+    connectDesc:
+      "Conecta tu Google Calendar para sincronizar citas automáticamente.",
+    connectedDesc:
+      "Sincroniza tus citas con Google Calendar. Las nuevas reservas crearán eventos automáticamente.",
+    connected: "Conectado",
+    connectedAs: "Conectado como",
+    calendarToSync: "Calendario para sincronizar",
+    primaryCalendar: "Calendario principal",
+    primary: "Principal",
+    disconnect: "Desconectar",
+    connecting: "Conectando...",
+    connectGoogle: "Conectar Google Calendar",
   },
 };

@@ -37,6 +37,10 @@ export const zh: TranslationStrings = {
     resetLinkSentDetail: "重置链接已发送至 {{email}}。请查看收件箱和垃圾邮件。",
     minChars: "最少8个字符",
     reEnterPassword: "重新输入密码",
+    strengthWeak: "弱",
+    strengthFair: "一般",
+    strengthGood: "良好",
+    strengthStrong: "强",
     createOne: "创建一个",
   },
   nav: {
@@ -544,5 +548,19 @@ export const zh: TranslationStrings = {
     cancel: "取消",
     saving: "保存中...",
     errorGeneric: "错误",
+  },
+
+  integrations: {
+    title: "集成",
+    connectDesc: "连接您的 Google 日历以自动同步预约。",
+    connectedDesc: "将您的预约同步到 Google 日历。新预订将自动创建活动。",
+    connected: "已连接",
+    connectedAs: "已连接为",
+    calendarToSync: "要同步的日历",
+    primaryCalendar: "主日历",
+    primary: "主要",
+    disconnect: "断开连接",
+    connecting: "正在连接...",
+    connectGoogle: "连接 Google 日历",
   },
 };

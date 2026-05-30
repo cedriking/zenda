@@ -30,14 +30,16 @@ export function CookieConsent() {
     setVisible(false);
   }
 
-  if (!visible) {
-    return null;
-  }
-
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t bg-white/95 p-4 shadow-lg backdrop-blur-sm md:p-6">
+    <div
+      aria-label={t("title")}
+      className="fixed inset-x-0 bottom-0 z-50 border-t bg-background/95 p-4 shadow-lg backdrop-blur-sm transition-transform duration-300 data-[hidden=true]:translate-y-full md:p-6"
+      data-hidden={!visible}
+      hidden={!visible}
+      role="dialog"
+    >
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:flex-row md:justify-between">
-        <p className="text-center text-slate-600 text-sm md:text-left">
+        <p className="text-center text-muted-foreground text-sm md:text-left">
           {t.rich("message", {
             privacy: (chunks: React.ReactNode) => (
               <Link
@@ -51,14 +53,14 @@ export function CookieConsent() {
         </p>
         <div className="flex shrink-0 gap-3">
           <button
-            className="rounded-lg border border-slate-300 px-4 py-2 font-medium text-slate-700 text-sm hover:bg-slate-50"
+            className="rounded-lg border border-border px-5 py-3 font-medium text-muted-foreground text-sm hover:bg-accent"
             onClick={decline}
             type="button"
           >
             {t("decline")}
           </button>
           <button
-            className="rounded-lg bg-slate-900 px-4 py-2 font-medium text-sm text-white hover:bg-slate-800"
+            className="rounded-lg bg-primary px-5 py-3 font-medium text-primary-foreground text-sm hover:bg-primary/90"
             onClick={accept}
             type="button"
           >

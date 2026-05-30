@@ -40,7 +40,7 @@ export default async function Home() {
 
       {/* White container with rounded corners for hero + audiences */}
       <div className="overflow-hidden rounded-b-[2rem] bg-white shadow-2xl">
-        <main>
+        <main id="main-content">
           {/* Hero */}
           <section className="relative overflow-hidden px-6 pt-32 pb-24">
             <div className="absolute top-0 right-0 h-[600px] w-[600px] translate-x-1/4 -translate-y-1/2 rounded-full bg-emerald-500/5" />
@@ -52,13 +52,16 @@ export default async function Home() {
           </section>
 
           {/* Audiences — Who it's for */}
-          <section className="px-6 py-20">
+          <section aria-labelledby="section-audiences" className="px-6 py-20">
             <div className="mx-auto max-w-6xl">
               <div className="mb-12 text-center">
                 <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-1.5 font-semibold text-emerald-700 text-xs uppercase tracking-wider">
                   {t("audiencesBadge")}
                 </span>
-                <h2 className="mb-4 font-black text-3xl text-slate-900 md:text-4xl">
+                <h2
+                  className="mb-4 font-black text-3xl text-slate-900 md:text-4xl"
+                  id="section-audiences"
+                >
                   {t("audiencesTitle")}
                 </h2>
                 <p className="mx-auto mb-12 max-w-2xl text-center text-lg text-slate-500">
@@ -72,13 +75,19 @@ export default async function Home() {
       </div>
 
       {/* Capabilities */}
-      <section className="bg-neutral-200 px-6 py-20">
+      <section
+        aria-labelledby="section-capabilities"
+        className="bg-neutral-200 px-6 py-20"
+      >
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center">
             <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-1.5 font-semibold text-emerald-700 text-xs uppercase tracking-wider">
               {t("capabilitiesBadge")}
             </span>
-            <h2 className="mb-4 font-black text-3xl text-slate-900 md:text-4xl">
+            <h2
+              className="mb-4 font-black text-3xl text-slate-900 md:text-4xl"
+              id="section-capabilities"
+            >
               {t("capabilitiesTitle")}
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-slate-500">
@@ -99,14 +108,20 @@ export default async function Home() {
       </section>
 
       {/* Safety (dark section) */}
-      <section className="bg-neutral-200 px-6 py-20">
+      <section
+        aria-labelledby="section-safety"
+        className="bg-neutral-200 px-6 py-20"
+      >
         <div className="mx-auto max-w-6xl">
           <div className="overflow-hidden rounded-[2rem] bg-slate-950 p-8 md:p-16">
             <div className="mx-auto mb-12 max-w-3xl text-center">
               <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-1.5 font-semibold text-emerald-400 text-xs uppercase tracking-wider">
                 {t("safetyBadge")}
               </span>
-              <h2 className="mb-4 font-black text-3xl text-white md:text-4xl">
+              <h2
+                className="mb-4 font-black text-3xl text-white md:text-4xl"
+                id="section-safety"
+              >
                 {t("safetyTitle")}
               </h2>
               <p className="text-lg text-slate-400">{t("safetyDesc")}</p>
@@ -117,13 +132,20 @@ export default async function Home() {
       </section>
 
       {/* How It Works */}
-      <section className="bg-neutral-200 px-6 py-20" id="how-it-works">
+      <section
+        aria-labelledby="section-how-it-works"
+        className="bg-neutral-200 px-6 py-20"
+        id="how-it-works"
+      >
         <div className="mx-auto max-w-4xl">
           <div className="mb-16 text-center">
             <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-1.5 font-semibold text-emerald-700 text-xs uppercase tracking-wider">
               {t("howBadge")}
             </span>
-            <h2 className="font-black text-3xl text-slate-900 md:text-4xl">
+            <h2
+              className="font-black text-3xl text-slate-900 md:text-4xl"
+              id="section-how-it-works"
+            >
               {t("howTitle")}
             </h2>
           </div>
@@ -132,13 +154,19 @@ export default async function Home() {
       </section>
 
       {/* Dashboard mockup */}
-      <section className="bg-neutral-200 px-6 py-20">
+      <section
+        aria-labelledby="section-dashboard"
+        className="bg-neutral-200 px-6 py-20"
+      >
         <div className="mx-auto max-w-5xl">
           <div className="mb-12 text-center">
             <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-1.5 font-semibold text-emerald-700 text-xs uppercase tracking-wider">
               {t("dashboardBadge")}
             </span>
-            <h2 className="mb-4 font-black text-3xl text-slate-900 md:text-4xl">
+            <h2
+              className="mb-4 font-black text-3xl text-slate-900 md:text-4xl"
+              id="section-dashboard"
+            >
               {t("dashboardTitle")}
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-slate-500">
@@ -150,9 +178,15 @@ export default async function Home() {
       </section>
 
       {/* Industries */}
-      <section className="bg-neutral-200 px-6 py-20">
+      <section
+        aria-labelledby="section-industries"
+        className="bg-neutral-200 px-6 py-20"
+      >
         <div className="mx-auto max-w-4xl text-center">
-          <h2 className="mb-8 font-black text-2xl text-slate-900 md:text-3xl">
+          <h2
+            className="mb-8 font-black text-2xl text-slate-900 md:text-3xl"
+            id="section-industries"
+          >
             {t("industriesTitle")}
           </h2>
           <HomeAnimations variant="industries" />
@@ -160,9 +194,16 @@ export default async function Home() {
       </section>
 
       {/* FAQ */}
-      <section className="bg-white px-6 py-20" id="faq">
+      <section
+        aria-labelledby="section-faq"
+        className="bg-white px-6 py-20"
+        id="faq"
+      >
         <div className="mx-auto max-w-3xl">
-          <h2 className="mb-12 text-center font-black text-2xl text-slate-900 md:text-3xl">
+          <h2
+            className="mb-12 text-center font-black text-2xl text-slate-900 md:text-3xl"
+            id="section-faq"
+          >
             {t("faqTitle")}
           </h2>
           <div className="space-y-6">

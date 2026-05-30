@@ -461,17 +461,17 @@ export default function OnboardingPage() {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+    <div className="flex h-screen overflow-hidden bg-background">
       {/* Progress sidebar */}
       <aside
-        className={`flex w-80 flex-col border-border border-r bg-white/80 p-8 backdrop-blur-sm transition-all duration-700 ease-out ${
+        className={`flex w-80 flex-col border-border border-r bg-card/80 p-8 backdrop-blur-sm transition-all duration-700 ease-out ${
           sidebarVisible
             ? "translate-x-0 opacity-100"
             : "-translate-x-8 opacity-0"
         }`}
       >
         <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/20 shadow-lg">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20">
             <Sparkles className="text-white" size={20} />
           </div>
           <div>
@@ -490,7 +490,7 @@ export default function OnboardingPage() {
             const isCurrent = step.id === currentStep;
             let stepClass = "text-muted-foreground";
             if (isComplete) {
-              stepClass = "text-emerald-600";
+              stepClass = "text-primary";
             } else if (isCurrent) {
               stepClass = "bg-primary/10 font-medium text-primary shadow-sm";
             }
@@ -520,7 +520,7 @@ export default function OnboardingPage() {
                   {step.icon}
                 </span>
                 <span className="flex-1">{step.label}</span>
-                {isComplete && <Check className="text-emerald-500" size={16} />}
+                {isComplete && <Check className="text-primary" size={16} />}
                 {isCurrent && (
                   <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
                 )}
@@ -552,7 +552,7 @@ export default function OnboardingPage() {
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all duration-1000 ease-out"
+              className="h-full rounded-full bg-primary transition-all duration-1000 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -562,9 +562,9 @@ export default function OnboardingPage() {
       {/* Main content area */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Header */}
-        <div className="border-border border-b bg-white/60 px-6 py-4 backdrop-blur-sm">
+        <div className="border-border border-b bg-card/60 px-6 py-4 backdrop-blur-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <MessageSquare className="text-white" size={16} />
             </div>
             <div>
@@ -696,7 +696,7 @@ function ChatView({
             value={input}
           />
           <button
-            className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 p-3 text-white shadow-emerald-500/20 shadow-lg transition-all duration-200 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-emerald-500/30 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-xl bg-primary p-3 text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-200 hover:bg-primary/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
             disabled={loading || isTyping || !input.trim()}
             type="submit"
           >
@@ -779,7 +779,7 @@ function TestReceptionistView({
             value={input}
           />
           <button
-            className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 p-3 text-white shadow-emerald-500/20 shadow-lg transition-all duration-200 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-emerald-500/30 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-xl bg-primary p-3 text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-200 hover:bg-primary/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
             disabled={loading || isTyping || !input.trim()}
             type="submit"
           >
@@ -806,7 +806,7 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
       <div
         className={`max-w-lg rounded-2xl px-4 py-3 ${
           isUser
-            ? "rounded-br-md bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-emerald-500/15 shadow-lg"
+            ? "rounded-br-md bg-primary text-primary-foreground shadow-lg shadow-primary/15"
             : "rounded-bl-md border border-border bg-card text-foreground shadow-sm"
         }`}
       >
@@ -978,7 +978,7 @@ function PersonalityPickerView({
         {/* Confirm button */}
         <div className="flex justify-center pt-2 pb-4">
           <button
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-3 font-semibold text-white shadow-emerald-500/20 shadow-lg transition-all duration-200 hover:from-emerald-600 hover:to-emerald-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center gap-2 rounded-xl bg-primary px-8 py-3 font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-200 hover:bg-primary/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
             disabled={!selected || loading}
             onClick={handleConfirm}
             type="button"
@@ -1073,7 +1073,7 @@ function ReviewStepView({
         style={{ animation: "fadeSlideIn 0.5s ease-out 0.5s both" }}
       >
         <button
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-3 font-semibold text-white shadow-emerald-500/20 shadow-lg transition-all duration-200 hover:from-emerald-600 hover:to-emerald-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex items-center gap-2 rounded-xl bg-primary px-8 py-3 font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-200 hover:bg-primary/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
           disabled={loading}
           onClick={onConfirmReview}
           type="button"
@@ -1147,8 +1147,8 @@ function PlanSelectionView({
         className="flex justify-center"
         style={{ animation: "fadeSlideIn 0.5s ease-out 0.2s both" }}
       >
-        <span className="inline-flex items-center gap-2 rounded-full border border-amber-200/60 bg-gradient-to-r from-amber-50 to-orange-50 px-5 py-2.5 font-semibold text-amber-800 text-sm shadow-sm">
-          <Sparkles className="text-amber-500" size={14} />
+        <span className="inline-flex items-center gap-2 rounded-full border border-warning/30 bg-warning/10 px-5 py-2.5 font-semibold text-sm text-warning shadow-sm">
+          <Sparkles className="text-warning" size={14} />
           {t("onboarding.foundingPricing")}
         </span>
       </div>
@@ -1177,7 +1177,7 @@ function PlanSelectionView({
               style={{ animationDelay: `${0.4 + idx * 0.1}s` }}
             >
               {plan.highlight && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-1 font-semibold text-white text-xs shadow-emerald-500/30 shadow-lg">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 font-semibold text-primary-foreground text-xs shadow-lg shadow-primary/30">
                   {t("onboarding.mostPopular")}
                 </div>
               )}
@@ -1207,7 +1207,7 @@ function PlanSelectionView({
                     className="flex items-start gap-2 text-muted-foreground text-xs"
                     key={f}
                   >
-                    <span className="mt-0.5 flex-shrink-0 text-emerald-400">
+                    <span className="mt-0.5 flex-shrink-0 text-primary">
                       &#10003;
                     </span>
                     {f}
@@ -1217,7 +1217,7 @@ function PlanSelectionView({
               <button
                 className={`flex w-full items-center justify-center gap-2 rounded-xl py-2.5 font-semibold text-sm transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${
                   plan.highlight
-                    ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-emerald-500/20 shadow-lg hover:from-emerald-600 hover:to-emerald-700"
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90"
                     : "border-border text-muted-foreground hover:border-border hover:bg-muted"
                 }`}
                 disabled={checkoutLoading !== null}

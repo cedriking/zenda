@@ -38,6 +38,10 @@ export const ar: TranslationStrings = {
       "تم إرسال رابط إعادة التعيين إلى {{email}}. تحقق من صندوق الوارد والبريد المزعج.",
     minChars: "8 أحرف كحد أدنى",
     reEnterPassword: "أعد إدخال كلمة المرور",
+    strengthWeak: "ضعيف",
+    strengthFair: "مقبول",
+    strengthGood: "جيد",
+    strengthStrong: "قوي",
     createOne: "أنشئ واحدة",
   },
   nav: {
@@ -551,5 +555,20 @@ export const ar: TranslationStrings = {
     cancel: "إلغاء",
     saving: "جارٍ الحفظ...",
     errorGeneric: "خطأ",
+  },
+
+  integrations: {
+    title: "التكاملات",
+    connectDesc: "اربط تقويم Google الخاص بك لمزامنة المواعيد تلقائيًا.",
+    connectedDesc:
+      "زامن مواعيدك مع تقويم Google. ستُنشئ الحجوزات الجديدة أحداثًا تلقائيًا.",
+    connected: "متصل",
+    connectedAs: "متصل كـ",
+    calendarToSync: "التقويم للمزامنة",
+    primaryCalendar: "التقويم الرئيسي",
+    primary: "الرئيسي",
+    disconnect: "قطع الاتصال",
+    connecting: "جارٍ الاتصال...",
+    connectGoogle: "ربط تقويم Google",
   },
 };

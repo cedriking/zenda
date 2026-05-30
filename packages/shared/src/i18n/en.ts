@@ -38,6 +38,10 @@ export const en = {
       "Reset link sent to {{email}}. Check your inbox and spam folder.",
     minChars: "Min 8 characters",
     reEnterPassword: "Re-enter your password",
+    strengthWeak: "Weak",
+    strengthFair: "Fair",
+    strengthGood: "Good",
+    strengthStrong: "Strong",
     createOne: "Create one",
   },
   // Navigation
@@ -580,6 +584,22 @@ export const en = {
     cancel: "Cancel",
     saving: "Saving...",
     errorGeneric: "Error",
+  },
+
+  integrations: {
+    title: "Integrations",
+    connectDesc:
+      "Connect your Google Calendar to automatically sync appointments.",
+    connectedDesc:
+      "Sync your appointments to Google Calendar. New bookings will automatically create events.",
+    connected: "Connected",
+    connectedAs: "Connected as",
+    calendarToSync: "Calendar to sync",
+    primaryCalendar: "Primary Calendar",
+    primary: "Primary",
+    disconnect: "Disconnect",
+    connecting: "Connecting...",
+    connectGoogle: "Connect Google Calendar",
   },
 } as const;
 

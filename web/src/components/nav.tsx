@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Link, usePathname } from "@/i18n/navigation";
 
 function Logo() {
@@ -167,14 +168,13 @@ export function Nav({ variant = "home" }: { variant?: "home" | "simple" }) {
         </button>
       </div>
 
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div
-          aria-label={t("menuToggle")}
-          className="border-slate-200 border-b bg-white px-6 pb-4 md:hidden"
-          id="mobile-menu"
-          role="dialog"
+      {/* Mobile menu with focus trap and scroll lock */}
+      <Dialog onOpenChange={setMobileOpen} open={mobileOpen}>
+        <DialogContent
+          className="fixed inset-x-0 top-16 bottom-auto max-w-none translate-y-0 rounded-none border-b bg-white px-6 pt-2 pb-4 shadow-none md:hidden"
+          showCloseButton={false}
         >
+          <DialogTitle className="sr-only">{t("menuToggle")}</DialogTitle>
           <div className="flex flex-col gap-3">
             {NAV_LINKS.map((l) =>
               l.hash ? (
@@ -203,8 +203,8 @@ export function Nav({ variant = "home" }: { variant?: "home" | "simple" }) {
               <PrimaryButton href="/signup">{t("getStarted")}</PrimaryButton>
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 }

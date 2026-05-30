@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 
 function Logo() {
   return (
-    <div className="flex items-center gap-2">
+    <Link className="flex items-center gap-2" href="/">
       <Image
         alt="Zenda"
         className="size-7"
@@ -15,7 +15,7 @@ function Logo() {
         width={28}
       />
       <span className="font-bold text-lg text-white">Zenda</span>
-    </div>
+    </Link>
   );
 }
 

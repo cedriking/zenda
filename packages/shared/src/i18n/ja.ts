@@ -39,6 +39,10 @@ export const ja: TranslationStrings = {
       "{{email}} にリセットリンクを送信しました。受信トレイと迷惑メールをご確認ください。",
     minChars: "8文字以上",
     reEnterPassword: "パスワードを再入力",
+    strengthWeak: "弱い",
+    strengthFair: "まあまあ",
+    strengthGood: "良い",
+    strengthStrong: "強い",
     createOne: "作成する",
   },
   nav: {
@@ -549,5 +553,20 @@ export const ja: TranslationStrings = {
     cancel: "キャンセル",
     saving: "保存中...",
     errorGeneric: "エラー",
+  },
+
+  integrations: {
+    title: "連携",
+    connectDesc: "Googleカレンダーを接続して、予約を自動的に同期します。",
+    connectedDesc:
+      "予約をGoogleカレンダーと同期します。新しい予約が自動的にイベントとして作成されます。",
+    connected: "接続済み",
+    connectedAs: "接続アカウント",
+    calendarToSync: "同期するカレンダー",
+    primaryCalendar: "メインカレンダー",
+    primary: "メイン",
+    disconnect: "切断",
+    connecting: "接続中...",
+    connectGoogle: "Googleカレンダーに接続",
   },
 };

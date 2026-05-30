@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, Globe } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { supportedLanguages } from "@/i18n/routing";
 
@@ -11,6 +11,7 @@ export function LanguageSwitcher({
   variant?: "header" | "footer";
 }) {
   const locale = useLocale();
+  const t = useTranslations("common");
   const router = useRouter();
   const pathname = usePathname();
 
@@ -26,8 +27,8 @@ export function LanguageSwitcher({
         className={`mr-1.5 size-4 ${isDark ? "text-slate-400" : "text-slate-500"}`}
       />
       <select
-        aria-label="Language"
-        className={`cursor-pointer appearance-none rounded bg-transparent pr-4 font-medium text-sm focus:ring-2 focus:ring-emerald-500 ${
+        aria-label={t("language", { defaultValue: "Language" })}
+        className={`cursor-pointer appearance-none rounded bg-transparent pr-4 font-medium text-sm focus:ring-2 focus:ring-primary dark:text-gray-100 ${
           isDark
             ? "text-slate-400 hover:text-white"
             : "text-slate-600 hover:text-slate-900"

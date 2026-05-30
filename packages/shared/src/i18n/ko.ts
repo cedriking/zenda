@@ -38,6 +38,10 @@ export const ko: TranslationStrings = {
       "{{email}}로 재설정 링크를 보냈습니다. 받은편지함과 스팸함을 확인하세요.",
     minChars: "최소 8자",
     reEnterPassword: "비밀번호 재입력",
+    strengthWeak: "약함",
+    strengthFair: "보통",
+    strengthGood: "양호",
+    strengthStrong: "강함",
     createOne: "만들기",
   },
   nav: {
@@ -548,5 +552,20 @@ export const ko: TranslationStrings = {
     cancel: "취소",
     saving: "저장 중...",
     errorGeneric: "오류",
+  },
+
+  integrations: {
+    title: "연동",
+    connectDesc: "Google 캘린더를 연결하여 예약을 자동으로 동기화하세요.",
+    connectedDesc:
+      "예약을 Google 캘린더와 동기화합니다. 새 예약이 자동으로 이벤트로 생성됩니다.",
+    connected: "연결됨",
+    connectedAs: "연결 계정",
+    calendarToSync: "동기화할 캘린더",
+    primaryCalendar: "기본 캘린더",
+    primary: "기본",
+    disconnect: "연결 해제",
+    connecting: "연결 중...",
+    connectGoogle: "Google 캘린더 연결",
   },
 };

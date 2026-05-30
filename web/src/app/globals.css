@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import "@fontsource-variable/plus-jakarta-sans";
 @import "@fontsource-variable/geist-mono";
 
 @custom-variant dark (&:is(.dark *));
@@ -60,7 +60,7 @@
 }
 
 @theme inline {
-  --font-sans: "Geist", sans-serif;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
   --font-mono: "Geist Mono", monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -250,4 +250,27 @@ button:focus-visible {
 /* Smooth scroll */
 html {
   scroll-behavior: smooth;
+}
+
+/* Shared fade+slide animation */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
